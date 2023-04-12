@@ -50,8 +50,9 @@
 
     <logger name="eu.sia.pagopa" level="DEBUG" />
     <logger name="eu.sia.pagopa.input" level="INFO" />
-    <logger name="eu.sia.pagopa.common.actor.HttpActorPerRequest" level="INFO" />
+
     <logger name="com.zaxxer.hikari.HikariConfig" level="INFO"/>
+
     <logger name="slick" level="INFO" />
     <logger name="slick.jdbc.DriverDataSource"              level="INFO" />
     <logger name="slick.jdbc.JdbcBackend.statement"         level="INFO" />

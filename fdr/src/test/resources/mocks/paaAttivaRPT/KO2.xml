@@ -1,8 +1,0 @@
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-    <soap:Body>
-        <ns2:paaAttivaRPTRisposta xmlns:ns3="http://www.digitpa.gov.it/schemas/2011/Pagamenti/"
-                                  xmlns:ns2="http://ws.pagamenti.telematici.gov/">
-            <paaAttivaRPTRisposta>
-                asdasdasdad
-    </soap:Body>
-</soap:Envelope>

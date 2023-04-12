@@ -53,7 +53,7 @@ class ActorUtility {
     }
 
     val redate = Util.now()
-    log.info(s"HTTP NODO -> [${req.uri}]  will timeout in [${req.timeout.toString}]")
+    log.info(s"HTTP NODO -> [${req.uri}] will timeout in [${req.timeout.toString}]")
     (for {
       httpResponse <- dispatchRequest(req.timeout, req.proxyData, akkaReq)
       payload <- Unmarshaller.stringUnmarshaller(httpResponse.entity)

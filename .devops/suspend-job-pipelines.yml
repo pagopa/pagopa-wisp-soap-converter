@@ -53,23 +53,23 @@ variables:
   ${{ if eq(parameters['ENV'], 'dev') }}:
     kubernetesServiceConnection: '$(dev_kubernetes_service_conn)'
     poolImage: 'pagopa-dev-linux'
-    labelSelector: 'app.kubernetes.io/instance=ndp-cron'
+    labelSelector: 'app.kubernetes.io/instance=fdr-cron'
   ${{ if eq(parameters['ENV'], 'it') }}:
     kubernetesServiceConnection: '$(dev_kubernetes_service_conn)'
     poolImage: 'pagopa-dev-linux'
-    labelSelector: 'app.kubernetes.io/instance=ndp-cron-replica'
+    labelSelector: 'app.kubernetes.io/instance=fdr-cron-replica'
   ${{ if eq(parameters['ENV'], 'prf') }}:
     kubernetesServiceConnection: '$(uat_kubernetes_service_conn)'
     poolImage: 'pagopa-uat-linux'
-    labelSelector: 'app.kubernetes.io/instance=ndp-cron-replica'
+    labelSelector: 'app.kubernetes.io/instance=fdr-cron-replica'
   ${{ if eq(parameters['ENV'], 'uat') }}:
     kubernetesServiceConnection: '$(uat_kubernetes_service_conn)'
     poolImage: 'pagopa-uat-linux'
-    labelSelector: 'app.kubernetes.io/instance=ndp-cron'
+    labelSelector: 'app.kubernetes.io/instance=fdr-cron'
   ${{ if eq(parameters['ENV'], 'prod') }}:
     kubernetesServiceConnection: '$(prod_kubernetes_service_conn)'
     poolImage: 'pagopa-prod-linux'
-    labelSelector: 'app.kubernetes.io/instance=ndp-cron'
+    labelSelector: 'app.kubernetes.io/instance=fdr-cron'
 
 stages:
   - stage: suspend_cronjob

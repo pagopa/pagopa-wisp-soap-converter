@@ -9,9 +9,7 @@
     -->
     <property name="CONSOLE_PATTERN" value="%d %-5level [sid:%X{sessionId}] [can:%X{idCanale}] [sta:%X{idStazione}] [%logger] - %msg [%X{akkaSource}]%n"/>
 
-
     <appender name="CONSOLE_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
-
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
                 <message/>
@@ -59,7 +57,6 @@
 
     <logger name="eu.sia.pagopa" level="INFO" />
     <logger name="eu.sia.pagopa.input" level="INFO" />
-    <logger name="eu.sia.pagopa.common.actor.HttpActorPerRequest" level="INFO" />
 
     <logger name="com.zaxxer.hikari.HikariConfig" level="INFO"/>
 

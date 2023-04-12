@@ -11,11 +11,8 @@ object Tabulator {
   }
 
   def formatRows(rowSeparator: String, rows: Seq[String]): String = (
-//    rowSeparator ::
     rows.head ::
-//      rowSeparator ::
       rows.tail.toList :::
-//      rowSeparator ::
       List()
   ).mkString("\n")
 

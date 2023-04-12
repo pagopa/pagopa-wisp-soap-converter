@@ -158,10 +158,6 @@ object DDataChecks {
 
   }
 
-  def checkDenylist(log: NodoLogger, ddataMap: ConfigData, idPsp: String, idCanale: String, idDominio: String) = {
-    Success(())//TODO remove
-  }
-
   def checkTipoVersamento(log: NodoLogger, ddataMap: ConfigData, tipoVersamento: String): Try[PaymentType] = {
     ddataMap.paymentTypes.get(tipoVersamento) match {
       case Some(value) => Success(value)
@@ -169,18 +165,6 @@ object DDataChecks {
         log.warn(s"[$tipoVersamento] Tipo versamento sconosciuto")
         Failure(DigitPaErrorCodes.PPT_TIPO_VERSAMENTO_SCONOSCIUTO)
     }
-  }
-
-  def checkIban(log: NodoLogger, ddataMap: ConfigData, identPa: String, ibanAccredito: String): Try[Iban] = {
-      val ibanPAkey = s"${identPa}-$ibanAccredito"
-      ddataMap.ibans.get(ibanPAkey) match {
-        case Some(value) =>
-          log.debug(s"Coppia PA [${identPa}] IBAN [$ibanAccredito] trovata")
-          Success(value)
-        case None =>
-          log.warn(s"Coppia PA [$identPa] IBAN [$ibanAccredito] non trovata")
-          Failure(DigitPaErrorCodes.PPT_IBAN_NON_CENSITO)
-      }
   }
 
   //noinspection ScalaStyle
@@ -236,48 +220,6 @@ object DDataChecks {
     } yield (pspOpt, intermediarioPsp, canaleOpt)
   }
 
-  //noinspection ScalaStyle
-  def checkPspCanale(
-      log: NodoLogger,
-      ddataMap: ConfigData,
-      idPsp: Option[String] = None,
-      idCanale: Option[String] = None,
-      password: Option[String] = None,
-      tipoVers: Option[String] = None
-  ): Try[(Option[PaymentServiceProvider], Option[Channel])] = {
-
-    for {
-      pspOpt <- idPsp match {
-        case Some(idpsp) =>
-          checkPsp(log, ddataMap, idpsp).map(Some(_))
-        case None =>
-          Success(None)
-      }
-      canaleOpt <- idCanale match {
-        case Some(idc) =>
-          checkCanale(log, ddataMap, idc, password).map(Some(_))
-        case None =>
-          Success(None)
-      }
-      tipoVersOpt <- tipoVers match {
-        case Some(tv) =>
-          checkTipoVersamento(log, ddataMap, tv).map(Some(_))
-        case None =>
-          Success(None)
-      }
-      pspcanale = for {
-        psp <- pspOpt
-        canale <- canaleOpt
-      } yield (psp, canale)
-      _ <- pspcanale match {
-        case Some(s) =>
-          checkPspCanaleTipoVersamento(log, ddataMap, s._1, s._2, tipoVersOpt)
-        case None =>
-          Success(None)
-      }
-    } yield (pspOpt, canaleOpt)
-  }
-
   def checkIntermediarioPA(log: NodoLogger, ddataMap: ConfigData, idIntPa: String): Try[BrokerCreditorInstitution] = {
 
     ddataMap.creditorInstitutionBrokers.get(idIntPa) match {
@@ -293,29 +235,6 @@ object DDataChecks {
         log.warn(s"[$idIntPa] non trovato")
         Failure(DigitPaErrorCodes.PPT_INTERMEDIARIO_PA_SCONOSCIUTO)
     }
-  }
-
-  //TODO vedere se deve tornare la PA per forza
-  def checkCodifichePA(log: NodoLogger, ddataMap: ConfigData, codicePA: String, codificaPA: String): Try[CreditorInstitution] = {
-    for {
-      _ <- checkCodifiche(log, ddataMap, codificaPA)
-      codificaPa <- ddataMap.creditorInstitutionEncodings.get(codicePA) match {
-        case Some(value) =>
-          Success(value)
-        case None =>
-          log.warn(s"CodificaPa [codicePa:$codicePA] non trovata")
-          Failure(DigitPaErrorCodes.PPT_DOMINIO_SCONOSCIUTO)
-        case _ =>
-          log.warn(s"CodificaPa [codicePa:$codicePA] configurazione errata")
-          Failure(DigitPaErrorCodes.PPT_SYSTEM_ERROR)
-      }
-      pa <- ddataMap.creditorInstitutions.find(pa => pa._2.creditorInstitutionCode == codificaPa.creditorInstitutionCode) match {
-        case Some(pa) => Success(pa._2)
-        case None =>
-          log.warn(s"CodificaPa [codicePa:$codicePA] PA non trovata")
-          Failure(DigitPaErrorCodes.PPT_DOMINIO_SCONOSCIUTO)
-      }
-    } yield pa
   }
 
   def checkPaIntermediarioPaStazione(
@@ -358,32 +277,6 @@ object DDataChecks {
 
   }
 
-  def checkPaIntermediarioPaStazioneMultibeneficiario(
-      log: NodoLogger,
-      ddataMap: ConfigData,
-      idPa: String,
-      idIntermediarioPa: String,
-      idStazione: String,
-      auxDigit: Option[Long] = None,
-      password: Option[String] = None
-  ): Try[(CreditorInstitution, BrokerCreditorInstitution, Station)] = {
-    for {
-      pa <- checkPA(log, ddataMap, idPa)
-      intermediarioPa <- checkIntermediarioPA(log, ddataMap, idIntermediarioPa)
-      stazione <- checkStazione(log, ddataMap, idStazione, password)
-
-      //TODO check se fkpa e fkstazione in pastazionepa devono essere option
-      checkPaStazionePa = ddataMap.creditorInstitutionStations.exists(pastazionepa => {
-        val cast = pastazionepa._2
-        cast.creditorInstitutionCode == pa.creditorInstitutionCode &&
-        cast.stationCode == stazione.stationCode &&
-        auxDigit.forall(aux => cast.auxDigit.forall(_ == aux))
-      })
-
-    } yield (pa, intermediarioPa, stazione)
-
-  }
-
   def checkIntermediarioPaStazionePassword(log: NodoLogger, ddataMap: ConfigData, idIntermediarioPa: String, idStazione: String, password: String): Try[(BrokerCreditorInstitution, Station)] = {
     for {
       intermediarioPa <- checkIntermediarioPA(log, ddataMap, idIntermediarioPa)
@@ -407,139 +300,6 @@ object DDataChecks {
         }
 
     } yield (intermediarioPa, stazione)
-  }
-
-  def checkIntermediarioPaStazionePasswordMultibeneficiario(log: NodoLogger, ddataMap: ConfigData, idIntermediarioPa: String, idStazione: String, password: String): Try[(BrokerCreditorInstitution, Station)] = {
-    for {
-      intermediarioPa <- checkIntermediarioPA(log, ddataMap, idIntermediarioPa)
-      stazione <- checkStazione(log, ddataMap, idStazione, Some(password))
-    } yield (intermediarioPa, stazione)
-  }
-
-  //noinspection ScalaStyle
-  def checkPaStazionePa(log: NodoLogger, ddataMap: ConfigData, idPa: String, noticeNumber: String): Try[(CreditorInstitution, Station, BrokerCreditorInstitution, String)] = {
-    for {
-      pa <- checkPA(log, ddataMap, idPa)
-      (iuv, segregazione, progressivo, auxValue) = Util.getNoticeNumberData(noticeNumber)
-      pastazionepa <- ddataMap.creditorInstitutionStations.find(pastazionepa => {
-        pastazionepa._2.creditorInstitutionCode == pa.creditorInstitutionCode &&
-        progressivo.forall(pastazionepa._2.applicationCode.contains(_)) &&
-        segregazione.forall(pastazionepa._2.segregationCode.contains(_)) &&
-        auxValue.forall(pastazionepa._2.auxDigit.contains(_))
-      }) match {
-        case Some(paspa) => Success(paspa)
-        case None =>
-          Failure(exception.DigitPaException("Configurazione pa-progressivo stazione non corretta", DigitPaErrorCodes.PPT_STAZIONE_INT_PA_SCONOSCIUTA))
-      }
-      stazione <- ddataMap.stations.find(s => pastazionepa._2.stationCode == s._2.stationCode) match {
-        case Some((idStazione, value)) =>
-          if (value.enabled) {
-            log.debug(s"Stazione [$idStazione] trovata e abilitata")
-            Success(value)
-          } else {
-            log.warn(s"Stazione [$idStazione] trovata e disabilitata")
-            Failure(DigitPaErrorCodes.PPT_STAZIONE_INT_PA_DISABILITATA)
-          }
-        case None =>
-          Failure(exception.DigitPaException("Configurazione pa-progressivo stazione non corretta", DigitPaErrorCodes.PPT_STAZIONE_INT_PA_SCONOSCIUTA))
-      }
-      intermediarioPa <- ddataMap.creditorInstitutionBrokers.find(ipa => ipa._2.brokerCode == stazione.brokerCode) match {
-        case Some((idIntPa, value)) =>
-          if (value.enabled) {
-            log.debug(s"Intermediario PA [$idIntPa] trovato e abilitato")
-            Success(value)
-          } else {
-            log.warn(s"Intermediario PA [$idIntPa] trovato e disabilitato")
-            Failure(DigitPaErrorCodes.PPT_INTERMEDIARIO_PA_DISABILITATO)
-          }
-        case None =>
-          Failure(exception.DigitPaException("Configurazione pa-progressivo stazione non corretta", DigitPaErrorCodes.PPT_STAZIONE_INT_PA_SCONOSCIUTA))
-      }
-    } yield (pa, stazione, intermediarioPa, iuv)
-
-  }
-
-  //noinspection ScalaStyle
-  def checkPaStazionePa(log: NodoLogger, ddataMap: ConfigData, idPa: String, progressivo: Option[Int], segregazione: Option[Long], auxDigit: Option[Long]): Try[(CreditorInstitution, Station, BrokerCreditorInstitution)] = {
-    for {
-      pa <- checkPA(log, ddataMap, idPa)
-      pastazionepa <- ddataMap.creditorInstitutionStations.find(pastazionepa => {
-        pastazionepa._2.creditorInstitutionCode == idPa &&
-        progressivo.forall(pastazionepa._2.applicationCode.contains(_)) &&
-        segregazione.forall(pastazionepa._2.segregationCode.contains(_)) &&
-        auxDigit.forall(pastazionepa._2.auxDigit.contains(_))
-      }) match {
-        case Some(paspa) => Success(paspa)
-        case None =>
-          Failure(exception.DigitPaException("Configurazione pa-progressivo stazione non corretta", DigitPaErrorCodes.PPT_STAZIONE_INT_PA_SCONOSCIUTA))
-      }
-      stazione <- ddataMap.stations.find(s => pastazionepa._2.stationCode == s._2.stationCode) match {
-        case Some((idStazione, value)) =>
-          if (value.enabled) {
-            log.debug(s"Stazione [$idStazione] trovata e abilitata")
-            Success(value)
-          } else {
-            log.warn(s"Stazione [$idStazione] trovata e disabilitata")
-            Failure(DigitPaErrorCodes.PPT_STAZIONE_INT_PA_DISABILITATA)
-          }
-        case None =>
-          Failure(exception.DigitPaException("Configurazione pa-progressivo stazione non corretta", DigitPaErrorCodes.PPT_STAZIONE_INT_PA_SCONOSCIUTA))
-      }
-      intermediarioPa <- ddataMap.creditorInstitutionBrokers.find(ipa => ipa._2.brokerCode == stazione.brokerCode) match {
-        case Some((idIntPa, value)) =>
-          if (value.enabled) {
-            log.debug(s"Intermediario PA [$idIntPa] trovato e abilitato")
-            Success(value)
-          } else {
-            log.warn(s"Intermediario PA [$idIntPa] trovato e disabilitato")
-            Failure(DigitPaErrorCodes.PPT_INTERMEDIARIO_PA_DISABILITATO)
-          }
-        case None =>
-          Failure(exception.DigitPaException("Configurazione pa-progressivo stazione non corretta", DigitPaErrorCodes.PPT_STAZIONE_INT_PA_SCONOSCIUTA))
-      }
-    } yield (pa, stazione, intermediarioPa)
-
-  }
-
-  def checkSegregazioneStazione(log: NodoLogger, ddataMap: ConfigData, pa: CreditorInstitution, stazione: Station, segregazione: Long): Try[StationCreditorInstitution] = {
-    for {
-      _ <- Success(())
-      pastazionepa <- ddataMap.creditorInstitutionStations.find(pastazionepa => {
-        pastazionepa._2.creditorInstitutionCode == pa.creditorInstitutionCode &&
-        pastazionepa._2.stationCode == stazione.stationCode &&
-        pastazionepa._2.segregationCode.contains(segregazione)
-      }) match {
-        case Some(paspa) => Success(paspa)
-        case None =>
-          Failure(exception.DigitPaException("Configurazione pa-stazione-segregazione stazione non corretta", DigitPaErrorCodes.PPT_STAZIONE_INT_PA_SCONOSCIUTA))
-      }
-    } yield pastazionepa._2
-
-  }
-
-  def checkCdsServizio(log: NodoLogger, ddataMap: ConfigData, idServizio: String, versione: Int): Try[CdsService] = {
-    ddataMap.cdsServices.find(_._2.id == idServizio) match {
-      case Some(value) =>
-        if (value._2.version == versione) {
-          Success(value._2)
-        } else {
-          log.warn(s"[$idServizio] trovato, versione errata")
-          Failure(exception.DigitPaException("Versione servizio incompatibile con la chiamata", DigitPaErrorCodes.PPT_VERSIONE_SERVIZIO))
-        }
-      case None =>
-        log.warn(s"[$idServizio] non trovato")
-        Failure(exception.DigitPaException("Servizio inesistente sul sistema pagoPA", DigitPaErrorCodes.PPT_SERVIZIO_SCONOSCIUTO))
-    }
-  }
-
-  def checkCdsSoggettoServizio(log: NodoLogger, ddataMap: ConfigData, idSoggettoServizio: String): Try[CdsSubjectService] = {
-    ddataMap.cdsSubjectServices.find(_._2.subjectServiceId == idSoggettoServizio) match {
-      case Some(value) =>
-        Success(value._2)
-      case None =>
-        log.warn(s"[$idSoggettoServizio] non trovato")
-        Failure(exception.DigitPaException("Soggetto Servizio inesistente sul sistema pagoPA", DigitPaErrorCodes.PPT_SERVIZIO_SCONOSCIUTO))
-    }
   }
 
 }

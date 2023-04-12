@@ -18,7 +18,6 @@
     </appender>
 
     <logger name="eu.sia.pagopa" level="INFO" />
-    <logger name="eu.sia.pagopa.rptinvia.actor" level="INFO" />
     <logger name="eu.sia.pagopa.input" level="INFO" />
     <logger name="eu.sia.pagopa.common.actor.HttpActorPerRequest" level="INFO" />
     <logger name="com.azure" level="OFF" />

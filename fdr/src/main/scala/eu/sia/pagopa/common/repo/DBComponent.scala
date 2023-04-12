@@ -18,12 +18,7 @@ trait DBComponent {
 
   val db: Database
 
-  val MDC_QUERY_ID = "queryId"
-
   private final val DEFAULT_LIST_GROUPED = 1000
-
-  val trunc = SimpleFunction.unary[LocalDateTime, LocalDate]("TRUNC")
-  val truncOpt = SimpleFunction.unary[Option[LocalDateTime], Option[LocalDate]]("TRUNC")
 
   def adjustName(originalName: String): String = {
     slickProfile match {
@@ -42,22 +37,6 @@ trait DBComponent {
         db.run(sql"select 1".as[Int])
 
     }
-  }
-
-  def toStartDate(date: LocalDateTime) = {
-    date.toLocalDate.atStartOfDay()
-  }
-
-  def toEndDate(date: LocalDateTime) = {
-    LocalDateTime.of(date.toLocalDate, LocalTime.MAX)
-  }
-
-  def toStartDate(date: LocalDate) = {
-    date.atStartOfDay()
-  }
-
-  def toEndDate(date: LocalDate) = {
-    LocalDateTime.of(date, LocalTime.MAX)
   }
 
   def runAction[M](action: DBIO[M]): Future[M] = {
@@ -96,21 +75,4 @@ trait DBComponent {
     //oracle fix for clause IN
     list.grouped(DEFAULT_LIST_GROUPED).map(fn).reduce(_ || _)
   }
-  def insetFixOpt[T](list: Iterable[T], fn: (Iterable[T]) => Rep[Option[Boolean]]): driver.api.Rep[Option[Boolean]] = {
-    //oracle fix for clause IN
-    list.grouped(DEFAULT_LIST_GROUPED).map(fn).reduce(_ || _)
-  }
-
-  def getStartEndDates(time: LocalDateTime): (LocalDateTime, LocalDateTime) = {
-    val startOfDay = toStartDate(time)
-    val endOfDay = toEndDate(startOfDay)
-    startOfDay -> endOfDay
-  }
-
-  def getStartEndDatesYesterday(time: LocalDateTime): (LocalDateTime, LocalDateTime) = {
-    val startOfDay = toStartDate(time.minusDays(1))
-    val endOfDay = toEndDate(startOfDay)
-    startOfDay -> endOfDay
-  }
-
 }

@@ -10,8 +10,6 @@ case class MockActor() extends Actor with NodoLogging {
     case r: FTPRequest =>
       log.info(s"FTPRequest ricevuta ${r.sessionId}")
       sender() ! FTPResponse(r.sessionId, r.testCaseId, None)
-    case r: WispAdapterChiediSceltaRequest =>
-      sender() ! WispAdapterChiediSceltaResponse(r.sessionId, r.testCaseId, None)
     case r: WorkRequest =>
       sender() ! WorkResponse(r.sessionId, r.testCaseId, None)
   }

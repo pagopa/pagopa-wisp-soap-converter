@@ -23,7 +23,7 @@ trait MainTestUtil {
 
   EnvHacker.setEnv(
     Map(
-      "AKKA_SYSTEM_NAME" -> "nodo-dev",
+      "AKKA_SYSTEM_NAME" -> "fdr-dev",
       "REQUIRED_CONTACT_POINT_NR" -> "1",
       "REMOTING_HOST" -> host,
       "REMOTING_PORT" -> remotingPort,
@@ -38,20 +38,11 @@ trait MainTestUtil {
       "SERVICE_HTTP_PORT" -> servicePort,
       "SERVICE_HTTP_BIND_HOST" -> bindHost,
       "SERVICE_HTTP_BIND_PORT" -> servicePort,
-      "DB_CONFIG_USER" -> "NODO4_CFG_DEV",
-      "DB_CONFIG_PASSWORD" -> "NODO4_CFG_DEV",
-      "DB_ONLINE_USER" -> "NODO_ONLINE_DEV",
-      "DB_ONLINE_PASSWORD" -> "NODO_ONLINE_DEV",
       "DB_OFFLINE_USER" -> "NODO_OFFLINE_DEV",
       "DB_OFFLINE_PASSWORD" -> "NODO_OFFLINE_DEV",
-      "DB_WFESP_USER" -> "WFESP_DEV",
-      "DB_WFESP_PASSWORD" -> "WFESP_DEV",
-      "DB_RE_USER" -> "RE_DEV",
-      "DB_RE_PASSWORD" -> "RE_DEV",
       "TZ" -> "Europe/Rome",
       "PROMETHEUS_HOST" -> host,
-      "PROMETHEUS_PORT" -> prometheusPort,
-      "GEC_FEES_SUBSCRIPTION_KEY" -> "6e508a628317485ea1241e57cde7602d"
+      "PROMETHEUS_PORT" -> prometheusPort
     )
   )
 

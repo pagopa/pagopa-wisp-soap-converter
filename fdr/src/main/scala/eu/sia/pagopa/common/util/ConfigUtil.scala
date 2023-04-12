@@ -120,7 +120,6 @@ object ConfigUtil {
 
   }
 
-
   def getGdeConfigKey(primitiva: String, primitivaType: String): String = {
     s"${primitiva}_$primitivaType".toUpperCase
   }

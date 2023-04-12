@@ -118,14 +118,6 @@ case class OfflineRepository(override val driver: JdbcProfile, override val db: 
   }
 
   val compGetFileFromSendQueue = Compiled((name: Rep[String]) => sendRendicontazione.filter(_.fileName === name))
-  def getFileFromSendQueue(name: String)(implicit log: NodoLogger): Future[Seq[FtpFile]] = {
-    val param = Seq("name" -> name)
-
-    val action = for {
-      q <- compGetFileFromSendQueue(name).result
-    } yield q
-    run("getFileFromSendQueue", param, action)
-  }
 
   private val insertRendicontazioni =
     rendicontazioni returning rendicontazioni.map(_.objId) into ((item, id) => item.copy(objId = id))
@@ -198,11 +190,6 @@ case class OfflineRepository(override val driver: JdbcProfile, override val db: 
     } yield r
     run("findRendicontazioniByIdFlusso", param, action)
   }
-
-  val compFindValidByIdFlussoAndIdPspNotEquals =
-    Compiled((stato: Rep[RendicontazioneStatus.Value], idFlusso: Rep[String], idPsp: Rep[String]) =>
-      rendicontazioni.filter(_.stato === stato).filter(_.idFlusso === idFlusso).filter(_.psp =!= idPsp).sortBy(_.dataOraFlusso.desc).take(1)
-    )
 
   val compFindValidByIdFlussoAndIdPspEqualsAndDate =
     Compiled((stato: Rep[RendicontazioneStatus.Value], idFlusso: Rep[String], idPsp: Rep[String], dataOraFlusso: Rep[LocalDateTime]) =>

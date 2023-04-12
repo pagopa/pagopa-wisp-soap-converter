@@ -1,11 +1,10 @@
 package eu.sia.pagopa.common.repo.offline
 
 import eu.sia.pagopa.common.message.SchedulerStatus
-import eu.sia.pagopa.common.repo.offline.enums.{ FtpFileStatus, RendicontazioneBolloStatus, RendicontazioneStatus, SchedulerFire, SchedulerFireCheckStatus, StatoVersamentoBollo }
-import eu.sia.pagopa.common.repo.offline.model._
+import eu.sia.pagopa.common.repo.offline.enums.{FtpFileStatus, RendicontazioneStatus, SchedulerFire, SchedulerFireCheckStatus}
 import eu.sia.pagopa.common.repo.util.YNBoolean
 import eu.sia.pagopa.common.repo.util.YNBoolean.YNBoolean
-import eu.sia.pagopa.common.repo.{ BigDecimal2, DBComponent }
+import eu.sia.pagopa.common.repo.{BigDecimal2, DBComponent}
 import slick.ast.BaseTypedType
 import slick.jdbc.JdbcType
 
@@ -34,12 +33,6 @@ trait OfflineMapping { this: DBComponent =>
 
   implicit val RendicontazioneStatusMapper: JdbcType[RendicontazioneStatus.Value] with BaseTypedType[RendicontazioneStatus.Value] =
     MappedColumnType.base[RendicontazioneStatus.Value, String](e => e.toString, s => RendicontazioneStatus.withName(s))
-
-  implicit val RendicontazioneBolloStatusMapper: JdbcType[RendicontazioneBolloStatus.Value] with BaseTypedType[RendicontazioneBolloStatus.Value] =
-    MappedColumnType.base[RendicontazioneBolloStatus.Value, String](e => e.toString, s => RendicontazioneBolloStatus.withName(s))
-
-  implicit val StatoVersamentoBolloMapper: JdbcType[StatoVersamentoBollo.Value] with BaseTypedType[StatoVersamentoBollo.Value] =
-    MappedColumnType.base[StatoVersamentoBollo.Value, String](e => e.toString, s => StatoVersamentoBollo.withName(s))
 
   implicit val amountMapper: JdbcType[BigDecimal2] with BaseTypedType[BigDecimal2] =
     MappedColumnType.base[BigDecimal2, BigDecimal](e => e.amount, s => s)

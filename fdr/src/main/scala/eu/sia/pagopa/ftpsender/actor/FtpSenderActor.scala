@@ -113,7 +113,6 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
     if (filename.isEmpty) throw FtpSenderException("Filename non valido", FTPFailureReason.VALIDATION)
 
   private def createDirs(destPath: String)(implicit ftp: SSHFtp): Unit = {
-
     destPath
       .split("/")
       .map(dir => {
@@ -132,22 +131,11 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
     ftp.cd("/")
   }
 
-  //  protected def serializeFuture[A, B](l: Iterable[A])(fn: A => Future[B])(implicit ec: ExecutionContext): Future[Seq[B]] = {
-  //    l.foldLeft(Future(Seq.empty[B])) {
-  //      (previousFuture, next) =>
-  //        for {
-  //          previousResults <- previousFuture
-  //          nextResult <- fn(next)
-  //        } yield previousResults :+ nextResult
-  //    }
-  //  }
-
   override def actorError(dpe: DigitPaException): Unit = {
     MDC.put(Constant.MDCKey.SESSION_ID, req.sessionId)
     MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
     val response = FTPResponse(req.sessionId, Some(dpe.getMessage), None)
     replyTo ! response
-    //MDC.remove(Constant.MDCKey.SESSION_ID)
   }
 
 }

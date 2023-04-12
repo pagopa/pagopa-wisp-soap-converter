@@ -101,7 +101,7 @@ object Main extends App {
               |#    ██║     ██████╔╝██║  ██║    #
               |#    ╚═╝     ╚═════╝ ╚═╝  ╚═╝    #
               |#                                #
-              |${filler(job.map(j => s" Job: ${j} ").getOrElse(""))}""".stripMargin)
+              |${filler(job.map(j => s" Job: $j ").getOrElse(""))}""".stripMargin)
   log.info(s"ActorSystem $actorSystemName created")
 
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
@@ -228,7 +228,6 @@ object Main extends App {
           Seq(
             BootstrapUtil.actorClassId(classOf[ApiConfigActor]) -> classOf[ApiConfigActor],
             BootstrapUtil.actorClassId(classOf[PollerActor]) -> classOf[PollerActor],
-            Constant.KeyName.IDEMPOTENCY -> classOf[PrimitiveActor],
             Constant.KeyName.FTP_SENDER -> classOf[PrimitiveActor]
           )
         case Some(j) =>

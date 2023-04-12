@@ -35,12 +35,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
 
   val outputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean
   val inputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_input").toBoolean
-  //  val ftphost: String = DDataChecks.getConfigurationKeys(ddataMap, "ftp.internalFTPComponentEndpointHost", BuildInfo.name)
-  //  val ftpport: String = DDataChecks.getConfigurationKeys(ddataMap, "ftp.internalFTPComponentEndpointPort", BuildInfo.name)
 
-  //  private def getFtpUrl(idFlusso: String, idDominio: String): String = {
-  //    s"""http://$ftphost:$ftpport/transferFTP?idFlussoRendicontazione=$idFlusso&dominio=$idDominio"""
-  //  }
   var re: Option[Re] = None
 
   private def parseInput(br: SoapRequest): Try[NodoChiediFlussoRendicontazione] = {
@@ -161,7 +156,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
       if (idDominio.isDefined && rendicontazione.dominio != idDominio.get || idPsp.isDefined && rendicontazione.psp != idPsp.get) {
         Failure(
           exception.DigitPaException(
-            "Rendicontazione sconosciuta o non disponibile, riprovare in un secondo momento", //TODO inserire errore
+            "Rendicontazione sconosciuta o non disponibile, riprovare in un secondo momento",
             DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO
           )
         )

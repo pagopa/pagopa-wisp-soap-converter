@@ -75,7 +75,6 @@ case class PollerActor(repositories: Repositories, actorProps: ActorProps) exten
           replyTo ! TriggerJobResponse(req.sessionId, SchedulerStatus.OK, Some(s"Job $jobstatus"), req.testCaseId)
         })
     }
-
   }
 
   private def ftpRetry(req: TriggerJobRequest, timeLimit: LocalDateTime): Future[TriggerJobResponse] = {

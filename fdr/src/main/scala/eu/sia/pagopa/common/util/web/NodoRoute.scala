@@ -378,50 +378,12 @@ case class NodoRoute(
     pathPrefix("config" / "refresh") { configRefresh() } ~
     path("web" / "refreshable-key") { refreshableKey() }
 
-  private def triggerRendicontazioneBollo(rendicontazioniRouter: ActorRef): Route = {
-    get {
-      parameterMap { parameters =>
-        complete {
-          val sessionId = UUID.randomUUID().toString
-          MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-          MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
-          log.debug(s"START request Http triggerRendicontazioneBollo[$sessionId]")
-
-          val key = s"${parameters("from")}_${parameters("to")}"
-
-          rendicontazioniRouter
-            .ask(WorkRequest(sessionId, None, "generaRendicontazioneBollo", Some(key)))(BUNDLE_IDLE_TIMEOUT)
-            .mapTo[WorkResponse]
-            .map(resp => {
-              import spray.json._
-              createHttpResponseSeed(ContentTypes.`text/plain(UTF-8)`, StatusCodes.OK, ActionResponse(true, s"success", "ok").toJson.toString(), sessionId)
-            })
-        }
-      }
-    }
-  }
-
-  private def createHttpResponseSeed(contentType: ContentType.NonBinary, statusCode: StatusCode, payload: String, sessionId: String): HttpResponse = {
-    log.debug(s"END request Http [$sessionId]")
-    val SESSION_ID_HEADER = true //config.getBoolean("session_id_header")
-    //MDC.remove(Constant.MDCKey.SESSION_ID)
-    HttpResponse(
-      status = statusCode,
-      entity = HttpEntity(contentType, payload),
-      headers = if (SESSION_ID_HEADER) {
-        scala.collection.immutable.Seq(RawHeader(Constant.HTTP_RESP_SESSION_ID_HEADER, sessionId))
-      } else {
-        scala.collection.immutable.Seq()
-      }
-    )
-  }
-
   private def configRefresh(): Route = {
     import scala.concurrent.duration._
     corsHandler {
       path(Segment) { segment =>
         withRequestTimeout(120.seconds) {
-          optionalHeaderValueByName("testCaseId") { headerTestCaseId =>
+          optionalHeaderValueByName("testCaseId") { _ =>
             complete {
               val sessionId = UUID.randomUUID().toString
               MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
@@ -490,30 +452,9 @@ case class NodoRoute(
     }
   }
 
-  def akkaHttpTimeout(sessionId: String): HttpResponse = {
-    val payload = Error("Internal timeout").toJson.toString()
-    MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-    MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
-    Util.logPayload(log, Some(payload))
-    log.debug(s"END request Http for AKKA HTTP TIMEOUT")
-    log.info(NodoLogConstant.logEnd(Constant.KeyName.REST_INPUT))
-    HttpResponse(status = StatusCodes.ServiceUnavailable, entity = HttpEntity(MediaTypes.`application/json`, payload))
-  }
-
-  def akkaErrorEncoding(sessionId: String, charset: String): HttpResponse = {
-    val payload = Error(s"Error, data encoding is not $charset").toJson.toString()
-    MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-    MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
-    Util.logPayload(log, Some(payload))
-    log.debug(s"END request Http for AKKA HTTP TIMEOUT")
-    log.info(NodoLogConstant.logEnd(Constant.KeyName.REST_INPUT))
-    HttpResponse(status = StatusCodes.ServiceUnavailable, entity = HttpEntity(MediaTypes.`application/json`, payload))
-  }
-
   private def createHttpResponse(contentType: ContentType.NonBinary, statusCode: StatusCode, payload: String, sessionId: String): HttpResponse = {
     log.debug(s"END request Http [$sessionId]")
-    val SESSION_ID_HEADER = true //config.getBoolean("session_id_header")
-    //MDC.remove(Constant.MDCKey.SESSION_ID)
+    val SESSION_ID_HEADER = true
     HttpResponse(
       status = statusCode,
       entity = HttpEntity(contentType, payload),

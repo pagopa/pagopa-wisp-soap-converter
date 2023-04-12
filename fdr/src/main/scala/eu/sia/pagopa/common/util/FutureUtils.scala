@@ -1,27 +1,7 @@
 package eu.sia.pagopa.common.util
 
-import org.slf4j.MDC
-
 import java.util.UUID
-import scala.concurrent.{ ExecutionContext, Future }
-
-class MdcExecutionContext(executionContext: ExecutionContext) extends ExecutionContext {
-  override def execute(runnable: Runnable): Unit = {
-    val callerMdc = MDC.getCopyOfContextMap
-    executionContext.execute(() => {
-      // copy caller thread diagnostic context to execution thread
-      if (callerMdc != null) MDC.setContextMap(callerMdc)
-      try {
-        runnable.run()
-      } finally {
-        // the thread might be reused, so we clean up for the next use
-        MDC.clear()
-      }
-    })
-  }
-
-  override def reportFailure(cause: Throwable): Unit = executionContext.reportFailure(cause)
-}
+import scala.concurrent.{ExecutionContext, Future}
 
 object FutureUtils {
 

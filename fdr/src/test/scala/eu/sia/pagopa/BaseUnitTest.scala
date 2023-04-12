@@ -88,7 +88,6 @@ abstract class BaseUnitTest()
         }
         limitjobs = true
         config.ftp.connect-timeout = "1000"
-        rendicontazionibollo.path = "/tmp"
         slick.dbs.default.db.numThreads=20
         slick.dbs.default.db.maxConnections=20
         configScheduleMinutes=1
@@ -96,39 +95,6 @@ abstract class BaseUnitTest()
         waitAsyncProcesses=true
         reBufferSize=1
         reFlushIntervalSeconds=1
-        sendPaymentResult{
-          v1 {
-            uri="https://acardste.vaservices.eu:1443/pp-restapi-CD/v2/payments/send-payment-result"
-            proxyUse="true"
-            proxyHost="10.97.20.33"
-            proxyPort=80
-            #proxyUser=""
-            #proxyPassword=""
-            timeoutSeconds=80
-          }
-          v2 {
-            uri="https://acardste.vaservices.eu:1443/pp-restapi-CD/v2/transactions/{idTransaction}/user-receipts"
-             subscriptionKey=33e3cb3333333c3ea33be3a333efb3ba
-            proxyUse="true"
-            proxyHost="10.97.20.33"
-            proxyPort=80
-            #proxyUser=""
-            #proxyPassword=""
-            timeoutSeconds=80
-          }
-        }
-        gec {
-          fees {
-            uri="http://localhost:8088/fees"
-            subscriptionKey=6e508a628317485ea1241e57cde7602d
-            proxyUse="false"
-            proxyHost="10.79.20.33"
-            proxyPort=80
-            #proxyUser=""
-            #proxyPassword=""
-            timeoutSeconds=80
-          }
-        }
     """
       ActorSystem("testSystem", ConfigFactory.parseString(config))
     })

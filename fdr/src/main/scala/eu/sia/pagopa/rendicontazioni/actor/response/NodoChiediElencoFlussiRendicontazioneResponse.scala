@@ -43,6 +43,5 @@ trait NodoChiediElencoFlussiRendicontazioneResponse { this: NodoLogging =>
     val outputXsdValid = DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean
     val res = errorHandler(req.sessionId, req.testCaseId, outputXsdValid, e, re)
     replyTo ! res
-    //MDC.remove(Constant.MDCKey.SESSION_ID)
   }
 }

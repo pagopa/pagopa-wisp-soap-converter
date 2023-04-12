@@ -9,11 +9,6 @@ import eu.sia.pagopa.Main.ConfigData
 
 trait ReUtil { this: NodoLogging =>
 
-//  private val reFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
-//  def formatDate(date: LocalDateTime): String = {
-//    reFormat.format(date)
-//  }
-
   def traceInterfaceRequest(message: SoapRequest, reExtra: ReExtra, reEventFunc: ReEventFunc, ddataMap: ConfigData): Unit = {
     import StringUtils.Utf8String
     Util.logPayload(log, Some(message.payload))
