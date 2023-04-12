@@ -1,0 +1,44 @@
+trigger:
+  branches:
+    include:
+      - develop
+
+pool:
+  vmImage: 'ubuntu-22.04'
+
+variables:
+  lightbend_key_secret: $(lightbend_key_dev)
+stages:
+  - stage: Test
+    jobs:
+      - job: unit_test
+        steps:
+          - checkout: self
+            persistCredentials: true
+          - bash: |
+              echo "##vso[task.setvariable variable=LIGHTBEND_KEY]$(lightbend_key_secret)"
+          - task: SonarCloudPrepare@1
+            displayName: 'Prepare SonarCloud analysis configuration'
+            inputs:
+              SonarCloud: '$(SONARCLOUD_SERVICE_CONN)'
+              organization: '$(SONARCLOUD_ORG)'
+              scannerMode: CLI
+              extraProperties: |
+                sonar.projectKey=$(SONARCLOUD_PROJECT_KEY)
+                sonar.projectName=$(SONARCLOUD_PROJECT_NAME)
+                sonar.projectVersion=$(Build.BuildNumber)
+                sonar.sources=nodo4/src/main/scala
+                sonar.tests=nodo4/src/test/scala
+                sonar.junit.reportPaths=nodo4/target/test-reports
+                sonar.coverage.jacoco.xmlReportPaths=target/scala-2.13/jacoco/report/aggregate/jacoco.xml
+
+          - script: ./sbt -v clean jacocoAggregate
+            displayName: "Run unit tests and generate Jacoco report"
+
+          - task: SonarCloudAnalyze@1
+            displayName: 'Analyze with SonarCloud'
+
+          - task: SonarCloudPublish@1
+            displayName: 'Publish SonarCloud results on build summary'
+            inputs:
+              pollingTimeoutSec: '300'

@@ -1,0 +1,11 @@
+apiVersion: v2
+name: ndp-chart
+description: Nodo dei pagmaneti
+type: application
+version: 3.15.1-SNAPSHOT
+appVersion: 3.15.1-SNAPSHOT
+dependencies:
+  - name: microservice-chart
+    version: 3.0.0
+    repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
+    alias: nodo

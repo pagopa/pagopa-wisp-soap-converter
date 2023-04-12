@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<env:Envelope xmlns:env="http://schemas.xmlsoap.org/soap/envelope/">
+    <env:Header/>
+    <env:Body>
+        <ns1:pspInviaRPTResponse xmlns:ns1="http://ws.pagamenti.telematici.gov/" xmlns:ns2="http://www.cnipa.gov.it/schemas/2010/Pagamenti/Ack_1_0/">
+            <pspInviaRPTResponse>
+                <esitoComplessivoOperazione>OK</esitoComplessivoOperazione>
+                <identificativoCarrello>{RANDOM}</identificativoCarrello>
+                <parametriPagamentoImmediato>parametriPagamentoImmediato</parametriPagamentoImmediato>
+            </pspInviaRPTResponse>
+        </ns1:pspInviaRPTResponse>
+    </env:Body>
+</env:Envelope>

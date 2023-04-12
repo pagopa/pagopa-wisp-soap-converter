@@ -1,0 +1,19 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <ns5:nodoInviaFlussoRendicontazione xmlns:ns2="http://www.digitpa.gov.it/schemas/2011/Pagamenti/"
+                                            xmlns:ns3="http://PuntoAccessoPSP.spcoop.gov.it/QrCode"
+                                            xmlns:ns4="http://PuntoAccessoPSP.spcoop.gov.it/BarCode_GS1_128_Modified"
+                                            xmlns:ns5="http://ws.pagamenti.telematici.gov/">
+            <identificativoPSP>{psp}</identificativoPSP>
+            <identificativoIntermediarioPSP>{brokerPsp}</identificativoIntermediarioPSP>
+            <identificativoCanale>{channel}</identificativoCanale>
+            <password>{channelPwd}</password>
+            <identificativoDominio>{pa}</identificativoDominio>
+            <identificativoFlusso>{idflusso}</identificativoFlusso>
+            <dataOraFlusso>{dataoraflussobusta}</dataOraFlusso>
+            <xmlRendicontazione>
+                {rendicontazione}
+            </xmlRendicontazione>
+        </ns5:nodoInviaFlussoRendicontazione>
+    </soap:Body>
+</soap:Envelope>

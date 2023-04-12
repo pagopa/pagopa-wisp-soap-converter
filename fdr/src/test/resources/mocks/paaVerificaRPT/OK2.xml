@@ -1,0 +1,15 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <ns3:paaVerificaRPTRisposta xmlns:ns3="http://ws.pagamenti.telematici.gov/" xmlns:ns2="http://ws.pagamenti.telematici.gov/ppthead">
+            <paaVerificaRPTRisposta>
+                <esito>OK</esito>
+                <datiPagamentoPA>
+                    <importoSingoloVersamento>5.00</importoSingoloVersamento>
+                    <ibanAccredito>IT93Z0101504802000070777778</ibanAccredito>
+                    <causaleVersamento>/RFB/00202200000221870/5.00/TXT/</causaleVersamento>
+                </datiPagamentoPA>
+            </paaVerificaRPTRisposta>
+        </ns3:paaVerificaRPTRisposta>
+    </soapenv:Body>
+</soapenv:Envelope>

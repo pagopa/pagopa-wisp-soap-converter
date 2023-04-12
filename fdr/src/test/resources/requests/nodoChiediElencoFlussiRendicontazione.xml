@@ -1,0 +1,10 @@
+    <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
+        <soap:Header/>
+        <soap:Body>
+            <ns4:nodoChiediElencoFlussiRendicontazione xmlns:ns4="http://ws.pagamenti.telematici.gov/">
+                <identificativoIntermediarioPA>{brokerPa}</identificativoIntermediarioPA>
+                <identificativoStazioneIntermediarioPA>{station}</identificativoStazioneIntermediarioPA>
+                <password>{stationPwd}</password>
+            </ns4:nodoChiediElencoFlussiRendicontazione>
+        </soap:Body>
+    </soap:Envelope>

@@ -1,0 +1,14 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+<soap:Body>
+    <ns3:pspChiediAvanzamentoRPTResponse xmlns:ns3="http://ws.pagamenti.telematici.gov/"
+                                         xmlns:ns2="http://www.cnipa.gov.it/schemas/2010/Pagamenti/Ack_1_0/">
+        <pspChiediAvanzamentoRPTResponse>
+            <fault>
+                <faultCode>CANALE_RPT_SCONOSCIUTA</faultCode>
+                <faultString>RPT sconosciuta</faultString>
+                <id>PPAYITR1XXX</id>
+            </fault>
+        </pspChiediAvanzamentoRPTResponse>
+    </ns3:pspChiediAvanzamentoRPTResponse>
+</soap:Body>
+</soap:Envelope>

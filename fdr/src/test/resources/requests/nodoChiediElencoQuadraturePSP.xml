@@ -1,0 +1,13 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Header/>
+    <soap:Body>
+        <ns4:nodoChiediElencoQuadraturePSP xmlns:ns4="http://ws.pagamenti.telematici.gov/">
+            <identificativoPSP>{psp}</identificativoPSP>
+            <identificativoIntermediarioPSP>{brokerPsp}</identificativoIntermediarioPSP>
+            <identificativoCanale>{channel}</identificativoCanale>
+            <password>{channelPwd}</password> <!--Optional:-->
+            <identificativoDominio>{pa}</identificativoDominio>
+        </ns4:nodoChiediElencoQuadraturePSP>
+    </soap:Body>
+</soap:Envelope>
+

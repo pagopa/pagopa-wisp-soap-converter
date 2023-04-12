@@ -1,0 +1,28 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <ns5:nodoAttivaRPT xmlns:ns2="http://www.digitpa.gov.it/schemas/2011/Pagamenti/"
+                           xmlns:ns3="http://PuntoAccessoPSP.spcoop.gov.it/BarCode_GS1_128_Modified"
+                           xmlns:ns4="http://PuntoAccessoPSP.spcoop.gov.it/QrCode"
+                           xmlns:ns5="http://ws.pagamenti.telematici.gov/">
+            <identificativoPSP>{psp}</identificativoPSP>
+            <identificativoIntermediarioPSP>{brokerPsp}</identificativoIntermediarioPSP>
+            <identificativoCanale>{channel}</identificativoCanale>
+            <password>{channelPwd}</password>
+            <codiceContestoPagamento>{ccp}</codiceContestoPagamento>
+            <identificativoIntermediarioPSPPagamento>{brokerPsp}</identificativoIntermediarioPSPPagamento>
+            <identificativoCanalePagamento>{channel}</identificativoCanalePagamento>
+            <codificaInfrastrutturaPSP>QR-CODE</codificaInfrastrutturaPSP>
+            <codiceIdRPT>
+                <ns4:QrCode>
+                    <ns4:CF>{pa}</ns4:CF>
+                    <ns4:CodStazPA>{codStazPA}</ns4:CodStazPA>
+                    <ns4:AuxDigit>{auxDigit}</ns4:AuxDigit>
+                    <ns4:CodIUV>{iuv}</ns4:CodIUV>
+                </ns4:QrCode>
+            </codiceIdRPT>
+            <datiPagamentoPSP>
+                <importoSingoloVersamento>10.00</importoSingoloVersamento>
+            </datiPagamentoPSP>
+        </ns5:nodoAttivaRPT>
+    </soap:Body>
+</soap:Envelope>

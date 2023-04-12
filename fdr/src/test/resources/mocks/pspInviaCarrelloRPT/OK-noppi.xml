@@ -1,0 +1,10 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
+    <soapenv:Body>
+        <ws:pspInviaCarrelloRPTResponse>
+            <pspInviaCarrelloRPTResponse>
+                <esitoComplessivoOperazione>OK</esitoComplessivoOperazione>
+                <identificativoCarrello>{RANDOM}</identificativoCarrello>
+            </pspInviaCarrelloRPTResponse>
+        </ws:pspInviaCarrelloRPTResponse>
+    </soapenv:Body>
+</soapenv:Envelope>

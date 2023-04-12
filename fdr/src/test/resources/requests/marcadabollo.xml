@@ -1,0 +1,26 @@
+<mar:marcaDaBollo xmlns:mar="http://www.agenziaentrate.gov.it/2014/MarcaDaBollo" xmlns:xd="http://www.w3.org/2000/09/xmldsig#">
+
+    <mar:PSP>
+        <mar:CodiceFiscale>{pspCF}</mar:CodiceFiscale>
+        <mar:Denominazione>string</mar:Denominazione>
+    </mar:PSP>
+    <mar:IUBD>{iubd}</mar:IUBD>
+    <mar:OraAcquisto>2008-09-29T03:49:45</mar:OraAcquisto>
+    <mar:Importo>0.01</mar:Importo>
+    <mar:TipoBollo>{tipoBollo}</mar:TipoBollo>
+    <mar:ImprontaDocumento>
+        <mar:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+        <xd:DigestValue>{digestValue}</xd:DigestValue>
+    </mar:ImprontaDocumento>
+    <xd:Signature>
+        <xd:SignedInfo>
+            <xd:CanonicalizationMethod Algorithm=""></xd:CanonicalizationMethod>
+            <xd:SignatureMethod Algorithm=""></xd:SignatureMethod>
+            <xd:Reference>
+                <xd:DigestMethod Algorithm=""></xd:DigestMethod>
+                <xd:DigestValue></xd:DigestValue>
+            </xd:Reference>
+        </xd:SignedInfo>
+        <xd:SignatureValue></xd:SignatureValue>
+    </xd:Signature>
+</mar:marcaDaBollo>

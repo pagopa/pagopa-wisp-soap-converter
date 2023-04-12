@@ -1,0 +1,20 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:nod="http://pagopa-api.pagopa.gov.it/node/nodeForPsp.xsd">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <nod:activatePaymentNoticeReq>
+            <idPSP>{psp}</idPSP>
+            <idBrokerPSP>{brokerPsp}</idBrokerPSP>
+            <idChannel>{channel}</idChannel>
+            <password>{channelPwd}</password>
+            {idempotencyKey}
+            <qrCode>
+                <fiscalCode>{pa}</fiscalCode>
+                <noticeNumber>{noticeNumber}</noticeNumber>
+            </qrCode>
+            <expirationTime>5000</expirationTime>
+            <amount>{amount}</amount>
+            <dueDate>2021-10-27</dueDate>
+            <paymentNote>Test payment</paymentNote>
+        </nod:activatePaymentNoticeReq>
+    </soapenv:Body>
+</soapenv:Envelope>

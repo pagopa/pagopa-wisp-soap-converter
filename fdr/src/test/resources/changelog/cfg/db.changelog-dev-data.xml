@@ -1,0 +1,41 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+<changeSet author="liquibase" id="202110201734h2" dbms="h2">
+        <sql>
+            ALTER SEQUENCE NODO4_CFG.BINARY_FILE_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.CANALE_TIPO_VERSAMENTO_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.CANALI_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.CANALI_NODO_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.CDI_DETAIL_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.CDI_FASCIA_COSTO_SERVIZIO_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.CDI_INFORMAZIONI_SERVIZIO_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.CDI_MASTER_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.CDI_PREFERENCES_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.CDS_SERVIZIO_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.CDS_SOGGETTO_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.CDS_SOGGETTO_SERVIZIO_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.CODIFICHE_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.CODIFICHE_PA_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.ELENCO_SERVIZI_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.FTP_SERVERS_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.INFORMATIVE_CONTO_ACCREDITO_DETAIL_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.INFORMATIVE_CONTO_ACCREDITO_MASTER_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.INFORMATIVE_PA_DETAIL_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.INFORMATIVE_PA_FASCE_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.INFORMATIVE_PA_MASTER_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.INTERMEDIARI_PA_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.INTERMEDIARI_PSP_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.PA_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.PA_STAZIONE_PA_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.PDD_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.PSP_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.PSP_CANALE_TIPO_VERSAMENTO_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.QUADRATURE_SCHED_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.STAZIONI_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.SYNC_STATUS_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.TIPI_VERSAMENTO_SEQ restart with 40000;
+            ALTER SEQUENCE NODO4_CFG.WFESP_PLUGIN_CONF_SEQ restart with 40000;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,13 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:nod="http://pagopa-api.pagopa.gov.it/node/nodeForPsp.xsd">
+<soapenv:Header/>
+<soapenv:Body>
+    <nod:verificaBollettinoReq>
+        <idPSP>{psp}</idPSP>
+        <idBrokerPSP>{brokerPsp}</idBrokerPSP>
+        <idChannel>{channel}</idChannel>
+        <password>{channelPwd}</password>
+        <ccPost>{ccPost}</ccPost>
+        <noticeNumber>{noticeNumber}</noticeNumber>
+    </nod:verificaBollettinoReq>
+</soapenv:Body>
+</soapenv:Envelope>

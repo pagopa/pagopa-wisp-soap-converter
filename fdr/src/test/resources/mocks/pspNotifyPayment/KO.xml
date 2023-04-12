@@ -1,0 +1,13 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psp="http://pagopa-api.pagopa.gov.it/psp/pspForNode.xsd">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <psp:pspNotifyPaymentRes>
+            <outcome>KO</outcome>
+            <fault>
+                <faultCode>asdasdasd</faultCode>
+                <faultString>2</faultString>
+                <id>123</id>
+            </fault>
+        </psp:pspNotifyPaymentRes>
+    </soapenv:Body>
+</soapenv:Envelope>

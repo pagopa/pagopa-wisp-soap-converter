@@ -1,0 +1,2205 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+    <changeSet author="lorenz (generated)" id="1653665292990-1">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="ANAGRAFICA_NOTIFICA_RT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-2">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="CARRELLO_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-3">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="CD_INFO_PAGAMENTO_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-4">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="IDEMPOTENCY_CACHE_SEQ" startValue="20001"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-5">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="MESSAGGI_SEQ" startValue="20001"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-6">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="NEXT_RETRY_NOTIFICA_RT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-7">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="NOTIFICA_RT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-8">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="PM_SESSION_DATA_SEQ" startValue="20001"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-9">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_ACTIVATE_SEQ" startValue="20001"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-10">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_PAYMENT_PLAN_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-11">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_PAYMENT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-12">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_PAYMENT_STATUS_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-13">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_PAYMENT_STATUS_SNAPSHOT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-14">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_RECEIPT_RECIPIENT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-15">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_RECEIPT_RECIPIENT_STATUS_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-16">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_RECEIPT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-17">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_RECEIPT_TRANSFER_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-18">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_RECEIPT_XML_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-19">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_RETRY_PA_SEND_RT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-20">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_RETRY_PSP_SEND_PAYMENT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-21">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_SERVICE_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-22">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_STATUS_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-23">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_STATUS_SNAPSHOT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-24">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_SUBJECT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-25">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="POSITION_TRANSFER_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-26">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="REGISTRO_CHIAMATE_NOTIFICA_RT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-27">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RETRY_PA_ATTIVA_RPT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-28">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RETRY_PA_INVIA_RT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-29">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RETRY_PSP_ACK_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-30">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RETRY_PSP_NOTIFICA_CANCELLAZIONE_RPT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-31">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RETRY_RPT_NOTIFICA_CANCELLAZIONE_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-32">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RETRY_RPT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-33">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="REVOCA_ESITI_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-34">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="REVOCA_RICHIESTE_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-35">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RPT_ACTIVATIONS_SEQ" startValue="40001"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-36">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RPT_SEQ" startValue="20001"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-37">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RPT_SOGGETTI_SEQ" startValue="40001"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-38">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RPT_VERSAMENTI_BOLLO_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-39">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RPT_VERSAMENTI_SEQ" startValue="20001"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-40">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RPT_XML_SEQ" startValue="20001"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-41">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RT_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-42">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RT_VERSAMENTI_BOLLO_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-43">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RT_VERSAMENTI_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-44">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RT_XML_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-45">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="SQ_POSITION_RETRY_SENDPAYMENTRESULT_ID" startValue="40001"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-46">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="STATI_RPT_SEQ" startValue="60001"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-47">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="STORNO_ESITI_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-48">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="STORNO_RICHIESTE_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-49">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="TOKEN_UTILITY_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-50">
+        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="VERIFICA_BOLLETTINO_SEQ" startValue="1"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-51">
+        <createTable tableName="ANAGRAFICA_NOTIFICA_RT">
+            <column defaultValueComputed="${schema}.ANAGRAFICA_NOTIFICA_RT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="ANAGRAFICA_NOTIFICA_RT_PK"/>
+            </column>
+            <column name="HASH_CF" type="VARCHAR2(100 BYTE)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-52">
+        <createTable tableName="CARRELLO">
+            <column defaultValueComputed="${schema}.CARRELLO_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="CARRELLO_PK"/>
+            </column>
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DATA_MSG_RICH" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_CARRELLO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STAZ_INTERMEDIARIOPA" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INTERMEDIARIOPA" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CANALE" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PSP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INTERMEDIARIOPSP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TIPO_VERSAMENTO" type="VARCHAR2(35 CHAR)"/>
+            <column name="PARAMETRI_PROFILO_PAGAMENTO" type="VARCHAR2(255 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CODICE_CONVENZIONE" type="VARCHAR2(35 CHAR)"/>
+            <column defaultValue="N" name="FLAG_MULTIBENEFICIARIO" type="CHAR(1 BYTE)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-53">
+        <createTable tableName="CD_INFO_PAGAMENTO">
+            <column defaultValueComputed="${schema}.CD_INFO_PAGAMENTO_SEQ.NEXTVAL" name="OBJ_ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="CD_INFO_PAGAMENTO_PK"/>
+            </column>
+            <column name="IDENT_DOMINIO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IUV" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CCP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_SESSIONE" type="VARCHAR2(100 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-54">
+        <createTable tableName="IDEMPOTENCY_CACHE">
+            <column defaultValueComputed="${schema}.IDEMPOTENCY_CACHE_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="IDEMPOTENCY_CACHE_PK"/>
+            </column>
+            <column name="PRIMITIVA" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PSP_ID" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="IDEMPOTENCY_KEY" type="VARCHAR2(50 CHAR)"/>
+            <column name="TOKEN" type="VARCHAR2(50 CHAR)"/>
+            <column name="VALID_TO" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="HASH_REQUEST" type="VARCHAR2(500 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RESPONSE" type="CLOB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-55">
+        <createTable tableName="MESSAGGI">
+            <column defaultValueComputed="${schema}.MESSAGGI_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="MESSAGGI_PK"/>
+            </column>
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_DOMINIO" type="VARCHAR2(35 CHAR)"/>
+            <column name="IUV" type="VARCHAR2(35 CHAR)"/>
+            <column name="CCP" type="VARCHAR2(35 CHAR)"/>
+            <column name="ID_CARRELLO" type="VARCHAR2(35 CHAR)"/>
+            <column name="TIPO" type="VARCHAR2(35 CHAR)"/>
+            <column name="TIMESTAMP_EVENTO" type="TIMESTAMP(6)"/>
+            <column name="SOURCE" type="CLOB"/>
+            <column name="SOURCE_TYPE" type="VARCHAR2(10 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-56">
+        <createTable tableName="NEXT_RETRY_NOTIFICA_RT">
+            <column defaultValueComputed="${schema}.NEXT_RETRY_NOTIFICA_RT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NEXT_RETRY_NOTIFICA_RT_PK"/>
+            </column>
+            <column name="NEXT_RETRY" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-57">
+        <createTable tableName="NOTIFICA_RT">
+            <column defaultValueComputed="${schema}.NOTIFICA_RT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NOTIFICA_RT_PK"/>
+            </column>
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_SESSIONE_ORIGINALE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_CARRELLO" type="VARCHAR2(35 CHAR)"/>
+            <column name="ID_DOMINIO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IUV" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CCP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MESSAGE" type="VARCHAR2(4000 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CODICE_FISCALE" type="VARCHAR2(16 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RETRY" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CODICE_FISCALE_HASH" type="VARCHAR2(100 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-58">
+        <createTable tableName="PM_SESSION_DATA">
+            <column defaultValueComputed="${schema}.PM_SESSION_DATA_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RPT_PM_DATA_PK"/>
+            </column>
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TIPO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MOBILE_TOKEN" type="VARCHAR2(255 CHAR)"/>
+            <column name="RRN" type="VARCHAR2(255 CHAR)"/>
+            <column name="TIPO_INTERAZIONE" type="VARCHAR2(255 CHAR)"/>
+            <column name="IMPORTO_TOTALE_PAGATO" type="FLOAT(22)"/>
+            <column name="ESITO_TRANSAZIONE_CARTA" type="VARCHAR2(255 CHAR)"/>
+            <column name="CODICE_AUTORIZZATIVO" type="VARCHAR2(6 CHAR)"/>
+            <column name="TIMESTAMP_OPERAZIONE" type="TIMESTAMP(6)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MOTIVO_ANNULLAMENTO" type="VARCHAR2(10 CHAR)"/>
+            <column name="CODICE_CONVENZIONE" type="VARCHAR2(35 CHAR)"/>
+            <column name="CODICE_AUTORIZZATIVO_PAYPAL" type="VARCHAR2(255 CHAR)"/>
+            <column name="ID_TRANSAZIONE_PSP_PAYPAL" type="VARCHAR2(255 BYTE)"/>
+            <column name="ID_TRANSAZIONE_PM_PAYPAL" type="VARCHAR2(255 BYTE)"/>
+            <column name="ID_TRANSAZIONE_PM_BPAY" type="VARCHAR2(255 BYTE)"/>
+            <column name="ID_TRANSAZIONE_PSP_BPAY" type="VARCHAR2(255 BYTE)"/>
+            <column name="OUTCOME_PAYMENT_GATEWAY" type="VARCHAR2(255 BYTE)"/>
+            <column name="COMMISSIONE" type="FLOAT(22)"/>
+            <column name="CODICE_AUTORIZZATIVO_BPAY" type="VARCHAR2(255 BYTE)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-59">
+        <createTable tableName="POSITION_ACTIVATE">
+            <column defaultValueComputed="${schema}.POSITION_ACTIVATE_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="POSITION_ACTIVATE_PK"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="CREDITOR_REFERENCE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="PSP_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="IDEMPOTENCY_KEY" type="VARCHAR2(50 CHAR)"/>
+            <column name="PAYMENT_TOKEN" type="VARCHAR2(50 CHAR)"/>
+            <column name="TOKEN_VALID_FROM" type="TIMESTAMP(6)"/>
+            <column name="TOKEN_VALID_TO" type="TIMESTAMP(6)"/>
+            <column name="DUE_DATE" type="TIMESTAMP(6)"/>
+            <column name="AMOUNT" type="NUMBER"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-60">
+        <createTable tableName="POSITION_PAYMENT">
+            <column defaultValueComputed="${schema}.POSITION_PAYMENT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="POSITION_PAYMENT_PK"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="CREDITOR_REFERENCE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="PAYMENT_TOKEN" type="VARCHAR2(50 CHAR)"/>
+            <column name="BROKER_PA_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="STATION_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="STATION_VERSION" type="NUMBER"/>
+            <column name="PSP_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="BROKER_PSP_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="CHANNEL_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="IDEMPOTENCY_KEY" type="VARCHAR2(50 CHAR)"/>
+            <column name="AMOUNT" type="NUMBER"/>
+            <column name="FEE" type="NUMBER"/>
+            <column name="OUTCOME" type="VARCHAR2(50 CHAR)"/>
+            <column name="PAYMENT_METHOD" type="VARCHAR2(50 CHAR)"/>
+            <column name="PAYMENT_CHANNEL" type="VARCHAR2(50 CHAR)"/>
+            <column name="TRANSFER_DATE" type="TIMESTAMP(6)"/>
+            <column name="PAYER_ID" type="NUMBER"/>
+            <column name="APPLICATION_DATE" type="TIMESTAMP(6)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="FK_PAYMENT_PLAN" type="NUMBER"/>
+            <column name="RPT_ID" type="NUMBER"/>
+            <column defaultValue="NA" name="PAYMENT_TYPE" type="VARCHAR2(10 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CARRELLO_ID" type="NUMBER"/>
+            <column name="ORIGINAL_PAYMENT_TOKEN" type="VARCHAR2(50 BYTE)"/>
+            <column defaultValue="N" name="FLAG_IO" type="CHAR(1 BYTE)"/>
+            <column defaultValue="N" name="RICEVUTA_PM" type="CHAR(1 BYTE)"/>
+            <column name="FLAG_ACTIVATE_RESP_MISSING" type="CHAR(1 BYTE)"/>
+            <column name="FLAG_PAYPAL" type="CHAR(1 BYTE)"/>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-61">
+        <createTable tableName="POSITION_PAYMENT_PLAN">
+            <column defaultValueComputed="${schema}.POSITION_PAYMENT_PLAN_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PPP_PK"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="CREDITOR_REFERENCE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="DUE_DATE" type="TIMESTAMP(6)"/>
+            <column name="RETENTION_DATE" type="TIMESTAMP(6)"/>
+            <column name="AMOUNT" type="NUMBER"/>
+            <column name="FLAG_FINAL_PAYMENT" type="VARCHAR2(1 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="METADATA" type="VARCHAR2(3000 CHAR)"/>
+            <column name="FK_POSITION_SERVICE" type="NUMBER"/>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-62">
+        <createTable tableName="POSITION_PAYMENT_STATUS">
+            <column defaultValueComputed="${schema}.POSITION_PAYMENT_STATUS_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="POSITION_PAYMENT_STATUS_PK"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="STATUS" type="VARCHAR2(50 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="CREDITOR_REFERENCE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="PAYMENT_TOKEN" type="VARCHAR2(50 CHAR)"/>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-63">
+        <createTable tableName="POSITION_PAYMENT_STATUS_SNAPSHOT">
+            <column defaultValueComputed="${schema}.POSITION_PAYMENT_STATUS_SNAPSHOT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="POSITION_PAYMENT_STATUS_SNAPSHOT_PK"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="CREDITOR_REFERENCE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="PAYMENT_TOKEN" type="VARCHAR2(50 CHAR)"/>
+            <column name="STATUS" type="VARCHAR2(50 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="FK_POSITION_PAYMENT" type="NUMBER"/>
+            <column name="CONTA_AVANZAMENTO_PM" type="NUMBER"/>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-64">
+        <createTable tableName="POSITION_RECEIPT">
+            <column defaultValueComputed="${schema}.POSITION_RECEIPT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="POSITION_RECEIPT_PK"/>
+            </column>
+            <column name="RECEIPT_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="CREDITOR_REFERENCE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="PAYMENT_TOKEN" type="VARCHAR2(50 CHAR)"/>
+            <column name="OUTCOME" type="VARCHAR2(50 CHAR)"/>
+            <column name="PAYMENT_AMOUNT" type="NUMBER"/>
+            <column name="DESCRIPTION" type="VARCHAR2(140 CHAR)"/>
+            <column name="COMPANY_NAME" type="VARCHAR2(140 CHAR)"/>
+            <column name="OFFICE_NAME" type="VARCHAR2(140 CHAR)"/>
+            <column name="DEBTOR_ID" type="NUMBER"/>
+            <column name="PSP_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="PSP_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="PSP_VAT_NUMBER" type="VARCHAR2(50 CHAR)"/>
+            <column name="PSP_COMPANY_NAME" type="VARCHAR2(70 CHAR)"/>
+            <column name="CHANNEL_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="CHANNEL_DESCRIPTION" type="VARCHAR2(50 CHAR)"/>
+            <column name="PAYER_ID" type="NUMBER"/>
+            <column name="PAYMENT_METHOD" type="VARCHAR2(50 CHAR)"/>
+            <column name="FEE" type="NUMBER"/>
+            <column name="PAYMENT_DATE_TIME" type="TIMESTAMP(6)"/>
+            <column name="APPLICATION_DATE" type="TIMESTAMP(6)"/>
+            <column name="TRANSFER_DATE" type="TIMESTAMP(6)"/>
+            <column name="METADATA" type="VARCHAR2(3000 CHAR)"/>
+            <column name="RT_ID" type="NUMBER"/>
+            <column name="FK_POSITION_PAYMENT" type="NUMBER"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-65">
+        <createTable tableName="POSITION_RECEIPT_RECIPIENT">
+            <column defaultValueComputed="${schema}.POSITION_RECEIPT_RECIPIENT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="POSITION_RECEIPT_RECIPIENT_PK"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="CREDITOR_REFERENCE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="PAYMENT_TOKEN" type="VARCHAR2(50 CHAR)"/>
+            <column name="RECIPIENT_PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="RECIPIENT_BROKER_PA_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="RECIPIENT_STATION_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="STATUS" type="VARCHAR2(50 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="FK_POSITION_RECEIPT" type="NUMBER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FK_RECEIPT_XML" type="NUMBER"/>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-66">
+        <createTable tableName="POSITION_RECEIPT_RECIPIENT_STATUS">
+            <column defaultValueComputed="${schema}.POSITION_RECEIPT_RECIPIENT_STATUS_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="POSITION_RECEIPT_RECIPIENT_STATUS_PK"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="CREDITOR_REFERENCE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="PAYMENT_TOKEN" type="VARCHAR2(50 CHAR)"/>
+            <column name="RECIPIENT_PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="RECIPIENT_BROKER_PA_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="RECIPIENT_STATION_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="STATUS" type="VARCHAR2(50 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="FK_POSITION_RECEIPT_RECIPIENT" type="NUMBER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-67">
+        <createTable tableName="POSITION_RECEIPT_TRANSFER">
+            <column defaultValueComputed="${schema}.POSITION_RECEIPT_TRANSFER_SEQ.NEXTVAL" name="FK_POSITION_RECEIPT" type="NUMBER"/>
+            <column name="FK_POSITION_TRANSFER" type="NUMBER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-68">
+        <createTable tableName="POSITION_RECEIPT_XML">
+            <column defaultValueComputed="${schema}.POSITION_RECEIPT_XML_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="POSITION_RECEIPT_XML_PK"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="CREDITOR_REFERENCE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="PAYMENT_TOKEN" type="VARCHAR2(50 CHAR)"/>
+            <column name="XML" type="BLOB"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="FK_POSITION_RECEIPT" type="NUMBER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RECIPIENT_PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="RECIPIENT_BROKER_PA_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="RECIPIENT_STATION_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-69">
+        <createTable tableName="POSITION_RETRY_PA_SEND_RT">
+            <column defaultValueComputed="${schema}.POSITION_RETRY_PA_SEND_RT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="POSITION_RETRY_PA_SEND_RT_PK"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="TOKEN" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FK_RECIPIENT" type="NUMBER"/>
+            <column name="RETRY" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-70">
+        <createTable tableName="POSITION_RETRY_PSP_SEND_PAYMENT">
+            <column defaultValueComputed="${schema}.POSITION_RETRY_PSP_SEND_PAYMENT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="POSITION_RETRY_PK"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="IUV" type="VARCHAR2(50 CHAR)"/>
+            <column name="ID_PSP" type="VARCHAR2(50 CHAR)"/>
+            <column name="ID_BROKER_PSP" type="VARCHAR2(50 CHAR)"/>
+            <column name="ID_CHANNEL" type="VARCHAR2(50 CHAR)"/>
+            <column name="PAYMENT_TOKEN" type="VARCHAR2(50 CHAR)"/>
+            <column name="FK_POSITION_PAYMENT" type="NUMBER"/>
+            <column name="FK_MESSAGGI" type="NUMBER"/>
+            <column name="RETRY" type="NUMBER"/>
+            <column name="STATUS" type="VARCHAR2(50 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-71">
+        <createTable tableName="POSITION_RETRY_SENDPAYMENTRESULT">
+            <column defaultValueComputed="${schema}.SQ_POSITION_RETRY_SENDPAYMENTRESULT_ID.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK_POSITION_RETRY_SENDPAYMENTRESULT"/>
+            </column>
+            <column name="PAYMENT_TOKEN" type="VARCHAR2(255 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_DOMINIO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IUV" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CCP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREDITOR_REFERENCE_ID" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PSP_TRANSACTION_ID" type="VARCHAR2(255 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PSP_ID" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STAZIONE" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CANALE" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_SESSIONE_ORIGINALE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="OUTCOME" type="VARCHAR2(10 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RETRY" type="NUMBER(5, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-72">
+        <createTable tableName="POSITION_SERVICE">
+            <column defaultValueComputed="${schema}.POSITION_SERVICE_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PS_PK"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="DESCRIPTION" type="VARCHAR2(140 CHAR)"/>
+            <column name="COMPANY_NAME" type="VARCHAR2(140 CHAR)"/>
+            <column name="OFFICE_NAME" type="VARCHAR2(140 CHAR)"/>
+            <column name="DEBTOR_ID" type="NUMBER"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-73">
+        <createTable tableName="POSITION_STATUS">
+            <column defaultValueComputed="${schema}.POSITION_STATUS_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="POSITION_STATUS_PK"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="STATUS" type="VARCHAR2(50 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-74">
+        <createTable tableName="POSITION_STATUS_SNAPSHOT">
+            <column defaultValueComputed="${schema}.POSITION_STATUS_SNAPSHOT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="POSITION_STATUS_SNAPSHOT_PK"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="STATUS" type="VARCHAR2(50 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="FK_POSITION_SERVICE" type="NUMBER"/>
+            <column defaultValue="N" name="ACTIVATION_PENDING" type="CHAR(1 BYTE)"/>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-75">
+        <createTable tableName="POSITION_SUBJECT">
+            <column defaultValueComputed="${schema}.POSITION_SUBJECT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="POSITION_SUBJECT_PK"/>
+            </column>
+            <column name="SUBJECT_TYPE" type="VARCHAR2(50 CHAR)"/>
+            <column name="ENTITY_UNIQUE_IDENTIFIER_TYPE" type="VARCHAR2(1 CHAR)"/>
+            <column name="ENTITY_UNIQUE_IDENTIFIER_VALUE" type="VARCHAR2(255 CHAR)"/>
+            <column name="FULL_NAME" type="VARCHAR2(255 CHAR)"/>
+            <column name="STREET_NAME" type="VARCHAR2(255 CHAR)"/>
+            <column name="CIVIC_NUMBER" type="VARCHAR2(50 CHAR)"/>
+            <column name="POSTAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="CITY" type="VARCHAR2(50 CHAR)"/>
+            <column name="STATE_PROVINCE_REGION" type="VARCHAR2(50 CHAR)"/>
+            <column name="COUNTRY" type="VARCHAR2(50 CHAR)"/>
+            <column name="EMAIL" type="VARCHAR2(256 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-76">
+        <createTable tableName="POSITION_TRANSFER">
+            <column defaultValueComputed="${schema}.POSITION_TRANSFER_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="POSITION_TRANSFER_PK"/>
+            </column>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="CREDITOR_REFERENCE_ID" type="VARCHAR2(50 CHAR)"/>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)"/>
+            <column name="PA_FISCAL_CODE_SECONDARY" type="VARCHAR2(50 CHAR)"/>
+            <column name="IBAN" type="VARCHAR2(50 CHAR)"/>
+            <column name="AMOUNT" type="FLOAT(22)"/>
+            <column name="REMITTANCE_INFORMATION" type="VARCHAR2(512 CHAR)"/>
+            <column name="TRANSFER_CATEGORY" type="VARCHAR2(140 CHAR)"/>
+            <column name="TRANSFER_IDENTIFIER" type="VARCHAR2(50 CHAR)"/>
+            <column name="VALID" type="VARCHAR2(1 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="FK_PAYMENT_PLAN" type="NUMBER"/>
+            <column name="FK_POSITION_PAYMENT" type="NUMBER"/>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-77">
+        <createTable tableName="REGISTRO_CHIAMATE_NOTIFICA_RT">
+            <column defaultValueComputed="${schema}.REGISTRO_CHIAMATE_NOTIFICA_RT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="REGISTRO_CHIAMATE_NOTIFICA_RT_PK"/>
+            </column>
+            <column name="DATA" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ESITO" type="VARCHAR2(10 BYTE)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-78">
+        <createTable tableName="RETRY_PA_ATTIVA_RPT">
+            <column defaultValueComputed="${schema}.RETRY_PA_ATTIVA_RPT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RETRY_PA_ATTIVA_RPT_PK"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IUV" type="VARCHAR2(50 CHAR)"/>
+            <column name="TOKEN" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RETRY" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-79">
+        <createTable tableName="RETRY_PA_INVIA_RT">
+            <column defaultValueComputed="${schema}.RETRY_PA_INVIA_RT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RETRY_PA_INVIA_RT_PK"/>
+            </column>
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_STAZIONE" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_INTERMEDIARIO_PA" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_CANALE" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_SESSIONE_ORIGINALE" type="VARCHAR2(36 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_DOMINIO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IUV" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CCP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATO" type="VARCHAR2(35 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RETRY" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATO_RPT" type="VARCHAR2(50 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-80">
+        <createTable tableName="RETRY_PSP_ACK">
+            <column defaultValueComputed="${schema}.RETRY_PSP_ACK_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RETRY_PSP_ACK_PK"/>
+            </column>
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_CANALE" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_DOMINIO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IUV" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CCP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATO" type="VARCHAR2(35 CHAR)"/>
+            <column name="PSP" type="VARCHAR2(35 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RETRY" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IDENTIFICATIVO_MESSAGGIO_RICEVUTA_RT" type="VARCHAR2(50 CHAR)"/>
+            <column name="DATA_ORA_MESSAGGIO_RICEVUTA_RT" type="TIMESTAMP(6)"/>
+            <column name="STATO_MESSAGGIO_RT" type="VARCHAR2(10 CHAR)"/>
+            <column name="MOTIVAZIONE_MESSAGGIO_RT" type="VARCHAR2(20 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-81">
+        <createTable tableName="RETRY_PSP_NOTIFICA_CANCELLAZIONE_RPT">
+            <column defaultValueComputed="${schema}.RETRY_PSP_NOTIFICA_CANCELLAZIONE_RPT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RETRY_PSP_NOTIFICA_CANCELLAZIONE_RPT_PK"/>
+            </column>
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_SESSIONE_ORIGINALE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_CARRELLO" type="VARCHAR2(35 CHAR)"/>
+            <column name="ID_CANALE" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_STAZIONE" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_DOMINIO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IUV" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CCP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATO" type="VARCHAR2(35 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RETRY" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-82">
+        <createTable tableName="RETRY_RPT">
+            <column defaultValueComputed="${schema}.RETRY_RPT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RETRY_RPT_PK"/>
+            </column>
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_CARRELLO" type="VARCHAR2(35 CHAR)"/>
+            <column name="ID_CANALE" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_DOMINIO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IUV" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CCP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATO" type="VARCHAR2(35 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RETRY" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_SESSIONE_ORIGINALE" type="VARCHAR2(50 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-83">
+        <createTable tableName="RETRY_RPT_NOTIFICA_CANCELLAZIONE">
+            <column defaultValueComputed="${schema}.RETRY_RPT_NOTIFICA_CANCELLAZIONE_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RETRY_RPT_NOTIFICA_CANCELLAZIONE_PK"/>
+            </column>
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_SESSIONE_ORIGINALE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_CARRELLO" type="VARCHAR2(35 CHAR)"/>
+            <column name="ID_CANALE" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_STAZIONE" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_DOMINIO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IUV" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CCP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATO" type="VARCHAR2(35 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RETRY" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-84">
+        <createTable tableName="REVOCA_ESITI">
+            <column defaultValueComputed="${schema}.REVOCA_ESITI_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="REVOCA_ESITI_PK"/>
+            </column>
+            <column name="ID_MESSAGGIO_ESITO" type="VARCHAR2(255 CHAR)"/>
+            <column name="DATA_ORA_MESSAGGIO_ESITO" type="TIMESTAMP(6) WITH TIME ZONE"/>
+            <column name="RIFERIMENTO_DATA_ORA_REVOCA" type="TIMESTAMP(6) WITH TIME ZONE"/>
+            <column name="STATO_ESITO" type="VARCHAR2(255 CHAR)"/>
+            <column name="RIFERIMENTO_MESSAGGIO_REVOCA" type="VARCHAR2(255 CHAR)"/>
+            <column name="IDENT_DOMINIO" type="VARCHAR2(255 CHAR)"/>
+            <column name="IUV" type="VARCHAR2(255 CHAR)"/>
+            <column name="CCP" type="VARCHAR2(255 CHAR)"/>
+            <column defaultValueComputed="(current_timestamp)" name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="(current_timestamp)" name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-85">
+        <createTable tableName="REVOCA_RICHIESTE">
+            <column defaultValueComputed="${schema}.REVOCA_RICHIESTE_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="REVOCA_RICHIESTE_PK"/>
+            </column>
+            <column name="ID_MESSAGGIO_REVOCA" type="VARCHAR2(255 CHAR)"/>
+            <column name="DATA_ORA_REVOCA" type="TIMESTAMP(6) WITH TIME ZONE"/>
+            <column name="STATO_RICHIESTA" type="VARCHAR2(255 CHAR)"/>
+            <column name="IDENT_DOMINIO" type="VARCHAR2(255 CHAR)"/>
+            <column name="IUV" type="VARCHAR2(255 CHAR)"/>
+            <column name="CCP" type="VARCHAR2(255 CHAR)"/>
+            <column name="INTERMEDIARIOPA" type="VARCHAR2(255 CHAR)"/>
+            <column name="STAZ_INTERMEDIARIOPA" type="VARCHAR2(255 CHAR)"/>
+            <column defaultValueComputed="(current_timestamp)" name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="(current_timestamp)" name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INTERMEDIARIOPSP" type="VARCHAR2(255 CHAR)"/>
+            <column name="CANALE" type="VARCHAR2(255 CHAR)"/>
+            <column name="TIPO_REVOCA" type="NUMBER(*, 0)"/>
+            <column defaultValueNumeric="0.0" name="IMPORTO_TOTALE_REVOCATO" type="FLOAT(22)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-86">
+        <createTable tableName="RPT">
+            <column defaultValueComputed="${schema}.RPT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RPT_PK"/>
+            </column>
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CCP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IDENT_DOMINIO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IUV" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="BIC_ADDEBITO" type="VARCHAR2(11 CHAR)"/>
+            <column name="DATA_MSG_RICH" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FLAG_CANC" type="CHAR(1 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IBAN_ADDEBITO" type="VARCHAR2(35 CHAR)"/>
+            <column name="ID_MSG_RICH" type="VARCHAR2(100 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STAZ_INTERMEDIARIOPA" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INTERMEDIARIOPA" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CANALE" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PSP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INTERMEDIARIOPSP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TIPO_VERSAMENTO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="NUM_VERSAMENTI" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RT_SIGNATURE_CODE" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SOMMA_VERSAMENTI" type="FLOAT(22)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PARAMETRI_PROFILO_PAGAMENTO" type="VARCHAR2(255 CHAR)"/>
+            <column name="FK_CARRELLO" type="NUMBER(*, 0)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="N" name="RICEVUTA_PM" type="CHAR(1 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="N" name="WISP_2" type="CHAR(1 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FLAG_SECONDA" type="CHAR(1 BYTE)"/>
+            <column name="FLAG_IO" type="CHAR(1 BYTE)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-87">
+        <createTable tableName="RPT_ACTIVATIONS">
+            <column defaultValueComputed="${schema}.RPT_ACTIVATIONS_SEQ.NEXTVAL" name="PA_FISCAL_CODE" type="NUMBER"/>
+            <column name="NOTICE_ID" type="VARCHAR2(50 BYTE)"/>
+            <column name="CREDITOR_REFERENCE_ID" type="VARCHAR2(50 BYTE)"/>
+            <column name="PAYMENT_TOKEN" type="VARCHAR2(50 BYTE)"/>
+            <column name="PAAATTIVARPTRESP" type="CHAR(1 BYTE)"/>
+            <column name="NODOINVIARPTREQ" type="CHAR(1 BYTE)"/>
+            <column name="PAAATTIVARPTERROR" type="CHAR(1 BYTE)"/>
+            <column defaultValueComputed="to_timestamp('1970-01-01','yyyy-mm-dd')" name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-88">
+        <createTable tableName="RPT_SOGGETTI">
+            <column defaultValueComputed="${schema}.RPT_SOGGETTI_SEQ.NEXTVAL" name="RPT_ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RPT_SOGGETTI_PK"/>
+            </column>
+            <column name="TIPO_SOGGETTO" type="CHAR(1 CHAR)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RPT_SOGGETTI_PK"/>
+            </column>
+            <column name="TIPO_IDENTIFICATIVO_UNIVOCO" type="CHAR(1 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CODICE_IDENTIFICATIVO_UNIVOCO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ANAGRAFICA" type="VARCHAR2(70 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INDIRIZZO" type="VARCHAR2(70 CHAR)"/>
+            <column name="CIVICO" type="VARCHAR2(16 CHAR)"/>
+            <column name="CAP" type="VARCHAR2(16 CHAR)"/>
+            <column name="LOCALITA" type="VARCHAR2(35 CHAR)"/>
+            <column name="PROVINCIA" type="VARCHAR2(35 CHAR)"/>
+            <column name="NAZIONE" type="VARCHAR2(4 CHAR)"/>
+            <column name="EMAIL" type="VARCHAR2(256 CHAR)"/>
+            <column name="CODICE_UNITOPER" type="VARCHAR2(35 CHAR)"/>
+            <column name="DENOMIN_UNITOPER" type="VARCHAR2(35 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-89">
+        <createTable tableName="RPT_VERSAMENTI">
+            <column defaultValueComputed="${schema}.RPT_VERSAMENTI_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RPT_VERSAMENTI_PK"/>
+            </column>
+            <column name="PROGRESSIVO" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IMPORTO" type="FLOAT(22)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="COMMISSIONE_CARICO_PA" type="FLOAT(22)"/>
+            <column name="IBAN" type="VARCHAR2(35 CHAR)"/>
+            <column name="IBAN_APPOGGIO" type="VARCHAR2(35 CHAR)"/>
+            <column name="BIC_ACCREDITO" type="VARCHAR2(11 BYTE)"/>
+            <column name="BIC_APPOGGIO" type="VARCHAR2(11 BYTE)"/>
+            <column name="CREDENZIALI_PAGATORE" type="VARCHAR2(35 CHAR)"/>
+            <column name="CAUSALE_VERSAMENTO" type="VARCHAR2(255 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TIPO_VERSAMENTO" type="VARCHAR2(25 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DATI_SPECIFICI_RISCOSSIONE" type="VARCHAR2(255 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FK_RPT" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-90">
+        <createTable tableName="RPT_VERSAMENTI_BOLLO">
+            <column defaultValueComputed="${schema}.RPT_VERSAMENTI_BOLLO_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RPT_VERSAMENTI_BOLLO_PK"/>
+            </column>
+            <column name="PROGRESSIVO" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TIPO_BOLLO" type="VARCHAR2(2 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="HASH_DOCUMENTO" type="VARCHAR2(70 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PROVINCIA_RESIDENZA" type="VARCHAR2(2 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FK_RPT_VERSAMENTI" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-91">
+        <createTable tableName="RPT_XML">
+            <column defaultValueComputed="${schema}.RPT_XML_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RPT_XML_PK"/>
+            </column>
+            <column name="CCP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IDENT_DOMINIO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IUV" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FK_RPT" type="NUMBER(*, 0)"/>
+            <column name="FK_CARRELLO" type="NUMBER(*, 0)"/>
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)"/>
+            <column name="ID_CARRELLO" type="VARCHAR2(35 CHAR)"/>
+            <column name="XML_CONTENT" type="CLOB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-92">
+        <createTable tableName="RT">
+            <column defaultValueComputed="${schema}.RT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RT_PK"/>
+            </column>
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CCP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IDENT_DOMINIO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IUV" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="COD_ESITO" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ESITO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DATA_RICEVUTA" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DATA_RICHIESTA" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_RICEVUTA" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_RICHIESTA" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SOMMA_VERSAMENTI" type="FLOAT(22)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CANALE" type="VARCHAR2(32 BYTE)"/>
+            <column defaultValue="N" name="NOTIFICA_PROCESSATA" type="CHAR(1 BYTE)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="GENERATA_DA" type="VARCHAR2(10 BYTE)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-93">
+        <createTable tableName="RT_VERSAMENTI">
+            <column defaultValueComputed="${schema}.RT_VERSAMENTI_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RT_VERSAMENTI_PK"/>
+            </column>
+            <column name="PROGRESSIVO" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IMPORTO_RT" type="FLOAT(22)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ESITO" type="VARCHAR2(35 CHAR)"/>
+            <column name="CAUSALE_VERSAMENTO" type="VARCHAR2(255 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DATI_SPECIFICI_RISCOSSIONE" type="VARCHAR2(255 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="COMMISSIONE_APPLICATE_PSP" type="FLOAT(22)"/>
+            <column name="FK_RT" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="COMMISSIONE_CARICO_PA" type="FLOAT(22)"/>
+            <column name="COMMISSIONE_APPLICATE_PA" type="FLOAT(22)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-94">
+        <createTable tableName="RT_VERSAMENTI_BOLLO">
+            <column defaultValueComputed="${schema}.RT_VERSAMENTI_BOLLO_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RT_VERSAMENTI_BOLLO_PK"/>
+            </column>
+            <column name="PROGRESSIVO" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TIPO_BOLLO" type="VARCHAR2(2 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TIPO_ALLEGATO_RICEVUTA" type="VARCHAR2(2 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IUBD" type="VARCHAR2(255 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IMPORTO" type="NUMBER(19, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ORA_ACQUISTO" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FK_RT_VERSAMENTI" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ACK_IMPRONTA" type="NUMBER(*, 0)"/>
+            <column name="ACK_IUDB" type="NUMBER(*, 0)"/>
+            <column name="ACK_CODICE_FISCALE" type="NUMBER(*, 0)"/>
+            <column name="ACK_DENOMINAZIONE" type="NUMBER(*, 0)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-95">
+        <createTable tableName="RT_XML">
+            <column defaultValueComputed="${schema}.RT_XML_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="RT_XML_PK"/>
+            </column>
+            <column name="CCP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IDENT_DOMINIO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IUV" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FK_RT" type="NUMBER(*, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TIPO_FIRMA" type="VARCHAR2(255 CHAR)"/>
+            <column name="XML_CONTENT" type="CLOB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-96">
+        <createTable tableName="STATI_CARRELLO">
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_CARRELLO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_SESSIONE_ORIGINALE" type="VARCHAR2(50 CHAR)"/>
+            <column autoIncrement="true" defaultOnNull="true" generationType="BY DEFAULT" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="STATI_CARRELLO_PK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-97">
+        <createTable tableName="STATI_CARRELLO_SNAPSHOT">
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_CARRELLO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK_CARRELLO"/>
+            </column>
+            <column name="STATO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CONTA_AVANZAMENTO_PM" type="NUMBER"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-98">
+        <createTable tableName="STATI_RPT">
+            <column defaultValueComputed="${schema}.STATI_RPT_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="STATI_RPT_PK"/>
+            </column>
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ID_SESSIONE_ORIGINALE" type="VARCHAR2(50 CHAR)"/>
+            <column name="ID_DOMINIO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IUV" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CCP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-99">
+        <createTable tableName="STATI_RPT_SNAPSHOT">
+            <column name="ID_DOMINIO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="STATI_RPT_SNAPSHOT_PK"/>
+            </column>
+            <column name="IUV" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="STATI_RPT_SNAPSHOT_PK"/>
+            </column>
+            <column name="CCP" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="STATI_RPT_SNAPSHOT_PK"/>
+            </column>
+            <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATO" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_BY" type="VARCHAR2(35 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PUSH" type="NUMBER(1, 0)"/>
+            <column name="CONTA_AVANZAMENTO_PM" type="NUMBER"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-100">
+        <createTable tableName="STORNO_ESITI">
+            <column defaultValueComputed="${schema}.STORNO_ESITI_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="STORNO_ESITI_PK"/>
+            </column>
+            <column name="ID_MESSAGGIO_ESITO" type="VARCHAR2(255 CHAR)"/>
+            <column name="DATA_ORA_MESSAGGIO_ESITO" type="TIMESTAMP(6) WITH TIME ZONE"/>
+            <column name="RIFERIMENTO_DATA_ORA_REVOCA" type="TIMESTAMP(6) WITH TIME ZONE"/>
+            <column name="STATO_ESITO" type="VARCHAR2(255 CHAR)"/>
+            <column name="RIFERIMENTO_MESSAGGIO_REVOCA" type="VARCHAR2(255 CHAR)"/>
+            <column name="IDENT_DOMINIO" type="VARCHAR2(255 CHAR)"/>
+            <column name="IUV" type="VARCHAR2(255 CHAR)"/>
+            <column name="CCP" type="VARCHAR2(255 CHAR)"/>
+            <column defaultValueComputed="(current_timestamp)" name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="(current_timestamp)" name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-101">
+        <createTable tableName="STORNO_RICHIESTE">
+            <column defaultValueComputed="${schema}.STORNO_RICHIESTE_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="STORNO_RICHIESTE_PK"/>
+            </column>
+            <column name="ID_MESSAGGIO_REVOCA" type="VARCHAR2(255 CHAR)"/>
+            <column name="DATA_ORA_REVOCA" type="TIMESTAMP(6) WITH TIME ZONE"/>
+            <column name="STATO_RICHIESTA" type="VARCHAR2(255 CHAR)"/>
+            <column name="IDENT_DOMINIO" type="VARCHAR2(255 CHAR)"/>
+            <column name="IUV" type="VARCHAR2(255 CHAR)"/>
+            <column name="CCP" type="VARCHAR2(255 CHAR)"/>
+            <column name="INTERMEDIARIOPA" type="VARCHAR2(255 CHAR)"/>
+            <column name="STAZ_INTERMEDIARIOPA" type="VARCHAR2(255 CHAR)"/>
+            <column defaultValueComputed="(current_timestamp)" name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="(current_timestamp)" name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0.0" name="IMPORTO_TOTALE_REVOCATO" type="FLOAT(22)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-102">
+        <createTable tableName="TOKEN_UTILITY">
+            <column defaultValueComputed="${schema}.TOKEN_UTILITY_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="TOKEN_UTILITY_PK"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 BYTE)"/>
+            <column name="NOTICE_ID" type="VARCHAR2(50 BYTE)"/>
+            <column name="CREDITOR_REFERENCE_ID" type="VARCHAR2(50 BYTE)"/>
+            <column name="TOKEN1" type="VARCHAR2(50 BYTE)"/>
+            <column name="TOKEN2" type="VARCHAR2(50 BYTE)"/>
+            <column name="FK_PAYMENT1" type="NUMBER"/>
+            <column name="FK_PAYMENT2" type="NUMBER"/>
+            <column name="FK_RPT1" type="NUMBER"/>
+            <column name="FK_RPT2" type="NUMBER"/>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)"/>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-103">
+        <createTable tableName="T_SOGLIE_MON">
+            <column name="GIORNO" type="VARCHAR2(5 BYTE)"/>
+            <column name="ORA" type="NUMBER"/>
+            <column name="MONITOR" type="VARCHAR2(100 BYTE)"/>
+            <column name="SOGLIA_WARNING" type="NUMBER"/>
+            <column name="SOGLIA_CRITICAL" type="NUMBER"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-104">
+        <createTable tableName="VERIFICA_BOLLETTINO">
+            <column defaultValueComputed="${schema}.VERIFICA_BOLLETTINO_SEQ.NEXTVAL" name="ID" type="NUMBER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="VB_PK"/>
+            </column>
+            <column name="CCPOST" type="VARCHAR2(12 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="NOTICE_ID" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PA_FISCAL_CODE" type="VARCHAR2(50 CHAR)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPDATED_TIMESTAMP" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSERTED_BY" type="VARCHAR2(100 CHAR)"/>
+            <column name="UPDATED_BY" type="VARCHAR2(100 CHAR)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-105">
+        <createIndex indexName="ANAGRAFICA_NOTIFICA_RT_HASH_CF" tableName="ANAGRAFICA_NOTIFICA_RT" unique="true">
+            <column name="HASH_CF"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-106">
+        <addUniqueConstraint columnNames="HASH_CF" constraintName="ANAGRAFICA_NOTIFICA_RT_HASH_CF" forIndexName="ANAGRAFICA_NOTIFICA_RT_HASH_CF" tableName="ANAGRAFICA_NOTIFICA_RT"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-107">
+        <createIndex indexName="POSITION_SERVICE_PA_FISCAL_CODE_IDX" tableName="POSITION_SERVICE" unique="true">
+            <column name="PA_FISCAL_CODE"/>
+            <column name="NOTICE_ID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-108">
+        <addUniqueConstraint columnNames="PA_FISCAL_CODE, NOTICE_ID" constraintName="POSITION_SERVICE_PA_FISCAL_CODE_IDX" forIndexName="POSITION_SERVICE_PA_FISCAL_CODE_IDX" tableName="POSITION_SERVICE" validate="false"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-109">
+        <createIndex indexName="RETRY_PA_INVIA_RT_UN" tableName="RETRY_PA_INVIA_RT" unique="true">
+            <column name="IUV"/>
+            <column name="CCP"/>
+            <column name="ID_DOMINIO"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-110">
+        <addUniqueConstraint columnNames="IUV, CCP, ID_DOMINIO" constraintName="RETRY_PA_INVIA_RT_UN" forIndexName="RETRY_PA_INVIA_RT_UN" tableName="RETRY_PA_INVIA_RT"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-111">
+        <createIndex indexName="RPT_UNIQUE" tableName="RPT" unique="true">
+            <column name="IDENT_DOMINIO"/>
+            <column name="IUV"/>
+            <column name="CCP"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-112">
+        <addUniqueConstraint columnNames="IDENT_DOMINIO, IUV, CCP" constraintName="RPT_UNIQUE" forIndexName="RPT_UNIQUE" tableName="RPT"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-113">
+        <createIndex indexName="RT_UNIQUE" tableName="RT" unique="true">
+            <column name="IDENT_DOMINIO"/>
+            <column name="IUV"/>
+            <column name="CCP"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-114">
+        <addUniqueConstraint columnNames="IDENT_DOMINIO, IUV, CCP" constraintName="RT_UNIQUE" forIndexName="RT_UNIQUE" tableName="RT"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-115">
+        <createIndex indexName="VERIFICA_BOLLETTINO_UNIQUE" tableName="VERIFICA_BOLLETTINO" unique="true">
+            <column name="NOTICE_ID"/>
+            <column name="PA_FISCAL_CODE"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-116">
+        <addUniqueConstraint columnNames="NOTICE_ID, PA_FISCAL_CODE" constraintName="VER_BOLL_UNIQUE_PA_NN" forIndexName="VERIFICA_BOLLETTINO_UNIQUE" tableName="VERIFICA_BOLLETTINO"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-117">
+        <createIndex indexName="CARRELLO_ID_CARRELLO_IDX" tableName="CARRELLO">
+            <column name="ID_CARRELLO"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-118">
+        <createIndex indexName="CD_INFO_PAGAMENTO_IDX" tableName="CD_INFO_PAGAMENTO">
+            <column name="IDENT_DOMINIO"/>
+            <column name="IUV"/>
+            <column name="CCP"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-119">
+        <createIndex indexName="CFFJ72A4012C5_IDX" tableName="RPT">
+            <column name="IUV"/>
+            <column name="IDENT_DOMINIO"/>
+            <column name="CCP"/>
+            <column name="FLAG_IO"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-120">
+        <createIndex indexName="CRED_FISCAL_CODE_IDX" tableName="POSITION_PAYMENT_PLAN">
+            <column name="CREDITOR_REFERENCE_ID"/>
+            <column name="PA_FISCAL_CODE"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-121">
+        <createIndex indexName="DSF6XW4TWZYR2_IDX" tableName="RPT">
+            <column name="FK_CARRELLO"/>
+            <column name="WISP_2"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-122">
+        <createIndex indexName="IDEMPOTENCY_CACHE_HASH_IDX" tableName="IDEMPOTENCY_CACHE">
+            <column name="HASH_REQUEST"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-123">
+        <createIndex indexName="IDEMPOTENCY_CACHE_KEY_PSP_ID" tableName="IDEMPOTENCY_CACHE">
+            <column name="IDEMPOTENCY_KEY"/>
+            <column name="PSP_ID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-124">
+        <createIndex indexName="IDEMPOTENCY_CACHE_PSP_NOTICE_IDX" tableName="IDEMPOTENCY_CACHE">
+            <column name="PRIMITIVA"/>
+            <column name="PSP_ID"/>
+            <column name="NOTICE_ID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-125">
+        <createIndex indexName="IDEMPOTENCY_CACHE_PSP_TOKEN_IDX" tableName="IDEMPOTENCY_CACHE">
+            <column name="PRIMITIVA"/>
+            <column name="PSP_ID"/>
+            <column name="TOKEN"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-126">
+        <createIndex indexName="I_06B1NAX785KUU_IDX" tableName="POSITION_PAYMENT_PLAN">
+            <column name="CREDITOR_REFERENCE_ID"/>
+            <column name="NOTICE_ID"/>
+            <column name="PA_FISCAL_CODE"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-127">
+        <createIndex indexName="I_FK_PP_PS" tableName="POSITION_PAYMENT">
+            <column name="FK_PAYMENT_PLAN"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-128">
+        <createIndex indexName="I_FK_PP_RPT" tableName="POSITION_PAYMENT">
+            <column name="RPT_ID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-129">
+        <createIndex indexName="I_FK_RPT_1" tableName="TOKEN_UTILITY">
+            <column name="FK_RPT1"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-130">
+        <createIndex indexName="I_FK_RPT_2" tableName="TOKEN_UTILITY">
+            <column name="FK_RPT2"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-131">
+        <createIndex indexName="MESSAGGI_ID_CARRELLO_IDX" tableName="MESSAGGI">
+            <column name="ID_CARRELLO"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-132">
+        <createIndex indexName="MESSAGGI_ID_DOMINIO_IUV_CCP_IDX" tableName="MESSAGGI">
+            <column name="ID_DOMINIO"/>
+            <column name="IUV"/>
+            <column name="CCP"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-133">
+        <createIndex indexName="MESSAGGI_ID_SESS" tableName="MESSAGGI">
+            <column name="ID_SESSIONE"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-134">
+        <createIndex indexName="PM_SESSION_DATA_RRN_IDX" tableName="PM_SESSION_DATA">
+            <column name="RRN"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-135">
+        <createIndex indexName="PM_SESS_DATA_SESSID_IDX" tableName="PM_SESSION_DATA">
+            <column name="ID_SESSIONE"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-136">
+        <createIndex indexName="POSITION_ACTIVATE_IDX1" tableName="POSITION_ACTIVATE">
+            <column name="PAYMENT_TOKEN"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-137">
+        <createIndex indexName="POSITION_ACTIVATE_PA_NO" tableName="POSITION_ACTIVATE">
+            <column name="PA_FISCAL_CODE"/>
+            <column name="NOTICE_ID"/>
+            <column name="PAYMENT_TOKEN"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-138">
+        <createIndex indexName="POSITION_PAYMENT_IDX" tableName="POSITION_PAYMENT">
+            <column name="PAYMENT_TOKEN"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-139">
+        <createIndex indexName="POSITION_PAYMENT_IDX1" tableName="POSITION_PAYMENT">
+            <column name="NOTICE_ID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-140">
+        <createIndex indexName="POSITION_PAYMENT_IDX3" tableName="POSITION_PAYMENT">
+            <column name="PAYMENT_TOKEN"/>
+            <column name="PSP_ID"/>
+            <column name="INSERTED_TIMESTAMP"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-141">
+        <createIndex indexName="POSITION_PAYMENT_INSERTED_TIMESTAMP" tableName="POSITION_PAYMENT">
+            <column name="INSERTED_TIMESTAMP"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-142">
+        <createIndex indexName="POSITION_PAYMENT_PLAN_IDX" tableName="POSITION_PAYMENT_PLAN">
+            <column name="FK_POSITION_SERVICE"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-143">
+        <createIndex indexName="POSITION_PAYMENT_STATUS_IDX" tableName="POSITION_PAYMENT_STATUS_SNAPSHOT">
+            <column name="STATUS"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-144">
+        <createIndex indexName="POSITION_PAYMENT_STATUS_SNAPSHOT_IDX" tableName="POSITION_PAYMENT_STATUS_SNAPSHOT">
+            <column name="FK_POSITION_PAYMENT"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-145">
+        <createIndex indexName="POSITION_PAYMENT_STATUS_SNAPSHOT_IDX1" tableName="POSITION_PAYMENT_STATUS_SNAPSHOT">
+            <column name="NOTICE_ID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-146">
+        <createIndex indexName="POSITION_PAYMENT_STATUS_SNAPSHOT_INSERTED_TIMESTAMP" tableName="POSITION_PAYMENT_STATUS_SNAPSHOT">
+            <column name="INSERTED_TIMESTAMP"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-147">
+        <createIndex indexName="POSITION_PAYMENT_STATUS_SNAPSHOT_PA_NO" tableName="POSITION_PAYMENT_STATUS_SNAPSHOT">
+            <column name="PA_FISCAL_CODE"/>
+            <column name="NOTICE_ID"/>
+            <column name="PAYMENT_TOKEN"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-148">
+        <createIndex indexName="POSITION_PAYMENT_STATUS_SNAPSHOT_TOKEN" tableName="POSITION_PAYMENT_STATUS_SNAPSHOT">
+            <column name="PAYMENT_TOKEN"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-149">
+        <createIndex indexName="POSITION_RECEIPT_PAYMENT_DATE_TIME" tableName="POSITION_RECEIPT">
+            <column name="PAYMENT_DATE_TIME"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-150">
+        <createIndex indexName="POSITION_RECEIPT_RECIPIENT_INSERTED_TIMESTAMP" tableName="POSITION_RECEIPT_RECIPIENT">
+            <column name="INSERTED_TIMESTAMP"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-151">
+        <createIndex indexName="POSITION_RECEIPT_RECIPIENT_PA_NO_TO" tableName="POSITION_RECEIPT_RECIPIENT">
+            <column name="PA_FISCAL_CODE"/>
+            <column name="NOTICE_ID"/>
+            <column name="PAYMENT_TOKEN"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-152">
+        <createIndex indexName="POSITION_SERVICE_INSERTED_TIMESTAMP" tableName="POSITION_SERVICE">
+            <column name="INSERTED_TIMESTAMP"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-153">
+        <createIndex indexName="POSITION_STATUS_SNAPSHOT_IDX" tableName="POSITION_STATUS_SNAPSHOT">
+            <column name="FK_POSITION_SERVICE"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-154">
+        <createIndex indexName="POSITION_STATUS_SNAPSHOT_IDX1" tableName="POSITION_STATUS_SNAPSHOT">
+            <column name="NOTICE_ID"/>
+            <column name="PA_FISCAL_CODE"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-155">
+        <createIndex indexName="POSITION_STATUS_SNAPSHOT_IDX2" tableName="POSITION_STATUS_SNAPSHOT">
+            <column name="NOTICE_ID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-156">
+        <createIndex indexName="POSITION_STATUS_SNAPSHOT_INSERTED_TIMESTAMP" tableName="POSITION_STATUS_SNAPSHOT">
+            <column name="INSERTED_TIMESTAMP"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-157">
+        <createIndex indexName="POSITION_TRANSFER_FK_POSITION_PAYMENT" tableName="POSITION_TRANSFER">
+            <column name="FK_POSITION_PAYMENT"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-158">
+        <createIndex indexName="POSITION_TRANSFER_IDX1" tableName="POSITION_TRANSFER">
+            <column name="FK_PAYMENT_PLAN"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-159">
+        <createIndex indexName="PPSS_2QUPZ9MDTJ4B6_IDX" tableName="POSITION_PAYMENT_STATUS_SNAPSHOT">
+            <column name="CREDITOR_REFERENCE_ID"/>
+            <column name="PA_FISCAL_CODE"/>
+            <column name="PAYMENT_TOKEN"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-160">
+        <createIndex indexName="RETRY_PSP_ACK_IDX" tableName="RETRY_PSP_ACK">
+            <column name="ID_DOMINIO"/>
+            <column name="IUV"/>
+            <column name="CCP"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-161">
+        <createIndex indexName="RPT_ACTIVATIONS_FU6MSYD0TADCW_IDX" tableName="RPT_ACTIVATIONS">
+            <column name="CREDITOR_REFERENCE_ID"/>
+            <column name="PAYMENT_TOKEN"/>
+            <column defaultValueComputed="${schema}.RPT_ACTIVATIONS_SEQ.NEXTVAL" name="PA_FISCAL_CODE"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-162">
+        <createIndex indexName="RPT_ACTIVATIONS_PA_FISCAL_CODE_IDX" tableName="RPT_ACTIVATIONS">
+            <column defaultValueComputed="${schema}.RPT_ACTIVATIONS_SEQ.NEXTVAL" name="PA_FISCAL_CODE"/>
+            <column name="NOTICE_ID"/>
+            <column name="CREDITOR_REFERENCE_ID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-163">
+        <createIndex indexName="RPT_FK_CARRELLO" tableName="RPT">
+            <column name="FK_CARRELLO"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-164">
+        <createIndex indexName="RPT_SOGGETTI_RPT_ID_IDX" tableName="RPT_SOGGETTI">
+            <column defaultValueComputed="${schema}.RPT_SOGGETTI_SEQ.NEXTVAL" name="RPT_ID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-165">
+        <createIndex indexName="RPT_STAZ_INTERMEDIARIOPA" tableName="RPT">
+            <column name="STAZ_INTERMEDIARIOPA"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-166">
+        <createIndex indexName="RPT_VERSAMENTI_BOLLO_FK_RPT_VERSAMENTI_IDX" tableName="RPT_VERSAMENTI_BOLLO">
+            <column name="FK_RPT_VERSAMENTI"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-167">
+        <createIndex indexName="RPT_VERSAMENTI_FK_RPT_IDX" tableName="RPT_VERSAMENTI">
+            <column name="FK_RPT"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-168">
+        <createIndex indexName="RPT_XML_CCP_IUV_IDX" tableName="RPT_XML">
+            <column name="CCP"/>
+            <column name="IUV"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-169">
+        <createIndex indexName="RPT_XML_FK_RPT_IDX" tableName="RPT_XML">
+            <column name="FK_RPT"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-170">
+        <createIndex indexName="RPT_XML_ID_FK_CARRELLO_IDX" tableName="RPT_XML">
+            <column name="FK_CARRELLO"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-171">
+        <createIndex indexName="RT_VERSAMENTI_BOLLO_FK_RT_VERSAMENTI_IDX" tableName="RT_VERSAMENTI_BOLLO">
+            <column name="FK_RT_VERSAMENTI"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-172">
+        <createIndex indexName="RT_VERSAMENTI_BOLLO_IUBD" tableName="RT_VERSAMENTI_BOLLO">
+            <column name="IUBD"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-173">
+        <createIndex indexName="RT_VERSAMENTI_FK_RT_IDX" tableName="RT_VERSAMENTI">
+            <column name="FK_RT"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-174">
+        <createIndex indexName="RT_XML_FK_RT_IDX" tableName="RT_XML">
+            <column name="FK_RT"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-175">
+        <createIndex indexName="RT_XML_IDX1" tableName="RT_XML">
+            <column name="CCP"/>
+            <column name="IUV"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-176">
+        <createIndex indexName="STATI_CARRELLO_IDX_ID_CARRELLO_ID_SESSIONE" tableName="STATI_CARRELLO">
+            <column name="ID_CARRELLO"/>
+            <column name="ID_SESSIONE"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-177">
+        <createIndex indexName="STATI_CARRELLO_SNAPSHOT_IDX_ID_SESSIONE" tableName="STATI_CARRELLO_SNAPSHOT">
+            <column name="ID_SESSIONE"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-178">
+        <createIndex indexName="STATI_RPT_IDX_ID_SESSIONE_ORIGINALE" tableName="STATI_RPT">
+            <column name="ID_SESSIONE_ORIGINALE"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-179">
+        <createIndex indexName="STATI_RPT_IDX_RPTKEY_ID_SESSIONE" tableName="STATI_RPT">
+            <column name="ID_DOMINIO"/>
+            <column name="IUV"/>
+            <column name="CCP"/>
+            <column name="ID_SESSIONE"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-180">
+        <createIndex indexName="STATI_RPT_MV_IDX1" tableName="STATI_RPT">
+            <column name="INSERTED_TIMESTAMP"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-181">
+        <createIndex indexName="STATI_RPT_SNAPSHOT_IDX1" tableName="STATI_RPT_SNAPSHOT">
+            <column name="STATO"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-182">
+        <createIndex indexName="STATI_RPT_SNAPSHOT_IDX_ID_SESSIONE" tableName="STATI_RPT_SNAPSHOT">
+            <column name="ID_SESSIONE"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-183">
+        <createIndex indexName="STATI_RPT_SNAPSHOT_MV_IDX1" tableName="STATI_RPT_SNAPSHOT">
+            <column name="INSERTED_TIMESTAMP"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-184">
+        <addForeignKeyConstraint baseColumnNames="FK_POSITION_PAYMENT" baseTableName="POSITION_TRANSFER" constraintName="FK_POSITION_PAYMENT" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_PAYMENT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-185">
+        <addForeignKeyConstraint baseColumnNames="FK_PAYMENT1" baseTableName="TOKEN_UTILITY" constraintName="FK_POSITION_PAYMENT_1" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_PAYMENT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-186">
+        <addForeignKeyConstraint baseColumnNames="FK_PAYMENT2" baseTableName="TOKEN_UTILITY" constraintName="FK_POSITION_PAYMENT_2" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_PAYMENT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-187">
+        <addForeignKeyConstraint baseColumnNames="FK_POSITION_SERVICE" baseTableName="POSITION_PAYMENT_PLAN" constraintName="FK_PPP_PS" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_SERVICE" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-188">
+        <addForeignKeyConstraint baseColumnNames="FK_POSITION_PAYMENT" baseTableName="POSITION_PAYMENT_STATUS_SNAPSHOT" constraintName="FK_PPSNAP_PP" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_PAYMENT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-189">
+        <addForeignKeyConstraint baseColumnNames="FK_PAYMENT_PLAN" baseTableName="POSITION_PAYMENT" constraintName="FK_PP_PS" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_PAYMENT_PLAN" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-190">
+        <addForeignKeyConstraint baseColumnNames="RPT_ID" baseTableName="POSITION_PAYMENT" constraintName="FK_PP_RPT" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="RPT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-191">
+        <addForeignKeyConstraint baseColumnNames="DEBTOR_ID" baseTableName="POSITION_RECEIPT" constraintName="FK_PRDEB_PSUB" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_SUBJECT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-192">
+        <addForeignKeyConstraint baseColumnNames="PAYER_ID" baseTableName="POSITION_RECEIPT" constraintName="FK_PRPAY_PSUB" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_SUBJECT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-193">
+        <addForeignKeyConstraint baseColumnNames="FK_POSITION_RECEIPT_RECIPIENT" baseTableName="POSITION_RECEIPT_RECIPIENT_STATUS" constraintName="FK_PRRS_PRECREC" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_RECEIPT_RECIPIENT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-194">
+        <addForeignKeyConstraint baseColumnNames="RT_ID" baseTableName="POSITION_RECEIPT" constraintName="FK_PRRT_PSUB" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="RT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-195">
+        <addForeignKeyConstraint baseColumnNames="FK_POSITION_RECEIPT" baseTableName="POSITION_RECEIPT_RECIPIENT" constraintName="FK_PRR_PREC" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_RECEIPT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-196">
+        <addForeignKeyConstraint baseColumnNames="FK_POSITION_RECEIPT" baseTableName="POSITION_RECEIPT_TRANSFER" constraintName="FK_PRTREC_PREC" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_RECEIPT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-197">
+        <addForeignKeyConstraint baseColumnNames="FK_POSITION_TRANSFER" baseTableName="POSITION_RECEIPT_TRANSFER" constraintName="FK_PRTTRA_PTRA" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_TRANSFER" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-198">
+        <addForeignKeyConstraint baseColumnNames="FK_POSITION_RECEIPT" baseTableName="POSITION_RECEIPT_XML" constraintName="FK_PRX_PREC" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_RECEIPT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-199">
+        <addForeignKeyConstraint baseColumnNames="FK_POSITION_PAYMENT" baseTableName="POSITION_RECEIPT" constraintName="FK_PR_PP" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_PAYMENT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-200">
+        <addForeignKeyConstraint baseColumnNames="FK_RECEIPT_XML" baseTableName="POSITION_RECEIPT_RECIPIENT" constraintName="FK_PR_RXML" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_RECEIPT_XML" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-201">
+        <addForeignKeyConstraint baseColumnNames="FK_POSITION_SERVICE" baseTableName="POSITION_STATUS_SNAPSHOT" constraintName="FK_PSNAP_PS" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_SERVICE" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-202">
+        <addForeignKeyConstraint baseColumnNames="DEBTOR_ID" baseTableName="POSITION_SERVICE" constraintName="FK_PS_PSUB" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_SUBJECT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-203">
+        <addForeignKeyConstraint baseColumnNames="FK_PAYMENT_PLAN" baseTableName="POSITION_TRANSFER" constraintName="FK_PT_PPP" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_PAYMENT_PLAN" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-204">
+        <addForeignKeyConstraint baseColumnNames="FK_RECIPIENT" baseTableName="POSITION_RETRY_PA_SEND_RT" constraintName="FK_RECIPIENT" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="POSITION_RECEIPT_RECIPIENT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-205">
+        <addForeignKeyConstraint baseColumnNames="FK_RPT1" baseTableName="TOKEN_UTILITY" constraintName="FK_RPT_1" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="RPT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-206">
+        <addForeignKeyConstraint baseColumnNames="FK_RPT2" baseTableName="TOKEN_UTILITY" constraintName="FK_RPT_2" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="RPT" validate="true"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-207">
+        <addForeignKeyConstraint baseColumnNames="FK_CARRELLO" baseTableName="RPT" constraintName="RPT_FK_CARRELLO" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="CARRELLO" validate="false"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-208">
+        <addForeignKeyConstraint baseColumnNames="RPT_ID" baseTableName="RPT_SOGGETTI" constraintName="RPT_SOGGETTI_FK_RPT" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="RPT" validate="false"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-209">
+        <addForeignKeyConstraint baseColumnNames="FK_RPT_VERSAMENTI" baseTableName="RPT_VERSAMENTI_BOLLO" constraintName="RPT_VERSAMENTI_BOLLO_FK_RPT_VERSAMENTI" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="RPT_VERSAMENTI" validate="false"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-210">
+        <addForeignKeyConstraint baseColumnNames="FK_RPT" baseTableName="RPT_VERSAMENTI" constraintName="RPT_VERSAMENTI_FK_RPT" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="RPT" validate="false"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-211">
+        <addForeignKeyConstraint baseColumnNames="FK_CARRELLO" baseTableName="RPT_XML" constraintName="RPT_XML_FK_CARRELLO" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="CARRELLO" validate="false"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-212">
+        <addForeignKeyConstraint baseColumnNames="FK_RPT" baseTableName="RPT_XML" constraintName="RPT_XML_FK_RPT" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="RPT" validate="false"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-213">
+        <addForeignKeyConstraint baseColumnNames="FK_RT_VERSAMENTI" baseTableName="RT_VERSAMENTI_BOLLO" constraintName="RT_VERSAMENTI_BOLLO_FK_RT_VERSAMENTI" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="RT_VERSAMENTI" validate="false"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-214">
+        <addForeignKeyConstraint baseColumnNames="FK_RT" baseTableName="RT_VERSAMENTI" constraintName="RT_VERSAMENTI_FK_RT" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="RT" validate="false"/>
+    </changeSet>
+    <changeSet author="lorenz (generated)" id="1653665292990-215">
+        <addForeignKeyConstraint baseColumnNames="FK_RT" baseTableName="RT_XML" constraintName="RT_XML_FK_RT" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="RT" validate="false"/>
+    </changeSet>
+</databaseChangeLog>

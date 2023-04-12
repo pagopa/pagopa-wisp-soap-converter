@@ -1,0 +1,15 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:paf="http://pagopa-api.pagopa.gov.it/pa/paForNode.xsd">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <paf:paVerifyPaymentNoticeRes>
+         <outcome>KO</outcome>
+         <fault>
+            <faultCode>FAULT_CODE</faultCode>
+            <faultString>FAULT_STRING
+            </faultString>
+            <id>FAULT_ID</id>
+            <description>FAULT DESCRIPTION</description>
+         </fault>
+      </paf:paVerifyPaymentNoticeRes>
+   </soapenv:Body>
+</soapenv:Envelope>

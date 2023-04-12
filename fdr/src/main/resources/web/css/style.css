@@ -1,0 +1,497 @@
+:root{
+	--main: #ac2132;
+	--mainColor:#fff;
+}
+html,body{
+	height:100%;
+	width:100%;
+}
+body,#root{
+	display:flex;
+	flex-direction: row;
+	background-image: url(../images/rope-knot-bg.png);
+	font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+}
+
+#menu{
+    height: 100%;
+    background: var(--main);
+    display: flex;
+    flex-direction: column;
+    color: white;
+    padding: 2px;
+}
+#menu .version{
+	font-size:12px;
+	padding:0 5px 10px 5px;
+	white-space: nowrap;
+	display:flex;
+	flex-direction: column;
+}
+#menu #version{
+    font-size:14px;
+    font-weight:bold;
+}
+#menu #instance{
+    font-size:16px;
+    font-weight:bold;
+	margin:3px 0;
+	color:#7fff00;
+}
+#menu .title{
+	font-size: 15px;
+	padding:5px;
+}
+
+#menu a{
+	color:white;
+	text-decoration: none;
+	padding:5px;
+	display: flex;
+}
+#menu a:hover{
+	background:#ffffff33;
+}
+
+#menu .selected{
+	background:white;
+	color: var(--main);
+}
+#menu a:hover{
+	background:#ffffff33;
+}
+#menu a.selected:hover{
+	background:white;
+}
+#menu svg{
+	color:white;
+	height:16px;
+	fill: #fff;
+	margin-left:5px;
+}
+#menu .title svg{
+	height: 36px;
+	margin-right:5px;
+}
+#menu .selected svg{
+	color: var(--main);
+	fill: var(--main);
+}
+
+#root{
+	width:100%;
+}
+section#container {
+    padding: 10px;
+	width:100%;
+	overflow: auto;
+	position:relative;
+	background:#ffffff70;
+}
+section#container.loading{
+	overflow: hidden;
+}
+
+
+.hidden{
+	display:none;
+}
+.toggle{
+	cursor:pointer;
+}
+.monospace{
+	font-family: monospace;
+}
+.flex{
+	display:flex;
+}
+.column{
+	flex-direction:column;
+}
+.centeredV{
+	text-align: center;
+	justify-content: center;
+}
+.centeredH{
+	align-items: center;
+}
+.underline{
+	text-decoration: underline;
+}
+.bold{
+	font-weight: bold;
+}
+.subline{
+	color:#747474;
+}
+.RUNNING{
+	color: #009100;
+	font-weight: bold;
+}
+.warning{
+	background-color: #fd7786;
+}
+.highlight{
+	background-color: #a9ffa9;
+}
+.square{
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	margin: 1px;
+	border-radius: 50%;
+	vertical-align: middle;
+  }
+span.status{
+	text-align: center;
+  }
+  
+.button {
+	padding:6px;
+	border:solid 1px #000;
+	cursor:pointer;
+	background: white;
+	margin:5px;
+	text-align:left;
+	display:block;
+}
+.button.disabled{
+	color:grey;
+	background: lightgrey;
+	cursor:default;
+}
+.button.small {
+	padding:1px;
+	margin: 1px;
+}
+.button:hover {
+    background: #c3c3c3;
+}
+
+
+.jobsTable{
+	border:solid 1px #000;
+	margin: 2px 2px 10px 2px !important;
+}
+.jobsTable .button{
+	display: inline-block;
+}
+.jobsTable .title{
+	font-weight: bold;
+	background: #dadada;
+	text-align: left;
+}
+.jobsTable .title span{
+	float:right;
+}
+.jobsTable .title td{
+	padding:4px;
+}
+.jobsTable svg{
+	height:10px;
+}
+.jobsTable .title.opened svg{
+	transform:rotate(180deg)
+}
+table{
+	background:  #FFFFFF77;
+	border-radius: 5px;
+}
+table.centered{
+	margin:auto;
+}
+table td{
+	border:solid 1px #ececec;
+	border-collapse: collapse;
+	vertical-align: middle;
+	padding:2px;
+}
+table tr:hover{
+	background:yellow
+}
+table.full{
+	width:calc(100% - 20px);
+	margin:10px;
+}
+table.pad5 td{
+	padding:2px 5px;
+}
+table .alignleft{
+	text-align: left;
+}
+table .alignright{
+	text-align: right;
+}
+
+.rightAlign{
+	text-align: right;
+}
+.leftAlign{
+	text-align: left;
+}
+
+.refreshBox{
+	position: fixed;
+	right:0;
+	bottom:0;
+	padding:5px;
+	border:solid 1px;
+	background:white;
+	font-size:12px;
+	display: flex;
+	align-items: center;
+}
+
+.refreshBox select{
+	margin-left:5px;
+}
+.changepage{
+	cursor:pointer;
+	font-weight: bold;
+}
+
+.MemberUp {
+	color:green;
+	font-weight: bold;;
+}
+.MemberWeaklyUp {
+	color:rgb(40, 197, 40);
+	font-weight: bold;;
+}
+.MemberJoined {
+	color:rgb(40, 108, 197);
+	font-weight: bold;;
+}
+.MemberRemoved {
+	color:rgb(100, 100, 100);
+	font-weight: bold;;
+}
+.MemberDowned {
+	color:rgb(197, 40, 40);
+	font-weight: bold;;
+}
+.ReachableMember {
+	color:rgb(40, 197, 189);
+	font-weight: bold;;
+}
+.UnreachableMember {
+	color:rgb(197, 40, 197);
+	font-weight: bold;;
+}
+
+label{
+	padding:2px;
+}
+svg{
+	height: 16px;
+}
+
+.job{
+	font-family: monospace;
+    white-space: pre;
+}
+.nodata{
+	padding:15px;
+}
+
+
+.jobrow{
+	white-space: pre;
+}
+
+.gridConfig{
+	display: grid;
+	grid-template-columns: 15% 45% 40%;
+}
+.gridConfig .footer{
+	grid-column: span 3;
+	display:flex;
+	justify-content: space-between;
+}
+.gridConfig .span2{
+	grid-column: span 2;
+}
+.pager{
+	display: flex;
+	gap: 10px;
+}
+.pager span{
+	color:blue;
+	cursor: pointer;
+	text-decoration: underline;
+}
+.grid3,.gridActions{
+	display: grid;
+	grid-template-columns: 33% 33% 34%;
+}
+.grid4{
+	display: grid;
+	grid-template-columns: 25% 25% 25% 25%;
+}
+.grid5{
+	display: grid;
+	grid-template-columns: 20% 20% 25% 25% 10%;
+}
+header,.header{
+	font-weight: bold;
+}
+.grid3 span{
+	border-bottom: solid 1px #c3c3c3;
+}
+
+.buttonContainer{
+	position: relative;
+	display: flex;
+}
+.buttonContainer .tooltip{
+    background: green;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px;
+    border-radius: 7px;
+}
+.buttonContainer .tooltip.error{
+	background: rgb(255, 128, 128);
+	color:black;
+}
+.jobHeader{
+	background-color: #c3c3c3;
+	padding:2px;
+	color:black;
+	font-weight: bold;
+	border-bottom: solid 1px white;
+	cursor:pointer;
+	user-select: none; 
+	display: grid;
+    align-items: center;
+    justify-content: center;
+	gap: 10px;
+	grid-template-columns: 80% 10% 10%
+}
+.jobHeader .buttonContainer{
+	display: inline-flex;
+}
+
+.tabled > span{
+	border-bottom: solid 1px #00000045;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    padding: 2px;
+}
+.tabled.hidden{
+	display:none;
+}
+.alignleft{
+	text-align: left;
+}
+.descr{
+	color:#6d6d6d;
+}
+b{
+	font-weight: bold;
+}
+
+@-webkit-keyframes rotating /* Safari and Chrome */ {
+  from {
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes rotating {
+  from {
+    -ms-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -ms-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+.loader{
+	content: 'caricamento..';
+    width: calc(100% + 10px);
+    height: calc(100% + 10px);
+    background: #7c7c7c75;
+    position: absolute;
+    overflow: hidden;
+    display: flex;
+    top: -10px;
+    left: -10px;
+	justify-content: center;
+	align-items: center;
+	z-index:100;
+}
+.loader svg{
+      -webkit-animation: rotating 2s linear infinite;
+      -moz-animation: rotating 2s linear infinite;
+      -ms-animation: rotating 2s linear infinite;
+      -o-animation: rotating 2s linear infinite;
+      animation: rotating 2s linear infinite;
+      scale:4
+}
+.jobFilters{
+	display: flex;
+	padding:5px;
+	align-items: center;
+	justify-content: center;
+}
+.jobcontainer{
+	margin-bottom:2px;
+}
+.tabs.gridded{
+	display:grid;
+	grid-template-columns: 20% 20% 20% 20% 20%;
+}
+.tabs span{
+	display: inline-block;
+	border: solid 1px;
+	padding:3px;
+	margin: 2px;
+	cursor: pointer;
+	white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tabs span.selected{
+	background:var(--main);
+	color:var(--mainColor);
+}
+.ellipsis{
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.tabs .high{
+	font-size: 14px;
+}
+hr{
+	height:1px;
+	width:100%;
+	border:none;
+	border-bottom: dashed 1px var(--main);
+}
+.jobheader{
+	grid-column: span 5;
+	color:var(--main);
+	font-weight: bold;
+	background:#c3c3c3;
+}
+span.jobs0{
+	display: none;
+}

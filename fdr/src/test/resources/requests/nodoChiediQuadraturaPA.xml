@@ -1,0 +1,13 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:ws="http://ws.pagamenti.telematici.gov/">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <ws:nodoChiediQuadraturaPA>
+            <identificativoIntermediarioPA>{brokerPa}</identificativoIntermediarioPA>
+            <identificativoStazioneIntermediarioPA>{station}</identificativoStazioneIntermediarioPA>
+            <password>{stationPwd}</password> <!--Optional:-->
+            <identificativoDominio>{pa}</identificativoDominio>
+            <identificativoFlusso>112</identificativoFlusso>
+        </ws:nodoChiediQuadraturaPA>
+    </soapenv:Body>
+</soapenv:Envelope>

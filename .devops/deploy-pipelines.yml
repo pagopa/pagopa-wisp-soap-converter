@@ -1,0 +1,605 @@
+# Only manual triggers
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'ubuntu-22.04'
+
+resources:
+  repositories:
+    - repository: pagopaCommons
+      type: github
+      name: pagopa/azure-pipeline-templates
+      ref: helm_command
+      endpoint: 'io-azure-devops-github-ro'
+
+parameters:
+  - name: "WEU"
+    displayName: "Deploy in WEU"
+    type: boolean
+    default: True
+    values:
+      - False
+      - True
+  - name: "NEU"
+    displayName: "Deploy in NEU"
+    type: boolean
+    default: False
+    values:
+      - False
+      - True
+  - name: ENV
+    displayName: Target Environment
+    type: string
+    default: dev
+    values:
+      - dev
+      - it
+      - prf
+      - uat
+      - prod
+  - name: SEMVER
+    displayName: "When packing a release, define the version bump to apply. Use only buildNumber or skip for manual deployment"
+    type: string
+    values:
+      - major
+      - minor
+      - patch
+      - buildNumber
+      - skip
+    default: skip
+  - name: SOURCE_BRANCH
+    displayName: "Use for checkout a different branch"
+    type: string
+    default: ' '
+  - name: "SKIP_BUILD"
+    displayName: "Skip Build"
+    type: boolean
+    default: False
+    values:
+      - False
+      - True
+  - name: "FORCE_REPLACE_DOCKER_IMAGE"
+    displayName: "Force the existing docker image to be replaced"
+    type: boolean
+    default: False
+    values:
+      - False
+      - True
+  - name: "FORCE_REDEPLOY"
+    displayName: "Force re-deploy"
+    type: boolean
+    default: False
+    values:
+      - False
+      - True
+
+variables:
+  imageRepository: '$(IMAGE_REPOSITORY_NAME)'
+  nameSpace: '$(K8S_NAMESPACE)'
+  FILE_CONFIG_PATH_LOGBACK: $(Build.SourcesDirectory)/helm/config/${{ parameters.ENV }}/logback.xml
+  FILE_CONFIG_PATH_CONFIGAPP: $(Build.SourcesDirectory)/helm/config/${{ parameters.ENV }}/config-app.conf
+  APPROVE_NOTIFY_GROUP: '[pagoPA-iac]\pagopa-iac-externals-team'
+  APPROVE_NOTIFY_ADMIN: '[pagoPA-iac]\Project Administrators'
+  BRANCH_NAME: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
+
+  WEU_value_file_nodo: "helm/nodo/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
+  WEU_value_file_cron: "helm/nodo-cron/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
+  NEU_value_file_nodo: "helm/nodo/neu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
+  NEU_value_file_cron: "helm/nodo-cron/neu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
+
+  ${{ if eq(parameters['ENV'], 'dev') }}:
+    appName: 'nodo'
+    appNameCron: 'nodocron'
+    lightbend_key_secret: $(lightbend_key_dev)
+    WEU_dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
+    WEU_dockerRegistryFqdn: $(DEV_CONTAINER_NAMESPACE)
+    WEU_kubernetesServiceConnection: '$(dev_kubernetes_service_conn)'
+    WEU_poolImage: '$(DEPLOY-POOL-DEV)'
+    WEU_appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_DEV)"
+    WEU_appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_DEV)"
+    NEU_dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
+    NEU_dockerRegistryFqdn: $(DEV_CONTAINER_NAMESPACE)
+    NEU_kubernetesServiceConnection: 'pagopa-neu-nodo-aks-dev'
+    NEU_poolImage: 'pagopa-neu-dev-linux'
+    NEU_appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_DEV)"
+    NEU_appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_DEV)"
+
+  ${{ if eq(parameters['ENV'], 'it') }}:
+    appName: 'nodoreplica'
+    appNameCron: 'nodocronreplica'
+    lightbend_key_secret: $(lightbend_key_dev)
+    WEU_dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
+    WEU_dockerRegistryFqdn: $(DEV_CONTAINER_NAMESPACE)
+    WEU_kubernetesServiceConnection: '$(dev_kubernetes_service_conn)'
+    WEU_appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_DEV)"
+    WEU_appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_DEV)"
+    WEU_poolImage: '$(DEPLOY-POOL-DEV)'
+
+  ${{ if eq(parameters['ENV'], 'prf') }}:
+    appName: 'ndp-replica'
+    appNameCron: 'ndp-cron-replica'
+    lightbend_key_secret: $(lightbend_key_uat)
+    WEU_dockerRegistryServiceConnection: $(UAT_CONTAINER_REGISTRY_SERVICE_CONN)
+    WEU_dockerRegistryFqdn: $(UAT_CONTAINER_NAMESPACE)
+    WEU_kubernetesServiceConnection: '$(uat_weu_kubernetes_service_conn)'
+    WEU_appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_UAT)"
+    WEU_appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_UAT)"
+    WEU_poolImageWEU: '$(DEPLOY-POOL-UAT)'
+
+  ${{ if eq(parameters['ENV'], 'uat') }}:
+    appName: 'ndp'
+    appNameCron: 'ndp-cron'
+    lightbend_key_secret: $(lightbend_key_uat)
+    weight_steps: "10,30"
+    WEU_dockerRegistryServiceConnection: $(UAT_CONTAINER_REGISTRY_SERVICE_CONN)
+    WEU_dockerRegistryFqdn: $(UAT_CONTAINER_NAMESPACE)
+    WEU_kubernetesServiceConnection: '$(uat_kubernetes_service_conn)'
+    WEU_appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_UAT)"
+    WEU_appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_UAT)"
+    WEU_poolImage: '$(DEPLOY-POOL-UAT)'
+  ${{ if eq(parameters['ENV'], 'prod') }}:
+    appName: 'ndp'
+    appNameCron: 'ndp-cron'
+    lightbend_key_secret: $(lightbend_key_prod)
+    weight_steps: "10,30,50"
+    WEU_dockerRegistryServiceConnection: $(PROD_CONTAINER_REGISTRY_SERVICE_CONN)
+    WEU_dockerRegistryFqdn: $(PROD_CONTAINER_NAMESPACE)
+    WEU_kubernetesServiceConnection: '$(prod_kubernetes_service_conn)'
+    WEU_appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_PROD)"
+    WEU_appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_PROD)"
+    WEU_poolImage: '$(DEPLOY-POOL-PROD)'
+    NEU_dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
+    NEU_dockerRegistryFqdn: $(DEV_CONTAINER_NAMESPACE)
+    NEU_kubernetesServiceConnection: '$(prod_neu_kubernetes_service_conn)'
+    NEU_poolImage: '$(DEPLOY-POOL-PROD-NEU)'
+    NEU_appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_PROD)"
+    NEU_appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_PROD)"
+
+stages:
+  # Create a release on GitHub
+  - stage: release
+    displayName: "Release"
+    jobs:
+      - job: make_release
+        displayName: "Make release"
+        steps:
+          - bash: |
+              buildname="$(Build.BuildNumber) ${{ parameters.ENV }}"
+              echo "##vso[build.addbuildtag]${{ parameters.ENV }}"
+              echo "##vso[build.updatebuildnumber]$buildname"
+          - bash: |
+              echo "##vso[task.setvariable variable=LIGHTBEND_KEY]$(lightbend_key_secret)"
+          - checkout: self
+            clean: true
+            persistCredentials: true
+
+          - template: templates/sbt-github-release/template.yaml@pagopaCommons
+            parameters:
+              release_branch: $(BRANCH_NAME)
+              gitEmail: $(GIT_EMAIL)
+              gitUsername: $(GIT_USERNAME)
+              gitHubConnection: $(GITHUB_CONNECTION)
+              semver: ${{ parameters.SEMVER }}
+              helmPath: "helm/nodo"
+              helmChartAlias: "nodo"
+              customScriptsPostUpdateHelm: |
+                echo "ThisBuild / version := \"$(NEXT_SBT_VERSION)\"" > version.sbt
+
+                for i in helm/nodo-cron/values-${{ parameters['ENV'] }}.yaml; do
+                  [ -f "$i" ] || break
+                  yq -i ".basecronjob.image.tag = \"$(NEXT_SBT_VERSION)\"" "$i"
+                  git add "$i"
+                done
+                CHART_FILE="helm/nodo-cron/Chart.yaml"
+                if [[ -f "$CHART_FILE" ]]; then
+                  yq -i ".version = \"$(NEXT_SBT_VERSION)\"" "$CHART_FILE"
+                  yq -i ".appVersion = \"$(NEXT_SBT_VERSION)\"" "$CHART_FILE"
+                  git add "$CHART_FILE"
+                fi
+                
+                buildname="$(Build.BuildNumber) $(NEXT_SBT_VERSION)"
+                echo "##vso[build.updatebuildnumber]$buildname"
+
+          - template: templates/sbt-github-current-version/template.yaml@pagopaCommons
+
+  # Build and Push Docker Image
+  - stage: build
+    ${{ if parameters.SKIP_BUILD }}:
+      displayName: "Build skipped"
+    ${{ if not(parameters.SKIP_BUILD) }}:
+      displayName: "Build"
+    variables:
+      current_version: $[ stageDependencies.release.make_release.outputs['current_version.SBT_VERSION'] ]
+    jobs:
+      - job: build
+        ${{ if parameters.SKIP_BUILD }}:
+          displayName: "Build skipped"
+        ${{ if not(parameters.SKIP_BUILD) }}:
+          displayName: "Build"
+        condition: and(succeeded(), eq(${{ parameters.SKIP_BUILD }}, false))
+        steps:
+          - bash: |
+              echo "##vso[task.setvariable variable=LIGHTBEND_KEY]$(lightbend_key_secret)"
+          - script: ./sbt -v docker:stage
+            displayName: "Create Dockerfile"
+          - template: templates/docker-release/template.yaml@pagopaCommons
+            parameters:
+              CONTAINER_REGISTRY_SERVICE_CONN: $(WEU_dockerRegistryServiceConnection)
+              CONTAINER_REGISTRY_FQDN: $(WEU_dockerRegistryFqdn)
+              DOCKER_IMAGE_NAME: $(imageRepository)
+              DOCKER_IMAGE_TAG: $(current_version)
+              FORCE_REPLACE_DOCKER_IMAGE: ${{ parameters.FORCE_REPLACE_DOCKER_IMAGE }}
+              DOCKERFILE: "$(Build.SourcesDirectory)/nodo4/target/docker/stage/Dockerfile"
+              DOCKERCONTEXT: "$(Build.SourcesDirectory)/nodo4/target/docker/stage"
+          - task: Docker@2
+            displayName: "docker login"
+            inputs:
+              containerRegistry: "$(NEU_dockerRegistryServiceConnection)"
+              command: "login"
+          - bash: |
+              docker tag $(WEU_dockerRegistryFqdn)/$(imageRepository):$(current_version) $(NEU_dockerRegistryFqdn)/$(imageRepository):$(current_version) 
+              docker push $(NEU_dockerRegistryFqdn)/$(imageRepository):$(current_version) 
+
+  # Deploy Canary if prod or uat
+  - ${{ if and( parameters.WEU , in( parameters.ENV, 'prod', 'uat') ) }}:
+    - ${{ each step in split(variables.weight_steps, ',')}}:
+      - stage: deploy_nodo_${{ step }}
+        displayName: "Deploy ${{ parameters.ENV }} canary ${{ step }}%"
+        jobs:
+          - job: get_release_version
+            pool: $(WEU_poolImage)
+            displayName: "Get Release Version"
+            steps:
+              - bash: |
+                  IFS='"'
+                  arrIN=($(cat version.sbt))
+                  SBT_VERSION="${arrIN[1]}"
+                  IFS=' '
+            
+                  echo "SBT_VERSION: $SBT_VERSION"
+                  echo "##vso[task.setvariable variable=SBT_VERSION;isOutput=true]$SBT_VERSION"
+                name: output
+          - job: step_approval_${{ step }}
+            pool: server
+            dependsOn: get_release_version
+            condition: ${{ in( parameters.ENV, 'prod', 'uat') }}
+            variables:
+              SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
+            displayName: "Approval ${{ parameters.ENV }} canary ${{ step }}% "
+            timeoutInMinutes: 70
+            steps:
+              - task: ManualValidation@0
+                displayName: "Approval version $(SBT_VERSION) ${{ parameters.ENV }} canary ${{ step }}% "
+                timeoutInMinutes: 60
+                inputs:
+                  notifyUsers: |
+                    $(APPROVE_NOTIFY_GROUP)
+                    $(APPROVE_NOTIFY_ADMIN)
+                    $(APPROVE_NOTIFY_ADMIN)
+                  instructions: "Please approve or reject ${{ parameters.ENV }} $(SBT_VERSION) canary deploy ${{ step }}%"
+                  onTimeout: 'reject'
+          - deployment: "Approved_${{ parameters.ENV }}_${{ step }}_Deploy"
+            dependsOn :
+              - get_release_version
+              - step_approval_${{ step }}
+            condition: in(dependencies.step_approval_${{ step }}.result, 'Succeeded', 'Skipped')
+            variables:
+              SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
+            displayName: "Deploy ${{ parameters.ENV }} ${{ step }}%"
+            pool: $(WEU_poolImage)
+            environment: ${{ parameters['ENV'] }}
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                    - checkout: self
+                      clean: true
+                      persistCredentials: true
+
+                    - task: Bash@3
+                      name: setup_helm_microservices_chart
+                      displayName: "Setup helm nodo chart"
+                      inputs:
+                        targetType: "inline"
+                        script: |
+                          CHART_FILE="helm/nodo/Chart.yaml"
+                          if [[ -f "$CHART_FILE" ]]; then
+                            yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                            yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                          fi
+                          helm dep build helm/nodo
+                        failOnStderr: true
+                    - ${{ if parameters.WEU }}:
+                      - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+                        parameters:
+                          DO_DEPLOY: true
+                          ENV: ${{ parameters['ENV'] }}
+                          KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
+                          NAMESPACE: "nodo"
+                          APP_NAME: "$(appName)-canary"
+                          VALUE_FILE: $(WEU_value_file_nodo)
+                          DEPLOY_VERSION: $(SBT_VERSION)
+                          APPINSIGHTS_SERVICE_CONN: $(WEU_appInsightsServiceConn)
+                          APPINSIGHTS_RESOURCE_ID: $(WEU_appInsightsResourceId)
+                          CHART_PATH: "helm/nodo"
+                          ARGUMENTS: >-
+                            --set nodo.image.tag="$(SBT_VERSION)"
+                            --set nodo.canaryDelivery.create="true"
+                            --set nodo.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}
+                            --set nodo.canaryDelivery.ingress.weightPercent="${{ step }}"
+                            --set-file nodo.configMapFromFile.logback\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
+                            --set-file nodo.configMapFromFile.config-app\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
+
+
+  # Deploy stable
+  - stage: deploy_nodo_stable
+    displayName: "Deploy ${{ parameters.ENV }} stable"
+    jobs:
+      - job: get_release_version
+        pool: $(WEU_poolImage)
+        displayName: "Get Release Version"
+        steps:
+          - bash: |
+              IFS='"'
+              arrIN=($(cat version.sbt))
+              SBT_VERSION="${arrIN[1]}"
+              IFS=' '
+              
+              echo "SBT_VERSION: $SBT_VERSION"
+              echo "##vso[task.setvariable variable=SBT_VERSION;isOutput=true]$SBT_VERSION"
+            name: output
+      - job: step_approval_stable
+        pool: server
+        dependsOn: get_release_version
+        condition: ${{ in( parameters.ENV, 'prod', 'uat') }}
+        variables:
+          SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
+        displayName: "Approval ${{ parameters.ENV }} stable"
+        timeoutInMinutes: 70
+        steps:
+          - task: ManualValidation@0
+            displayName: "Approval version $(SBT_VERSION) ${{ parameters.ENV }} stable"
+            timeoutInMinutes: 60
+            inputs:
+              notifyUsers: |
+                $(APPROVE_NOTIFY_GROUP)
+                $(APPROVE_NOTIFY_ADMIN)
+              instructions: "Please approve or reject ${{ parameters.ENV }} $(SBT_VERSION) stable deploy"
+              onTimeout: 'reject'
+      - ${{ if parameters.WEU }}:
+        - deployment: "Approved_${{ parameters.ENV }}_Deploy"
+          dependsOn:
+            - get_release_version
+            - step_approval_stable
+          condition: in(dependencies.step_approval_stable.result, 'Succeeded', 'Skipped')
+          variables:
+            SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
+          displayName: "Deploy ${{ parameters.ENV }} WEU stable"
+          pool: $(WEU_poolImage)
+          environment: ${{ parameters['ENV'] }}
+          strategy:
+            runOnce:
+              deploy:
+                steps:
+                  - checkout: self
+                    clean: true
+                    persistCredentials: true
+
+                  - task: Bash@3
+                    name: setup_helm_microservices_chart
+                    displayName: "Setup helm nodo chart"
+                    inputs:
+                      targetType: "inline"
+                      script: |
+                        CHART_FILE="helm/nodo/Chart.yaml"
+                        if [[ -f "$CHART_FILE" ]]; then
+                          yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                          yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                        fi
+                        helm dep build helm/nodo
+                        CHART_FILE="helm/nodo-cron/Chart.yaml"
+                        if [[ -f "$CHART_FILE" ]]; then
+                          yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                          yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                        fi
+                        helm dep build helm/nodo-cron
+                      failOnStderr: true
+                  - bash: |
+                      echo "install WEU nodo"
+                  - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+                    parameters:
+                      DO_DEPLOY: true
+                      ENV: ${{ parameters['ENV'] }}
+                      KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
+                      NAMESPACE: "nodo"
+                      APP_NAME: $(appName)
+                      VALUE_FILE: $(WEU_value_file_nodo)
+                      DEPLOY_VERSION: $(SBT_VERSION)
+                      APPINSIGHTS_SERVICE_CONN: $(WEU_appInsightsServiceConn)
+                      APPINSIGHTS_RESOURCE_ID: $(WEU_appInsightsResourceId)
+                      CHART_PATH: "helm/nodo"
+                      ARGUMENTS: >-
+                        --set nodo.image.tag="$(SBT_VERSION)"
+                        --set nodo.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}
+                        --set-file nodo.configMapFromFile.logback\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
+                        --set-file nodo.configMapFromFile.config-app\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
+                  - task: Bash@3
+                    name: setupArgs
+                    displayName: "Setup job args"
+                    inputs:
+                      targetType: "inline"
+                      script: |
+                        declare -a JOBS=(cj-annullamento-rpt cj-ftp-upload cj-genera-rend-bollo cj-mod3-cancel-v1 cj-mod3-cancel-v2 cj-pa-invia-rt cj-pa-invia-rt-recovery cj-pa-retry-invia-rt-neg cj-pa-send-rt cj-pos-retry-send-payment-res cj-psp-chiedi-avanz-rpt cj-psp-chiedi-lista-rt cj-psp-retry-ack-negative cj-retry-pa-attiva-rpt cj-rt-pull-recovery-push)
+                        SETIMAGES=""
+                        SETFILES=""
+                        for i in "${JOBS[@]}" ; do :
+                          SETIMAGES="$SETIMAGES --set $i.image.tag=$(SBT_VERSION)"
+                          SETFILES="$SETFILES --set-file $i.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK"
+                          SETFILES="$SETFILES --set-file $i.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
+                        done
+                        echo "##vso[task.setvariable variable=IMAGES;isOutput=true]$SETIMAGES"
+                        echo "##vso[task.setvariable variable=FILES;isOutput=true]$SETFILES"
+                      failOnStderr: true
+                  - ${{ if parameters.WEU }}:
+                      - bash: |
+                          echo "install WEU jobs"
+                      - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+                        parameters:
+                          DO_DEPLOY: true
+                          ENV: ${{ parameters['ENV'] }}
+                          KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
+                          NAMESPACE: "nodo-cron"
+                          APP_NAME: $(appNameCron)
+                          VALUE_FILE: $(NEU_value_file_cron)
+                          DEPLOY_VERSION: $(SBT_VERSION)
+                          APPINSIGHTS_SERVICE_CONN: $(WEU_appInsightsServiceConn)
+                          APPINSIGHTS_RESOURCE_ID: $(WEU_appInsightsResourceId)
+                          CHART_PATH: "helm/nodo-cron"
+                          ARGUMENTS: >-
+                            $(setupArgs.IMAGES)
+                            $(setupArgs.FILES)
+                  - ${{ if in( parameters.ENV, 'prod', 'uat') }}:
+                      - bash: |
+                          echo "uninstall WEU CANARY"
+                      - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+                        parameters:
+                          COMMAND: "uninstall"
+                          DO_DEPLOY: true
+                          ENV: ${{ parameters['ENV'] }}
+                          KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
+                          NAMESPACE: "nodo"
+                          APP_NAME: "$(appName)-canary"
+                          VALUE_FILE: $(WEU_value_file_nodo)
+                          DEPLOY_VERSION: $(SBT_VERSION)
+                          APPINSIGHTS_SERVICE_CONN: $(WEU_appInsightsServiceConn)
+                          APPINSIGHTS_RESOURCE_ID: $(WEU_appInsightsResourceId)
+                          CHART_PATH: "helm/nodo"
+                          ARGUMENTS: "$(appName)-canary"
+      - ${{ if parameters.NEU }}:
+        - deployment: "Approved_${{ parameters.ENV }}_NEU_Deploy"
+          dependsOn :
+            - get_release_version
+            - step_approval_stable
+          condition:  in(dependencies.step_approval_stable.result, 'Succeeded', 'Skipped')
+          variables:
+            SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
+          displayName: "Deploy ${{ parameters.ENV }} NEU stable"
+          pool: $(NEU_poolImage)
+          environment: ${{ parameters['ENV'] }}
+          strategy:
+            runOnce:
+              deploy:
+                steps:
+                  - checkout: self
+                    clean: true
+                    persistCredentials: true
+
+                  - task: Bash@3
+                    name: setup_helm_microservices_chart
+                    displayName: "Setup helm nodo chart"
+                    inputs:
+                      targetType: "inline"
+                      script: |
+                        CHART_FILE="helm/nodo/Chart.yaml"
+                        if [[ -f "$CHART_FILE" ]]; then
+                          yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                          yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                        fi
+                        helm dep build helm/nodo
+                        CHART_FILE="helm/nodo-cron/Chart.yaml"
+                        if [[ -f "$CHART_FILE" ]]; then
+                          yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                          yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                        fi
+                        helm dep build helm/nodo-cron
+                      failOnStderr: true
+                  - bash: |
+                      echo "install NEU nodo"
+                  - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+                    parameters:
+                      DO_DEPLOY: true
+                      ENV: ${{ parameters['ENV'] }}
+                      KUBERNETES_SERVICE_CONN: ${{ variables.NEU_kubernetesServiceConnection }}
+                      NAMESPACE: "nodo"
+                      APP_NAME: $(appName)
+                      VALUE_FILE: $(NEU_value_file_nodo)
+                      DEPLOY_VERSION: $(SBT_VERSION)
+                      APPINSIGHTS_SERVICE_CONN: ${{ variables.NEU_appInsightsServiceConn }}
+                      APPINSIGHTS_RESOURCE_ID: ${{ variables.NEU_appInsightsResourceId }}
+                      CHART_PATH: "helm/nodo"
+                      ARGUMENTS: >-
+                        --set nodo.image.tag="$(SBT_VERSION)"
+                        --set nodo.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}
+                        --set-file nodo.configMapFromFile.logback\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
+                        --set-file nodo.configMapFromFile.config-app\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
+                  - task: Bash@3
+                    name: setupArgs
+                    displayName: "Setup job args"
+                    inputs:
+                      targetType: "inline"
+                      script: |
+                        declare -a JOBS=(cj-annullamento-rpt cj-ftp-upload cj-genera-rend-bollo cj-mod3-cancel-v1 cj-mod3-cancel-v2 cj-pa-invia-rt cj-pa-invia-rt-recovery cj-pa-retry-invia-rt-neg cj-pa-send-rt cj-pos-retry-send-payment-res cj-psp-chiedi-avanz-rpt cj-psp-chiedi-lista-rt cj-psp-retry-ack-negative cj-retry-pa-attiva-rpt cj-rt-pull-recovery-push)
+                        SETIMAGES="--set cj-refresh-configuration.suspend=true"
+                        SETFILES=""
+                        for i in "${JOBS[@]}" ; do :
+                          SETIMAGES="$SETIMAGES --set $i.image.tag=$(SBT_VERSION) --set $i.suspend=true"
+                          SETFILES="$SETFILES --set-file $i.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK"
+                          SETFILES="$SETFILES --set-file $i.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
+                        done
+                        echo "##vso[task.setvariable variable=IMAGES;isOutput=true]$SETIMAGES"
+                        echo "##vso[task.setvariable variable=FILES;isOutput=true]$SETFILES"
+                      failOnStderr: true
+                  - bash: |
+                      echo "install NEU jobs"
+                  - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+                    parameters:
+                      DO_DEPLOY: true
+                      ENV: ${{ parameters['ENV'] }}
+                      KUBERNETES_SERVICE_CONN: ${{ variables.NEU_kubernetesServiceConnection }}
+                      NAMESPACE: "nodo-cron"
+                      APP_NAME: $(appNameCron)
+                      VALUE_FILE: $(NEU_value_file_cron)
+                      DEPLOY_VERSION: $(SBT_VERSION)
+                      APPINSIGHTS_SERVICE_CONN: ${{ variables.NEU_appInsightsServiceConn }}
+                      APPINSIGHTS_RESOURCE_ID: ${{ variables.NEU_appInsightsResourceId }}
+                      CHART_PATH: "helm/nodo-cron"
+                      ARGUMENTS: >-
+                        $(setupArgs.IMAGES)
+                        $(setupArgs.FILES)
+
+  # uninstall canary id prod or uat
+  - ${{ if in( parameters.ENV, 'prod', 'uat') }}:
+    - stage: uninstall
+      displayName: "Uninstall ${{ parameters.ENV }} canary"
+      condition: and( ${{ in( parameters.ENV, 'prod', 'uat') }} ,failed())
+      jobs:
+        - deployment: "uninstall"
+          displayName: "Uninstall ${{ parameters.ENV }} canary"
+          pool: $(WEU_poolImage)
+          environment: ${{ parameters['ENV'] }}
+          strategy:
+            runOnce:
+              deploy:
+                steps:
+                  - checkout: self
+                    clean: true
+                    persistCredentials: true
+
+                  - ${{ if and( parameters.WEU , in( parameters.ENV, 'prod', 'uat') ) }}:
+                    - bash: |
+                        echo "uninstall WEU CANARY"
+                    - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+                      parameters:
+                        COMMAND: "uninstall"
+                        DO_DEPLOY: true
+                        ENV: ${{ parameters['ENV'] }}
+                        KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
+                        NAMESPACE: "nodo"
+                        APP_NAME: "$(appName)-canary"
+                        VALUE_FILE: $(WEU_value_file_nodo)
+                        DEPLOY_VERSION: $(SBT_VERSION)
+                        APPINSIGHTS_SERVICE_CONN: $(WEU_appInsightsServiceConn)
+                        APPINSIGHTS_RESOURCE_ID: $(WEU_appInsightsResourceId)
+                        CHART_PATH: "helm/nodo"
+                        ARGUMENTS: "$(appName)-canary"
