@@ -25,15 +25,6 @@ fdr:
     configMaps:
       - name: fdr-cacerts
         key: cacerts
-  providedVolumeMount:
-    create: true
-    envSecrets:
-      azurestorageaccountname: "azurestorageaccountname"
-      azurestorageaccountkey: "azurestorageaccountkey"
-    folders:
-      - name: firmatore
-        readOnly: false
-        mountOptions: "dir_mode=0777,file_mode=0777,cache=strict,actimeo=30"
   tmpVolumeMount:
     create: true
   resources:

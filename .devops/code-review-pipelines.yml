@@ -27,9 +27,9 @@ stages:
                 sonar.projectKey=$(SONARCLOUD_PROJECT_KEY)
                 sonar.projectName=$(SONARCLOUD_PROJECT_NAME)
                 sonar.projectVersion=$(Build.BuildNumber)
-                sonar.sources=nodo4/src/main/scala
-                sonar.tests=nodo4/src/test/scala
-                sonar.junit.reportPaths=nodo4/target/test-reports
+                sonar.sources=fdr/src/main/scala
+                sonar.tests=fdr/src/test/scala
+                sonar.junit.reportPaths=fdr/target/test-reports
                 sonar.coverage.jacoco.xmlReportPaths=target/scala-2.13/jacoco/report/aggregate/jacoco.xml
 
           - script: ./sbt -v clean jacocoAggregate
