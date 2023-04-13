@@ -200,8 +200,8 @@ stages:
               containerRegistry: "$(WEU_dockerRegistryServiceConnection)"
               command: "login"
           - bash: |
-              docker tag $(WEU_dockerRegistryFqdn)/$(imageRepository):$(current_version) $(NEU_dockerRegistryFqdn)/$(imageRepository):$(current_version) 
-              docker push $(WEU_dockerRegistryFqdn)/$(imageRepository):$(current_version) $(NEU_dockerRegistryFqdn)/$(imageRepository):$(current_version) 
+              docker tag $(WEU_dockerRegistryFqdn)/$(imageRepository):$(current_version)
+              docker push $(WEU_dockerRegistryFqdn)/$(imageRepository):$(current_version)
 
   # Deploy Canary if prod or uat
   - ${{ if and( parameters.WEU , in( parameters.ENV, 'prod', 'uat') ) }}:
