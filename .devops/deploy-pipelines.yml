@@ -34,8 +34,6 @@ parameters:
     default: dev
     values:
       - dev
-      - it
-      - prf
       - uat
       - prod
   - name: SEMVER
@@ -83,14 +81,14 @@ variables:
   APPROVE_NOTIFY_ADMIN: '[pagoPA-iac]\Project Administrators'
   BRANCH_NAME: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
 
-  WEU_value_file_fdr: "helm/fdr/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
-  WEU_value_file_cron: "helm/fdr/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
-  NEU_value_file_fdr: "helm/fdr/neu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
-  NEU_value_file_cron: "helm/fdr/neu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
+  WEU_value_file_fdr: "helm/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
+  WEU_value_file_cron: "helm/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
+  NEU_value_file_fdr: "helm/neu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
+  NEU_value_file_cron: "helm/neu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
 
   ${{ if eq(parameters['ENV'], 'dev') }}:
-    appName: 'fdr'
-    appNameCron: 'fdrcron'
+    appName: 'pagopafdrnodo'
+    appNameCron: 'pagopafdrnodocron'
     lightbend_key_secret: $(lightbend_key_dev)
     WEU_dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
     WEU_dockerRegistryFqdn: $(DEV_CONTAINER_NAMESPACE)
@@ -105,31 +103,9 @@ variables:
     NEU_appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_DEV)"
     NEU_appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_DEV)"
 
-  ${{ if eq(parameters['ENV'], 'it') }}:
-    appName: 'fdrreplica'
-    appNameCron: 'fdrcronreplica'
-    lightbend_key_secret: $(lightbend_key_dev)
-    WEU_dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
-    WEU_dockerRegistryFqdn: $(DEV_CONTAINER_NAMESPACE)
-    WEU_kubernetesServiceConnection: '$(dev_kubernetes_service_conn)'
-    WEU_appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_DEV)"
-    WEU_appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_DEV)"
-    WEU_poolImage: '$(DEPLOY-POOL-DEV)'
-
-  ${{ if eq(parameters['ENV'], 'prf') }}:
-    appName: 'ndp-replica'
-    appNameCron: 'ndp-cron-replica'
-    lightbend_key_secret: $(lightbend_key_uat)
-    WEU_dockerRegistryServiceConnection: $(UAT_CONTAINER_REGISTRY_SERVICE_CONN)
-    WEU_dockerRegistryFqdn: $(UAT_CONTAINER_NAMESPACE)
-    WEU_kubernetesServiceConnection: '$(uat_weu_kubernetes_service_conn)'
-    WEU_appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_UAT)"
-    WEU_appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_UAT)"
-    WEU_poolImageWEU: '$(DEPLOY-POOL-UAT)'
-
   ${{ if eq(parameters['ENV'], 'uat') }}:
-    appName: 'ndp'
-    appNameCron: 'ndp-cron'
+    appName: 'pagopafdrnodo'
+    appNameCron: 'pagopafdrnodocron'
     lightbend_key_secret: $(lightbend_key_uat)
     weight_steps: "10,30"
     WEU_dockerRegistryServiceConnection: $(UAT_CONTAINER_REGISTRY_SERVICE_CONN)
@@ -138,9 +114,10 @@ variables:
     WEU_appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_UAT)"
     WEU_appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_UAT)"
     WEU_poolImage: '$(DEPLOY-POOL-UAT)'
+
   ${{ if eq(parameters['ENV'], 'prod') }}:
-    appName: 'ndp'
-    appNameCron: 'ndp-cron'
+    appName: 'pagopafdrnodo'
+    appNameCron: 'pagopafdrnodocron'
     lightbend_key_secret: $(lightbend_key_prod)
     weight_steps: "10,30,50"
     WEU_dockerRegistryServiceConnection: $(PROD_CONTAINER_REGISTRY_SERVICE_CONN)
@@ -181,17 +158,12 @@ stages:
               gitUsername: $(GIT_USERNAME)
               gitHubConnection: $(GITHUB_CONNECTION)
               semver: ${{ parameters.SEMVER }}
-              helmPath: "helm/fdr"
+              helmPath: "helm"
               helmChartAlias: "fdr"
               customScriptsPostUpdateHelm: |
                 echo "ThisBuild / version := \"$(NEXT_SBT_VERSION)\"" > version.sbt
 
-                for i in helm/nodo-cron/values-${{ parameters['ENV'] }}.yaml; do
-                  [ -f "$i" ] || break
-                  yq -i ".basecronjob.image.tag = \"$(NEXT_SBT_VERSION)\"" "$i"
-                  git add "$i"
-                done
-                CHART_FILE="helm/nodo-cron/Chart.yaml"
+                CHART_FILE="helm/Chart.yaml"
                 if [[ -f "$CHART_FILE" ]]; then
                   yq -i ".version = \"$(NEXT_SBT_VERSION)\"" "$CHART_FILE"
                   yq -i ".appVersion = \"$(NEXT_SBT_VERSION)\"" "$CHART_FILE"
@@ -392,7 +364,7 @@ stages:
                     inputs:
                       targetType: "inline"
                       script: |
-                        CHART_FILE="helm/fdr/weu-${parameters.ENV}/Chart.yaml"
+                        CHART_FILE="helm/fdr/Chart.yaml"
                         if [[ -f "$CHART_FILE" ]]; then
                           yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
                           yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
@@ -460,7 +432,7 @@ stages:
                           KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
                           NAMESPACE: "fdr"
                           APP_NAME: "$(appName)-canary"
-                          VALUE_FILE: $(WEU_value_file_nodo)
+                          VALUE_FILE: $(WEU_value_file_fdr)
                           DEPLOY_VERSION: $(SBT_VERSION)
                           APPINSIGHTS_SERVICE_CONN: $(WEU_appInsightsServiceConn)
                           APPINSIGHTS_RESOURCE_ID: $(WEU_appInsightsResourceId)
@@ -491,18 +463,13 @@ stages:
                     inputs:
                       targetType: "inline"
                       script: |
-                        CHART_FILE="helm/nodo/Chart.yaml"
+                        CHART_FILE="helm/fdr/Chart.yaml"
                         if [[ -f "$CHART_FILE" ]]; then
                           yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
                           yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
                         fi
-                        helm dep build helm/nodo
-                        CHART_FILE="helm/nodo-cron/Chart.yaml"
-                        if [[ -f "$CHART_FILE" ]]; then
-                          yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
-                          yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
-                        fi
-                        helm dep build helm/nodo-cron
+                        helm dep build helm/fdr
+                        helm dep build helm/fdr-cron
                       failOnStderr: true
                   - bash: |
                       echo "install NEU nodo"
@@ -513,30 +480,26 @@ stages:
                       KUBERNETES_SERVICE_CONN: ${{ variables.NEU_kubernetesServiceConnection }}
                       NAMESPACE: "nodo"
                       APP_NAME: $(appName)
-                      VALUE_FILE: $(NEU_value_file_nodo)
+                      VALUE_FILE: $(NEU_value_file_fdr)
                       DEPLOY_VERSION: $(SBT_VERSION)
                       APPINSIGHTS_SERVICE_CONN: ${{ variables.NEU_appInsightsServiceConn }}
                       APPINSIGHTS_RESOURCE_ID: ${{ variables.NEU_appInsightsResourceId }}
                       CHART_PATH: "helm/nodo"
                       ARGUMENTS: >-
-                        --set nodo.image.tag="$(SBT_VERSION)"
-                        --set nodo.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}
-                        --set-file nodo.configMapFromFile.logback\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
-                        --set-file nodo.configMapFromFile.config-app\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
+                        --set fdr.image.tag="$(SBT_VERSION)"
+                        --set fdr.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}
+                        --set-file fdr.configMapFromFile.logback\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
+                        --set-file fdr.configMapFromFile.config-app\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
                   - task: Bash@3
                     name: setupArgs
                     displayName: "Setup job args"
                     inputs:
                       targetType: "inline"
                       script: |
-                        declare -a JOBS=(cj-annullamento-rpt cj-ftp-upload cj-genera-rend-bollo cj-mod3-cancel-v1 cj-mod3-cancel-v2 cj-pa-invia-rt cj-pa-invia-rt-recovery cj-pa-retry-invia-rt-neg cj-pa-send-rt cj-pos-retry-send-payment-res cj-psp-chiedi-avanz-rpt cj-psp-chiedi-lista-rt cj-psp-retry-ack-negative cj-retry-pa-attiva-rpt cj-rt-pull-recovery-push)
-                        SETIMAGES="--set cj-refresh-configuration.suspend=true"
-                        SETFILES=""
-                        for i in "${JOBS[@]}" ; do :
-                          SETIMAGES="$SETIMAGES --set $i.image.tag=$(SBT_VERSION) --set $i.suspend=true"
-                          SETFILES="$SETFILES --set-file $i.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK"
-                          SETFILES="$SETFILES --set-file $i.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
-                        done
+                        --set cj-ftp-upload.image.tag=$(SBT_VERSION) --set cj-ftp-upload.suspend="true"
+                        --set-file cj-ftp-upload.configMapFromFile.logback\\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
+                        --set-file cj-ftp-upload.configMapFromFile.config-app\\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
+                        
                         echo "##vso[task.setvariable variable=IMAGES;isOutput=true]$SETIMAGES"
                         echo "##vso[task.setvariable variable=FILES;isOutput=true]$SETFILES"
                       failOnStderr: true
@@ -547,13 +510,13 @@ stages:
                       DO_DEPLOY: true
                       ENV: ${{ parameters['ENV'] }}
                       KUBERNETES_SERVICE_CONN: ${{ variables.NEU_kubernetesServiceConnection }}
-                      NAMESPACE: "nodo-cron"
+                      NAMESPACE: "fdr-cron"
                       APP_NAME: $(appNameCron)
                       VALUE_FILE: $(NEU_value_file_cron)
                       DEPLOY_VERSION: $(SBT_VERSION)
                       APPINSIGHTS_SERVICE_CONN: ${{ variables.NEU_appInsightsServiceConn }}
                       APPINSIGHTS_RESOURCE_ID: ${{ variables.NEU_appInsightsResourceId }}
-                      CHART_PATH: "helm/nodo-cron"
+                      CHART_PATH: "helm/fdr-cron"
                       ARGUMENTS: >-
                         $(setupArgs.IMAGES)
                         $(setupArgs.FILES)
@@ -585,11 +548,11 @@ stages:
                         DO_DEPLOY: true
                         ENV: ${{ parameters['ENV'] }}
                         KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
-                        NAMESPACE: "nodo"
+                        NAMESPACE: "fdr"
                         APP_NAME: "$(appName)-canary"
-                        VALUE_FILE: $(WEU_value_file_nodo)
+                        VALUE_FILE: $(WEU_value_file_fdr)
                         DEPLOY_VERSION: $(SBT_VERSION)
                         APPINSIGHTS_SERVICE_CONN: $(WEU_appInsightsServiceConn)
                         APPINSIGHTS_RESOURCE_ID: $(WEU_appInsightsResourceId)
-                        CHART_PATH: "helm/nodo"
+                        CHART_PATH: "helm/fdr"
                         ARGUMENTS: "$(appName)-canary"

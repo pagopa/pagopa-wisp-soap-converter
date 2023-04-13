@@ -1,5 +1,5 @@
 apiVersion: v2
-name: ndp-chart
+name: fdr-chart
 description: Flussi di rendicontazione
 type: application
 version: 1.0.0.-SNAPSHOT

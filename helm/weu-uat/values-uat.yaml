@@ -1,11 +1,11 @@
-nodo:
-  namespace: "nodo"
+fdr:
+  namespace: "fdr"
   nameOverride: ""
   fullnameOverride: ""
   terminationGracePeriodSeconds: 140
   image:
     repository: pagopaucommonacr.azurecr.io/pagopanodo4nododeipagamenti
-    tag: "1.0.0-SNAPSHOT"
+    tag: 1.0.0-SNAPSHOT
   livenessProbe:
     httpGet:
       path: /alive
@@ -78,17 +78,11 @@ nodo:
     MICROMETER_HOST: "0.0.0.0"
     MICROMETER_PORT: "9092"
     TZ: "Europe/Rome"
-    AKKA_SYSTEM_NAME: "nodo"
+    AKKA_SYSTEM_NAME: "fdr"
     JAVA_OPTS: >-
       -Dlogback.configurationFile=/mnt/file-config/logback.xml  -Dconfig.app=/mnt/file-config/config-app.conf  -Dapp.bundle.casogei.path=/mnt/secrets-store/casogei-cert-pem  -Dapp.bundle.cacerts.path=/mnt/file-config-external/nodo-cacerts/cacerts  -Duser.language=it  -Duser.country=IT  -Duser.timezone=Europe/Rome  -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=3000  -Dcom.sun.management.jmxremote.rmi.port=3000  -Djava.rmi.server.hostname=127.0.0.1  -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false
-    DB_ONLINE_URL: jdbc:postgresql://pagopa-u-weu-nodo-flexible-postgresql.postgres.database.azure.com:6432/nodo?sslmode=require&prepareThreshold=0&currentSchema=online
     DB_OFFLINE_URL: jdbc:postgresql://pagopa-u-weu-nodo-flexible-postgresql.postgres.database.azure.com:6432/nodo?sslmode=require&prepareThreshold=0&currentSchema=offline
-    DB_RE_URL: jdbc:postgresql://pagopa-u-weu-nodo-flexible-postgresql.postgres.database.azure.com:6432/nodo?sslmode=require&prepareThreshold=0&currentSchema=re
-    DB_WFESP_URL: jdbc:postgresql://pagopa-u-weu-nodo-flexible-postgresql.postgres.database.azure.com:6432/nodo?sslmode=require&prepareThreshold=0&currentSchema=wfesp
-    DB_ONLINE_USER: online
-    DB_OFFLINE_USER: offline
-    DB_RE_USER: re
-    DB_WFESP_USER: wfesp
+    DB_OFFLINE_USER: fdr
     INSTANCE: UAT
     SERVICE_IDENTIFIER: NDP001UAT
   secretProvider:
@@ -97,14 +91,8 @@ nodo:
       APPLICATIONINSIGHTS_CONNECTION_STRING: "azure-insight-connection-string"
       AZURE_EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
       AZURE_EVENT_HUB_BIZ_EVT_CONNECTION_STRING: "azure-event-hub-biz-evt-connection-string"
-      GEC_FEES_SUBSCRIPTION_KEY: "gec-fees-subscription-key-string"
       API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
-      FORWARDER_SUBSCRIPTION_KEY: "node-forwarder-subscription-key-string"
-      DB_CONFIG_PASSWORD: "db-cfg-password"
-      DB_ONLINE_PASSWORD: "db-online-password"
-      DB_OFFLINE_PASSWORD: "db-offline-password"
-      DB_RE_PASSWORD: "db-re-password"
-      DB_WFESP_PASSWORD: "db-wfesp-password"
+      DB_OFFLINE_PASSWORD: "db-fdr-password"
       CASOGEI_CERT_PEM: "casogei-cert-pem"
     keyvault:
       name: "pagopa-u-nodo-kv"
@@ -154,7 +142,7 @@ nodo:
   ingress:
     create: true
     host: "weuuat.nodo.internal.uat.platform.pagopa.it"
-    path: /nodo(/|$)(.*)
+    path: /fdr(/|$)(.*)
     annotations:
       nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
     proxyBodySize: 100m
