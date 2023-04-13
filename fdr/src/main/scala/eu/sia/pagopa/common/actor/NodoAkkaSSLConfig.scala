@@ -1,8 +1,8 @@
 package eu.sia.pagopa.common.actor
 
-import akka.actor.{ ActorSystem, ExtendedActorSystem, ExtensionId, ExtensionIdProvider }
+import akka.actor.{ActorSystem, ExtendedActorSystem, ExtensionId, ExtensionIdProvider}
 import com.typesafe.sslconfig.akka.AkkaSSLConfig
-import com.typesafe.sslconfig.ssl.{ SSLConfigFactory, SSLConfigSettings }
+import com.typesafe.sslconfig.ssl.{SSLConfigFactory, SSLConfigSettings}
 
 object NodoAkkaSSLConfig extends ExtensionId[AkkaSSLConfig] with ExtensionIdProvider {
 

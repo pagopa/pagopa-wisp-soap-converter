@@ -30,9 +30,6 @@ object AzureProducerBuilder {
     val connectionString = eventConfigAzureSdkClient.getString("connection-string")
     val clientTimeoutMs = eventConfigAzureSdkClient.getLong("client-timeoput-ms")
 
-    val reXmlLog = Try(system.settings.config.getBoolean("reXmlLog")).getOrElse(true)
-    val reJsonLog = Try(system.settings.config.getBoolean("reJsonLog")).getOrElse(false)
-
     val reProducer: EventHubProducerAsyncClient =
       new EventHubClientBuilder().transportType(AmqpTransportType.AMQP_WEB_SOCKETS).connectionString(connectionString, eventHubName).buildAsyncProducerClient()
 

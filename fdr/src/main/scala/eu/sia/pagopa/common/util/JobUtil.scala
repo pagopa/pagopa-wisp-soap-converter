@@ -1,13 +1,13 @@
 package eu.sia.pagopa.common.util
 
 import akka.actor.ActorRef
-import eu.sia.pagopa.common.exception.DigitPaException
 import eu.sia.pagopa.Main.ConfigData
-import eu.sia.pagopa.common.message.{ WorkRequest, WorkResponse }
+import eu.sia.pagopa.common.exception.DigitPaException
+import eu.sia.pagopa.common.message.{WorkRequest, WorkResponse}
 import eu.sia.pagopa.common.repo.re.model.Re
 import org.slf4j.MDC
 
-import scala.util.{ Failure, Try }
+import scala.util.{Failure, Try}
 
 object JobUtil {
   def isJobEnabled(log: NodoLogger, ddataMap: ConfigData, jobName: String): Boolean = {

@@ -2,9 +2,9 @@ package eu.sia.pagopa.common.util.web
 
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.headers._
-import akka.http.scaladsl.model.{ HttpResponse, StatusCodes }
-import akka.http.scaladsl.server.Directives.{ complete, _ }
-import akka.http.scaladsl.server.{ Directive0, Route }
+import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
+import akka.http.scaladsl.server.Directives.{complete, _}
+import akka.http.scaladsl.server.{Directive0, Route}
 
 import scala.language.postfixOps
 

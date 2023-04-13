@@ -2,7 +2,7 @@ package eu.sia.pagopa.common.util.web
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import eu.sia.pagopa.common.util.Constant
-import spray.json.{ DefaultJsonProtocol, JsNull, JsString, JsValue, JsonFormat, RootJsonFormat }
+import spray.json.{DefaultJsonProtocol, JsNull, JsString, JsValue, JsonFormat, RootJsonFormat}
 
 import java.time.LocalDateTime
 

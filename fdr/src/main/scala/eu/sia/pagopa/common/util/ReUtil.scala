@@ -1,11 +1,11 @@
 package eu.sia.pagopa.common.util
 
+import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.actor.NodoLogging
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
-import eu.sia.pagopa.Main.ConfigData
 
 trait ReUtil { this: NodoLogging =>
 

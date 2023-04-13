@@ -6,6 +6,7 @@ import eu.sia.pagopa.common.util.{Primitive, Util}
 import eu.sia.pagopa.nodopoller.actor.PollerActor
 
 import java.util.UUID
+
 //@org.scalatest.Ignore
 class PollerActorUnitTests() extends BaseUnitTest {
 

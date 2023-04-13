@@ -1,14 +1,10 @@
 package eu.sia.pagopa.common.repo
 
-import eu.sia.pagopa.common.util.{NodoLogger, Util}
-import slick.dbio.DBIOAction
+import eu.sia.pagopa.common.util.NodoLogger
 import slick.jdbc.{H2Profile, JdbcProfile}
-import slick.sql.SqlAction
 
-import java.time.{LocalDate, LocalDateTime, LocalTime}
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
 
 trait DBComponent {
 

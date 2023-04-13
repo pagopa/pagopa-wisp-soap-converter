@@ -25,7 +25,6 @@ import scala.util.{Failure, Success, Try}
 import scala.xml.NodeSeq
 
 class SoapActorPerRequest(
-    useIdempotency: Boolean,
     override val requestContext: RequestContext,
     override val donePromise: Promise[RouteResult],
     allRouters: Map[String, ActorRef],
@@ -43,7 +42,6 @@ class SoapActorPerRequest(
     val payload = Util.faultXmlResponse(dpe.faultCode, dpe.faultString, Some(dpe.message))
     Util.logPayload(log, Some(payload))
     complete(createHttpResponse(StatusCodes.InternalServerError.intValue, payload, message.sessionId), Constant.KeyName.SOAP_INPUT)
-    //MDC.remove(Constant.MDCKey.SESSION_ID)
   }
 
   private def createHttpResponse(statusCode: StatusCode, payload: String, sessionId: String): HttpResponse = {

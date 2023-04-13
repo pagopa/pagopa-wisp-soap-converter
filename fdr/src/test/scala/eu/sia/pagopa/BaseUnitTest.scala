@@ -128,14 +128,13 @@ abstract class BaseUnitTest()
   val reFunction = AzureProducerBuilder.build()
 
   val certPath = s"${new File(".").getCanonicalPath}/devops/localresources/cacerts"
-  val caSogeiPath = s"${new File(".").getCanonicalPath}/devops/localresources/CASogeiTest.pem"
 
   class RepositoriesTest(override val config: Config, override val log: NodoLogger) extends Repositories(config, log) {
     override lazy val offlineRepository: OfflineRepository = RepositoriesUtil.getOfflineRepository
   }
   val repositories = new RepositoriesTest(system.settings.config, log)
 
-  val props = ActorProps(null, null, null, actorUtility, Map(), reFunction, "", caSogeiPath,certPath, TestItems.ddataMap)
+  val props = ActorProps(null, null, null, actorUtility, Map(), reFunction, "", certPath, TestItems.ddataMap)
 
   val mockActor = system.actorOf(Props.create(classOf[MockActor]), s"mock")
 

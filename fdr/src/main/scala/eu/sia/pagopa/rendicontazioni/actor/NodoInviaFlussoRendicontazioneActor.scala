@@ -244,7 +244,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
     } yield r
   }
 
-  def notifySFTPSender(pa: CreditorInstitution, sessionId: String, testCaseId: Option[String], file: FtpFile): Future[FTPResponse] = {
+  private def notifySFTPSender(pa: CreditorInstitution, sessionId: String, testCaseId: Option[String], file: FtpFile): Future[FTPResponse] = {
     log.info(s"Richiesta SFTPRequest pushFile")
 
     val ftpServerConf = ddataMap.ftpServers.find(s => {s._2.service == Constant.KeyName.RENDICONTAZIONI}).get

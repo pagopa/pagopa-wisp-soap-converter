@@ -1,0 +1,61 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="liquibase-docs" id="sequences">
+        <sqlFile dbms="!h2, oracle"
+                 encoding="UTF-8"
+                 path="./sql/sequences.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+    <changeSet author="liquibase-docs" id="tables">
+        <sqlFile dbms="!h2"
+                 encoding="UTF-8"
+                 path="./sql/tables.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+    <changeSet author="liquibase-docs" id="views">
+        <sqlFile dbms="!h2"
+                 encoding="UTF-8"
+                 path="./sql/views.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+    <changeSet author="liquibase-docs" id="indexes">
+        <sqlFile dbms="!h2"
+                 encoding="UTF-8"
+                 path="./sql/indexes.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+    <changeSet author="liquibase-docs" id="costraints">
+        <sqlFile dbms="!h2"
+                 encoding="UTF-8"
+                 path="./sql/costraints.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+    <changeSet author="liquibase" id="fix_sequences" dbms="oracle">
+        <sql>
+            ALTER SEQUENCE ${schema}."BINARY_FILE_SEQ" INCREMENT BY 1000000;
+            ALTER SEQUENCE ${schema}."RENDICONTAZIONE_SEQ" INCREMENT BY 1000000;
+            ALTER SEQUENCE ${schema}."RENDICONTAZIONE_SFTP_RECEIVE_QUEUE_SEQ" INCREMENT BY 1000000;
+            ALTER SEQUENCE ${schema}."RENDICONTAZIONE_SFTP_SEND_QUEUE_SEQ" INCREMENT BY 1000000;
+
+            SELECT ${schema}."BINARY_FILE_SEQ".NEXTVAL from dual;
+            SELECT ${schema}."RENDICONTAZIONE_SEQ".NEXTVAL from dual;
+            SELECT ${schema}."RENDICONTAZIONE_SFTP_RECEIVE_QUEUE_SEQ".NEXTVAL from dual;
+            SELECT ${schema}."RENDICONTAZIONE_SFTP_SEND_QUEUE_SEQ".NEXTVAL from dual;
+
+            ALTER SEQUENCE ${schema}."BINARY_FILE_SEQ" INCREMENT BY 1;
+            ALTER SEQUENCE ${schema}."RENDICONTAZIONE_SEQ" INCREMENT BY 1;
+            ALTER SEQUENCE ${schema}."RENDICONTAZIONE_SFTP_RECEIVE_QUEUE_SEQ" INCREMENT BY 1;
+            ALTER SEQUENCE ${schema}."RENDICONTAZIONE_SFTP_SEND_QUEUE_SEQ" INCREMENT BY 1;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

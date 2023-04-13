@@ -1,6 +1,6 @@
 package eu.sia.pagopa.common.json.model
 
-import spray.json.{ DeserializationException, JsBoolean, JsObject, JsString, JsValue, RootJsonFormat }
+import spray.json.{DeserializationException, JsBoolean, JsObject, JsString, JsValue, RootJsonFormat}
 
 object ActionResponse {
 

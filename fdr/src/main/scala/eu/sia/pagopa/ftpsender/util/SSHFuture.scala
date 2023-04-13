@@ -2,8 +2,8 @@ package eu.sia.pagopa.ftpsender.util
 
 import fr.janalyse.ssh._
 
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.language.{ implicitConversions, reflectiveCalls }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.language.{implicitConversions, reflectiveCalls}
 
 object SSHFuture {
 

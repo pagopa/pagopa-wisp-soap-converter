@@ -1,15 +1,15 @@
 package eu.sia.pagopa.rendicontazioni.util
 
 import eu.sia.pagopa.common.exception
-import eu.sia.pagopa.common.exception.{ DigitPaErrorCodes, DigitPaException }
+import eu.sia.pagopa.common.exception.DigitPaErrorCodes
 import eu.sia.pagopa.common.repo.offline.OfflineRepository
 import eu.sia.pagopa.common.repo.offline.model.Rendicontazione
-import eu.sia.pagopa.common.util.{ NodoLogger, Util }
+import eu.sia.pagopa.common.util.{NodoLogger, Util}
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import scala.concurrent.Future
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 object CheckRendicontazioni {
 

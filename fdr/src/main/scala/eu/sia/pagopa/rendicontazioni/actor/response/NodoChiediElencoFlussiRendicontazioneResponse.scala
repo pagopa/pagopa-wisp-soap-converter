@@ -2,17 +2,17 @@ package eu.sia.pagopa.rendicontazioni.actor.response
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
+import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.actor.NodoLogging
 import eu.sia.pagopa.common.exception
-import eu.sia.pagopa.common.exception.{ DigitPaErrorCodes, DigitPaException }
-import eu.sia.pagopa.Main.ConfigData
-import eu.sia.pagopa.common.message.{ SoapRequest, SoapResponse }
+import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
+import eu.sia.pagopa.common.message.{SoapRequest, SoapResponse}
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
 import org.slf4j.MDC
-import scalaxbmodel.nodoperpa.{ FaultBean, NodoChiediElencoFlussiRendicontazioneRisposta }
+import scalaxbmodel.nodoperpa.{FaultBean, NodoChiediElencoFlussiRendicontazioneRisposta}
 
 trait NodoChiediElencoFlussiRendicontazioneResponse { this: NodoLogging =>
 

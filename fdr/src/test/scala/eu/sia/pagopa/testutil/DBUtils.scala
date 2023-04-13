@@ -14,7 +14,7 @@ import java.io.File
 object DBUtils {
 
   private def fixXmlContentForH2(filename: String, schema: String, content: String): String = {
-    val c1 = content
+    content
       .replaceAll("""\$\{schema\}""", schema)
       .replaceAll("""\$\{schemaOnline\}""", "NODO_ONLINE")
       .replaceAll("""<changeSet author="liquibase" id="000000000001">[\s\S]*?</changeSet>""", "")
@@ -29,20 +29,11 @@ object DBUtils {
       .replaceAll("""9999999999999999999999999999""", "9223372036854775807")
       .replaceAll("""<modifySql labels="ignore">[\s\S]*</modifySql>""", "")
       .replaceAll("""db.changelog-0.xml""", "db.changelog-0-h2.xml")
-      .replaceAll("""db.changelog-20221205102000_replace_elenco_servizi_view_canali_nodo.xml""", "db.changelog-20221205102000_replace_elenco_servizi_view_canali_nodo-h2.xml")
-      .replaceAll("""db.changelog-20230120114500_restore_dropped_column.xml""", "")
-      .replaceAll("""db.changelog-20230124172900_fix_column_type.xml""", "")
-      .replaceAll("""db.changelog-20230124172900_set_default_values.xml""", "")
-    if (filename == "db.changelog-master.xml") {
-      c1.replaceAll("""</databaseChangeLog>""", "<include file=\"./db.changelog-dev-data.xml\"/></databaseChangeLog>")
-    } else {
-      c1
-    }
   }
   def initDB(schema: String, folder: String, additionalContexts: Seq[String] = Seq()): JdbcBackend.DatabaseDef = {
     val path = System.getProperty("user.dir")
-    val scriptpath = s"$path/devops/db/liquibase/changelog/$folder/"
-    val scriptpathh2 = s"$path/target/db/liquibase/changelog/$folder-h2/"
+    val scriptpath = s"$path/liquibase/changelog/$folder/"
+    val scriptpathh2 = s"$path/target/liquibase/changelog/$folder-h2/"
     val scriptFolder = new File(scriptpath)
     val changelogMaster = s"./db.changelog-master.xml"
 
@@ -71,7 +62,7 @@ object DBUtils {
 
     //    System.exit(0)
     val db = Database.forURL(
-      s"jdbc:h2:$path/target/NODO4;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS $schema\\;SET SCHEMA $schema;",
+      s"jdbc:h2:$path/target/FDR;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS $schema\\;SET SCHEMA $schema;",
       driver = "org.h2.Driver",
       executor = AsyncExecutor("test1", minThreads = 10, queueSize = 1000, maxConnections = 10, maxThreads = 10)
     )

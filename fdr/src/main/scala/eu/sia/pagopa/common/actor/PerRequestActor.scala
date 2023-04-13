@@ -4,11 +4,11 @@ import akka.actor.SupervisorStrategy.Stop
 import akka.actor.{Actor, ActorRef, ActorSystem, OneForOneStrategy, ReceiveTimeout, SupervisorStrategy}
 import akka.stream.Materializer
 import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
-import eu.sia.pagopa.Main.ConfigData
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.{FiniteDuration, _}

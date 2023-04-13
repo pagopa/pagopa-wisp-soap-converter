@@ -1,6 +1,6 @@
 package eu.sia.pagopa.common.util.azurehubevent
 
-import com.fasterxml.jackson.databind.{ ObjectMapper, SerializationFeature }
+import com.fasterxml.jackson.databind.{ObjectMapper, SerializationFeature}
 
 import java.text.SimpleDateFormat
 

@@ -1,16 +1,16 @@
 package eu.sia.pagopa.common.actor
 
 import akka.actor.SupervisorStrategy.Stop
-import akka.actor.{ Actor, OneForOneStrategy, ReceiveTimeout, SupervisorStrategy }
+import akka.actor.{Actor, OneForOneStrategy, ReceiveTimeout, SupervisorStrategy}
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.server.RequestContext
 import eu.sia.pagopa.common.exception
-import eu.sia.pagopa.common.exception.{ DigitPaErrorCodes, DigitPaException }
+import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.util.NodoLogConstant
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ ExecutionContextExecutor, Future, Promise }
+import scala.concurrent.{ExecutionContextExecutor, Future, Promise}
 
 trait FuturePerRequestActor extends Actor with NodoLogging {
   implicit val executionContext: ExecutionContextExecutor = context.system.dispatcher

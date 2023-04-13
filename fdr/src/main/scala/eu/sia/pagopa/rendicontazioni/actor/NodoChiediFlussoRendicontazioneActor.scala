@@ -6,23 +6,22 @@ import eu.sia.pagopa.ActorProps
 import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
-import eu.sia.pagopa.common.exception.{ DigitPaErrorCodes, DigitPaException }
+import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
-import eu.sia.pagopa.common.repo.offline.model.{ BinaryFile, Rendicontazione }
+import eu.sia.pagopa.common.repo.offline.model.{BinaryFile, Rendicontazione}
 import eu.sia.pagopa.common.repo.re.model.Re
-import eu.sia.pagopa.common.repo.util.YNBoolean
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XmlUtil.StringBase64Binary
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.actor.response.NodoChiediFlussoRendicontazioneResponse
-import it.pagopa.config.{ CreditorInstitution, PaymentServiceProvider, Station }
+import it.pagopa.config.{CreditorInstitution, PaymentServiceProvider, Station}
 import scalaxb.Base64Binary
-import scalaxbmodel.nodoperpa.{ NodoChiediFlussoRendicontazione, NodoChiediFlussoRendicontazioneRisposta }
+import scalaxbmodel.nodoperpa.{NodoChiediFlussoRendicontazione, NodoChiediFlussoRendicontazioneRisposta}
 
 import scala.concurrent.Future
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps) extends PerRequestActor with ReUtil with NodoChiediFlussoRendicontazioneResponse {
 

@@ -153,7 +153,7 @@ object TestDData {
         "wpl07" -> Plugin("wpl07", None, None, None, None)
       ),
       Map(TestItems.PSP -> PspInformation("<xml></xml>")),
-      Map("FULL" -> PspInformation(SpecsUtils.loadTestXML("/informative/informativaPspFull.xml")), TestItems.PSP -> PspInformation(SpecsUtils.loadTestXML("/informative/responsepsp.xml"))),
+      Map(),
       Map(
         TestItems.canale -> baseCanale.copy(channelCode = TestItems.canale, paymentModel = "ATTIVATO_PRESSO_PSP"),
         TestItems.canaleImmediato -> baseCanale.copy(channelCode = TestItems.canaleImmediato, paymentModel = "IMMEDIATO"),
@@ -211,8 +211,6 @@ object TestDData {
         "GLOBAL-istitutoAttestante.localitaAttestante" -> ConfigurationKey("", "", "Roma", None),
         "GLOBAL-istitutoAttestante.nazioneAttestante" -> ConfigurationKey("", "", "IT", None),
         "GLOBAL-istitutoAttestante.provinciaAttestante" -> ConfigurationKey("", "", "RM", None),
-        "GLOBAL-outcome_retry_active" -> ConfigurationKey("", "", "true", None),
-        "GLOBAL-paymentmanager.baseurl" -> ConfigurationKey("", "", "http://localhost:8080", None),
         "GLOBAL-scheduler.ftpUploadRetryPollerMaxRetry" -> ConfigurationKey("", "", "5", None),
         "GLOBAL-scheduler.jobName_ftpUpload.enabled" -> ConfigurationKey("", "", "true", None),
         "GLOBAL-scheduler.jobName_ftpUpload.jobDescription" -> ConfigurationKey("", "", "Description", None),

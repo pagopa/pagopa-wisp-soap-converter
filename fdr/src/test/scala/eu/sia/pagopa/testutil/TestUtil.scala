@@ -70,7 +70,6 @@ object TestItems {
   val testDTF: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
   val httpConnectTimeout: FiniteDuration = 10.seconds
   val testPDD = "portadidominio"
-  val pptSignCertPath = "/opt/configuration/CASogeiTest.pem"
 
   val ddataMap: ConfigData = TestDData.ddataMap
 }

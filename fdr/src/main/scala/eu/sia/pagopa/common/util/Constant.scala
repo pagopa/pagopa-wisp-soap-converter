@@ -1,6 +1,6 @@
 package eu.sia.pagopa.common.util
 
-import java.nio.charset.{ Charset, StandardCharsets }
+import java.nio.charset.{Charset, StandardCharsets}
 import java.time.format.DateTimeFormatter
 
 object Constant {

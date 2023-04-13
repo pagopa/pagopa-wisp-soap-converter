@@ -80,7 +80,7 @@ fdr:
     TZ: "Europe/Rome"
     AKKA_SYSTEM_NAME: "fdr"
     JAVA_OPTS: >-
-      -Dlogback.configurationFile=/mnt/file-config/logback.xml  -Dconfig.app=/mnt/file-config/config-app.conf  -Dapp.bundle.casogei.path=/mnt/secrets-store/casogei-cert-pem  -Dapp.bundle.cacerts.path=/mnt/file-config-external/nodo-cacerts/cacerts  -Duser.language=it  -Duser.country=IT  -Duser.timezone=Europe/Rome  -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=3000  -Dcom.sun.management.jmxremote.rmi.port=3000  -Djava.rmi.server.hostname=127.0.0.1  -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false
+      -Dlogback.configurationFile=/mnt/file-config/logback.xml  -Dconfig.app=/mnt/file-config/config-app.conf  -Dapp.bundle.cacerts.path=/mnt/file-config-external/nodo-cacerts/cacerts  -Duser.language=it  -Duser.country=IT  -Duser.timezone=Europe/Rome  -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=3000  -Dcom.sun.management.jmxremote.rmi.port=3000  -Djava.rmi.server.hostname=127.0.0.1  -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false
     DB_OFFLINE_URL: jdbc:postgresql://pagopa-u-weu-nodo-flexible-postgresql.postgres.database.azure.com:6432/nodo?sslmode=require&prepareThreshold=0&currentSchema=offline
     DB_OFFLINE_USER: fdr
     INSTANCE: UAT
@@ -93,7 +93,6 @@ fdr:
       AZURE_EVENT_HUB_BIZ_EVT_CONNECTION_STRING: "azure-event-hub-biz-evt-connection-string"
       API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
       DB_OFFLINE_PASSWORD: "db-fdr-password"
-      CASOGEI_CERT_PEM: "casogei-cert-pem"
     keyvault:
       name: "pagopa-u-nodo-kv"
       tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"

@@ -1,13 +1,13 @@
 package eu.sia.pagopa.common.actor
 import akka.Done
 import akka.actor.{Actor, ActorContext, ActorRef, Props, Terminated}
+import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
 import eu.sia.pagopa.ftpsender.actor.FtpSenderActorPerRequest
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}
-import eu.sia.pagopa.Main.ConfigData
 import org.slf4j.MDC
 
 import java.util.UUID

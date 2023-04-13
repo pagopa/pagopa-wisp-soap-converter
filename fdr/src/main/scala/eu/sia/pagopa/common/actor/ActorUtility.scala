@@ -1,6 +1,6 @@
 package eu.sia.pagopa.common.actor
 
-import akka.actor.{ActorContext, ActorRef, ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem}
 import akka.dispatch.MessageDispatcher
 import akka.http.impl.engine.client.ProxyConnectionFailedException
 import akka.http.scaladsl.model.headers.{BasicHttpCredentials, RawHeader}
@@ -21,7 +21,6 @@ import eu.sia.pagopa.common.util._
 
 import java.net.InetSocketAddress
 import java.time.temporal.ChronoUnit
-import java.util.UUID
 import javax.net.ssl.{SSLException, SSLHandshakeException}
 import scala.concurrent.Future
 import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}

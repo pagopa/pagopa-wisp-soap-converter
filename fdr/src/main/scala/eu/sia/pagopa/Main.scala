@@ -107,7 +107,6 @@ object Main extends App {
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
   implicit val materializer: Materializer = Materializer(system)
 
-  val casogeiPath: String = system.settings.config.getString("config.cert.sign")
   val cacertsPath: String = system.settings.config.getString("app.bundle.cacerts.path")
 
   val coordinatedShutdown: Boolean = system.settings.config.getBoolean("coordinatedShutdown")
@@ -262,7 +261,6 @@ object Main extends App {
         routers = baserouters ++ primitiverouters,
         reEventFunc = reEventFunc,
         actorClassId = "main",
-        casogeiPath = casogeiPath,
         cacertsPath = cacertsPath,
         ddataMap = data
       )
@@ -395,7 +393,6 @@ final case class ActorProps(
                              routers: Map[String, ActorRef],
                              reEventFunc: ReEventFunc,
                              actorClassId: String,
-                             casogeiPath: String,
                              cacertsPath: String,
                              var ddataMap: ConfigData
 )

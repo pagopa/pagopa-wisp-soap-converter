@@ -185,7 +185,6 @@ cj-ftp-upload:
       AZURE_EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
       API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
       DB_OFFLINE_PASSWORD: "db-fdr-password"
-      CASOGEI_CERT_PEM: "casogei-cert-pem"
     keyvault:
       name: "pagopa-d-fdr-kv"
       tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"

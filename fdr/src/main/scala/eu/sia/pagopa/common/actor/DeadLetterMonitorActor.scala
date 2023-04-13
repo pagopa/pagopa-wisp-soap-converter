@@ -1,9 +1,8 @@
 package eu.sia.pagopa.common.actor
 
-import akka.actor.{ Actor, DeadLetter, Props }
+import akka.actor.{Actor, DeadLetter, Props}
 import akka.http.scaladsl.model.StatusCodes
-import eu.sia.pagopa.common.exception
-import eu.sia.pagopa.common.exception.{ DigitPaErrorCodes, DigitPaException }
+import eu.sia.pagopa.common.exception.DigitPaErrorCodes
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.util.Constant
 

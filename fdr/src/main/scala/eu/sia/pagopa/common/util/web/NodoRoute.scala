@@ -11,7 +11,7 @@ import akka.pattern.{AskTimeoutException, ask}
 import akka.stream.Materializer
 import akka.util.ByteString
 import eu.sia.pagopa.common.exception.DigitPaErrorCodes
-import eu.sia.pagopa.common.json.model.{ActionResponse, Error}
+import eu.sia.pagopa.common.json.model.ActionResponse
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.offline.OfflineRepository
 import eu.sia.pagopa.common.repo.offline.enums.SchedulerFireCheckStatus

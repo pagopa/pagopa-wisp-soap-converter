@@ -49,7 +49,6 @@ trait MainTestUtil {
   val baseConfig = s"${new File(".").getCanonicalPath}/localresources"
 
   Map(
-    "app.bundle.casogei.path" -> s"$baseConfig/CASogeiTest.pem",
     "app.bundle.cacerts.path" -> s"$baseConfig/cacerts",
     "logback.configurationFile" -> s"$baseConfig/logback.xml",
     "config.app" -> sys.props.getOrElse("config.app", s"$baseConfig/config-app.conf"),

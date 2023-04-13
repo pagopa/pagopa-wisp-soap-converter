@@ -3,7 +3,6 @@ package eu.sia.pagopa.common.util.xml
 import com.sun.org.apache.xerces.internal.impl.Constants
 import eu.sia.pagopa.common.exception.XSDException
 import eu.sia.pagopa.commonxml.XmlEnum
-import eu.sia.pagopa.commonxml.XmlEnum.getClass
 import org.w3c.dom.Node
 import org.xml.sax.InputSource
 
@@ -13,7 +12,7 @@ import javax.xml.transform.Source
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamSource
 import javax.xml.validation.SchemaFactory
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 import scala.xml.SAXParseException
 
 object XsdValid {
