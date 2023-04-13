@@ -331,7 +331,7 @@ stages:
         - deployment: "Approved_${{ parameters.ENV }}_Deploy"
           dependsOn:
             - get_release_version
-            - step_approval_stable
+#            - step_approval_stable
           condition: in(dependencies.step_approval_stable.result, 'Succeeded', 'Skipped')
           variables:
             SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
