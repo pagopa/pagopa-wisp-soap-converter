@@ -332,7 +332,7 @@ stages:
           dependsOn:
             - get_release_version
 #            - step_approval_stable
-          condition: in(dependencies.step_approval_stable.result, 'Succeeded', 'Skipped')
+#          condition: in(dependencies.step_approval_stable.result, 'Succeeded', 'Skipped')
           variables:
             SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
           displayName: "Deploy ${{ parameters.ENV }} WEU stable"
