@@ -309,24 +309,24 @@ stages:
               echo "SBT_VERSION: $SBT_VERSION"
               echo "##vso[task.setvariable variable=SBT_VERSION;isOutput=true]$SBT_VERSION"
             name: output
-      - job: step_approval_stable
-        pool: server
-        dependsOn: get_release_version
-        condition: ${{ in( parameters.ENV, 'prod', 'uat') }}
-        variables:
-          SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
-        displayName: "Approval ${{ parameters.ENV }} stable"
-        timeoutInMinutes: 70
-        steps:
-          - task: ManualValidation@0
-            displayName: "Approval version $(SBT_VERSION) ${{ parameters.ENV }} stable"
-            timeoutInMinutes: 60
-            inputs:
-              notifyUsers: |
-                $(APPROVE_NOTIFY_GROUP)
-                $(APPROVE_NOTIFY_ADMIN)
-              instructions: "Please approve or reject ${{ parameters.ENV }} $(SBT_VERSION) stable deploy"
-              onTimeout: 'reject'
+#      - job: step_approval_stable
+#        pool: server
+#        dependsOn: get_release_version
+#        condition: ${{ in( parameters.ENV, 'prod', 'uat') }}
+#        variables:
+#          SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
+#        displayName: "Approval ${{ parameters.ENV }} stable"
+#        timeoutInMinutes: 70
+#        steps:
+#          - task: ManualValidation@0
+#            displayName: "Approval version $(SBT_VERSION) ${{ parameters.ENV }} stable"
+#            timeoutInMinutes: 60
+#            inputs:
+#              notifyUsers: |
+#                $(APPROVE_NOTIFY_GROUP)
+#                $(APPROVE_NOTIFY_ADMIN)
+#              instructions: "Please approve or reject ${{ parameters.ENV }} $(SBT_VERSION) stable deploy"
+#              onTimeout: 'reject'
       - ${{ if parameters.WEU }}:
         - deployment: "Approved_${{ parameters.ENV }}_Deploy"
           dependsOn:
