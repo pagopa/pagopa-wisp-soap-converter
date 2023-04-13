@@ -23,8 +23,8 @@ fixVersion () {
 }
 
 ########## APP ############
-#helm uninstall --namespace nodo ndp
-clean "helm/nodo"
+#helm uninstall --namespace fdr pagopafdrnodo
+clean "helm/fdr"
 
 helm repo add microservice-chart https://pagopa.github.io/aks-microservice-chart-blueprint
 helm dep build helm/fdr

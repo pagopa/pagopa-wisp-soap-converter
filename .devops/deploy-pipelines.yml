@@ -159,7 +159,7 @@ stages:
               gitHubConnection: $(GITHUB_CONNECTION)
               semver: ${{ parameters.SEMVER }}
               helmPath: "helm"
-              helmChartAlias: "fdr"
+              helmChartAlias: "fdrnodo"
               customScriptsPostUpdateHelm: |
                 echo "ThisBuild / version := \"$(NEXT_SBT_VERSION)\"" > version.sbt
 
