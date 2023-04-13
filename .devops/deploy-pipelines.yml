@@ -21,13 +21,13 @@ parameters:
     values:
       - False
       - True
-  - name: "NEU"
-    displayName: "Deploy in NEU"
-    type: boolean
-    default: False
-    values:
-      - False
-      - True
+#  - name: "NEU"
+#    displayName: "Deploy in NEU"
+#    type: boolean
+#    default: False
+#    values:
+#      - False
+#      - True
   - name: ENV
     displayName: Target Environment
     type: string
@@ -83,8 +83,8 @@ variables:
 
   WEU_value_file_fdr: "helm/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
   WEU_value_file_cron: "helm/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
-  NEU_value_file_fdr: "helm/neu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
-  NEU_value_file_cron: "helm/neu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
+#  NEU_value_file_fdr: "helm/neu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
+#  NEU_value_file_cron: "helm/neu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
 
   ${{ if eq(parameters['ENV'], 'dev') }}:
     appName: 'pagopafdrnodo'
@@ -94,10 +94,10 @@ variables:
     WEU_dockerRegistryFqdn: $(DEV_CONTAINER_NAMESPACE)
     WEU_kubernetesServiceConnection: '$(dev_kubernetes_service_conn)'
     WEU_poolImage: '$(DEPLOY-POOL-DEV)'
-    NEU_dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
-    NEU_dockerRegistryFqdn: $(DEV_CONTAINER_NAMESPACE)
-    NEU_kubernetesServiceConnection: 'pagopa-neu-nodo-aks-dev'
-    NEU_poolImage: 'pagopa-neu-dev-linux'
+#    NEU_dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
+#    NEU_dockerRegistryFqdn: $(DEV_CONTAINER_NAMESPACE)
+#    NEU_kubernetesServiceConnection: 'pagopa-neu-nodo-aks-dev'
+#    NEU_poolImage: 'pagopa-neu-dev-linux'
 
   ${{ if eq(parameters['ENV'], 'uat') }}:
     appName: 'pagopafdrnodo'
@@ -118,10 +118,10 @@ variables:
     WEU_dockerRegistryFqdn: $(PROD_CONTAINER_NAMESPACE)
     WEU_kubernetesServiceConnection: '$(prod_kubernetes_service_conn)'
     WEU_poolImage: '$(DEPLOY-POOL-PROD)'
-    NEU_dockerRegistryServiceConnection: $(PROD_CONTAINER_REGISTRY_SERVICE_CONN)
-    NEU_dockerRegistryFqdn: $(PROD_CONTAINER_NAMESPACE)
-    NEU_kubernetesServiceConnection: '$(prod_neu_kubernetes_service_conn)'
-    NEU_poolImage: '$(DEPLOY-POOL-PROD-NEU)'
+#    NEU_dockerRegistryServiceConnection: $(PROD_CONTAINER_REGISTRY_SERVICE_CONN)
+#    NEU_dockerRegistryFqdn: $(PROD_CONTAINER_NAMESPACE)
+#    NEU_kubernetesServiceConnection: '$(prod_neu_kubernetes_service_conn)'
+#    NEU_poolImage: '$(DEPLOY-POOL-PROD-NEU)'
 
 stages:
   # Create a release on GitHub
