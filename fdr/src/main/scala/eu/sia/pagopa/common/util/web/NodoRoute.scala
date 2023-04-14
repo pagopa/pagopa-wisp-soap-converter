@@ -536,13 +536,10 @@ case class NodoRoute(
 
                               val promise: Promise[RouteResult] = Promise[RouteResult]()
 
-                              val useIdempotency =
-                                DDataChecks.getConfigurationKeys(actorProps.ddataMap, "useIdempotency").toBoolean
-
                               createSystemActorPerRequestAndTell[SoapRouterRequest](
                                 soapRouterRequest,
                                 Constant.KeyName.SOAP_INPUT,
-                                Props(classOf[SoapActorPerRequest], useIdempotency, ctx, promise, routers, reEventFunc, actorProps)
+                                Props(classOf[SoapActorPerRequest], ctx, promise, routers, reEventFunc, actorProps)
                               )(log, system)
                               _ => promise.future
                             case Failure(e) =>
