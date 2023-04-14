@@ -82,8 +82,6 @@ variables:
   BRANCH_NAME: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
 
   WEU_value_file_fdr: "helm/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
-#  WEU_value_file_cron: "helm/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
-
 
   ${{ if eq(parameters['ENV'], 'dev') }}:
     appName: 'pagopafdrnodo'
@@ -105,7 +103,7 @@ variables:
     weight_steps: "10,30"
     WEU_dockerRegistryServiceConnection: $(UAT_CONTAINER_REGISTRY_SERVICE_CONN)
     WEU_dockerRegistryFqdn: $(UAT_CONTAINER_NAMESPACE)
-    WEU_kubernetesServiceConnection: '$(uat_kubernetes_service_conn)'
+    WEU_kubernetesServiceConnection: '$(UAT_KUBERNETES_SERVICE_CONN)'
     WEU_poolImage: '$(DEPLOY-POOL-UAT)'
 
   ${{ if eq(parameters['ENV'], 'prod') }}:
@@ -115,11 +113,11 @@ variables:
     weight_steps: "10,30,50"
     WEU_dockerRegistryServiceConnection: $(PROD_CONTAINER_REGISTRY_SERVICE_CONN)
     WEU_dockerRegistryFqdn: $(PROD_CONTAINER_NAMESPACE)
-    WEU_kubernetesServiceConnection: '$(prod_kubernetes_service_conn)'
+    WEU_kubernetesServiceConnection: '$(PROD_KUBERNETES_SERVICE_CONN)'
     WEU_poolImage: '$(DEPLOY-POOL-PROD)'
     NEU_dockerRegistryServiceConnection: $(PROD_CONTAINER_REGISTRY_SERVICE_CONN)
     NEU_dockerRegistryFqdn: $(PROD_CONTAINER_NAMESPACE)
-    NEU_kubernetesServiceConnection: '$(prod_neu_kubernetes_service_conn)'
+    NEU_kubernetesServiceConnection: '$(PROD_NEU_KUBERNETES_SERVICE_CONN)'
     NEU_poolImage: '$(DEPLOY-POOL-PROD-NEU)'
 
 
@@ -135,9 +133,6 @@ stages:
               buildname="$(Build.BuildNumber) ${{ parameters.ENV }}"
               echo "##vso[build.addbuildtag]${{ parameters.ENV }}"
               echo "##vso[build.updatebuildnumber]$buildname"
-              echo ">A>>>>>>>>>>>>>>>>>>>>>>>>>>> $(WEU_kubernetesServiceConnection)"
-              echo ">B>>>>>>>>>>>>>>>>>>>>>>>>>>> $(DEV_KUBERNETES_SERVICE_CONN)"
-
           - bash: |
               echo "##vso[task.setvariable variable=LIGHTBEND_KEY]$(lightbend_key_secret)"
           - checkout: self
@@ -399,7 +394,7 @@ stages:
                         parameters:
                           DO_DEPLOY: true
                           ENV: ${{ parameters['ENV'] }}
-                          KUBERNETES_SERVICE_CONN: $(DEV_KUBERNETES_SERVICE_CONN)
+                          KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
                           NAMESPACE: "fdr"
                           APP_NAME: $(appName)
                           VALUE_FILE: $(WEU_value_file_fdr)
@@ -407,20 +402,20 @@ stages:
                           ARGUMENTS: >-
                             $(setupArgs.IMAGES)
                             $(setupArgs.FILES)
-                  - ${{ if in( parameters.ENV, 'prod', 'uat') }}:
-                      - bash: |
-                          echo "uninstall WEU CANARY"
-                      - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
-                        parameters:
-                          COMMAND: "uninstall"
-                          DO_DEPLOY: true
-                          ENV: ${{ parameters['ENV'] }}
-                          KUBERNETES_SERVICE_CONN: $(DEV_KUBERNETES_SERVICE_CONN)
-                          NAMESPACE: "fdr"
-                          APP_NAME: "$(appName)-canary"
-                          VALUE_FILE: $(WEU_value_file_fdr)
-                          DEPLOY_VERSION: $(SBT_VERSION)
-                          ARGUMENTS: "$(appName)-canary"
+#                  - ${{ if in( parameters.ENV, 'prod', 'uat') }}:
+#                      - bash: |
+#                          echo "uninstall WEU CANARY"
+#                      - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+#                        parameters:
+#                          COMMAND: "uninstall"
+#                          DO_DEPLOY: true
+#                          ENV: ${{ parameters['ENV'] }}
+#                          KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
+#                          NAMESPACE: "fdr"
+#                          APP_NAME: "$(appName)-canary"
+#                          VALUE_FILE: $(WEU_value_file_fdr)
+#                          DEPLOY_VERSION: $(SBT_VERSION)
+#                          ARGUMENTS: "$(appName)-canary"
 #      - ${{ if parameters.NEU }}:
 #        - deployment: "Approved_${{ parameters.ENV }}_NEU_Deploy"
 #          dependsOn :
