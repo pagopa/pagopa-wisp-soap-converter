@@ -1,7 +1,5 @@
 import com.typesafe.sbt.packager.Keys.{ dockerBaseImage, dockerExposedPorts, dockerUpdateLatest, packageName }
 import sbt.{ url, Resolver, ThisBuild }
-import sbtbuildinfo.BuildInfoKeys.{ buildInfoKeys, buildInfoOptions }
-import sbtbuildinfo.{ BuildInfoKey, BuildInfoOption }
 import sbtrelease.ReleaseStateTransformations._
 
 import java.nio.file.{ Files, Paths }
@@ -209,7 +207,7 @@ lazy val `common-xml` = (project in file("common-xml"))
 import com.github.eikek.sbt.openapi.{ScalaConfig,CustomMapping,Pkg, TypeDef,Imports,Field}
 lazy val `fdr` = (project in file("fdr"))
   .dependsOn(`common-xml`)
-  .enablePlugins(BuildInfoPlugin, Cinnamon, JavaAppPackaging, DockerPlugin, JavaAgent, OpenApiSchema)
+  .enablePlugins(Cinnamon, JavaAppPackaging, DockerPlugin, JavaAgent, OpenApiSchema)
   .settings(
     openapiTargetLanguage := Language.Scala,
     openapiPackage := Pkg("it.pagopa.config"),
@@ -244,15 +242,6 @@ lazy val `fdr` = (project in file("fdr"))
     run / cinnamon := true,
     test / cinnamon := true,
     cinnamonLogLevel := "INFO",
-    buildInfoKeys := Seq[BuildInfoKey](
-      name,
-      version,
-      BuildInfoKey.action("buildTime") {
-        System.currentTimeMillis
-      }
-    ),
-    buildInfoPackage := "eu.sia.pagopa",
-    buildInfoOptions += BuildInfoOption.ToJson,
     Compile / mainClass := Some("eu.sia.pagopa.Main"),
     Docker / packageName := "nodo-dei-pagamenti",
     dockerBaseImage := "adoptopenjdk:11-jdk-hotspot",

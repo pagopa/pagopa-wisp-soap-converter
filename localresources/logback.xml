@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="30 seconds">
 
-    <conversionRule conversionWord="bundleVersion"
-                    converterClass="eu.sia.pagopa.common.util.log.BundleVersionConverter" />
-
-        <property name="CONSOLE_COLOR_LOG_PATTERN" value="%cyan(%d) %highlight(%-5level) %magenta([%X{sessionId}]) %green([%logger]) - %msg %magenta([%X{akkaSource}]%n)"/>
+    <property name="CONSOLE_COLOR_LOG_PATTERN" value="%cyan(%d) %highlight(%-5level) %magenta([%X{sessionId}]) %green([%logger]) - %msg %magenta([%X{akkaSource}]%n)"/>
 
     <appender name="CONSOLE_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
 

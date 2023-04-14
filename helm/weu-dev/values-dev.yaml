@@ -94,6 +94,7 @@ fdrnodo:
     NAMESPACE: "metadata.namespace"
     CINNAMON_HOST: "metadata.name"
     APP_VERSION: "metadata.labels['app.kubernetes.io/version']"
+    APP_NAME: "metadata.labels['app.kubernetes.io/name']"
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
@@ -153,11 +154,6 @@ cj-ftp-upload:
     limits:
       memory: "8Gi"
       cpu: "2560m"
-  providedVolumeMount:
-    create: true
-    envSecrets:
-      azurestorageaccountname: "azurestorageaccountname"
-      azurestorageaccountkey: "azurestorageaccountkey"
   externalConfigMap:
     create: true
     configMaps:
@@ -197,6 +193,7 @@ cj-ftp-upload:
     NAMESPACE: "metadata.namespace"
     CINNAMON_HOST: "metadata.name"
     APP_VERSION: "metadata.labels['app.kubernetes.io/version']"
+    APP_NAME: "metadata.labels['app.kubernetes.io/name']"
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:

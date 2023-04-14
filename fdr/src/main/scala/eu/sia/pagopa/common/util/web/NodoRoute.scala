@@ -98,8 +98,8 @@ case class NodoRoute(
       HttpEntity(
         ContentTypes.`application/json`,
         s"""{
-           |"version" : "${eu.sia.pagopa.BuildInfo.version}",
-           |"buildTime" : ${eu.sia.pagopa.BuildInfo.buildTime},
+           |"version" : "${Constant.APP_VERSION}",
+           |"name" : "${Constant.APP_NAME}",
            |"instance" : "${Constant.INSTANCE}",
            |"identifier" : "${Constant.SERVICE_IDENTIFIER}"
            |}""".stripMargin

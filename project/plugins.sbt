@@ -8,7 +8,6 @@ ThisBuild / resolvers += Resolver.url(
   url(s"https://repo.lightbend.com/pass/${lightbendKey}/commercial-releases")
 )(Resolver.ivyStylePatterns)
 
-addSbtPlugin("com.eed3si9n"           % "sbt-buildinfo"         % "0.9.0")
 addSbtPlugin("com.lightbend.cinnamon" % "sbt-cinnamon"          % "2.16.2")
 addSbtPlugin("org.scalameta"          % "sbt-scalafmt"          % "2.4.3")
 addSbtPlugin("com.github.sbt"         % "sbt-release"           % "1.1.0")

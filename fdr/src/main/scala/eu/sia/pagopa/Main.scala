@@ -92,7 +92,7 @@ object Main extends App {
   }
 
   log.info(s"""
-              |${filler(s" ${BuildInfo.version} ")}
+              |${filler(s" ${Constant.APP_VERSION} ")}
               |#                                #
               |#    ███████╗██████╗ ██████╗     #
               |#    ██╔════╝██╔══██╗██╔══██╗    #
