@@ -368,7 +368,7 @@ stages:
                     parameters:
                       DO_DEPLOY: true
                       ENV: ${{ parameters['ENV'] }}
-                      KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
+                      KUBERNETES_SERVICE_CONN: $(DEV_KUBERNETES_SERVICE_CONN)
                       NAMESPACE: "fdr"
                       APP_NAME: $(appName)
                       VALUE_FILE: $(WEU_value_file_fdr)
@@ -417,7 +417,7 @@ stages:
                           COMMAND: "uninstall"
                           DO_DEPLOY: true
                           ENV: ${{ parameters['ENV'] }}
-                          KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
+                          KUBERNETES_SERVICE_CONN: $(DEV_KUBERNETES_SERVICE_CONN)
                           NAMESPACE: "fdr"
                           APP_NAME: "$(appName)-canary"
                           VALUE_FILE: $(WEU_value_file_fdr)
