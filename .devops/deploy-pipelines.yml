@@ -92,12 +92,14 @@ variables:
     lightbend_key_secret: $(lightbend_key_dev)
     WEU_dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
     WEU_dockerRegistryFqdn: $(DEV_CONTAINER_NAMESPACE)
-    WEU_kubernetesServiceConnection: $(DEV_KUBERNETES_SERVICE_CONN)
+
     WEU_poolImage: '$(DEPLOY-POOL-DEV)'
 #    NEU_dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
 #    NEU_dockerRegistryFqdn: $(DEV_CONTAINER_NAMESPACE)
 #    NEU_kubernetesServiceConnection: 'pagopa-neu-nodo-aks-dev'
 #    NEU_poolImage: 'pagopa-neu-dev-linux'
+
+  WEU_kubernetesServiceConnection: $(DEV_KUBERNETES_SERVICE_CONN)
 
   ${{ if eq(parameters['ENV'], 'uat') }}:
     appName: 'pagopafdrnodo'
