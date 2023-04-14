@@ -86,6 +86,8 @@ variables:
 #  NEU_value_file_fdr: "helm/neu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
 #  NEU_value_file_cron: "helm/neu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
 
+  WEU_kubernetesServiceConnection: '$(dev_kubernetes_service_conn)'
+
   ${{ if eq(parameters['ENV'], 'dev') }}:
     appName: 'pagopafdrnodo'
     appNameCron: 'pagopafdrnodocron'
