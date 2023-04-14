@@ -1,8 +1,8 @@
 #!/bin/bash
 
 DIR=.
-NAME=fdr
-NAMESPACE=nodo
+NAME=pagopafdrnodo
+NAMESPACE=fdr
 FILE_CONFIG_PATH_LOGBACK=../config/dev/logback.xml
 FILE_CONFIG_PATH_CONFIGAPP=../config/dev/config-app.conf
 
@@ -102,12 +102,9 @@ if [ "$install" == 1 ]; then
   else
     echo "Installing stable version $version"
     helm upgrade --namespace $NAMESPACE --install --values $valuesFile \
-      --set fdr.image.tag=$version \
-      --set-file fdr.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK \
-      --set-file fdr.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP \
-      -set cj-ftp-upload.image.tag=$version \
-      --set-file cj-ftp-upload.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK \
-      --set-file cj-ftp-upload.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP \
+      --set fdrnodo.image.tag=$version cj-ftp-upload.image.tag=$version\
+      --set-file fdrnodo.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK cj-ftp-upload.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK \
+      --set-file fdrnodo.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP cj-ftp-upload.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP\
       $NAME $DIR
     exit 0
   fi
