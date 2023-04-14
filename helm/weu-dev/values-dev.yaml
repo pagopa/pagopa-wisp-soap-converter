@@ -134,6 +134,8 @@ fdrnodo:
 
 cj-ftp-upload:
   namespace: "fdr"
+  schedule: "4 * * * *"
+  args: [ ftpUpload ]
   concurrencyPolicy: "Allow"
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 1
