@@ -384,8 +384,8 @@ stages:
                     inputs:
                       targetType: "inline"
                       script: |
-                        SETIMAGES="--set fdr.image.tag=$SBT_VERSION --set fdr.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}"
-                        SETFILES="--set-file fdr.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK --set-file fdr.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
+                        SETIMAGES="--set fdrnodo.image.tag=$SBT_VERSION --set fdrnodo.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}"
+                        SETFILES="--set-file fdrnodo.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK --set-file fdrnodo.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
                         SETIMAGES="$SETIMAGES --set cj-ftp-upload.image.tag=$SBT_VERSION"
                         SETFILES="$SETFILES --set-file cj-ftp-upload.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK"
                         SETFILES="$SETFILES --set-file cj-ftp-upload.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
