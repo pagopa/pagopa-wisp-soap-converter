@@ -77,8 +77,8 @@ variables:
   nameSpace: '$(K8S_NAMESPACE)'
   FILE_CONFIG_PATH_LOGBACK: $(Build.SourcesDirectory)/helm/config/${{ parameters.ENV }}/logback.xml
   FILE_CONFIG_PATH_CONFIGAPP: $(Build.SourcesDirectory)/helm/config/${{ parameters.ENV }}/config-app.conf
-  APPROVE_NOTIFY_GROUP: '[pagoPA-iac]\pagopa-iac-externals-team'
-  APPROVE_NOTIFY_ADMIN: '[pagoPA-iac]\Project Administrators'
+#  APPROVE_NOTIFY_GROUP: '[pagoPA-iac]\pagopa-iac-externals-team'
+#  APPROVE_NOTIFY_ADMIN: '[pagoPA-iac]\Project Administrators'
   BRANCH_NAME: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
 
   WEU_value_file_fdr: "helm/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
@@ -293,23 +293,23 @@ stages:
 
 
   # Deploy stable
-  - stage: deploy_fdr_stable
-    displayName: "Deploy ${{ parameters.ENV }} stable"
-    jobs:
-      - job: get_release_version
-        pool: $(WEU_poolImage)
-        displayName: "Get Release Version"
-        steps:
-          - bash: |
-              IFS='"'
-              arrIN=($(cat version.sbt))
-              SBT_VERSION="${arrIN[1]}"
-              IFS=' '
-              
-              echo "SBT_VERSION: $SBT_VERSION"
-              echo "##vso[task.setvariable variable=SBT_VERSION;isOutput=true]$SBT_VERSION"
-            name: output
-#      - job: step_approval_stable
+#  - stage: deploy_fdr_stable
+#    displayName: "Deploy ${{ parameters.ENV }} stable"
+#    jobs:
+#      - job: get_release_version
+#        pool: $(WEU_poolImage)
+#        displayName: "Get Release Version"
+#        steps:
+#          - bash: |
+#              IFS='"'
+#              arrIN=($(cat version.sbt))
+#              SBT_VERSION="${arrIN[1]}"
+#              IFS=' '
+#
+#              echo "SBT_VERSION: $SBT_VERSION"
+#              echo "##vso[task.setvariable variable=SBT_VERSION;isOutput=true]$SBT_VERSION"
+#            name: output
+##      - job: step_approval_stable
 #        pool: server
 #        dependsOn: get_release_version
 #        condition: ${{ in( parameters.ENV, 'prod', 'uat') }}
@@ -327,68 +327,68 @@ stages:
 #                $(APPROVE_NOTIFY_ADMIN)
 #              instructions: "Please approve or reject ${{ parameters.ENV }} $(SBT_VERSION) stable deploy"
 #              onTimeout: 'reject'
-      - ${{ if parameters.WEU }}:
-        - deployment: "Approved_${{ parameters.ENV }}_Deploy"
-          dependsOn:
-            - get_release_version
+#      - ${{ if parameters.WEU }}:
+#        - deployment: "Approved_${{ parameters.ENV }}_Deploy"
+#          dependsOn:
+#            - get_release_version
 #            - step_approval_stable
 #          condition: in(dependencies.step_approval_stable.result, 'Succeeded', 'Skipped')
-          variables:
-            SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
-          displayName: "Deploy ${{ parameters.ENV }} WEU stable"
-          pool: $(WEU_poolImage)
-          environment: ${{ parameters['ENV'] }}
-          strategy:
-            runOnce:
-              deploy:
-                steps:
-                  - checkout: self
-                    clean: true
-                    persistCredentials: true
-
-                  - task: Bash@3
-                    name: setup_helm_microservices_chart
-                    displayName: "Setup helm fdr chart"
-                    inputs:
-                      targetType: "inline"
-                      script: |
-                        CHART_FILE="helm/fdr/Chart.yaml"
-                        if [[ -f "$CHART_FILE" ]]; then
-                          yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
-                          yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
-                        fi
-                        helm dep build helm/fdr
-                        helm dep build helm/fdr-cron
-                      failOnStderr: true
-                  - bash: |
-                      echo "install WEU fdr"
-                  - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
-                    parameters:
-                      DO_DEPLOY: true
-                      ENV: ${{ parameters['ENV'] }}
-                      KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
-                      NAMESPACE: "fdr"
-                      APP_NAME: $(appName)
-                      VALUE_FILE: $(WEU_value_file_fdr)
-                      DEPLOY_VERSION: $(SBT_VERSION)
-                      CHART_PATH: "helm/fdr"
-                      ARGUMENTS: >-
-                        --set fdr.image.tag="$(SBT_VERSION)"
-                        --set fdr.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}
-                        --set-file fdr.configMapFromFile.logback\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
-                        --set-file fdr.configMapFromFile.config-app\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
-                  - task: Bash@3
-                    name: setupArgs
-                    displayName: "Setup job args"
-                    inputs:
-                      targetType: "inline"
-                      script: |
-                        --set cj-ftp-upload.image.tag="$(SBT_VERSION)"
-                        --set-file cj-ftp-upload.configMapFromFile.logback\\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
-                        --set-file cj-ftp-upload.configMapFromFile.config-app\\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
-                        echo "##vso[task.setvariable variable=IMAGES;isOutput=true]$SETIMAGES"
-                        echo "##vso[task.setvariable variable=FILES;isOutput=true]$SETFILES"
-                      failOnStderr: true
+#          variables:
+#            SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
+#          displayName: "Deploy ${{ parameters.ENV }} WEU stable"
+#          pool: $(WEU_poolImage)
+#          environment: ${{ parameters['ENV'] }}
+#          strategy:
+#            runOnce:
+#              deploy:
+#                steps:
+#                  - checkout: self
+#                    clean: true
+#                    persistCredentials: true
+#
+#                  - task: Bash@3
+#                    name: setup_helm_microservices_chart
+#                    displayName: "Setup helm fdr chart"
+#                    inputs:
+#                      targetType: "inline"
+#                      script: |
+#                        CHART_FILE="helm/fdr/Chart.yaml"
+#                        if [[ -f "$CHART_FILE" ]]; then
+#                          yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
+#                          yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
+#                        fi
+#                        helm dep build helm/fdr
+#                        helm dep build helm/fdr-cron
+#                      failOnStderr: true
+#                  - bash: |
+#                      echo "install WEU fdr"
+#                  - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+#                    parameters:
+#                      DO_DEPLOY: true
+#                      ENV: ${{ parameters['ENV'] }}
+#                      KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
+#                      NAMESPACE: "fdr"
+#                      APP_NAME: $(appName)
+#                      VALUE_FILE: $(WEU_value_file_fdr)
+#                      DEPLOY_VERSION: $(SBT_VERSION)
+#                      CHART_PATH: "helm/fdr"
+#                      ARGUMENTS: >-
+#                        --set fdr.image.tag="$(SBT_VERSION)"
+#                        --set fdr.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}
+#                        --set-file fdr.configMapFromFile.logback\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
+#                        --set-file fdr.configMapFromFile.config-app\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
+#                  - task: Bash@3
+#                    name: setupArgs
+#                    displayName: "Setup job args"
+#                    inputs:
+#                      targetType: "inline"
+#                      script: |
+#                        --set cj-ftp-upload.image.tag="$(SBT_VERSION)"
+#                        --set-file cj-ftp-upload.configMapFromFile.logback\\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
+#                        --set-file cj-ftp-upload.configMapFromFile.config-app\\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
+#                        echo "##vso[task.setvariable variable=IMAGES;isOutput=true]$SETIMAGES"
+#                        echo "##vso[task.setvariable variable=FILES;isOutput=true]$SETFILES"
+#                      failOnStderr: true
 #                  - ${{ if parameters.WEU }}:
 #                      - bash: |
 #                          echo "install WEU jobs"
@@ -405,21 +405,21 @@ stages:
 #                          ARGUMENTS: >-
 #                            $(setupArgs.IMAGES)
 #                            $(setupArgs.FILES)
-                  - ${{ if in( parameters.ENV, 'prod', 'uat') }}:
-                      - bash: |
-                          echo "uninstall WEU CANARY"
-                      - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
-                        parameters:
-                          COMMAND: "uninstall"
-                          DO_DEPLOY: true
-                          ENV: ${{ parameters['ENV'] }}
-                          KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
-                          NAMESPACE: "fdr"
-                          APP_NAME: "$(appName)-canary"
-                          VALUE_FILE: $(WEU_value_file_fdr)
-                          DEPLOY_VERSION: $(SBT_VERSION)
-                          CHART_PATH: "helm/fdr"
-                          ARGUMENTS: "$(appName)-canary"
+#                  - ${{ if in( parameters.ENV, 'prod', 'uat') }}:
+#                      - bash: |
+#                          echo "uninstall WEU CANARY"
+#                      - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+#                        parameters:
+#                          COMMAND: "uninstall"
+#                          DO_DEPLOY: true
+#                          ENV: ${{ parameters['ENV'] }}
+#                          KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
+#                          NAMESPACE: "fdr"
+#                          APP_NAME: "$(appName)-canary"
+#                          VALUE_FILE: $(WEU_value_file_fdr)
+#                          DEPLOY_VERSION: $(SBT_VERSION)
+#                          CHART_PATH: "helm/fdr"
+#                          ARGUMENTS: "$(appName)-canary"
 #      - ${{ if parameters.NEU }}:
 #        - deployment: "Approved_${{ parameters.ENV }}_NEU_Deploy"
 #          dependsOn :
