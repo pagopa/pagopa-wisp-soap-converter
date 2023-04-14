@@ -1,7 +1,7 @@
-package eu.sia.pagopa.common.repo.offline.table
+package eu.sia.pagopa.common.repo.fdr.table
 
 import eu.sia.pagopa.common.repo.DBComponent
-import eu.sia.pagopa.common.repo.offline.model.BinaryFile
+import eu.sia.pagopa.common.repo.fdr.model.BinaryFile
 
 trait BinaryFileTable { self: DBComponent =>
 

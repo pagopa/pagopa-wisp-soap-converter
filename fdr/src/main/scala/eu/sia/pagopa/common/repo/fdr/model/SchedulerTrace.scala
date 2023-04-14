@@ -1,7 +1,7 @@
-package eu.sia.pagopa.common.repo.offline.model
+package eu.sia.pagopa.common.repo.fdr.model
 
 import eu.sia.pagopa.common.message.SchedulerStatus
-import eu.sia.pagopa.common.repo.offline.enums.SchedulerFire
+import eu.sia.pagopa.common.repo.fdr.enums.SchedulerFire
 
 import java.time.LocalDateTime
 

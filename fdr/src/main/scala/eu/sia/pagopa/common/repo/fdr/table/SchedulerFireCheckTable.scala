@@ -1,13 +1,13 @@
-package eu.sia.pagopa.common.repo.offline.table
+package eu.sia.pagopa.common.repo.fdr.table
 
 import eu.sia.pagopa.common.repo.DBComponent
-import eu.sia.pagopa.common.repo.offline.OfflineMapping
-import eu.sia.pagopa.common.repo.offline.enums.SchedulerFireCheckStatus
-import eu.sia.pagopa.common.repo.offline.model.SchedulerFireCheck
+import eu.sia.pagopa.common.repo.fdr.FdrMapping
+import eu.sia.pagopa.common.repo.fdr.enums.SchedulerFireCheckStatus
+import eu.sia.pagopa.common.repo.fdr.model.SchedulerFireCheck
 
 import java.time.LocalDateTime
 
-trait SchedulerFireCheckTable { self: DBComponent with OfflineMapping =>
+trait SchedulerFireCheckTable { self: DBComponent with FdrMapping =>
 
   import driver.api._
 

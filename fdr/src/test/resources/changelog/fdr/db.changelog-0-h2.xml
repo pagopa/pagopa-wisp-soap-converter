@@ -2,27 +2,27 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
 
     <changeSet author="liquibase" id="1653665435192-28">
-        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="BINARY_FILE_SEQ" startValue="248241699"/>
+        <createSequence cacheSize="20000" maxValue="9223372036854775807" sequenceName="BINARY_FILE_SEQ" startValue="248241699"/>
     </changeSet>
     <changeSet author="liquibase" id="1653665435192-39">
-        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RENDICONTAZIONE_SEQ" startValue="178721845"/>
+        <createSequence cacheSize="20000" maxValue="9223372036854775807" sequenceName="RENDICONTAZIONE_SEQ" startValue="178721845"/>
     </changeSet>
     <changeSet author="liquibase" id="1653665435192-40">
-        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RENDICONTAZIONE_SFTP_RECEIVE_QUEUE_SEQ" startValue="248241699"/>
+        <createSequence cacheSize="20000" maxValue="9223372036854775807" sequenceName="RENDICONTAZIONE_SFTP_RECEIVE_QUEUE_SEQ" startValue="248241699"/>
     </changeSet>
     <changeSet author="liquibase" id="1653665435192-41">
-        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="RENDICONTAZIONE_SFTP_SEND_QUEUE_SEQ" startValue="248241699"/>
+        <createSequence cacheSize="20000" maxValue="9223372036854775807" sequenceName="RENDICONTAZIONE_SFTP_SEND_QUEUE_SEQ" startValue="248241699"/>
     </changeSet>
     <changeSet author="liquibase" id="1653665435192-42">
-        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="SCHEDULER_FIRE_CHECK_SEQ" startValue="248241699"/>
+        <createSequence cacheSize="20000" maxValue="9223372036854775807" sequenceName="SCHEDULER_FIRE_CHECK_SEQ" startValue="248241699"/>
     </changeSet>
     <changeSet author="liquibase" id="1653665435192-43">
-        <createSequence cacheSize="20000" maxValue="9999999999999999999999999999" sequenceName="SCHEDULER_TRACE_SEQ" startValue="248241699"/>
+        <createSequence cacheSize="20000" maxValue="9223372036854775807" sequenceName="SCHEDULER_TRACE_SEQ" startValue="248241699"/>
     </changeSet>
 
     <changeSet author="liquibase" id="1653665435192-1">
         <createTable tableName="RENDICONTAZIONE">
-            <column defaultValueComputed="NEXT VALUE FOR ${schema}.RENDICONTAZIONE_SEQ" name="ID" type="NUMBER">
+            <column defaultValueComputed="NEXT VALUE FOR RENDICONTAZIONE_SEQ" name="ID" type="NUMBER">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="RENDICONTAZIONE_PK"/>
             </column>
             <column name="OPTLOCK" type="NUMBER(19, 0)">
@@ -55,7 +55,7 @@
     </changeSet>
     <changeSet author="liquibase" id="1653665435192-2">
         <createTable tableName="BINARY_FILE">
-            <column defaultValueComputed="NEXT VALUE FOR ${schema}.BINARY_FILE_SEQ" name="ID" type="NUMBER">
+            <column defaultValueComputed="NEXT VALUE FOR BINARY_FILE_SEQ" name="ID" type="NUMBER">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="BINARY_FILE_PK"/>
             </column>
             <column name="FILE_SIZE" type="NUMBER(19, 0)"/>
@@ -67,7 +67,7 @@
     </changeSet>
     <changeSet author="liquibase" id="1653665435192-58">
         <createTable tableName="RENDICONTAZIONE_SFTP_RECEIVE_QUEUE">
-            <column defaultValueComputed="NEXT VALUE FOR ${schema}.RENDICONTAZIONE_SFTP_RECEIVE_QUEUE_SEQ" name="ID" type="NUMBER">
+            <column defaultValueComputed="NEXT VALUE FOR RENDICONTAZIONE_SFTP_RECEIVE_QUEUE_SEQ" name="ID" type="NUMBER">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="RENDICONTAZIONE_SFTP_RECEIVE_QUEUE_PK"/>
             </column>
             <column name="FILE_NAME" type="VARCHAR2(255 CHAR)">
@@ -113,7 +113,7 @@
     </changeSet>
     <changeSet author="liquibase" id="1653665435192-59">
         <createTable tableName="RENDICONTAZIONE_SFTP_SEND_QUEUE">
-            <column defaultValueComputed="NEXT VALUE FOR ${schema}.RENDICONTAZIONE_SFTP_SEND_QUEUE_SEQ" name="ID" type="NUMBER">
+            <column defaultValueComputed="NEXT VALUE FOR RENDICONTAZIONE_SFTP_SEND_QUEUE_SEQ" name="ID" type="NUMBER">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="RENDICONTAZIONE_SFTP_SEND_QUEUE_PK"/>
             </column>
             <column name="FILE_NAME" type="VARCHAR2(255 CHAR)">
@@ -155,12 +155,12 @@
             <column name="UPDATED_BY" type="VARCHAR2(35 CHAR)">
                 <constraints nullable="false"/>
             </column>
-            <column name="RETRY" type="NUMBER(*, 0)"/>
+            <column name="RETRY" type="NUMBER(22, 0)"/>
         </createTable>
     </changeSet>
     <changeSet author="liquibase" id="1653665435192-60">
         <createTable tableName="SCHEDULER_FIRE_CHECK">
-            <column defaultValueComputed="NEXT VALUE FOR ${schema}.SCHEDULER_FIRE_CHECK_SEQ" name="ID" type="NUMBER">
+            <column defaultValueComputed="NEXT VALUE FOR SCHEDULER_FIRE_CHECK_SEQ" name="ID" type="NUMBER">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="SCHEDULER_FIRE_CHECK"/>
             </column>
             <column name="JOB_NAME" type="VARCHAR2(50 CHAR)">
@@ -178,7 +178,7 @@
     </changeSet>
     <changeSet author="liquibase" id="1653665435192-61">
         <createTable tableName="SCHEDULER_TRACE">
-            <column defaultValueComputed="NEXT VALUE FOR ${schema}.SCHEDULER_TRACE_SEQ" name="ID" type="NUMBER">
+            <column defaultValueComputed="NEXT VALUE FOR SCHEDULER_TRACE_SEQ" name="ID" type="NUMBER">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="SCHEDULER_TRACE"/>
             </column>
             <column name="ID_SESSIONE" type="VARCHAR2(50 CHAR)">

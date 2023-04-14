@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="30 seconds">
 
-    <conversionRule conversionWord="bundleVersion"
-                    converterClass="eu.sia.pagopa.common.util.log.BundleVersionConverter" />
-
     <property name="CONSOLE_COLOR_LOG_PATTERN" value="%cyan(%d) %highlight(%-5level) %magenta([%X{sessionId}]) %green([%logger]) - %msg %magenta([%X{akkaSource}]%n)"/>
 
     <appender name="CONSOLE_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
@@ -17,11 +14,11 @@
         <appender-ref ref="CONSOLE_APPENDER" />
     </appender>
 
-    <logger name="eu.sia.pagopa" level="INFO" />
+    <logger name="eu.sia.pagopa" level="DEBUG" />
     <logger name="eu.sia.pagopa.input" level="INFO" />
-    <logger name="eu.sia.pagopa.common.actor.HttpActorPerRequest" level="INFO" />
-    <logger name="com.azure" level="OFF" />
+
     <logger name="com.zaxxer.hikari.HikariConfig" level="INFO"/>
+
     <logger name="slick" level="INFO" />
     <logger name="slick.jdbc.DriverDataSource"              level="INFO" />
     <logger name="slick.jdbc.JdbcBackend.statement"         level="INFO" />
@@ -36,3 +33,4 @@
     </root>
 
 </configuration>
+

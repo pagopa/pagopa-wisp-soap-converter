@@ -2,8 +2,8 @@ package eu.sia.pagopa.rendicontazioni.util
 
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.DigitPaErrorCodes
-import eu.sia.pagopa.common.repo.offline.OfflineRepository
-import eu.sia.pagopa.common.repo.offline.model.Rendicontazione
+import eu.sia.pagopa.common.repo.fdr.FdrRepository
+import eu.sia.pagopa.common.repo.fdr.model.Rendicontazione
 import eu.sia.pagopa.common.util.{NodoLogger, Util}
 
 import java.time.LocalDateTime
@@ -24,8 +24,8 @@ object CheckRendicontazioni {
     idFlusso.replaceAll("[*:!?|\\\\\\/]", "_") + s".${ldtformatter.format(Util.now())}"
   }
 
-  def checkFlussoRendicontazioneNotPresentOnSamePsp(repo: OfflineRepository, identificativoFlusso: String, identificativoPSP: String, dataOraFlusso: LocalDateTime)(implicit
-      log: NodoLogger
+  def checkFlussoRendicontazioneNotPresentOnSamePsp(repo: FdrRepository, identificativoFlusso: String, identificativoPSP: String, dataOraFlusso: LocalDateTime)(implicit
+                                                                                                                                                                log: NodoLogger
   ): Future[Option[Rendicontazione]] = {
     repo.findValidByIdFlussoAndIdPspEqualsAndDate(identificativoFlusso, identificativoPSP, dataOraFlusso)
   }

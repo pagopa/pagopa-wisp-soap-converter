@@ -68,7 +68,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
       })
       .keys
       .toSeq
-    repositories.offlineRepository.findRendicontazioni(domini, ncefr.identificativoPSP, dayLimit)
+    repositories.fdrRepository.findRendicontazioni(domini, ncefr.identificativoPSP, dayLimit)
   }
 
   private def checks(ncefr: NodoChiediElencoFlussiRendicontazione) = {

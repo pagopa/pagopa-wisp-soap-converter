@@ -6,7 +6,7 @@ import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.exception.DigitPaException
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
-import eu.sia.pagopa.common.repo.offline.enums.{FtpFileStatus, SchedulerFireExitStatus}
+import eu.sia.pagopa.common.repo.fdr.enums.{FtpFileStatus, SchedulerFireExitStatus}
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.ftpsender.util.{FTPFailureReason, FtpSenderException, SSHFuture}
 import fr.janalyse.ssh.{SSH, SSHFtp, SSHOptions}
@@ -18,7 +18,7 @@ case class FTPRetryRequest(sessionId: String, messageType: String, ftpServerId: 
 
 final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps: ActorProps) extends PerRequestActor {
 
-  val offlineRepository = repositories.offlineRepository
+  val fdrRepository = repositories.fdrRepository
 
   override def actorError(dpe: DigitPaException): Unit = {
     log.error(dpe, s"${dpe.getMessage}")
@@ -68,18 +68,18 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
 
     val pipeline = if (enabled && !suspend) {
       for {
-        status <- offlineRepository.fireJobIfNotRunning(jobName, Constant.KeyName.EMPTY_KEY)
+        status <- fdrRepository.fireJobIfNotRunning(jobName, Constant.KeyName.EMPTY_KEY)
         _ <- status match {
           case SchedulerFireExitStatus.JOB_STARTED =>
             val timeNow = Util.now()
             val timeLimit = timeNow.minusDays(limitJobsDays)
             for {
-              filesIdServerId <- offlineRepository.findToRetry(Constant.Sftp.RENDICONTAZIONI, maxRetry, timeLimit)
+              filesIdServerId <- fdrRepository.findToRetry(Constant.Sftp.RENDICONTAZIONI, maxRetry, timeLimit)
               grouped = filesIdServerId.groupBy(_._1)
               _ = log.info(s"Riepilogo file trovati da caricare:\n${grouped.map(g => s"Server[${g._1}],numero files[${g._2.size}]").mkString("\n")}")
               subreqs = grouped.map(f => FTPRetryRequest(sch.sessionId, Constant.Sftp.RENDICONTAZIONI, f._1, f._2.map(_._2)))
               _ <- FutureUtils.groupedSerializeFuture(log, subreqs, 50)(d => uploadFile(d.sessionId, d.messageType, d.ftpServerId, d.fileIds))
-              _ <- offlineRepository
+              _ <- fdrRepository
                 .stopRunningJob(jobName, Constant.KeyName.EMPTY_KEY)
                 .recover({ case e =>
                   log.error(e, "Errore allo stop del job")
@@ -97,7 +97,7 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
       .recoverWith({ case cause: Throwable =>
         log.warn(cause, s"Errore durante ${actorClassId}, message: [${cause.getMessage}]")
         for {
-          _ <- offlineRepository
+          _ <- fdrRepository
             .stopRunningJob(jobName, Constant.KeyName.EMPTY_KEY)
             .recover({ case e =>
               log.error(e, "Errore allo stop del job")
@@ -125,7 +125,7 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
       ftpconfig <- Future.successful(ftpconfigopt.get._2)
       _ = log.info(NodoLogConstant.logSemantico(Constant.KeyName.FTP_RETRY) + "-per-request")
       _ = log.debug(s"Recupero files da DB")
-      files <- offlineRepository.findFtpFilesByIds(fileIds, tipo)
+      files <- fdrRepository.findFtpFilesByIds(fileIds, tipo)
 
       _ = log.debug(s"Recuperati ${files.size} files")
       inPath =
@@ -158,10 +158,10 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
           } match {
             case Success(_) =>
               log.debug(s"Aggiornamento stato file a UPLOADED")
-              offlineRepository.updateFileStatus(f._1.id, FtpFileStatus.UPLOADED, tipo, actorClassId)
+              fdrRepository.updateFileStatus(f._1.id, FtpFileStatus.UPLOADED, tipo, actorClassId)
             case Failure(e) =>
               log.error(e, s"errore upload file [id:${f._1.id},path:${f._3}]")
-              offlineRepository.updateFileRetry(f._1, tipo, actorClassId)
+              fdrRepository.updateFileRetry(f._1, tipo, actorClassId)
           }
         }))
       }

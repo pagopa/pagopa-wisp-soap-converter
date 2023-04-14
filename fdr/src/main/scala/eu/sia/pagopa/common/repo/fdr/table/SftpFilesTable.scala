@@ -1,14 +1,14 @@
-package eu.sia.pagopa.common.repo.offline.table
+package eu.sia.pagopa.common.repo.fdr.table
 
 import eu.sia.pagopa.common.repo.DBComponent
-import eu.sia.pagopa.common.repo.offline.OfflineMapping
-import eu.sia.pagopa.common.repo.offline.enums.FtpFileStatus
-import eu.sia.pagopa.common.repo.offline.model.FtpFile
+import eu.sia.pagopa.common.repo.fdr.FdrMapping
+import eu.sia.pagopa.common.repo.fdr.enums.FtpFileStatus
+import eu.sia.pagopa.common.repo.fdr.model.FtpFile
 import slick.lifted.ProvenShape
 
 import java.time.LocalDateTime
 
-trait SftpFilesTable { self: DBComponent with OfflineMapping =>
+trait SftpFilesTable { self: DBComponent with FdrMapping =>
 
   import driver.api._
 

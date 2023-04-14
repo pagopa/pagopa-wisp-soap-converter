@@ -9,7 +9,7 @@ import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
-import eu.sia.pagopa.common.repo.offline.model.{BinaryFile, Rendicontazione}
+import eu.sia.pagopa.common.repo.fdr.model.{BinaryFile, Rendicontazione}
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XmlUtil.StringBase64Binary
@@ -129,7 +129,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
             for {
               binaryFileOption <- rendicontazione.fk_binary_file match {
                 case Some(fk) =>
-                  repositories.offlineRepository.binaryFileById(fk)
+                  repositories.fdrRepository.binaryFileById(fk)
                 case None =>
                   Future.successful(None)
               }
@@ -147,7 +147,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
   }
 
   private def checkFlussoRendicontazione(idFlusso: String, idDominio: Option[String], idPsp: Option[String]): Future[Option[Rendicontazione]] = {
-    repositories.offlineRepository.getRendicontazioneValidaByIfFlusso(idFlusso, idDominio, idPsp)
+    repositories.fdrRepository.getRendicontazioneValidaByIfFlusso(idFlusso, idDominio, idPsp)
   }
 
   private def checkDatiRendicontazione(rendicontazione: Rendicontazione, idDominio: Option[String], idPsp: Option[String]) =

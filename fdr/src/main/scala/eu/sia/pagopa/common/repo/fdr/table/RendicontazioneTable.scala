@@ -1,13 +1,13 @@
-package eu.sia.pagopa.common.repo.offline.table
+package eu.sia.pagopa.common.repo.fdr.table
 
 import eu.sia.pagopa.common.repo.DBComponent
-import eu.sia.pagopa.common.repo.offline.OfflineMapping
-import eu.sia.pagopa.common.repo.offline.enums.RendicontazioneStatus
-import eu.sia.pagopa.common.repo.offline.model.Rendicontazione
+import eu.sia.pagopa.common.repo.fdr.FdrMapping
+import eu.sia.pagopa.common.repo.fdr.enums.RendicontazioneStatus
+import eu.sia.pagopa.common.repo.fdr.model.Rendicontazione
 
 import java.time.LocalDateTime
 
-trait RendicontazioneTable { self: DBComponent with OfflineMapping =>
+trait RendicontazioneTable { self: DBComponent with FdrMapping =>
 
   import driver.api._
 

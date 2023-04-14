@@ -170,16 +170,16 @@ object Main extends App {
   if (coordinatedShutdown) {
     shutdown.addTask(CoordinatedShutdown.PhaseBeforeActorSystemTerminate, s"dbs-stop") { () =>
       log.info("Stopping db connections...")
-      if (repositories.offlineRepositoryInitialized) {
-        repositories.offlineRepository.db.close()
+      if (repositories.fdrRepositoryInitialized) {
+        repositories.fdrRepository.db.close()
       }
       Future.successful(Done)
     }
   } else {
     system.registerOnTermination(() => {
       log.info("Stopping db connections...")
-      if (repositories.offlineRepositoryInitialized) {
-        repositories.offlineRepository.db.close()
+      if (repositories.fdrRepositoryInitialized) {
+        repositories.fdrRepository.db.close()
       }
     })
   }
@@ -219,7 +219,7 @@ object Main extends App {
     }
     _ = log.info("ConfigData loaded")
     _ = log.info("Check db connections")
-    _ <- repositories.offlineRepository.testQuery()
+    _ <- repositories.fdrRepository.testQuery()
   } yield ddata)
     .map(data => {
       val baseActorsNamesAndTypes: Seq[(String, Class[_ <: BaseActor])] = job match {
@@ -285,7 +285,7 @@ object Main extends App {
           log.info(s"Starting HTTP Service (Seed,Soap,Rest)...")
           val routes = NodoRoute(
             system = system,
-            offlineRepository = repositories.offlineRepository,
+            fdrRepository = repositories.fdrRepository,
             routers = baserouters ++ primitiverouters,
             httpHost = httpHost,
             httpPort = httpPort,

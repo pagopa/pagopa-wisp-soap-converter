@@ -1,10 +1,10 @@
-package eu.sia.pagopa.common.repo.offline
+package eu.sia.pagopa.common.repo.fdr
 
 import eu.sia.pagopa.common.message.SchedulerStatus
 import eu.sia.pagopa.common.repo.DBComponent
-import eu.sia.pagopa.common.repo.offline.enums._
-import eu.sia.pagopa.common.repo.offline.model._
-import eu.sia.pagopa.common.repo.offline.table._
+import eu.sia.pagopa.common.repo.fdr.enums._
+import eu.sia.pagopa.common.repo.fdr.model._
+import eu.sia.pagopa.common.repo.fdr.table._
 import eu.sia.pagopa.common.util.{Constant, NodoLogger, Util}
 import slick.dbio.DBIOAction
 import slick.jdbc.{JdbcBackend, JdbcProfile}
@@ -12,9 +12,9 @@ import slick.jdbc.{JdbcBackend, JdbcProfile}
 import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 
-case class OfflineRepository(override val driver: JdbcProfile, override val db: JdbcBackend#DatabaseDef)(implicit ec: ExecutionContext)
+case class FdrRepository(override val driver: JdbcProfile, override val db: JdbcBackend#DatabaseDef)(implicit ec: ExecutionContext)
     extends DBComponent
-    with OfflineMapping
+    with FdrMapping
     with BinaryFileTable
     with SftpFilesTable
     with SchedulerFireCheckTable

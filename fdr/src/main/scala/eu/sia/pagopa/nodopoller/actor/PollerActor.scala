@@ -69,7 +69,7 @@ case class PollerActor(repositories: Repositories, actorProps: ActorProps) exten
     } else {
       val jobstatus = if (suspend) { "suspended" }
       else { "disabled" }
-      repositories.offlineRepository
+      repositories.fdrRepository
         .insertSchedulerTrace(req.sessionId, req.job, req.cron, SchedulerStatus.WARN, Some(s"Job $jobstatus"))
         .onComplete(_ => {
           replyTo ! TriggerJobResponse(req.sessionId, SchedulerStatus.OK, Some(s"Job $jobstatus"), req.testCaseId)
@@ -80,13 +80,13 @@ case class PollerActor(repositories: Repositories, actorProps: ActorProps) exten
   private def ftpRetry(req: TriggerJobRequest, timeLimit: LocalDateTime): Future[TriggerJobResponse] = {
     val ftpmaxRetry = DDataChecks.getConfigurationKeys(ddataMap, "scheduler.ftpUploadRetryPollerMaxRetry").toInt
     for {
-      exists <- repositories.offlineRepository.existsToRetry(ftpmaxRetry, timeLimit)
+      exists <- repositories.fdrRepository.existsToRetry(ftpmaxRetry, timeLimit)
       _ <-
         if (!exists) {
-          repositories.offlineRepository.insertSchedulerTrace(req.sessionId, req.job, req.cron, SchedulerStatus.OK, Some(NOTHING_TO_DO_MSG))
+          repositories.fdrRepository.insertSchedulerTrace(req.sessionId, req.job, req.cron, SchedulerStatus.OK, Some(NOTHING_TO_DO_MSG))
         } else {
           for {
-            _ <- repositories.offlineRepository.insertSchedulerTrace(req.sessionId, req.job, req.cron, SchedulerStatus.OK, None)
+            _ <- repositories.fdrRepository.insertSchedulerTrace(req.sessionId, req.job, req.cron, SchedulerStatus.OK, None)
             _ = log.debug(s"Trovati file da caricare,chiamata FtpSenderRetry")
             subreq = WorkRequest(req.sessionId, req.testCaseId, req.job)
             _ <- getRouter(req.job).ask(subreq).mapTo[WorkResponse]

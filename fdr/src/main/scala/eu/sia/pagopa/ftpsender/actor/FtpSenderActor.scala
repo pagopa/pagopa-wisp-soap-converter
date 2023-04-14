@@ -7,7 +7,7 @@ import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
-import eu.sia.pagopa.common.repo.offline.enums.FtpFileStatus
+import eu.sia.pagopa.common.repo.fdr.enums.FtpFileStatus
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.ftpsender.util.{FTPFailureReason, FtpSenderException, SSHFuture}
 import fr.janalyse.ssh.{SSH, SSHFtp, SSHOptions}
@@ -17,8 +17,6 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps: ActorProps) extends PerRequestActor with FtpSenderResponse with ReUtil {
-
-  val offlineRepository = repositories.offlineRepository
 
   var req: FTPRequest = _
   var replyTo: ActorRef = _
@@ -47,7 +45,7 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
           _ = log.info(NodoLogConstant.logSemantico(Constant.KeyName.FTP_SENDER))
           _ <- Future(validateInput(filename))
           _ = log.debug(s"Recupero file da DB:fileId[$fileId]")
-          file <- offlineRepository.findFtpFileById(fileId, tipo).flatMap {
+          file <- repositories.fdrRepository.findFtpFileById(fileId, tipo).flatMap {
             case Some(b) =>
               Future.successful(b)
             case None =>
@@ -82,10 +80,10 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
             }) match {
               case Success(_) =>
                 log.debug(s"Aggiornamento stato file a UPLOADED")
-                offlineRepository.updateFileStatus(file.id, FtpFileStatus.UPLOADED, tipo, actorClassId)
+                repositories.fdrRepository.updateFileStatus(file.id, FtpFileStatus.UPLOADED, tipo, actorClassId)
               case Failure(ex) =>
                 log.error(ex, "Errore caricamento file")
-                offlineRepository.updateFileRetry(file, tipo, actorClassId)
+                repositories.fdrRepository.updateFileRetry(file, tipo, actorClassId)
             }
           }
         } yield FTPResponse(sessionId, testCaseId, None)

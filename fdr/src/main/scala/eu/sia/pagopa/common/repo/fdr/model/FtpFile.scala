@@ -1,6 +1,6 @@
-package eu.sia.pagopa.common.repo.offline.model
+package eu.sia.pagopa.common.repo.fdr.model
 
-import eu.sia.pagopa.common.repo.offline.enums.FtpFileStatus
+import eu.sia.pagopa.common.repo.fdr.enums.FtpFileStatus
 
 import java.time.LocalDateTime
 

@@ -5,7 +5,7 @@ import akka.event.Logging
 import akka.testkit.{ImplicitSender, TestKit}
 import com.typesafe.config.{Config, ConfigFactory}
 import eu.sia.pagopa.common.message._
-import eu.sia.pagopa.common.repo.offline.OfflineRepository
+import eu.sia.pagopa.common.repo.fdr.FdrRepository
 import eu.sia.pagopa.common.repo.{DBComponent, Repositories}
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder
@@ -36,13 +36,13 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.Try
 
 object RepositoriesUtil {
-  var offlineRepository: OfflineRepository = _
+  var fdrRepository: FdrRepository = _
 
-  def getOfflineRepository(implicit ec: ExecutionContext): OfflineRepository = {
-    if (offlineRepository != null) offlineRepository
+  def getFdrRepository(implicit ec: ExecutionContext): FdrRepository = {
+    if (fdrRepository != null) fdrRepository
     else {
-      offlineRepository = OfflineRepository(H2Profile, DBUtils.initDB("NODO_OFFLINE", "offline", Seq("dev")))
-      offlineRepository
+      fdrRepository = FdrRepository(H2Profile, DBUtils.initDB("fdr"))
+      fdrRepository
     }
   }
 }
@@ -111,26 +111,26 @@ abstract class BaseUnitTest()
 
   override def beforeAll() {
     import slick.jdbc.H2Profile.api._
-    offlineRepository.db.run(sql"update SCHEDULER_FIRE_CHECK set STATUS = 'WAIT_TO_NEXT_FIRE'".as[Long])
+    fdrRepository.db.run(sql"update SCHEDULER_FIRE_CHECK set STATUS = 'WAIT_TO_NEXT_FIRE'".as[Long])
   }
 
   system.registerOnTermination(() => {
 //    Thread.sleep(5000)
-//    offlineRepository.db.close()
+//    fdrRepository.db.close()
   })
 
   implicit val log: NodoLogger = new NodoLogger(Logging(system, getClass.getCanonicalName))
   implicit val ec: ExecutionContext = system.dispatcher
 
-  val offlineRepository: OfflineRepository = RepositoriesUtil.getOfflineRepository
+  val fdrRepository: FdrRepository = RepositoriesUtil.getFdrRepository
 
   val actorUtility = new ActorUtilityTest()
   val reFunction = AzureProducerBuilder.build()
 
-  val certPath = s"${new File(".").getCanonicalPath}/devops/localresources/cacerts"
+  val certPath = s"${new File(".").getCanonicalPath}/localresources/cacerts"
 
   class RepositoriesTest(override val config: Config, override val log: NodoLogger) extends Repositories(config, log) {
-    override lazy val offlineRepository: OfflineRepository = RepositoriesUtil.getOfflineRepository
+    override lazy val fdrRepository: FdrRepository = RepositoriesUtil.getFdrRepository
   }
   val repositories = new RepositoriesTest(system.settings.config, log)
 
@@ -147,7 +147,7 @@ abstract class BaseUnitTest()
   def initDB(schema: String, folder: String, additionalContexts: Seq[String] = Seq()): JdbcBackend.DatabaseDef = {
 
     val path = System.getProperty("user.dir")
-    val scriptpath = s"$path/devops/db/liquibase/changelog/$folder/"
+    val scriptpath = s"$path/liquibase/changelog/$folder/"
     val scriptFolder = new File(scriptpath)
     val changelogMaster = s"./db.changelog-master.xml"
 

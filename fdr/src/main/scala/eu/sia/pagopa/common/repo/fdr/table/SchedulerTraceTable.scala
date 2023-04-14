@@ -1,14 +1,14 @@
-package eu.sia.pagopa.common.repo.offline.table
+package eu.sia.pagopa.common.repo.fdr.table
 
 import eu.sia.pagopa.common.message.SchedulerStatus
 import eu.sia.pagopa.common.repo.DBComponent
-import eu.sia.pagopa.common.repo.offline.OfflineMapping
-import eu.sia.pagopa.common.repo.offline.enums.SchedulerFire
-import eu.sia.pagopa.common.repo.offline.model.SchedulerTrace
+import eu.sia.pagopa.common.repo.fdr.FdrMapping
+import eu.sia.pagopa.common.repo.fdr.enums.SchedulerFire
+import eu.sia.pagopa.common.repo.fdr.model.SchedulerTrace
 
 import java.time.LocalDateTime
 
-trait SchedulerTraceTable { self: DBComponent with OfflineMapping =>
+trait SchedulerTraceTable { self: DBComponent with FdrMapping =>
 
   import driver.api._
 

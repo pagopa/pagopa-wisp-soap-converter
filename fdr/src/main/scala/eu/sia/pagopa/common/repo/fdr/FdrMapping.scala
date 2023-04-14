@@ -1,14 +1,14 @@
-package eu.sia.pagopa.common.repo.offline
+package eu.sia.pagopa.common.repo.fdr
 
 import eu.sia.pagopa.common.message.SchedulerStatus
-import eu.sia.pagopa.common.repo.offline.enums.{FtpFileStatus, RendicontazioneStatus, SchedulerFire, SchedulerFireCheckStatus}
+import eu.sia.pagopa.common.repo.fdr.enums.{FtpFileStatus, RendicontazioneStatus, SchedulerFire, SchedulerFireCheckStatus}
 import eu.sia.pagopa.common.repo.util.YNBoolean
 import eu.sia.pagopa.common.repo.util.YNBoolean.YNBoolean
 import eu.sia.pagopa.common.repo.{BigDecimal2, DBComponent}
 import slick.ast.BaseTypedType
 import slick.jdbc.JdbcType
 
-trait OfflineMapping { this: DBComponent =>
+trait FdrMapping { this: DBComponent =>
 
   import driver.api._
 

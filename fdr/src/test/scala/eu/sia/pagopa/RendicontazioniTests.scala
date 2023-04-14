@@ -66,7 +66,7 @@ class RendicontazioniTests() extends BaseUnitTest {
         }
       )
       import H2Profile.api._
-      assert(Try(runQuery[Long](offlineRepository, sql"select id from RENDICONTAZIONE where ID_FLUSSO = '#$idFlusso'".as[Long])).isSuccess)
+      assert(Try(runQuery[Long](fdrRepository, sql"select id from RENDICONTAZIONE where ID_FLUSSO = '#$idFlusso'".as[Long])).isSuccess)
 
       chiediElencoFlussiRendicontazione(responseAssert = (r) => {
         assert(r.elencoFlussiRendicontazione.isDefined)

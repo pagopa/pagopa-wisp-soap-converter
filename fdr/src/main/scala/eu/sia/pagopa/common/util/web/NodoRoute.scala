@@ -13,8 +13,8 @@ import akka.util.ByteString
 import eu.sia.pagopa.common.exception.DigitPaErrorCodes
 import eu.sia.pagopa.common.json.model.ActionResponse
 import eu.sia.pagopa.common.message._
-import eu.sia.pagopa.common.repo.offline.OfflineRepository
-import eu.sia.pagopa.common.repo.offline.enums.SchedulerFireCheckStatus
+import eu.sia.pagopa.common.repo.fdr.FdrRepository
+import eu.sia.pagopa.common.repo.fdr.enums.SchedulerFireCheckStatus
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
 import eu.sia.pagopa.nodopoller.actor.PollerActor
@@ -33,13 +33,13 @@ import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
 case class NodoRoute(
-    system: ActorSystem,
-    offlineRepository: OfflineRepository,
-    routers: Map[String, ActorRef],
-    httpHost: String,
-    httpPort: Int,
-    reEventFunc: ReEventFunc,
-    actorProps: ActorProps
+                      system: ActorSystem,
+                      fdrRepository: FdrRepository,
+                      routers: Map[String, ActorRef],
+                      httpHost: String,
+                      httpPort: Int,
+                      reEventFunc: ReEventFunc,
+                      actorProps: ActorProps
 )(implicit val ec: ExecutionContext, log: NodoLogger, materializer: Materializer)
     extends CORSHandler {
 
@@ -80,7 +80,7 @@ case class NodoRoute(
   private def resetRunningJob(): Route = {
     complete {
       import spray.json._
-      offlineRepository
+      fdrRepository
         .resetRunningJobs()
         .map(s => {
           HttpEntity(ContentTypes.`application/json`, ActionResponse(true, "Reset running jobs", s"Updated $s records").toJson.toString())
@@ -126,7 +126,7 @@ case class NodoRoute(
         import spray.json._
         import DefaultJsonProtocol._
         (for {
-          jobs <- offlineRepository.findJobs(timeFilter, keyFilter)
+          jobs <- fdrRepository.findJobs(timeFilter, keyFilter)
           groups = jobs
             .groupBy(_.jobName)
             .map(group => {
@@ -223,14 +223,14 @@ case class NodoRoute(
       MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
       log.debug(s"START request Http config[$sessionId]")
 
-      import offlineRepository.driver.api._
+      import fdrRepository.driver.api._
       val action = sql"select ID,FILENAME,DATEEXECUTED,MD5SUM from DATABASECHANGELOG order by ORDEREXECUTED asc".as[(String, String, String, String)]
 
-      offlineRepository.runAction(action)
+      fdrRepository.runAction(action)
         .map(clogs => {
           val alllogs = makeClogJson(clogs)
           val p = s"""{
-                   |"offline": $alllogs,
+                   |"fdr": $alllogs,
                    |}""".stripMargin
           HttpEntity(ContentTypes.`application/json`, p)
         })
@@ -245,7 +245,7 @@ case class NodoRoute(
       MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
       log.debug(s"START request Http checkRunningJobs[$sessionId]")
 
-      val runningJobs = offlineRepository
+      val runningJobs = fdrRepository
         .checkRunningJobs()
         .map(tot => HttpResponse(status = StatusCodes.OK.intValue, entity = HttpEntity(ContentTypes.`application/json`, tot.toString), headers = Nil))
         .recover({ case _: Throwable =>
@@ -277,7 +277,7 @@ case class NodoRoute(
     parameterMap { params =>
       complete {
         import spray.json._
-        offlineRepository
+        fdrRepository
           .resetJob(params("id").toLong)
           .map(_ => {
             HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, ActionResponse(true, "Reset job", s"Job resetted").toJson.toString()))

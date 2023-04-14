@@ -4,10 +4,10 @@
 
 function Changelogs(props) {
 
-    const [db, setDb] = React.useState("cfg");
+    const [db, setDb] = React.useState("fdr");
 
     const [changelogs, setChangelogs] = React.useState({
-        'online':[],'offline':[],'re':[],'wfesp':[]
+        'fdr':[]
     });
 
     React.useEffect(()=>{
@@ -22,10 +22,7 @@ function Changelogs(props) {
 
     return html`<div className="monospace changelogs">
     <div className="tabs">
-        <span onClick=${()=>setDb('online')} className="${db=='online'?'selected':''}">online</span>
-        <span onClick=${()=>setDb('offline')} className="${db=='offline'?'selected':''}">offline</span>
-        <span onClick=${()=>setDb('re')} className="${db=='re'?'selected':''}">re</span>
-        <span onClick=${()=>setDb('wfesp')} className="${db=='wfesp'?'selected':''}">wfesp</span>
+        <span onClick=${()=>setDb('fdr')} className="${db=='fdr'?'selected':''}">fdr</span>
     </div>
     <hr/>
     <div key=${db} className="changelog">

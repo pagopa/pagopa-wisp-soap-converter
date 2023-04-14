@@ -38,8 +38,8 @@ trait MainTestUtil {
       "SERVICE_HTTP_PORT" -> servicePort,
       "SERVICE_HTTP_BIND_HOST" -> bindHost,
       "SERVICE_HTTP_BIND_PORT" -> servicePort,
-      "DB_OFFLINE_USER" -> "NODO_OFFLINE_DEV",
-      "DB_OFFLINE_PASSWORD" -> "NODO_OFFLINE_DEV",
+      "DB_FDR_USER" -> "fdr",
+      "DB_FDR_PASSWORD" -> "password",
       "TZ" -> "Europe/Rome",
       "PROMETHEUS_HOST" -> host,
       "PROMETHEUS_PORT" -> prometheusPort

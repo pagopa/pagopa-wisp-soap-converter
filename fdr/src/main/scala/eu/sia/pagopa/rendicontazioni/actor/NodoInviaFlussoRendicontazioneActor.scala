@@ -9,8 +9,8 @@ import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
-import eu.sia.pagopa.common.repo.offline.enums.{FtpFileStatus, RendicontazioneStatus}
-import eu.sia.pagopa.common.repo.offline.model._
+import eu.sia.pagopa.common.repo.fdr.enums.{FtpFileStatus, RendicontazioneStatus}
+import eu.sia.pagopa.common.repo.fdr.model._
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XsdValid
@@ -83,7 +83,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
   private def checksDB(nifr: NodoInviaFlussoRendicontazione) = {
     val datazoned =
       LocalDateTime.parse(nifr.dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault()))
-    CheckRendicontazioni.checkFlussoRendicontazioneNotPresentOnSamePsp(repositories.offlineRepository, nifr.identificativoFlusso, nifr.identificativoPSP, datazoned).flatMap {
+    CheckRendicontazioni.checkFlussoRendicontazioneNotPresentOnSamePsp(repositories.fdrRepository, nifr.identificativoFlusso, nifr.identificativoPSP, datazoned).flatMap {
       case Some(r) =>
         Future.failed(
           exception.DigitPaException(
@@ -184,7 +184,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
               None,
               None
             )
-            repositories.offlineRepository
+            repositories.fdrRepository
               .save(rendi, sftpFile)
               .recoverWith({ case e =>
                 Future.failed(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e))
@@ -207,7 +207,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
               None
             )
             val bf = BinaryFile(0, nifr.xmlRendicontazione.length, Some(nifr.xmlRendicontazione.toArray), None, Some(content))
-            repositories.offlineRepository
+            repositories.fdrRepository
               .saveRendicontazioneAndBinaryFile(rendi, bf)
               .recoverWith({ case e =>
                 Future.failed(exception.DigitPaException("Errore salvataggio rendicontazione", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e))
@@ -232,7 +232,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
             None,
             None
           )
-          repositories.offlineRepository
+          repositories.fdrRepository
             .save(rendi)
             .recoverWith({ case e1 =>
               Future.failed(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e1))
@@ -322,7 +322,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
       _ <- checksDB(nodoInviaFlussoRendicontazione)
 
       dataOraFlussoNew = LocalDateTime.parse(nodoInviaFlussoRendicontazione.dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault()))
-      oldRendi <- repositories.offlineRepository.findRendicontazioniByIdFlusso(
+      oldRendi <- repositories.fdrRepository.findRendicontazioniByIdFlusso(
         nodoInviaFlussoRendicontazione.identificativoPSP,
         nodoInviaFlussoRendicontazione.identificativoFlusso,
         LocalDateTime.of(dataOraFlussoNew.getYear, 1, 1, 0, 0, 0),

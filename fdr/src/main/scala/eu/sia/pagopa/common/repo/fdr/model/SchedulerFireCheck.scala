@@ -1,6 +1,6 @@
-package eu.sia.pagopa.common.repo.offline.model
+package eu.sia.pagopa.common.repo.fdr.model
 
-import eu.sia.pagopa.common.repo.offline.enums.SchedulerFireCheckStatus
+import eu.sia.pagopa.common.repo.fdr.enums.SchedulerFireCheckStatus
 
 import java.time.LocalDateTime
 

@@ -3,7 +3,7 @@ package eu.sia.pagopa.config.actor
 import eu.sia.pagopa.common.actor.BaseActor
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
-import eu.sia.pagopa.common.repo.offline.enums.SchedulerFireExitStatus
+import eu.sia.pagopa.common.repo.fdr.enums.SchedulerFireExitStatus
 import eu.sia.pagopa.common.util.{ConfigUtil, Constant, JobUtil}
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 
@@ -66,13 +66,13 @@ final case class ApiConfigActor(repositories: Repositories, actorProps: ActorPro
 
       val pipeline = if (enabled && !suspend) {
         for {
-          status <- repositories.offlineRepository.fireJobIfNotRunning(req.jobName, Constant.KeyName.EMPTY_KEY)
+          status <- repositories.fdrRepository.fireJobIfNotRunning(req.jobName, Constant.KeyName.EMPTY_KEY)
           _ <- status match {
             case SchedulerFireExitStatus.JOB_STARTED =>
               for {
                 d <- ConfigUtil.refreshConfigHttp(actorProps,false)
                 _ = actorProps.ddataMap = d
-                _ <- repositories.offlineRepository
+                _ <- repositories.fdrRepository
                   .stopRunningJob(req.jobName, Constant.KeyName.EMPTY_KEY)
                   .recover({ case e =>
                     log.error(e, "Errore allo stop del job")
@@ -89,7 +89,7 @@ final case class ApiConfigActor(repositories: Repositories, actorProps: ActorPro
       pipeline
         .recoverWith({ case cause: Throwable =>
           log.warn(cause, s"Errore durante ${BootstrapUtil.actorClassId(getClass)}, message: [${cause.getMessage}]")
-          repositories.offlineRepository
+          repositories.fdrRepository
             .stopRunningJob(req.jobName, Constant.KeyName.EMPTY_KEY)
             .recover({ case e =>
               log.error(e, "Errore allo stop del job")
