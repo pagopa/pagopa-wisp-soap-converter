@@ -77,8 +77,8 @@ variables:
   nameSpace: '$(K8S_NAMESPACE)'
   FILE_CONFIG_PATH_LOGBACK: $(Build.SourcesDirectory)/helm/config/${{ parameters.ENV }}/logback.xml
   FILE_CONFIG_PATH_CONFIGAPP: $(Build.SourcesDirectory)/helm/config/${{ parameters.ENV }}/config-app.conf
-#  APPROVE_NOTIFY_GROUP: '[pagoPA-iac]\pagopa-iac-externals-team'
-#  APPROVE_NOTIFY_ADMIN: '[pagoPA-iac]\Project Administrators'
+  APPROVE_NOTIFY_GROUP: '[pagoPA-iac]\pagopa-iac-externals-team'
+  APPROVE_NOTIFY_ADMIN: '[pagoPA-iac]\Project Administrators'
   BRANCH_NAME: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
 
   WEU_value_file_fdr: "helm/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
