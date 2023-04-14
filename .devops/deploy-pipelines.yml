@@ -368,7 +368,7 @@ stages:
                     parameters:
                       DO_DEPLOY: true
                       ENV: ${{ parameters['ENV'] }}
-                      KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
+                      KUBERNETES_SERVICE_CONN: '$(WEU_kubernetesServiceConnection)'
                       NAMESPACE: "fdr"
                       APP_NAME: $(appName)
                       VALUE_FILE: $(WEU_value_file_fdr)
@@ -400,7 +400,7 @@ stages:
                         parameters:
                           DO_DEPLOY: true
                           ENV: ${{ parameters['ENV'] }}
-                          KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
+                          KUBERNETES_SERVICE_CONN: '$(WEU_kubernetesServiceConnection)'
                           NAMESPACE: "fdr"
                           APP_NAME: $(appNameCron)
                           VALUE_FILE: $(WEU_value_file_cron)
