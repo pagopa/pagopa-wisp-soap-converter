@@ -355,12 +355,12 @@ stages:
                     inputs:
                       targetType: "inline"
                       script: |
-                        CHART_FILE="helm/fdr/Chart.yaml"
+                        CHART_FILE="helm/Chart.yaml"
                         if [[ -f "$CHART_FILE" ]]; then
                           yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
                           yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
                         fi
-                        helm dep build helm/fdr
+                        helm dep build helm/
                       failOnStderr: true
                   - bash: |
                       echo "install WEU fdr"
@@ -373,12 +373,16 @@ stages:
                       APP_NAME: $(appName)
                       VALUE_FILE: $(WEU_value_file_fdr)
                       DEPLOY_VERSION: $(SBT_VERSION)
-                      CHART_PATH: "helm"
                       ARGUMENTS: >-
                         --set fdr.image.tag="$(SBT_VERSION)"
                         --set fdr.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}
                         --set-file fdr.configMapFromFile.logback\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
                         --set-file fdr.configMapFromFile.config-app\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
+                        
+                        --set cj-ftp-upload.image.tag="$(SBT_VERSION)"
+                        --set cj-ftp-upload.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}
+                        --set-file cj-ftp-upload.configMapFromFile.logback\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
+                        --set-file cj-ftp-upload.configMapFromFile.config-app\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
                   - task: Bash@3
                     name: setupArgs
                     displayName: "Setup job args"
@@ -405,7 +409,6 @@ stages:
 #                          APP_NAME: $(appNameCron)
 #                          VALUE_FILE: $(WEU_value_file_cron)
 #                          DEPLOY_VERSION: $(SBT_VERSION)
-#                          CHART_PATH: "helm/fdr"
 #                          ARGUMENTS: >-
 #                            $(setupArgs.IMAGES)
 #                            $(setupArgs.FILES)
@@ -422,7 +425,6 @@ stages:
                           APP_NAME: "$(appName)-canary"
                           VALUE_FILE: $(WEU_value_file_fdr)
                           DEPLOY_VERSION: $(SBT_VERSION)
-                          CHART_PATH: "helm/fdr"
                           ARGUMENTS: "$(appName)-canary"
 #      - ${{ if parameters.NEU }}:
 #        - deployment: "Approved_${{ parameters.ENV }}_NEU_Deploy"
