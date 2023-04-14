@@ -373,7 +373,7 @@ stages:
                       APP_NAME: $(appName)
                       VALUE_FILE: $(WEU_value_file_fdr)
                       DEPLOY_VERSION: $(SBT_VERSION)
-                      CHART_PATH: "helm/fdr"
+                      CHART_PATH: "helm"
                       ARGUMENTS: >-
                         --set fdr.image.tag="$(SBT_VERSION)"
                         --set fdr.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}
