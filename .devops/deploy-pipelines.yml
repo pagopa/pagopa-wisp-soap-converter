@@ -10,7 +10,7 @@ resources:
     - repository: pagopaCommons
       type: github
       name: pagopa/azure-pipeline-templates
-      ref: helm_command
+      ref: 3.9.0
       endpoint: 'io-azure-devops-github-ro'
 
 parameters:
@@ -368,7 +368,7 @@ stages:
                     parameters:
                       DO_DEPLOY: true
                       ENV: ${{ parameters['ENV'] }}
-                      KUBERNETES_SERVICE_CONN: '$(WEU_kubernetesServiceConnection)'
+                      KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
                       NAMESPACE: "fdr"
                       APP_NAME: $(appName)
                       VALUE_FILE: $(WEU_value_file_fdr)
@@ -393,22 +393,22 @@ stages:
                         echo "##vso[task.setvariable variable=IMAGES;isOutput=true]$SETIMAGES"
                         echo "##vso[task.setvariable variable=FILES;isOutput=true]$SETFILES"
                       failOnStderr: true
-                  - ${{ if parameters.WEU }}:
-                      - bash: |
-                          echo "install WEU jobs"
-                      - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
-                        parameters:
-                          DO_DEPLOY: true
-                          ENV: ${{ parameters['ENV'] }}
-                          KUBERNETES_SERVICE_CONN: '$(WEU_kubernetesServiceConnection)'
-                          NAMESPACE: "fdr"
-                          APP_NAME: $(appNameCron)
-                          VALUE_FILE: $(WEU_value_file_cron)
-                          DEPLOY_VERSION: $(SBT_VERSION)
-                          CHART_PATH: "helm/fdr"
-                          ARGUMENTS: >-
-                            $(setupArgs.IMAGES)
-                            $(setupArgs.FILES)
+#                  - ${{ if parameters.WEU }}:
+#                      - bash: |
+#                          echo "install WEU jobs"
+#                      - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+#                        parameters:
+#                          DO_DEPLOY: true
+#                          ENV: ${{ parameters['ENV'] }}
+#                          KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
+#                          NAMESPACE: "fdr"
+#                          APP_NAME: $(appNameCron)
+#                          VALUE_FILE: $(WEU_value_file_cron)
+#                          DEPLOY_VERSION: $(SBT_VERSION)
+#                          CHART_PATH: "helm/fdr"
+#                          ARGUMENTS: >-
+#                            $(setupArgs.IMAGES)
+#                            $(setupArgs.FILES)
                   - ${{ if in( parameters.ENV, 'prod', 'uat') }}:
                       - bash: |
                           echo "uninstall WEU CANARY"
