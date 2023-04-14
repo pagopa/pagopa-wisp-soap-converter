@@ -82,7 +82,7 @@ variables:
   BRANCH_NAME: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
 
   WEU_value_file_fdr: "helm/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
-  WEU_value_file_cron: "helm/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
+#  WEU_value_file_cron: "helm/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
 
 
   ${{ if eq(parameters['ENV'], 'dev') }}:
@@ -362,31 +362,31 @@ stages:
                         fi
                         helm dep build helm/
                       failOnStderr: true
-                  - bash: |
-                      echo "install WEU fdr"
-                  - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
-                    parameters:
-                      DO_DEPLOY: true
-                      ENV: ${{ parameters['ENV'] }}
-                      KUBERNETES_SERVICE_CONN: $(DEV_KUBERNETES_SERVICE_CONN)
-                      NAMESPACE: "fdr"
-                      APP_NAME: $(appName)
-                      VALUE_FILE: $(WEU_value_file_fdr)
-                      DEPLOY_VERSION: $(SBT_VERSION)
-                      ARGUMENTS: >-
-                        --set fdr.image.tag="$(SBT_VERSION)"
-                        --set fdr.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}
-                        --set-file fdr.configMapFromFile.logback\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
-                        --set-file fdr.configMapFromFile.config-app\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
+#                  - bash: |
+#                      echo "install WEU fdr"
+#                  - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+#                    parameters:
+#                      DO_DEPLOY: true
+#                      ENV: ${{ parameters['ENV'] }}
+#                      KUBERNETES_SERVICE_CONN: $(DEV_KUBERNETES_SERVICE_CONN)
+#                      NAMESPACE: "fdr"
+#                      APP_NAME: $(appName)
+#                      VALUE_FILE: $(WEU_value_file_fdr)
+#                      DEPLOY_VERSION: $(SBT_VERSION)
+#                      ARGUMENTS: >-
+#                        --set fdr.image.tag="$(SBT_VERSION)"
+#                        --set fdr.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}
+#                        --set-file fdr.configMapFromFile.logback\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
+#                        --set-file fdr.configMapFromFile.config-app\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
                   - task: Bash@3
                     name: setupArgs
-                    displayName: "Setup job args"
+                    displayName: "Setup fdr and job args"
                     inputs:
                       targetType: "inline"
                       script: |
-                        SETIMAGES=""
-                        SETFILES=""
-                        SETIMAGES="$SETIMAGES --set cj-ftp-upload.image.tag=$(SBT_VERSION)"
+                        SETIMAGES="--set fdr.image.tag=$SBT_VERSION --set fdr.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}"
+                        SETFILES="--set-file fdr.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK --set-file fdr.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
+                        SETIMAGES="$SETIMAGES --set cj-ftp-upload.image.tag=$SBT_VERSION"
                         SETFILES="$SETFILES --set-file cj-ftp-upload.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK"
                         SETFILES="$SETFILES --set-file cj-ftp-upload.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
                         echo "##vso[task.setvariable variable=IMAGES;isOutput=true]$SETIMAGES"
@@ -394,15 +394,15 @@ stages:
                       failOnStderr: true
                   - ${{ if parameters.WEU }}:
                       - bash: |
-                          echo "install WEU jobs"
+                          echo "install WEU fdr and jobs"
                       - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
                         parameters:
                           DO_DEPLOY: true
                           ENV: ${{ parameters['ENV'] }}
                           KUBERNETES_SERVICE_CONN: $(DEV_KUBERNETES_SERVICE_CONN)
                           NAMESPACE: "fdr"
-                          APP_NAME: $(appNameCron)
-                          VALUE_FILE: $(WEU_value_file_cron)
+                          APP_NAME: $(appName)
+                          VALUE_FILE: $(WEU_value_file_fdr)
                           DEPLOY_VERSION: $(SBT_VERSION)
                           ARGUMENTS: >-
                             $(setupArgs.IMAGES)
