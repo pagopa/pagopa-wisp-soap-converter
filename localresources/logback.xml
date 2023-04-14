@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="30 seconds">
 
-    <property name="CONSOLE_COLOR_LOG_PATTERN" value="%cyan(%d) %highlight(%-5level) %magenta([%X{sessionId}]) %green([%logger]) - %msg %magenta([%X{akkaSource}]%n)"/>
-
     <appender name="CONSOLE_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
-
 <!--        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">-->
 <!--            <providers>-->
 <!--                <message/>-->
@@ -32,13 +29,10 @@
 <!--                </nestedField>-->
 <!--            </providers>-->
 <!--        </encoder>-->
-
-<!--        &lt;!&ndash;-->
         <encoder>
             <pattern>${CONSOLE_COLOR_LOG_PATTERN}</pattern>
             <charset>utf8</charset>
         </encoder>
-<!--        &ndash;&gt;-->
     </appender>
 
     <appender name="CONSOLE_APPENDER_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
