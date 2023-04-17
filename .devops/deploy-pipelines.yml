@@ -197,92 +197,92 @@ stages:
               docker tag $(WEU_dockerRegistryFqdn)/$(imageRepository):$(current_version) $(NEU_dockerRegistryFqdn)/$(imageRepository):$(current_version) 
               docker push $(NEU_dockerRegistryFqdn)/$(imageRepository):$(current_version)
 
-#  # Deploy Canary if prod or uat
-#  - ${{ if and( parameters.WEU , in( parameters.ENV, 'prod', 'uat') ) }}:
-#    - ${{ each step in split(variables.weight_steps, ',')}}:
-#      - stage: deploy_fdr_${{ step }}
-#        displayName: "Deploy ${{ parameters.ENV }} canary ${{ step }}%"
-#        jobs:
-#          - job: get_release_version
-#            pool: $(WEU_poolImage)
-#            displayName: "Get Release Version"
-#            steps:
-#              - bash: |
-#                  IFS='"'
-#                  arrIN=($(cat version.sbt))
-#                  SBT_VERSION="${arrIN[1]}"
-#                  IFS=' '
-#
-#                  echo "SBT_VERSION: $SBT_VERSION"
-#                  echo "##vso[task.setvariable variable=SBT_VERSION;isOutput=true]$SBT_VERSION"
-#                name: output
-#          - job: step_approval_${{ step }}
-#            pool: server
-#            dependsOn: get_release_version
-#            condition: ${{ in( parameters.ENV, 'prod', 'uat') }}
-#            variables:
-#              SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
-#            displayName: "Approval ${{ parameters.ENV }} canary ${{ step }}% "
-#            timeoutInMinutes: 70
-#            steps:
-#              - task: ManualValidation@0
-#                displayName: "Approval version $(SBT_VERSION) ${{ parameters.ENV }} canary ${{ step }}% "
-#                timeoutInMinutes: 60
-#                inputs:
-#                  notifyUsers: |
-#                    $(APPROVE_NOTIFY_GROUP)
-#                    $(APPROVE_NOTIFY_ADMIN)
-#                    $(APPROVE_NOTIFY_ADMIN)
-#                  instructions: "Please approve or reject ${{ parameters.ENV }} $(SBT_VERSION) canary deploy ${{ step }}%"
-#                  onTimeout: 'reject'
-#          - deployment: "Approved_${{ parameters.ENV }}_${{ step }}_Deploy"
-#            dependsOn :
-#              - get_release_version
-#              - step_approval_${{ step }}
-#            condition: in(dependencies.step_approval_${{ step }}.result, 'Succeeded', 'Skipped')
-#            variables:
-#              SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
-#            displayName: "Deploy ${{ parameters.ENV }} ${{ step }}%"
-#            pool: $(WEU_poolImage)
-#            environment: ${{ parameters['ENV'] }}
-#            strategy:
-#              runOnce:
-#                deploy:
-#                  steps:
-#                    - checkout: self
-#                      clean: true
-#                      persistCredentials: true
-#
-#                    - task: Bash@3
-#                      name: setup_helm_microservices_chart
-#                      displayName: "Setup helm fdr chart"
-#                      inputs:
-#                        targetType: "inline"
-#                        script: |
-#                          CHART_FILE="helm/fdr/Chart.yaml"
-#                          if [[ -f "$CHART_FILE" ]]; then
-#                            yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
-#                            yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
-#                          fi
-#                          helm dep build helm/
-#                        failOnStderr: true
-#                    - ${{ if parameters.WEU }}:
-#                      - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
-#                        parameters:
-#                          DO_DEPLOY: true
-#                          ENV: ${{ parameters['ENV'] }}
-#                          KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
-#                          NAMESPACE: "fdr"
-#                          APP_NAME: "$(appName)-canary"
-#                          VALUE_FILE: $(WEU_value_file_fdr)
-#                          DEPLOY_VERSION: $(SBT_VERSION)
-#                          ARGUMENTS: >-
-#                            --set fdrnodo.image.tag="$(SBT_VERSION)"
-#                            --set fdrnodo.canaryDelivery.create="true"
-#                            --set fdrnodo.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}
-#                            --set fdrnodo.canaryDelivery.ingress.weightPercent="${{ step }}"
-#                            --set-file fdrnodo.configMapFromFile.logback\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
-#                            --set-file fdrnodo.configMapFromFile.config-app\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
+  # Deploy Canary if prod or uat
+  - ${{ if and( parameters.WEU , in( parameters.ENV, 'prod', 'uat') ) }}:
+    - ${{ each step in split(variables.weight_steps, ',')}}:
+      - stage: deploy_fdr_${{ step }}
+        displayName: "Deploy ${{ parameters.ENV }} canary ${{ step }}%"
+        jobs:
+          - job: get_release_version
+            pool: $(WEU_poolImage)
+            displayName: "Get Release Version"
+            steps:
+              - bash: |
+                  IFS='"'
+                  arrIN=($(cat version.sbt))
+                  SBT_VERSION="${arrIN[1]}"
+                  IFS=' '
+
+                  echo "SBT_VERSION: $SBT_VERSION"
+                  echo "##vso[task.setvariable variable=SBT_VERSION;isOutput=true]$SBT_VERSION"
+                name: output
+          - job: step_approval_${{ step }}
+            pool: server
+            dependsOn: get_release_version
+            condition: ${{ in( parameters.ENV, 'prod', 'uat') }}
+            variables:
+              SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
+            displayName: "Approval ${{ parameters.ENV }} canary ${{ step }}% "
+            timeoutInMinutes: 70
+            steps:
+              - task: ManualValidation@0
+                displayName: "Approval version $(SBT_VERSION) ${{ parameters.ENV }} canary ${{ step }}% "
+                timeoutInMinutes: 60
+                inputs:
+                  notifyUsers: |
+                    $(APPROVE_NOTIFY_GROUP)
+                    $(APPROVE_NOTIFY_ADMIN)
+                    $(APPROVE_NOTIFY_ADMIN)
+                  instructions: "Please approve or reject ${{ parameters.ENV }} $(SBT_VERSION) canary deploy ${{ step }}%"
+                  onTimeout: 'reject'
+          - deployment: "Approved_${{ parameters.ENV }}_${{ step }}_Deploy"
+            dependsOn :
+              - get_release_version
+              - step_approval_${{ step }}
+            condition: in(dependencies.step_approval_${{ step }}.result, 'Succeeded', 'Skipped')
+            variables:
+              SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
+            displayName: "Deploy ${{ parameters.ENV }} ${{ step }}%"
+            pool: $(WEU_poolImage)
+            environment: ${{ parameters['ENV'] }}
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                    - checkout: self
+                      clean: true
+                      persistCredentials: true
+
+                    - task: Bash@3
+                      name: setup_helm_microservices_chart
+                      displayName: "Setup helm fdr chart"
+                      inputs:
+                        targetType: "inline"
+                        script: |
+                          CHART_FILE="helm/fdr/Chart.yaml"
+                          if [[ -f "$CHART_FILE" ]]; then
+                            yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                            yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                          fi
+                          helm dep build helm/
+                        failOnStderr: true
+                    - ${{ if parameters.WEU }}:
+                      - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+                        parameters:
+                          DO_DEPLOY: true
+                          ENV: ${{ parameters['ENV'] }}
+                          KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
+                          NAMESPACE: "fdr"
+                          APP_NAME: "$(appName)-canary"
+                          VALUE_FILE: $(WEU_value_file_fdr)
+                          DEPLOY_VERSION: $(SBT_VERSION)
+                          ARGUMENTS: >-
+                            --set fdrnodo.image.tag="$(SBT_VERSION)"
+                            --set fdrnodo.canaryDelivery.create="true"
+                            --set fdrnodo.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}
+                            --set fdrnodo.canaryDelivery.ingress.weightPercent="${{ step }}"
+                            --set-file fdrnodo.configMapFromFile.logback\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
+                            --set-file fdrnodo.configMapFromFile.config-app\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
 
 
   # Deploy stable
@@ -380,110 +380,110 @@ stages:
                           ARGUMENTS: >-
                             $(setupArgs.IMAGES)
                             $(setupArgs.FILES)
-#                  - ${{ if in( parameters.ENV, 'prod', 'uat') }}:
-#                      - bash: |
-#                          echo "uninstall WEU CANARY"
-#                      - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
-#                        parameters:
-#                          COMMAND: "uninstall"
-#                          DO_DEPLOY: true
-#                          ENV: ${{ parameters['ENV'] }}
-#                          KUBERNETES_SERVICE_CONN: ${{ variables.WEU_kubernetesServiceConnection }}
-#                          NAMESPACE: "fdr"
-#                          APP_NAME: "$(appName)-canary"
-#                          VALUE_FILE: $(WEU_value_file_fdr)
-#                          DEPLOY_VERSION: $(SBT_VERSION)
-#                          ARGUMENTS: "$(appName)-canary"
-#      - ${{ if parameters.NEU }}:
-#        - deployment: "Approved_${{ parameters.ENV }}_NEU_Deploy"
-#          dependsOn :
-#            - get_release_version
-#            - step_approval_stable
-#          condition:  in(dependencies.step_approval_stable.result, 'Succeeded', 'Skipped')
-#          variables:
-#            SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
-#          displayName: "Deploy ${{ parameters.ENV }} NEU stable"
-#          pool: $(NEU_poolImage)
-#          environment: ${{ parameters['ENV'] }}
-#          strategy:
-#            runOnce:
-#              deploy:
-#                steps:
-#                  - checkout: self
-#                    clean: true
-#                    persistCredentials: true
-#
-#                  - task: Bash@3
-#                    name: setup_helm_microservices_chart
-#                    displayName: "Setup helm nodo chart"
-#                    inputs:
-#                      targetType: "inline"
-#                      script: |
-#                        CHART_FILE="helm/Chart.yaml"
-#                        if [[ -f "$CHART_FILE" ]]; then
-#                          yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
-#                          yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
-#                        fi
-#                        helm dep build helm/
-#                      failOnStderr: true
-#                  - task: Bash@3
-#                    name: setupArgs
-#                    displayName: "Setup fdr and job args"
-#                    inputs:
-#                      targetType: "inline"
-#                      script: |
-#                        SETIMAGES="--set fdrnodo.image.tag=$SBT_VERSION --set fdrnodo.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}"
-#                        SETFILES="--set-file fdrnodo.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK --set-file fdrnodo.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
-#                        SETIMAGES="$SETIMAGES --set cj-ftp-upload.image.tag=$SBT_VERSION --set cj-ftp-upload.suspend=true"
-#                        SETFILES="$SETFILES --set-file cj-ftp-upload.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK"
-#                        SETFILES="$SETFILES --set-file cj-ftp-upload.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
-#                        echo "##vso[task.setvariable variable=IMAGES;isOutput=true]$SETIMAGES"
-#                        echo "##vso[task.setvariable variable=FILES;isOutput=true]$SETFILES"
-#                      failOnStderr: true
-#                  - bash: |
-#                      echo "install NEU jobs"
-#                  - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
-#                    parameters:
-#                      DO_DEPLOY: true
-#                      ENV: ${{ parameters['ENV'] }}
-#                      KUBERNETES_SERVICE_CONN: ${{ variables.NEU_kubernetesServiceConnection }}
-#                      NAMESPACE: "fdr"
-#                      APP_NAME: $(appNameCron)
-#                      VALUE_FILE: $(NEU_value_file_cron)
-#                      DEPLOY_VERSION: $(SBT_VERSION)
-#                      ARGUMENTS: >-
-#                        $(setupArgs.IMAGES)
-#                        $(setupArgs.FILES)
+                  - ${{ if in( parameters.ENV, 'prod', 'uat') }}:
+                      - bash: |
+                          echo "uninstall WEU CANARY"
+                      - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+                        parameters:
+                          COMMAND: "uninstall"
+                          DO_DEPLOY: true
+                          ENV: ${{ parameters['ENV'] }}
+                          KUBERNETES_SERVICE_CONN: ${{ variables.WEU_kubernetesServiceConnection }}
+                          NAMESPACE: "fdr"
+                          APP_NAME: "$(appName)-canary"
+                          VALUE_FILE: $(WEU_value_file_fdr)
+                          DEPLOY_VERSION: $(SBT_VERSION)
+                          ARGUMENTS: "$(appName)-canary"
+      - ${{ if parameters.NEU }}:
+        - deployment: "Approved_${{ parameters.ENV }}_NEU_Deploy"
+          dependsOn :
+            - get_release_version
+            - step_approval_stable
+          condition:  in(dependencies.step_approval_stable.result, 'Succeeded', 'Skipped')
+          variables:
+            SBT_VERSION: $[ dependencies.get_release_version.outputs['output.SBT_VERSION'] ]
+          displayName: "Deploy ${{ parameters.ENV }} NEU stable"
+          pool: $(NEU_poolImage)
+          environment: ${{ parameters['ENV'] }}
+          strategy:
+            runOnce:
+              deploy:
+                steps:
+                  - checkout: self
+                    clean: true
+                    persistCredentials: true
 
-#  # uninstall canary id prod or uat
-#  - ${{ if in( parameters.ENV, 'prod', 'uat') }}:
-#    - stage: uninstall
-#      displayName: "Uninstall ${{ parameters.ENV }} canary"
-#      condition: and( ${{ in( parameters.ENV, 'prod', 'uat') }} ,failed())
-#      jobs:
-#        - deployment: "uninstall"
-#          displayName: "Uninstall ${{ parameters.ENV }} canary"
-#          pool: $(WEU_poolImage)
-#          environment: ${{ parameters['ENV'] }}
-#          strategy:
-#            runOnce:
-#              deploy:
-#                steps:
-#                  - checkout: self
-#                    clean: true
-#                    persistCredentials: true
-#
-#                  - ${{ if and( parameters.WEU , in( parameters.ENV, 'prod', 'uat') ) }}:
-#                    - bash: |
-#                        echo "uninstall WEU CANARY"
-#                    - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
-#                      parameters:
-#                        COMMAND: "uninstall"
-#                        DO_DEPLOY: true
-#                        ENV: ${{ parameters['ENV'] }}
-#                        KUBERNETES_SERVICE_CONN: ${{ variables.NEU_kubernetesServiceConnection }}
-#                        NAMESPACE: "fdr"
-#                        APP_NAME: "$(appName)-canary"
-#                        VALUE_FILE: $(WEU_value_file_fdr)
-#                        DEPLOY_VERSION: $(SBT_VERSION)
-#                        ARGUMENTS: "$(appName)-canary"
+                  - task: Bash@3
+                    name: setup_helm_microservices_chart
+                    displayName: "Setup helm nodo chart"
+                    inputs:
+                      targetType: "inline"
+                      script: |
+                        CHART_FILE="helm/Chart.yaml"
+                        if [[ -f "$CHART_FILE" ]]; then
+                          yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                          yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                        fi
+                        helm dep build helm/
+                      failOnStderr: true
+                  - task: Bash@3
+                    name: setupArgs
+                    displayName: "Setup fdr and job args"
+                    inputs:
+                      targetType: "inline"
+                      script: |
+                        SETIMAGES="--set fdrnodo.image.tag=$SBT_VERSION --set fdrnodo.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}"
+                        SETFILES="--set-file fdrnodo.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK --set-file fdrnodo.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
+                        SETIMAGES="$SETIMAGES --set cj-ftp-upload.image.tag=$SBT_VERSION --set cj-ftp-upload.suspend=true"
+                        SETFILES="$SETFILES --set-file cj-ftp-upload.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK"
+                        SETFILES="$SETFILES --set-file cj-ftp-upload.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
+                        echo "##vso[task.setvariable variable=IMAGES;isOutput=true]$SETIMAGES"
+                        echo "##vso[task.setvariable variable=FILES;isOutput=true]$SETFILES"
+                      failOnStderr: true
+                  - bash: |
+                      echo "install NEU jobs"
+                  - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+                    parameters:
+                      DO_DEPLOY: true
+                      ENV: ${{ parameters['ENV'] }}
+                      KUBERNETES_SERVICE_CONN: ${{ variables.NEU_kubernetesServiceConnection }}
+                      NAMESPACE: "fdr"
+                      APP_NAME: $(appNameCron)
+                      VALUE_FILE: $(NEU_value_file_cron)
+                      DEPLOY_VERSION: $(SBT_VERSION)
+                      ARGUMENTS: >-
+                        $(setupArgs.IMAGES)
+                        $(setupArgs.FILES)
+
+  # uninstall canary id prod or uat
+  - ${{ if in( parameters.ENV, 'prod', 'uat') }}:
+    - stage: uninstall
+      displayName: "Uninstall ${{ parameters.ENV }} canary"
+      condition: and( ${{ in( parameters.ENV, 'prod', 'uat') }} ,failed())
+      jobs:
+        - deployment: "uninstall"
+          displayName: "Uninstall ${{ parameters.ENV }} canary"
+          pool: $(WEU_poolImage)
+          environment: ${{ parameters['ENV'] }}
+          strategy:
+            runOnce:
+              deploy:
+                steps:
+                  - checkout: self
+                    clean: true
+                    persistCredentials: true
+
+                  - ${{ if and( parameters.WEU , in( parameters.ENV, 'prod', 'uat') ) }}:
+                    - bash: |
+                        echo "uninstall WEU CANARY"
+                    - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+                      parameters:
+                        COMMAND: "uninstall"
+                        DO_DEPLOY: true
+                        ENV: ${{ parameters['ENV'] }}
+                        KUBERNETES_SERVICE_CONN: ${{ variables.NEU_kubernetesServiceConnection }}
+                        NAMESPACE: "fdr"
+                        APP_NAME: "$(appName)-canary"
+                        VALUE_FILE: $(WEU_value_file_fdr)
+                        DEPLOY_VERSION: $(SBT_VERSION)
+                        ARGUMENTS: "$(appName)-canary"
