@@ -15,6 +15,7 @@ import eu.sia.pagopa.common.util.xml.XmlUtil.XsdDatePattern
 import eu.sia.pagopa.common.util.xml.{XmlUtil, XsdValid}
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.actor.response.NodoChiediElencoFlussiRendicontazioneResponse
+import eu.sia.pagopa.rendicontazioni.util.RendicontazioniUtil
 import scalaxbmodel.nodoperpa.{NodoChiediElencoFlussiRendicontazione, NodoChiediElencoFlussiRendicontazioneRisposta, TipoElencoFlussiRendicontazione, TipoIdRendicontazione}
 
 import java.time.LocalDateTime
@@ -23,7 +24,6 @@ import scala.util.{Failure, Success, Try}
 
 final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
     extends PerRequestActor
-    with ReUtil
     with NodoChiediElencoFlussiRendicontazioneResponse {
 
   var req: SoapRequest = _
@@ -31,7 +31,8 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
   val inputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_input").toBoolean
   val outputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean
 
-  val dayLimit: Long = Try(context.system.settings.config.getLong(s"chiediElencoFlussiRendicontazioneDayLimit")).getOrElse(90)
+  private val dayLimit: Long = Try(context.system.settings.config.getLong(s"chiediElencoFlussiRendicontazioneDayLimit")).getOrElse(90)
+  private val callNexiToo: Boolean = Try(context.system.settings.config.getBoolean(s"callNexiToo")).getOrElse(false)
 
   var re: Option[Re] = None
 
@@ -49,10 +50,21 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
     }
   }
 
-  private def createTipoElencoFlussiRendicontazione(rendicontazioni: Seq[(String, LocalDateTime)]) = {
-    val tipiIdRendi = rendicontazioni.map(rendi => {
+  private def parseResponseNexi(payloadResponse: String): Try[Option[NodoChiediElencoFlussiRendicontazioneRisposta]] = {
+    (for {
+      _ <- XsdValid.checkOnly(payloadResponse, XmlEnum.NODO_CHIEDI_ELENCO_FLUSSI_RENDICONTAZIONE_RISPOSTA_NODOPERPA, inputXsdValid)
+      body <- XmlEnum.str2nodoChiediElencoFlussiRendicontazioneResponse_nodoperpa(payloadResponse)
+    } yield Some(body)) recoverWith { case e =>
+      log.error(e, e.getMessage)
+      Success(None)
+    }
+  }
+
+  private def createTipoElencoFlussiRendicontazione(rendicontazioni: Seq[(String, LocalDateTime)], rendicontazioniNexi: Seq[Option[TipoIdRendicontazione]]) = {
+    val tipiIdRendi = (rendicontazioniNexi ++ rendicontazioni.map(rendi => {
       Some(TipoIdRendicontazione(rendi._1, XmlUtil.StringXMLGregorianCalendarDate.format(rendi._2, XsdDatePattern.DATE_TIME)))
-    })
+    })).distinct
+
     Future.successful(Some(TipoElencoFlussiRendicontazione(tipiIdRendi.size, tipiIdRendi)))
   }
 
@@ -143,10 +155,35 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
       rendicontazioni <- findRendicontazioni(ncefr)
 
       rendicontazioniFiltered = rendicontazioni.groupBy(_._1).map(a => a._2.maxBy(_._2)(Ordering.by(_.toString)))
-
       _ = log.debug(s"Trovate ${rendicontazioniFiltered.size} Rendicontazioni")
 
-      elencoFlussiRendicontazione <- createTipoElencoFlussiRendicontazione(rendicontazioniFiltered.toSeq)
+      rendicontazioniNexi <- if( callNexiToo ) {
+        (for {
+          _ <- Future.successful(())
+
+          ncefrResponse <- RendicontazioniUtil.callPrimitive(
+            req.sessionId,
+            req.testCaseId,
+            req.primitive,
+            SoapReceiverType.NEXI.toString,
+            req.payload.replace("\n",""),
+            actorProps
+          )
+
+          flussiResponseNexi <- Future.fromTry(parseResponseNexi(ncefrResponse.payload.get))
+          tipiIdRendicontazioni = if (flussiResponseNexi.isDefined && flussiResponseNexi.get.elencoFlussiRendicontazione.isDefined) {
+            flussiResponseNexi.get.elencoFlussiRendicontazione.get.idRendicontazione
+          } else {
+            Nil
+          }
+        } yield tipiIdRendicontazioni).recoverWith({
+          case _ => Future.successful(Nil)
+        })
+      } else {
+        Future.successful(Nil)
+      }
+
+      elencoFlussiRendicontazione <- createTipoElencoFlussiRendicontazione(rendicontazioniFiltered.toSeq, rendicontazioniNexi)
 
       ncrfrResponse = NodoChiediElencoFlussiRendicontazioneRisposta(None, elencoFlussiRendicontazione)
 
@@ -165,7 +202,6 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
         log.info(NodoLogConstant.logGeneraPayload("nodoChiediElencoFlussiRendicontazioneRisposta"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, DigitPaErrorCodes.PPT_SYSTEM_ERROR, re)
     }) map (sr => {
-      traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
       log.info(NodoLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()

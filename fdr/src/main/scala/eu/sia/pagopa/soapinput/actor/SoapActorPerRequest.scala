@@ -30,8 +30,7 @@ class SoapActorPerRequest(
     allRouters: Map[String, ActorRef],
     reEventFunc: ReEventFunc,
     actorProps: ActorProps
-) extends FuturePerRequestActor
-    with ReUtil {
+) extends FuturePerRequestActor {
 
   var message: SoapRouterRequest = _
   var bundleResponse: SoapResponse = _

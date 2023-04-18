@@ -16,7 +16,7 @@ import org.slf4j.MDC
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps: ActorProps) extends PerRequestActor with FtpSenderResponse with ReUtil {
+final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps: ActorProps) extends PerRequestActor with FtpSenderResponse {
 
   var req: FTPRequest = _
   var replyTo: ActorRef = _

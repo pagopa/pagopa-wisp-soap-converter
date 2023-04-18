@@ -12,15 +12,12 @@ import akka.stream.StreamTcpException
 import akka.stream.scaladsl.TcpIdleTimeoutException
 import com.typesafe.sslconfig.akka.AkkaSSLConfig
 import eu.sia.pagopa.ActorProps
-import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.message._
-import eu.sia.pagopa.common.util.StringUtils.Utf8String
 import eu.sia.pagopa.common.util._
 
 import java.net.InetSocketAddress
-import java.time.temporal.ChronoUnit
 import javax.net.ssl.{SSLException, SSLHandshakeException}
 import scala.concurrent.Future
 import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
@@ -56,31 +53,6 @@ class ActorUtility {
     (for {
       httpResponse <- dispatchRequest(req.timeout, req.proxyData, akkaReq)
       payload <- Unmarshaller.stringUnmarshaller(httpResponse.entity)
-      _ = {
-        val reRequest = ReRequest(
-          sessionId = req.sessionId,
-          testCaseId = req.testCaseId,
-          re = req.re.copy(
-            status = None,
-            componente = Componente.FESP.toString,
-            categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
-            sottoTipoEvento = SottoTipoEvento.REQ.toString,
-            tipoEvento = Some(req.messageType),
-            payload = req.payload.map(_.getUtf8Bytes),
-            esito = Some(EsitoRE.INVIATA.toString),
-            insertedTimestamp = redate,
-            erogatore = req.receiver,
-            fruitore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-            fruitoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-            erogatoreDescr = req.receiver,
-            info = Some(req.uri)
-          ),
-          reExtra = Some(ReExtra(uri = Some(req.uri), httpMethod = Some(req.method.toString())))
-        )
-        log.info(NodoLogConstant.callBundle(Constant.KeyName.RE_FEEDER))
-        actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
-      }
-
       payloadResponse =
         if (payload.nonEmpty) {
           payload.getBytes(Constant.UTF_8)
@@ -88,58 +60,10 @@ class ActorUtility {
           s"HttpStatus: [${httpResponse.status.value}], headers: [${httpResponse.headers.toString()}]".getBytes(Constant.UTF_8)
         }
 
-      _ = {
-        val now = Util.now()
-        val reRequest = ReRequest(
-          sessionId = req.sessionId,
-          testCaseId = req.testCaseId,
-          re = req.re.copy(
-            status = None,
-            componente = Componente.FESP.toString,
-            categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
-            sottoTipoEvento = SottoTipoEvento.RESP.toString,
-            tipoEvento = Some(req.messageType),
-            esito = Some(EsitoRE.RICEVUTA.toString),
-            insertedTimestamp = now,
-            erogatore = req.receiver,
-            fruitore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-            fruitoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-            erogatoreDescr = req.receiver,
-            payload = Some(payloadResponse),
-            info = Some(req.uri)
-          ),
-          reExtra = Some(ReExtra(uri = None, httpMethod = None, statusCode = Some(httpResponse.status.intValue()), elapsed = Some(redate.until(now,ChronoUnit.MILLIS))))
-        )
-        actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
-      }
-
       response = SimpleHttpRes(req.sessionId, httpResponse.status.intValue(), httpResponse.headers, Some(payload), None, req.testCaseId)
       _ = log.debug(s"callHttp - end")
     } yield response).recover({ case e: Throwable =>
       log.warn(e, s"callHttp -> [${req.method}] [${req.uri}] -> [${e.getMessage}]")
-      val redate = Util.now()
-      val reRequest = ReRequest(
-        sessionId = req.sessionId,
-        testCaseId = req.testCaseId,
-        re = req.re.copy(
-          status = None,
-          componente = Componente.FESP.toString,
-          categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
-          sottoTipoEvento = SottoTipoEvento.REQ.toString,
-          tipoEvento = Some(req.messageType),
-          esito = Some(EsitoRE.INVIATA_KO.toString),
-          insertedTimestamp = redate,
-          erogatore = req.receiver,
-          fruitore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-          fruitoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-          erogatoreDescr = req.receiver,
-          payload = req.payload.map(_.getUtf8Bytes),
-          info = Some(req.uri)
-        ),
-        reExtra = Some(ReExtra(uri = Some(req.uri), httpMethod = Some(req.method.toString())))
-      )
-      actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
-
       val response = SimpleHttpRes(req.sessionId, StatusCodes.InternalServerError.intValue, Seq(), None, Some(handlerReqException(e)), req.testCaseId)
       log.debug(s"callHttp - end")
       response

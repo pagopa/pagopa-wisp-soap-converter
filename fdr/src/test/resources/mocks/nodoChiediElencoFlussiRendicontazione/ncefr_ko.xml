@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ppt="http://ws.pagamenti.telematici.gov/" xmlns:tns="http://NodoPagamentiSPC.spcoop.gov.it/servizi/PagamentiTelematiciRPT" xmlns:ppthead="http://ws.pagamenti.telematici.gov/ppthead">
+    <soapenv:Body>
+        <ppt:nodoChiediElencoFlussiRendicontazioneRisposta>
+            <elencoFlussiRendicontazione>
+            </elencoFlussiRendicontazione>
+        </ppt:nodoChiediElencoFlussiRendicontazioneRisposta>
+   </soapenv:Body>
+</soapenv:Envelope>

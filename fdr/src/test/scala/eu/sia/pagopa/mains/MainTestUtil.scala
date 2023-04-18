@@ -14,11 +14,11 @@ trait MainTestUtil {
 
   val remotingPort = "2552"
   println(s"remotingPort: $remotingPort")
-  val managementPort = "8558"
+  val managementPort = "8588"
   println(s"managementPort: $managementPort")
   val prometheusPort = "9091"
   println(s"prometheusPort: $prometheusPort")
-  val servicePort = "8080"
+  val servicePort = "8088"
   println(s"servicePort: $servicePort")
 
   EnvHacker.setEnv(

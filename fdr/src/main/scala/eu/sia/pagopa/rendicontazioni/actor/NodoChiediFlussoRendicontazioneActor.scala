@@ -16,6 +16,7 @@ import eu.sia.pagopa.common.util.xml.XmlUtil.StringBase64Binary
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.actor.response.NodoChiediFlussoRendicontazioneResponse
+import eu.sia.pagopa.rendicontazioni.util.RendicontazioniUtil
 import it.pagopa.config.{CreditorInstitution, PaymentServiceProvider, Station}
 import scalaxb.Base64Binary
 import scalaxbmodel.nodoperpa.{NodoChiediFlussoRendicontazione, NodoChiediFlussoRendicontazioneRisposta}
@@ -23,7 +24,7 @@ import scalaxbmodel.nodoperpa.{NodoChiediFlussoRendicontazione, NodoChiediFlusso
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps) extends PerRequestActor with ReUtil with NodoChiediFlussoRendicontazioneResponse {
+final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps) extends PerRequestActor with NodoChiediFlussoRendicontazioneResponse {
 
   override def actorError(e: DigitPaException): Unit = {
     actorError(req, replyTo, ddataMap, e, re)
@@ -34,6 +35,8 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
 
   val outputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean
   val inputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_input").toBoolean
+
+  private val callNexiToo: Boolean = Try(context.system.settings.config.getBoolean(s"callNexiToo")).getOrElse(false)
 
   var re: Option[Re] = None
 
@@ -207,12 +210,40 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
       )
       _ = re = Some(re_)
 
-      (_, binaryFileOption, _, pa, staz, psp) <- checksSemanticiEDuplicati(ncfr)
+      rendicontazioneNexi <- if (callNexiToo) {
+        (for {
+          _ <- Future.successful(())
 
-      _ = re = re.map(r => r.copy(fruitoreDescr = Some(staz.stationCode), pspDescr = psp.flatMap(p => p.description)))
+          ncfrResponse <- RendicontazioniUtil.callPrimitive(
+            req.sessionId,
+            req.testCaseId,
+            req.primitive,
+            SoapReceiverType.NEXI.toString,
+            req.payload.replace("\n", ""),
+            actorProps
+          )
 
-      _ = log.debug("Creazione risposta rendicontazione")
-      xmlrendicontazione <- elaboraRisposta(binaryFileOption, pa)
+          flussoResponseNexi <- Future.fromTry(parseResponseNexi(ncfrResponse.payload.get))
+          xmlRendicontazione = flussoResponseNexi.flatMap(_.xmlRendicontazione)
+        } yield xmlRendicontazione).recoverWith({
+          case _ => Future.successful(None)
+        })
+      } else {
+        Future.successful(None)
+      }
+
+      xmlrendicontazione <- if( rendicontazioneNexi.isDefined ) {
+        Future.successful(rendicontazioneNexi)
+      } else {
+        for {
+          _ <- Future.successful(())
+          _ = log.debug("Recupero rendicontazione")
+          (_, binaryFileOption, _, pa, staz, psp) <- checksSemanticiEDuplicati(ncfr)
+          _ = re = re.map(r => r.copy(fruitoreDescr = Some(staz.stationCode), pspDescr = psp.flatMap(p => p.description)))
+          _ = log.debug("Creazione risposta rendicontazione")
+          rendicontazioneDb <- elaboraRisposta(binaryFileOption, pa)
+        } yield rendicontazioneDb
+      }
       _ = log.info(NodoLogConstant.logGeneraPayload("nodoChiediFlussoRendicontazioneRisposta"))
       ncfrResponse = NodoChiediFlussoRendicontazioneRisposta(None, xmlrendicontazione)
 
@@ -230,11 +261,20 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
         log.info(NodoLogConstant.logGeneraPayload("nodoChiediFlussoRendicontazioneRisposta"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), re)
     }) map (sr => {
-      traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
       log.info(NodoLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()
     })
+  }
+
+  private def parseResponseNexi(payloadResponse: String): Try[Option[NodoChiediFlussoRendicontazioneRisposta]] = {
+    (for {
+      _ <- XsdValid.checkOnly(payloadResponse, XmlEnum.NODO_CHIEDI_FLUSSO_RENDICONTAZIONE_RISPOSTA_NODOPERPA, inputXsdValid)
+      body <- XmlEnum.str2nodoChiediFlussoRendicontazioneResponse_nodoperpa(payloadResponse)
+    } yield Some(body)) recoverWith { case e =>
+      log.error(e, e.getMessage)
+      Success(None)
+    }
   }
 
 }

@@ -30,7 +30,7 @@ import java.util.zip.{ZipEntry, ZipOutputStream}
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps) extends PerRequestActor with ReUtil with NodoInviaFlussoRendicontazioneResponse {
+final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps) extends PerRequestActor with NodoInviaFlussoRendicontazioneResponse {
 
   var req: SoapRequest = _
   var replyTo: ActorRef = _
@@ -393,7 +393,6 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
         log.info(NodoLogConstant.logGeneraPayload("nodoInviaFlussoRendicontazioneRisposta"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), re)
     }) map (sr => {
-      traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
       log.info(NodoLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()
