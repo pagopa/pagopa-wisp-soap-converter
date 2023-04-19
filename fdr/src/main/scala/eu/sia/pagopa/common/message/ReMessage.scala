@@ -9,7 +9,7 @@ object SottoTipoEvento extends Enumeration {
   val REQ, RESP, INTERN = Value
 }
 object SoapReceiverType extends Enumeration {
-  val NEXI = Value
+  val NEXI, FDRNEW = Value
 }
 
 object Componente extends Enumeration {

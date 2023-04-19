@@ -10,7 +10,7 @@ case class ProxyData(host: String, port: Int, username: Option[String] = None, p
 case class SimpleHttpReq(
     override val sessionId: String,
     messageType: String,
-    contentype: akka.http.scaladsl.model.ContentType.WithCharset,
+    contentype: akka.http.scaladsl.model.ContentType.NonBinary,
     method: HttpMethod,
     uri: String,
     payload: Option[String] = None,

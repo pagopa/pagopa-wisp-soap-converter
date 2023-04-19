@@ -160,7 +160,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
         (for {
           _ <- Future.successful(())
 
-          ncefrResponse <- RendicontazioniUtil.callPrimitive(
+          ncefrResponse <- RendicontazioniUtil.callPrimitiveOld(
             req.sessionId,
             req.testCaseId,
             req.primitive,
