@@ -66,15 +66,15 @@ class SoapActorPerRequest(
       sessionId = message.sessionId,
       testCaseId = message.testCaseId,
       re = Re(
-        componente = Componente.FESP.toString,
+        componente = Componente.FDR.toString,
         categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
         sottoTipoEvento = SottoTipoEvento.REQ.toString,
         esito = Some(EsitoRE.RICEVUTA.toString),
         sessionId = Some(message.sessionId),
         payload = Some(message.payload.getUtf8Bytes),
         insertedTimestamp = message.timestamp,
-        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+        erogatore = Some(FaultId.FDR),
+        erogatoreDescr = Some(FaultId.FDR)
       ),
       reExtra = Some(reExtra(message))
     )
@@ -101,7 +101,7 @@ class SoapActorPerRequest(
             re = sres.re
               .map(
                 _.copy(
-                  componente = Componente.FESP.toString,
+                  componente = Componente.FDR.toString,
                   categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
                   sottoTipoEvento = SottoTipoEvento.RESP.toString,
                   esito = Some(EsitoRE.INVIATA.toString),
@@ -111,15 +111,15 @@ class SoapActorPerRequest(
               )
               .getOrElse(
                 Re(
-                  componente = Componente.FESP.toString,
+                  componente = Componente.FDR.toString,
                   categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
                   sottoTipoEvento = SottoTipoEvento.RESP.toString,
                   esito = Some(EsitoRE.INVIATA.toString),
                   payload = sres.payload.map(_.getUtf8Bytes),
                   insertedTimestamp = now,
                   sessionId = Some(sres.sessionId),
-                  erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-                  erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+                  erogatore = Some(FaultId.FDR),
+                  erogatoreDescr = Some(FaultId.FDR)
                 )
               ),
             reExtra = Some(ReExtra(statusCode = Some(bundleResponse.statusCode), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
@@ -147,7 +147,7 @@ class SoapActorPerRequest(
                 sessionId = message.sessionId,
                 testCaseId = message.testCaseId,
                 re = Re(
-                  componente = Componente.FESP.toString,
+                  componente = Componente.FDR.toString,
                   categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
                   sottoTipoEvento = SottoTipoEvento.RESP.toString,
                   esito = Some(EsitoRE.INVIATA_KO.toString),
@@ -176,7 +176,7 @@ class SoapActorPerRequest(
                 sessionId = message.sessionId,
                 testCaseId = message.testCaseId,
                 re = Re(
-                  componente = Componente.FESP.toString,
+                  componente = Componente.FDR.toString,
                   categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
                   sottoTipoEvento = SottoTipoEvento.RESP.toString,
                   esito = Some(EsitoRE.INVIATA_KO.toString),
@@ -267,7 +267,7 @@ class SoapActorPerRequest(
           sessionId = message.sessionId,
           testCaseId = message.testCaseId,
           re = Re(
-            componente = Componente.FESP.toString,
+            componente = Componente.FDR.toString,
             categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
             sottoTipoEvento = SottoTipoEvento.RESP.toString,
             esito = Some(EsitoRE.INVIATA_KO.toString),
@@ -295,7 +295,7 @@ class SoapActorPerRequest(
           sessionId = message.sessionId,
           testCaseId = message.testCaseId,
           re = Re(
-            componente = Componente.FESP.toString,
+            componente = Componente.FDR.toString,
             categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
             sottoTipoEvento = SottoTipoEvento.RESP.toString,
             esito = Some(EsitoRE.INVIATA_KO.toString),

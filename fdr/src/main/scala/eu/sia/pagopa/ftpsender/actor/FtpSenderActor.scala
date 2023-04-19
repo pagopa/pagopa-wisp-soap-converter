@@ -37,20 +37,21 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
         val ftpconfigopt = ddataMap.ftpServers.find(f => f._2.id == ftpServerId)
 
         if (ftpconfigopt.isEmpty) {
-          throw FtpSenderException(s"Configurazione non trovata su database", FTPFailureReason.CONFIGURATION)
+          throw FtpSenderException(s"Configurazione FTP non trovata", FTPFailureReason.CONFIGURATION)
         }
 
         val pipeline = for {
           ftpconfig <- Future.successful(ftpconfigopt.get._2)
           _ = log.info(NodoLogConstant.logSemantico(Constant.KeyName.FTP_SENDER))
           _ <- Future(validateInput(filename))
-          _ = log.debug(s"Recupero file da DB:fileId[$fileId]")
+          _ = log.debug(s"Recupero file da DB con fileId=[$fileId]")
           file <- repositories.fdrRepository.findFtpFileById(fileId, tipo).flatMap {
             case Some(b) =>
               Future.successful(b)
             case None =>
-              log.info("File non trovato su database")
-              Future.failed(DigitPaException("File non trovato su database", DigitPaErrorCodes.PPT_SYSTEM_ERROR))
+              val message = s"File non trovato su database"
+              log.info(message)
+              Future.failed(DigitPaException(message, DigitPaErrorCodes.PPT_SYSTEM_ERROR))
           }
           inPath =
             if (ftpconfig.inPath.endsWith("/")) {
@@ -64,7 +65,7 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
 
           opts = SSHOptions(host = ftpconfig.host, port = ftpconfig.port, username = ftpconfig.username, password = ftpconfig.password, connectTimeout = ftpConnectTimeout)
 
-          _ = log.debug(s"Connessione al server")
+          _ = log.debug(s"Connessione al server [${opts.host}]")
 
           ssh <- Future(new SSH(opts)).recover({ case e =>
             log.error(e, s"Impossibile stabilire una connessione col server sftp [$opts]")
@@ -90,7 +91,7 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
 
         pipeline
           .recoverWith { case ex: Throwable =>
-            log.warn(ex, s"errore ftp sender:${ex.getMessage}")
+            log.warn(ex, s"Errore FTP sender:${ex.getMessage}")
             Future.successful(FTPResponse(sessionId, testCaseId, Some(DigitPaErrorCodes.PPT_SYSTEM_ERROR)))
           }
           .map(resp => {

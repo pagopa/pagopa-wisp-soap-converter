@@ -1,11 +1,14 @@
 package eu.sia.pagopa
 
+import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.DigitPaErrorCodes
-import eu.sia.pagopa.common.util.{Constant, RandomStringUtils, Util}
+import eu.sia.pagopa.common.util.{Constant, RandomStringUtils, StringUtils, Util}
+import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.testutil.TestItems
 import slick.jdbc.H2Profile
 
 import java.time.format.DateTimeFormatter
+import scala.concurrent.Future
 import scala.util.Try
 
 //@org.scalatest.Ignore
@@ -92,7 +95,6 @@ class RendicontazioniTests() extends BaseUnitTest {
           assert(r.esito == "OK", "outcome in res")
         }
       )
-      val dateora2 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'hh:mm:ss").format(Util.now())
       inviaFlussoRendicontazione(
         pa = "77777777777",
         idFlusso = Some(idFlusso),
@@ -246,14 +248,64 @@ class RendicontazioniTests() extends BaseUnitTest {
 
   }
 
-  "chiedi flusso" must {
+  "chiediFlussoRendicontazione" must {
     "ok" in {
       chiediFlussoRendicontazione(
         "not exists",
+        testCase = Some("ko_nexi"),
         responseAssert = (r) => {
+          assert(r.fault.isDefined)
+          assert(r.fault.get.faultCode == DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO.faultCode)
           assert(r.xmlRendicontazione.isEmpty)
         }
       )
     }
+  }
+
+  "chiediElencoFlussiRendicontazione Nexi OK" in {
+    val idFlussoNexiToCheck = "2023-04-01nodo-doc-dev-16818090899"
+    chiediElencoFlussiRendicontazione(responseAssert = (r) => {
+      assert(r.elencoFlussiRendicontazione.isDefined)
+      assert(r.elencoFlussiRendicontazione.get.idRendicontazione.nonEmpty)
+      val listarendi = r.elencoFlussiRendicontazione.get.idRendicontazione
+      val zipped = listarendi.tail.zip(listarendi)
+      assert(!zipped.exists(p => p._1 == p._2))
+      assert(listarendi.exists(p => p.get.identificativoFlusso == idFlussoNexiToCheck))
+    })
+  }
+
+  "chiediElencoFlussiRendicontazione Nexi KO" in {
+    val idFlussoNexiToCheck = "2023-04-01nodo-doc-dev-16818090899"
+    chiediElencoFlussiRendicontazione(testCase = Some("ko_nexi"), responseAssert = (r) => {
+      assert(r.elencoFlussiRendicontazione.isDefined)
+      assert(r.elencoFlussiRendicontazione.get.idRendicontazione.nonEmpty)
+      val listarendi = r.elencoFlussiRendicontazione.get.idRendicontazione
+      assert(!listarendi.exists(p => p.get.identificativoFlusso == idFlussoNexiToCheck))
+    })
+  }
+
+  "chiediFlussoRendicontazione Nexi OK" in {
+    val idFlussoNexiToCheck = "2023-04-01nodo-doc-dev-16818090899"
+    val res = chiediFlussoRendicontazione(idFlussoNexiToCheck)
+    (for {
+      _ <- Future.successful(())
+      _ = {
+        assert(res.fault.isEmpty)
+        assert(res.xmlRendicontazione.isDefined)
+      }
+      rendicontazioneDecoded <- Future.fromTry(StringUtils.getStringDecoded(res.xmlRendicontazione.get, true))
+      flussoRiversamento = XmlEnum.str2FlussoRiversamento_flussoriversamento(rendicontazioneDecoded).getOrElse(throw exception.DigitPaException(DigitPaErrorCodes.PPT_SINTASSI_XSD))
+      _ = {
+        assert(flussoRiversamento.identificativoFlusso == idFlussoNexiToCheck)
+      }
+    } yield ())
+  }
+
+  "chiediFlussoRendicontazione KO" in {
+    val idFlussoNexiToCheck = "2023-04-01nodo-doc-dev-16818090800"
+    chiediFlussoRendicontazione(idFlussoNexiToCheck, Some("ko_nexi"), responseAssert = (r) => {
+      assert(r.fault.isDefined)
+      assert(r.fault.get.faultCode == DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO.faultCode)
+    })
   }
 }

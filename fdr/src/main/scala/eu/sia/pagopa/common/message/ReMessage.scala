@@ -9,11 +9,11 @@ object SottoTipoEvento extends Enumeration {
   val REQ, RESP, INTERN = Value
 }
 object SoapReceiverType extends Enumeration {
-  val PA, PSP, NEXI, PAGOPA = Value
+  val NEXI = Value
 }
 
 object Componente extends Enumeration {
-  val FESP = Value
+  val FDR = Value
 }
 
 case class ReExtra(uri: Option[String] = None, headers: Seq[(String, String)] = Nil, httpMethod: Option[String] = None, callRemoteAddress: Option[String] = None, statusCode: Option[Int] = None, elapsed: Option[Long] = None, soapProtocol: Boolean = false)

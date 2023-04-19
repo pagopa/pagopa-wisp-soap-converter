@@ -270,7 +270,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
 
     re = Some(
       Re(
-        componente = Componente.FESP.toString,
+        componente = Componente.FDR.toString,
         categoriaEvento = CategoriaEvento.INTERNO.toString,
         sessionId = Some(req.sessionId),
         payload = None,
@@ -278,9 +278,9 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         insertedTimestamp = soapRequest.timestamp,
-        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+        erogatore = Some(FaultId.FDR),
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+        erogatoreDescr = Some(FaultId.FDR)
       )
     )
 
@@ -297,18 +297,18 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
       re_ = Re(
         idDominio = Some(nodoInviaFlussoRendicontazione.identificativoDominio),
         psp = Some(nodoInviaFlussoRendicontazione.identificativoPSP),
-        componente = Componente.FESP.toString,
+        componente = Componente.FDR.toString,
         categoriaEvento = CategoriaEvento.INTERNO.toString,
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         fruitore = Some(nodoInviaFlussoRendicontazione.identificativoCanale),
-        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+        erogatore = Some(FaultId.FDR),
         canale = Some(nodoInviaFlussoRendicontazione.identificativoCanale),
         esito = Some(EsitoRE.RICEVUTA.toString),
         sessionId = Some(req.sessionId),
         insertedTimestamp = now,
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+        erogatoreDescr = Some(FaultId.FDR)
       )
       _ = re = Some(re_)
 

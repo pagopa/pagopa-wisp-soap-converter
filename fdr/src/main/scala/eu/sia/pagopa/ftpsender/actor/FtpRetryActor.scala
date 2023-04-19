@@ -157,17 +157,17 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
             log.debug(s"Caricamento file completato")
           } match {
             case Success(_) =>
-              log.debug(s"Aggiornamento stato file a UPLOADED")
+              log.debug(s"Aggiornamento stato file a ${FtpFileStatus.UPLOADED}")
               fdrRepository.updateFileStatus(f._1.id, FtpFileStatus.UPLOADED, tipo, actorClassId)
             case Failure(e) =>
-              log.error(e, s"errore upload file [id:${f._1.id},path:${f._3}]")
+              log.error(e, s"Errore upload file [id:${f._1.id},path:${f._3}]")
               fdrRepository.updateFileRetry(f._1, tipo, actorClassId)
           }
         }))
       }
     } yield ()
     pipeline.recover({ case e =>
-      log.error(e, "errore upload sftp")
+      log.error(e, "Errore upload SFTP")
     })
   }
 

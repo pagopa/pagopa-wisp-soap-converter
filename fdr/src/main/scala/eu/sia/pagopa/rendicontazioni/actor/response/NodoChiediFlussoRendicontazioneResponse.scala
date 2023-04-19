@@ -17,7 +17,7 @@ import scalaxbmodel.nodoperpa.{FaultBean, NodoChiediFlussoRendicontazioneRispost
 trait NodoChiediFlussoRendicontazioneResponse { this: NodoLogging =>
 
   def makeResponseWithFault(e: DigitPaException): NodoChiediFlussoRendicontazioneRisposta = {
-    NodoChiediFlussoRendicontazioneRisposta(Option(FaultBean(e.faultCode, e.faultString, FaultId.NODO_DEI_PAGAMENTI_SPC, Option(e.message), None)), None)
+    NodoChiediFlussoRendicontazioneRisposta(Option(FaultBean(e.faultCode, e.faultString, FaultId.FDR, Option(e.message), None)), None)
   }
 
   def errorHandler(sessionId: String, testCaseId: Option[String], outputXsdValid: Boolean, e: DigitPaException, re: Option[Re]): SoapResponse = {
@@ -27,7 +27,7 @@ trait NodoChiediFlussoRendicontazioneResponse { this: NodoLogging =>
       _ <- XsdValid.checkOnly(respPayload, XmlEnum.NODO_CHIEDI_FLUSSO_RENDICONTAZIONE_RISPOSTA_NODOPERPA, outputXsdValid)
     } yield SoapResponse(sessionId, Some(respPayload), StatusCodes.OK.intValue, re, testCaseId, None))
       .recover({ case e: Throwable =>
-        log.error(e, "errore creazione risposta negativa")
+        log.error(e, "Errore creazione risposta negativa")
         val cfb = exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e)
         val failRes = makeResponseWithFault(cfb)
         val payloadInviaRPTRispostaFail = XmlEnum.nodoChiediFlussoRendicontazioneRisposta2Str_nodoperpa(failRes).get

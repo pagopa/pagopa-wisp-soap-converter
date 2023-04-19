@@ -8,4 +8,8 @@ object RandomStringUtils {
     Random.alphanumeric.filter(_.isDigit).take(size).mkString("")
   }
 
+  def randomAlphanumeric(size: Int): String = {
+    Random.alphanumeric.take(size).mkString("")
+  }
+
 }

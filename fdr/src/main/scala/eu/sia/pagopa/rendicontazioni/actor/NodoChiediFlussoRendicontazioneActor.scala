@@ -24,7 +24,8 @@ import scalaxbmodel.nodoperpa.{NodoChiediFlussoRendicontazione, NodoChiediFlusso
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps) extends PerRequestActor with NodoChiediFlussoRendicontazioneResponse {
+final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
+  extends PerRequestActor with NodoChiediFlussoRendicontazioneResponse {
 
   override def actorError(e: DigitPaException): Unit = {
     actorError(req, replyTo, ddataMap, e, re)
@@ -41,7 +42,6 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
   var re: Option[Re] = None
 
   private def parseInput(br: SoapRequest): Try[NodoChiediFlussoRendicontazione] = {
-    log.debug("parseInput")
     (for {
       _ <- XsdValid.checkOnly(br.payload, XmlEnum.NODO_CHIEDI_FLUSSO_RENDICONTAZIONE_NODOPERPA, inputXsdValid)
       body <- XmlEnum.str2nodoChiediFlussoRendicontazione_nodoperpa(br.payload)
@@ -50,26 +50,23 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
       val cfb = exception.DigitPaException(e.getMessage, DigitPaErrorCodes.PPT_SINTASSI_EXTRAXSD, e)
       Failure(cfb)
     }
-
   }
 
   private def wrapInBundleMessage(ncefrr: NodoChiediFlussoRendicontazioneRisposta) = {
     for {
       respPayload <- XmlEnum.nodoChiediFlussoRendicontazioneRisposta2Str_nodoperpa(ncefrr)
       _ <- XsdValid.checkOnly(respPayload, XmlEnum.NODO_CHIEDI_FLUSSO_RENDICONTAZIONE_RISPOSTA_NODOPERPA, outputXsdValid)
-      _ = log.debug("Envelope di risposta valida")
     } yield respPayload
   }
 
   private def elaboraRisposta(binaryFileOption: Option[BinaryFile], paOpt: Option[CreditorInstitution]): Future[Option[Base64Binary]] = {
-
     paOpt match {
       case Some(pa) =>
         if (pa.reportingFtp) {
-          log.info("Rendicontazione ftp")
+          log.info("Rendicontazione FTP")
           Future.successful(None)
         } else {
-          log.info("Rendicontazione NON ftp")
+          log.info("Rendicontazione NON FTP")
           if (binaryFileOption.isDefined) {
             val resppayload = StringBase64Binary.encodeBase64ToBase64(binaryFileOption.get.fileContent.get)
             Future.successful(Some(resppayload))
@@ -97,7 +94,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
       checkFlussoRendicontazione(ncfr.identificativoFlusso, ncfr.identificativoDominio, ncfr.identificativoPSP)
     rendiFuture flatMap {
       case Some(rendicontazione) =>
-        log.debug(s"flusso: ${ncfr.identificativoFlusso} trovato")
+        log.debug(s"Flusso: ${ncfr.identificativoFlusso} trovato")
 
         val checks = for {
           (pa, staz) <-
@@ -173,7 +170,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
 
     re = Some(
       Re(
-        componente = Componente.FESP.toString,
+        componente = Componente.FDR.toString,
         categoriaEvento = CategoriaEvento.INTERNO.toString,
         sessionId = Some(req.sessionId),
         payload = None,
@@ -181,32 +178,31 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         insertedTimestamp = soapRequest.timestamp,
-        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+        erogatore = Some(FaultId.FDR),
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+        erogatoreDescr = Some(FaultId.FDR)
       )
     )
     log.info(NodoLogConstant.logSintattico(actorClassId))
     val pipeline = for {
-
       ncfr <- Future.fromTry(parseInput(soapRequest))
 
       now = Util.now()
       re_ = Re(
         idDominio = ncfr.identificativoDominio,
         psp = ncfr.identificativoPSP,
-        componente = Componente.FESP.toString,
+        componente = Componente.FDR.toString,
         categoriaEvento = CategoriaEvento.INTERNO.toString,
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         fruitore = Some(ncfr.identificativoStazioneIntermediarioPA),
-        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+        erogatore = Some(FaultId.FDR),
         stazione = Some(ncfr.identificativoStazioneIntermediarioPA),
         esito = Some(EsitoRE.RICEVUTA.toString),
         sessionId = Some(req.sessionId),
         insertedTimestamp = now,
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+        erogatoreDescr = Some(FaultId.FDR)
       )
       _ = re = Some(re_)
 
@@ -219,7 +215,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
             req.testCaseId,
             req.primitive,
             SoapReceiverType.NEXI.toString,
-            req.payload.replace("\n", ""),
+            req.payload,
             actorProps
           )
 

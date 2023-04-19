@@ -5,14 +5,14 @@ import eu.sia.pagopa.common.util.FaultId
 import scala.language.implicitConversions
 
 case class DigitPaException(
-    message: String,
-    code: DigitPaErrorCodes.Value,
-    cause: Throwable = None.orNull,
-    reporterId: String = FaultId.NODO_DEI_PAGAMENTI_SPC,
-    originalFaultCode: Option[String] = None,
-    originalFaultString: Option[String] = None,
-    originalFaultDescription: Option[String] = None,
-    customFaultString: Option[String] = None
+                             message: String,
+                             code: DigitPaErrorCodes.Value,
+                             cause: Throwable = None.orNull,
+                             reporterId: String = FaultId.FDR,
+                             originalFaultCode: Option[String] = None,
+                             originalFaultString: Option[String] = None,
+                             originalFaultDescription: Option[String] = None,
+                             customFaultString: Option[String] = None
 ) extends Exception(message, cause) {
 
   def this(code: DigitPaErrorCodes.Value) = this(DigitPaErrorCodes.description(code), code)
@@ -29,7 +29,7 @@ object DigitPaException {
       message = DigitPaErrorCodes.description(code),
       code = code,
       cause = cause,
-      reporterId = FaultId.NODO_DEI_PAGAMENTI_SPC,
+      reporterId = FaultId.FDR,
       originalFaultCode = None,
       originalFaultString = None,
       originalFaultDescription = None
@@ -39,7 +39,7 @@ object DigitPaException {
       message = DigitPaErrorCodes.description(code),
       code = code,
       cause = None.orNull,
-      reporterId = FaultId.NODO_DEI_PAGAMENTI_SPC,
+      reporterId = FaultId.FDR,
       originalFaultCode = None,
       originalFaultString = None,
       originalFaultDescription = None
@@ -68,7 +68,7 @@ object DigitPaException {
       message = message,
       code = code,
       cause = None.orNull,
-      reporterId = FaultId.NODO_DEI_PAGAMENTI_SPC,
+      reporterId = FaultId.FDR,
       originalFaultCode = originalFaultCode,
       originalFaultString = originalFaultString,
       originalFaultDescription = originalFaultDescription

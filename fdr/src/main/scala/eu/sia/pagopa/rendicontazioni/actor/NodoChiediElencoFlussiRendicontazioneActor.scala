@@ -64,7 +64,6 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
     val tipiIdRendi = (rendicontazioniNexi ++ rendicontazioni.map(rendi => {
       Some(TipoIdRendicontazione(rendi._1, XmlUtil.StringXMLGregorianCalendarDate.format(rendi._2, XsdDatePattern.DATE_TIME)))
     })).distinct
-
     Future.successful(Some(TipoElencoFlussiRendicontazione(tipiIdRendi.size, tipiIdRendi)))
   }
 
@@ -119,16 +118,16 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
 
     re = Some(
       Re(
-        componente = Componente.FESP.toString,
+        componente = Componente.FDR.toString,
         categoriaEvento = CategoriaEvento.INTERNO.toString,
         sessionId = Some(req.sessionId),
         esito = Some(EsitoRE.CAMBIO_STATO.toString),
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         insertedTimestamp = soapRequest.timestamp,
-        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+        erogatore = Some(FaultId.FDR),
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+        erogatoreDescr = Some(FaultId.FDR)
       )
     )
     log.info(NodoLogConstant.logSintattico(actorClassId))
@@ -155,7 +154,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
       rendicontazioni <- findRendicontazioni(ncefr)
 
       rendicontazioniFiltered = rendicontazioni.groupBy(_._1).map(a => a._2.maxBy(_._2)(Ordering.by(_.toString)))
-      _ = log.debug(s"Trovate ${rendicontazioniFiltered.size} Rendicontazioni")
+      _ = log.debug(s"Trovate ${rendicontazioniFiltered.size} rendicontazioni")
 
       rendicontazioniNexi <- if( callNexiToo ) {
         (for {
@@ -166,7 +165,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
             req.testCaseId,
             req.primitive,
             SoapReceiverType.NEXI.toString,
-            req.payload.replace("\n",""),
+            req.payload,
             actorProps
           )
 

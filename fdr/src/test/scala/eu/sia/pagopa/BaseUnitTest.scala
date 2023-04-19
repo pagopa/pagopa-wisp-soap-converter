@@ -86,6 +86,11 @@ abstract class BaseUnitTest()
           loglevel = "INFO"
           logging-filter = "akka.event.slf4j.Slf4jLoggingFilter"
         }
+        nexi {
+            url="http://localhost:8080/webservices/input"
+            timeoutSeconds=60
+        }
+        callNexiToo=true
         limitjobs = true
         config.ftp.connect-timeout = "1000"
         slick.dbs.default.db.numThreads=20
@@ -305,9 +310,9 @@ abstract class BaseUnitTest()
       responseAssert: NodoChiediFlussoRendicontazioneRisposta => Assertion = (_) => assert(true)
   ): NodoChiediFlussoRendicontazioneRisposta = {
     val act =
-      system.actorOf(Props.create(classOf[NodoChiediFlussoRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "chiediflussorendi")), s"chiediflussorendi${Util.now()}")
+      system.actorOf(Props.create(classOf[NodoChiediFlussoRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "nodoChiediFlussoRendicontazione")), s"nodoChiediFlussoRendicontazione${Util.now()}")
     val soapres =
-      askActor(act, SoapRequest(UUID.randomUUID().toString, chiediFlussoRendicontazionePayload(idFlusso), TestItems.testPDD, "chiediflussorendi", "test", Util.now(), ReExtra(), testCase))
+      askActor(act, SoapRequest(UUID.randomUUID().toString, chiediFlussoRendicontazionePayload(idFlusso), TestItems.testPDD, "nodoChiediFlussoRendicontazione", "test", Util.now(), ReExtra(), testCase))
     assert(soapres.payload.isDefined)
     val actRes: Try[NodoChiediFlussoRendicontazioneRisposta] = XmlEnum.str2nodoChiediFlussoRendicontazioneResponse_nodoperpa(soapres.payload.get)
     assert(actRes.isSuccess)
@@ -321,11 +326,11 @@ abstract class BaseUnitTest()
   ): NodoChiediElencoFlussiRendicontazioneRisposta = {
     val act =
       system.actorOf(
-        Props.create(classOf[NodoChiediElencoFlussiRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "chiedielencoflussorendi")),
-        s"chiedielencoflussorendi${Util.now()}"
+        Props.create(classOf[NodoChiediElencoFlussiRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "nodoChiediElencoFlussiRendicontazione")),
+        s"nodoChiediElencoFlussiRendicontazione${Util.now()}"
       )
     val soapres =
-      askActor(act, SoapRequest(UUID.randomUUID().toString, chiediElencoFlussiRendicontazionePayload(), TestItems.testPDD, "chiedielencoflussorendi", "test", Util.now(), ReExtra(), testCase))
+      askActor(act, SoapRequest(UUID.randomUUID().toString, chiediElencoFlussiRendicontazionePayload(), TestItems.testPDD, "nodoChiediElencoFlussiRendicontazione", "test", Util.now(), ReExtra(), testCase))
     assert(soapres.payload.isDefined)
     val actRes: Try[NodoChiediElencoFlussiRendicontazioneRisposta] = XmlEnum.str2nodoChiediElencoFlussiRendicontazioneResponse_nodoperpa(soapres.payload.get)
     assert(actRes.isSuccess)
