@@ -7,7 +7,7 @@ import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
-import eu.sia.pagopa.common.json.model.rendicontazione.{NodoInviaFlussoRendicontazioneRequest, Payment, Receiver, Sender}
+import eu.sia.pagopa.common.json.model.rendicontazione.{CodiceEsitoSingoloPagamentoEnum, NodoInviaFlussoRendicontazioneRequest, Payment, Receiver, Sender, SenderTypeEnum}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.repo.fdr.enums.{FtpFileStatus, RendicontazioneStatus}
@@ -414,7 +414,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
   private def translateNifrFdrNewAndCallIt(nodoInviaFlussoRendicontazione: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento) = {
     (for {
       _ <- Future.successful(())
-      _ = log.info(NodoLogConstant.logGeneraPayload("nodoInviaFlussoRendicontazione REST"))
+      _ = log.info(NodoLogConstant.logGeneraPayload(s"${req.primitive} REST"))
       nifrRequest = NodoInviaFlussoRendicontazioneRequest(
         nodoInviaFlussoRendicontazione.identificativoFlusso,
         nodoInviaFlussoRendicontazione.dataOraFlusso.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME),
@@ -424,9 +424,9 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
           nodoInviaFlussoRendicontazione.identificativoCanale,
           nodoInviaFlussoRendicontazione.password,
           flussoRiversamento.istitutoMittente.identificativoUnivocoMittente.tipoIdentificativoUnivoco match {
-            case scalaxbmodel.flussoriversamento.GValue => "PERSONA_GIURIDICA"
-            case scalaxbmodel.flussoriversamento.A => "CODICE_ABI"
-            case _ => "CODICE_BIC"
+            case scalaxbmodel.flussoriversamento.GValue => SenderTypeEnum.PERSONA_GIURIDICA
+            case scalaxbmodel.flussoriversamento.A      => SenderTypeEnum.CODICE_ABI
+            case _                                      => SenderTypeEnum.CODICE_BIC
           },
           flussoRiversamento.istitutoMittente.denominazioneMittente,
           flussoRiversamento.istitutoMittente.identificativoUnivocoMittente.codiceIdentificativoUnivoco
@@ -446,9 +446,9 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
             p.indiceDatiSingoloPagamento.map(_.intValue),
             p.singoloImportoPagato,
             p.codiceEsitoSingoloPagamento match {
-              case Number0 => "PAGAMENTO_ESEGUITO"
-              case Number3 => "PAGAMENTO_REVOCATO"
-              case _ => "PAGAMENTO_NO_RPT"
+              case Number0  => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_ESEGUITO
+              case Number3  => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_REVOCATO
+              case _        => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_NO_RPT
             },
             p.dataEsitoSingoloPagamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME)
           )

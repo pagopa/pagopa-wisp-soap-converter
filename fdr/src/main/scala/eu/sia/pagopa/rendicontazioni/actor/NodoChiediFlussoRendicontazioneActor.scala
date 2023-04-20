@@ -75,7 +75,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
           }
         }
 
-      case None => //se NON c'è l'identificativoDominio
+      case None =>
         log.info("Identificativo dominio NON presente")
         if (binaryFileOption.isDefined) {
           val resppayload = StringBase64Binary.encodeBase64ToBase64(binaryFileOption.get.fileContent.get)

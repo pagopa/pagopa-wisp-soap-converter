@@ -34,8 +34,11 @@ case class Sender(
                    idBroker: String,
                    idChannel: String,
                    password: String,
-                   _type: String,
+                   _type: SenderTypeEnum.Value,
                    name: Option[String],
                    id: String
                  )
 
+object SenderTypeEnum extends Enumeration {
+  val PERSONA_GIURIDICA, CODICE_ABI, CODICE_BIC = Value
+}

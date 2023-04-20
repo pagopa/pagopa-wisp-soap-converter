@@ -32,7 +32,11 @@ case class Payment(
                     identificativoUnivocoRiscossione: String,
                     indiceDatiSingoloPagamento: Option[Integer],
                     singoloImportoPagato: BigDecimal,
-                    codiceEsitoSingoloPagamento: String,
+                    codiceEsitoSingoloPagamento: CodiceEsitoSingoloPagamentoEnum.Value,
                     dataEsitoSingoloPagamento: String
                   )
+
+object CodiceEsitoSingoloPagamentoEnum extends Enumeration {
+  val PAGAMENTO_ESEGUITO, PAGAMENTO_REVOCATO, PAGAMENTO_NO_RPT = Value
+}
 
