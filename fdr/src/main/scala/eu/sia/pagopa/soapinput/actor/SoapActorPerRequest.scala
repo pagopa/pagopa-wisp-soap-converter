@@ -125,7 +125,7 @@ class SoapActorPerRequest(
           )
 
           Util.logPayload(log, sres.payload)
-          log.info(NodoLogConstant.callBundle(Constant.KeyName.RE_FEEDER, isInput = false))
+          log.info(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER, isInput = false))
           reEventFunc(reRequest, log, actorProps.ddataMap)
           complete(createHttpResponse(StatusCode.int2StatusCode(bundleResponse.statusCode), bundleResponse.payload.getOrElse(""), sres.sessionId), Constant.KeyName.SOAP_INPUT)
         case None =>
@@ -250,7 +250,7 @@ class SoapActorPerRequest(
         message.testCaseId
       )
     } yield (router, soapRequest)) map { case (router, soapRequest) =>
-      log.info(NodoLogConstant.callBundle(router.path.name))
+      log.info(FdrLogConstant.callBundle(router.path.name))
       router ! soapRequest
     } recover {
       case sre: SoapRouterException =>

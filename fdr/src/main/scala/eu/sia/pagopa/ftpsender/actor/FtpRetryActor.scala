@@ -111,7 +111,7 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
   }
 
   def uploadFile(sessionId: String, tipo: String, ftpServerId: Long, fileIds: Seq[Long]): Future[Unit] = {
-    log.info(NodoLogConstant.logStart(actorClassId) + "-per-request")
+    log.info(FdrLogConstant.logStart(actorClassId) + "-per-request")
 
     log.debug(s"Ricevuta request FTPRetryRequest[${sessionId}][$tipo]")
     val ftpconfigopt =
@@ -123,7 +123,7 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
 
     val pipeline = for {
       ftpconfig <- Future.successful(ftpconfigopt.get._2)
-      _ = log.info(NodoLogConstant.logSemantico(Constant.KeyName.FTP_RETRY) + "-per-request")
+      _ = log.info(FdrLogConstant.logSemantico(Constant.KeyName.FTP_RETRY) + "-per-request")
       _ = log.debug(s"Recupero files da DB")
       files <- fdrRepository.findFtpFilesByIds(fileIds, tipo)
 

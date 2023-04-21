@@ -45,6 +45,8 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
 
   private val callNewServiceFdr: Boolean = Try(context.system.settings.config.getBoolean(s"callNewServiceFdr")).getOrElse(false)
 
+  val RESPONSE_NAME = "nodoInviaFlussoRendicontazioneRisposta"
+
   override def actorError(e: DigitPaException): Unit = {
     actorError(req, replyTo, ddataMap, e, re)
   }
@@ -290,13 +292,10 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
     )
 
     val pipeline = for {
-
       _ <- Future.successful(())
-
-      _ = log.debug("Parserizzazione input")
-      _ = log.info(NodoLogConstant.logSintattico(actorClassId))
+      _ = log.info(FdrLogConstant.logSintattico(actorClassId))
       nodoInviaFlussoRendicontazione <- Future.fromTry(parseInput(soapRequest.payload, inputXsdValid))
-      _ = log.debug("Input parserizzato correttamente")
+      _ = log.debug("Richiesta validata correttamente")
 
       now = Util.now()
       re_ = Re(
@@ -317,13 +316,12 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
       )
       _ = re = Some(re_)
 
-      _ = log.debug("Check semantici input req")
-      _ = log.info(NodoLogConstant.logSemantico(actorClassId))
+      _ = log.info(FdrLogConstant.logSemantico(actorClassId))
       (pa, psp, canale) <- Future.fromTry(checks(ddataMap, nodoInviaFlussoRendicontazione))
 
       _ = re = re.map(r => r.copy(fruitoreDescr = canale.flatMap(c => c.description), pspDescr = psp.flatMap(p => p.description)))
 
-      _ = log.debug("Check duplicati su db")
+      _ = log.debug("Controllo duplicati su db")
       _ <- checksDB(nodoInviaFlussoRendicontazione)
 
       dataOraFlussoNew = LocalDateTime.parse(nodoInviaFlussoRendicontazione.dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault()))
@@ -334,13 +332,12 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
         LocalDateTime.of(dataOraFlussoNew.getYear, 12, 31, 23, 59, 59)
       )
 
-      _ = log.debug("Check dataOraFlusso new with dataOraFlusso old")
+      _ = log.debug("Controllo dataOraFlusso new with dataOraFlusso old")
       _ <- oldRendi match {
         case Some(old) =>
-//          val d = LocalDateTime.parse(nodoInviaFlussoRendicontazione.dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault()))
           val idDominioNew = nodoInviaFlussoRendicontazione.identificativoDominio
           if (dataOraFlussoNew.isAfter(old.dataOraFlusso)) {
-            log.debug("Check idDominio new with idDominio old")
+            log.debug("Controllo idDominio new with idDominio old")
             if (idDominioNew == old.dominio) {
               Future.successful(())
             } else {
@@ -363,7 +360,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
           Future.successful(())
       }
 
-      _ = log.debug("Check xml rendicontazione e salvataggio")
+      _ = log.debug("Verifica xml rendicontazione e salvataggio")
       (esito, _, sftpFile, flussoRiversamento) <- validateAndSaveRendicontazione(nodoInviaFlussoRendicontazione, pa)
 
       _ <-
@@ -387,24 +384,22 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
         Future.successful(())
       }
 
-      _ = log.info(NodoLogConstant.logGeneraPayload("nodoInviaFlussoRendicontazioneRisposta"))
+      _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
       nodoInviaFlussoRisposta = NodoInviaFlussoRendicontazioneRisposta(None, esito)
-      _ = log.info(NodoLogConstant.logSintattico("nodoInviaFlussoRendicontazioneRisposta"))
+      _ = log.info(FdrLogConstant.logSintattico(RESPONSE_NAME))
       resultMessage <- Future.fromTry(wrapInBundleMessage(nodoInviaFlussoRisposta))
       sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, re, req.testCaseId, None)
     } yield sr
 
     pipeline.recover({
       case e: DigitPaException =>
-        log.warn(e, s"Creazione response negativa [${e.getMessage}]")
-        log.info(NodoLogConstant.logGeneraPayload("nodoInviaFlussoRendicontazioneRisposta"))
+        log.warn(e, FdrLogConstant.logGeneraPayload(s"negativo $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, e, re)
       case e: Throwable =>
-        log.warn(e, s"Creazione response negativa [${e.getMessage}]")
-        log.info(NodoLogConstant.logGeneraPayload("nodoInviaFlussoRendicontazioneRisposta"))
+        log.warn(e, FdrLogConstant.logGeneraPayload(s"negativo $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), re)
     }) map (sr => {
-      log.info(NodoLogConstant.logEnd(actorClassId))
+      log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()
     })
@@ -414,7 +409,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
   private def translateNifrFdrNewAndCallIt(nodoInviaFlussoRendicontazione: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento) = {
     (for {
       _ <- Future.successful(())
-      _ = log.info(NodoLogConstant.logGeneraPayload(s"${req.primitive} REST"))
+      _ = log.info(FdrLogConstant.logGeneraPayload(s"${req.primitive} REST"))
       nifrRequest = InviaFlussoRendicontazioneRequest(
         nodoInviaFlussoRendicontazione.identificativoFlusso,
         nodoInviaFlussoRendicontazione.dataOraFlusso.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME),

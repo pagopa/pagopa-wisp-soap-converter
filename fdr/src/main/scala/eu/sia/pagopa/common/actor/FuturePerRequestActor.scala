@@ -6,7 +6,7 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.server.RequestContext
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
-import eu.sia.pagopa.common.util.NodoLogConstant
+import eu.sia.pagopa.common.util.FdrLogConstant
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.FiniteDuration
@@ -54,7 +54,7 @@ trait FuturePerRequestActor extends Actor with NodoLogging {
     val f: Future[akka.http.scaladsl.server.RouteResult] = requestContext.complete(m)
     f.onComplete(a => donePromise.complete(a))
     log.debug(s"FuturePerRequest - DESTROY FutureActorPerRequest [$actorPathName]")
-    log.info(NodoLogConstant.logEnd(s"$actorClassId"))
+    log.info(FdrLogConstant.logEnd(s"$actorClassId"))
     context.stop(context.self)
   }
 }

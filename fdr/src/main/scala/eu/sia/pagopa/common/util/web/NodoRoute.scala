@@ -469,7 +469,7 @@ case class NodoRoute(
     MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
     Util.logPayload(log, Some(payload))
     log.debug(s"END request Http for AKKA HTTP TIMEOUT")
-    log.info(NodoLogConstant.logEnd(Constant.KeyName.SOAP_INPUT))
+    log.info(FdrLogConstant.logEnd(Constant.KeyName.SOAP_INPUT))
     HttpResponse(status = StatusCodes.ServiceUnavailable, entity = HttpEntity(MediaTypes.`application/xml` withCharset HttpCharsets.`UTF-8`, payload))
   }
 
@@ -479,7 +479,7 @@ case class NodoRoute(
     MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
     Util.logPayload(log, Some(payload))
     log.debug(s"END request Http for AKKA HTTP TIMEOUT")
-    log.info(NodoLogConstant.logEnd(Constant.KeyName.SOAP_INPUT))
+    log.info(FdrLogConstant.logEnd(Constant.KeyName.SOAP_INPUT))
     HttpResponse(status = StatusCodes.BadRequest, entity = HttpEntity(MediaTypes.`application/xml` withCharset HttpCharsets.`UTF-8`, payload))
   }
 
@@ -488,7 +488,7 @@ case class NodoRoute(
       path("webservices" / "input") {
         val sessionId = UUID.randomUUID().toString
         MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-        log.info(NodoLogConstant.logStart(Constant.KeyName.SOAP_INPUT))
+        log.info(FdrLogConstant.logStart(Constant.KeyName.SOAP_INPUT))
         import scala.concurrent.duration._
         val httpSeverRequestTimeout = FiniteDuration(httpSeverRequestTimeoutParam, SECONDS)
         withRequestTimeout(httpSeverRequestTimeout, _ => akkaHttpTimeout(sessionId)) {
@@ -587,7 +587,7 @@ case class NodoRoute(
                             })
                             payloadTry match {
                               case Success(payload) =>
-                                log.info(NodoLogConstant.logStart(Constant.KeyName.REST_INPUT))
+                                log.info(FdrLogConstant.logStart(Constant.KeyName.REST_INPUT))
                                 val request = ctx.request
                                 log.info(s"Content-Type [${request.entity.contentType}]")
 

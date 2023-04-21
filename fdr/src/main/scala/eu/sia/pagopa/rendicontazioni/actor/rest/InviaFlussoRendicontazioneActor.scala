@@ -62,7 +62,7 @@ final case class InviaFlussoRendicontazioneActorPerRequest(repositories: Reposit
         _ <- Future.successful(())
 
         _ = log.debug("Parserizzazione input")
-        _ = log.info(NodoLogConstant.logSintattico(actorClassId))
+        _ = log.info(FdrLogConstant.logSintattico(actorClassId))
         nodoInviaFlussoRendicontazione <- Future.fromTry(parseInput(restRequest.payload.get, false))
         _ = log.debug("Input parserizzato correttamente")
 
@@ -86,7 +86,7 @@ final case class InviaFlussoRendicontazioneActorPerRequest(repositories: Reposit
         _ = re = Some(re_)
 
         _ = log.debug("Check semantici input req")
-        _ = log.info(NodoLogConstant.logSemantico(actorClassId))
+        _ = log.info(FdrLogConstant.logSemantico(actorClassId))
 
 
         _ = log.debug("Check xml rendicontazione e salvataggio")
@@ -98,9 +98,9 @@ final case class InviaFlussoRendicontazioneActorPerRequest(repositories: Reposit
 //          Future.successful(())
 //        }
 
-        _ = log.info(NodoLogConstant.logGeneraPayload("nodoInviaFlussoRendicontazioneRisposta"))
+        _ = log.info(FdrLogConstant.logGeneraPayload("nodoInviaFlussoRendicontazioneRisposta"))
         nodoInviaFlussoRisposta = NodoInviaFlussoRendicontazioneRisposta(None, "")
-        _ = log.info(NodoLogConstant.logSintattico("nodoInviaFlussoRendicontazioneRisposta"))
+        _ = log.info(FdrLogConstant.logSintattico("nodoInviaFlussoRendicontazioneRisposta"))
         sr = SoapResponse(req.sessionId, None, StatusCodes.OK.intValue, re, req.testCaseId, None)
       } yield sr
 
@@ -111,7 +111,7 @@ final case class InviaFlussoRendicontazioneActorPerRequest(repositories: Reposit
           val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
           Future.successful(generateResponse(Some(pmae)))
       }) map (sr => {
-        log.info(NodoLogConstant.logEnd(actorClassId))
+        log.info(FdrLogConstant.logEnd(actorClassId))
         replyTo ! sr
         complete()
       })
@@ -138,7 +138,7 @@ final case class InviaFlussoRendicontazioneActorPerRequest(repositories: Reposit
   }
 
   private def generateResponse(exception: Option[RestException]) = {
-    log.info(NodoLogConstant.logGeneraPayload(actorClassId + "Risposta"))
+    log.info(FdrLogConstant.logGeneraPayload(actorClassId + "Risposta"))
     val httpStatusCode = exception.map(_.statusCode).getOrElse(StatusCodes.OK.intValue)
     log.debug(s"Generazione risposta $httpStatusCode")
     RestResponse(req.sessionId, None, httpStatusCode, re, req.testCaseId, None)
@@ -163,7 +163,7 @@ final case class InviaFlussoRendicontazioneActorPerRequest(repositories: Reposit
   private def translateRestToSoap(inviaFlussoRendicontazione: InviaFlussoRendicontazioneRequest) = {
     (for {
       _ <- Future.successful(())
-      _ = log.info(NodoLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
+      _ = log.info(FdrLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
 
 //      flussoRiversamento = CtFlussoRiversamento(
 //        Number1u461,

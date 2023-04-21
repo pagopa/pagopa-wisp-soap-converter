@@ -84,7 +84,7 @@ class RestActorPerRequest(
     case srr: RestRouterRequest =>
       log.debug("RECEIVE RestRouterRequest")
       message = srr
-      log.info(NodoLogConstant.callBundle(Constant.KeyName.RE_FEEDER, isInput = true))
+      log.info(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER, isInput = true))
       sendToBundle(message)
 
     case sres: RestResponse =>
@@ -94,7 +94,7 @@ class RestActorPerRequest(
           bundleResponse = sres
 
           log.debug("RECEIVE RestResponse")
-          log.info(NodoLogConstant.callBundle(Constant.KeyName.RE_FEEDER, isInput = false))
+          log.info(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER, isInput = false))
 
           val now = Util.now()
           val reRequest = ReRequest(
@@ -197,7 +197,7 @@ class RestActorPerRequest(
       case Some(router) =>
         val restRequest =
           RestRequest(message.sessionId, message.payload, message.queryParams, message.callRemoteAddress.getOrElse(""), message.primitiva, message.timestamp, reExtra(message), message.testCaseId)
-        log.info(NodoLogConstant.callBundle(router.path.name))
+        log.info(FdrLogConstant.callBundle(router.path.name))
         router ! restRequest
 
       case None =>

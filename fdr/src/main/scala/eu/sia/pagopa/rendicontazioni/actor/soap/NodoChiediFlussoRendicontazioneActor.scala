@@ -39,6 +39,8 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
 
   private val callNexiToo: Boolean = Try(context.system.settings.config.getBoolean(s"callNexiToo")).getOrElse(false)
 
+  val RESPONSE_NAME = "nodoChiediFlussoRendicontazioneRisposta"
+
   var re: Option[Re] = None
 
   private def parseInput(br: SoapRequest): Try[NodoChiediFlussoRendicontazione] = {
@@ -183,7 +185,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
         erogatoreDescr = Some(FaultId.FDR)
       )
     )
-    log.info(NodoLogConstant.logSintattico(actorClassId))
+    log.info(FdrLogConstant.logSintattico(actorClassId))
     val pipeline = for {
       ncfr <- Future.fromTry(parseInput(soapRequest))
 
@@ -242,14 +244,14 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
         log.debug("Nessuna rendicontazione restituita da Nexi")
         for {
           _ <- Future.successful(())
-          _ = log.debug("Recupero rendicontazione a db")
+          _ = log.debug(s"Cerco la rendicontazione ${ncfr.identificativoFlusso} a db")
           (_, binaryFileOption, _, pa, staz, psp) <- checksSemanticiEDuplicati(ncfr)
           _ = re = re.map(r => r.copy(fruitoreDescr = Some(staz.stationCode), pspDescr = psp.flatMap(p => p.description)))
-          _ = log.debug("Creazione risposta rendicontazione")
+          _ = log.debug("Creazione risposta con rendicontazione")
           rendicontazioneDb <- elaboraRisposta(binaryFileOption, pa)
         } yield rendicontazioneDb
       }
-      _ = log.info(NodoLogConstant.logGeneraPayload("nodoChiediFlussoRendicontazioneRisposta"))
+      _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
       ncfrResponse = NodoChiediFlussoRendicontazioneRisposta(None, xmlrendicontazione)
 
       resultMessage <- Future.fromTry(wrapInBundleMessage(ncfrResponse))
@@ -258,22 +260,20 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
 
     pipeline.recover({
       case e: DigitPaException =>
-        log.warn(e, s"Creazione response negativa [${e.getMessage}]")
-        log.info(NodoLogConstant.logGeneraPayload("nodoChiediFlussoRendicontazioneRisposta"))
+        log.warn(e, FdrLogConstant.logGeneraPayload(s"negativo $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, e, re)
       case e: Throwable =>
-        log.warn(e, s"Creazione response negativa [${e.getMessage}]")
-        log.info(NodoLogConstant.logGeneraPayload("nodoChiediFlussoRendicontazioneRisposta"))
+        log.warn(e, FdrLogConstant.logGeneraPayload(s"negativo $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), re)
     }) map (sr => {
-      log.info(NodoLogConstant.logEnd(actorClassId))
+      log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()
     })
   }
 
   private def parseResponseNexi(payloadResponse: String): Try[Option[NodoChiediFlussoRendicontazioneRisposta]] = {
-    log.debug("Parse response Nexi")
+    log.info(FdrLogConstant.logSintattico(s"Nexi $RESPONSE_NAME"))
     (for {
       _ <- XsdValid.checkOnly(payloadResponse, XmlEnum.NODO_CHIEDI_FLUSSO_RENDICONTAZIONE_RISPOSTA_NODOPERPA, inputXsdValid)
       body <- XmlEnum.str2nodoChiediFlussoRendicontazioneResponse_nodoperpa(payloadResponse)

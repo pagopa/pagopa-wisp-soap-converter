@@ -1,7 +1,6 @@
 package eu.sia.pagopa.rendicontazioni.util
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.model
 import akka.http.scaladsl.model.{ContentTypes, HttpMethods, ContentType => _}
 import eu.sia.pagopa.ActorProps
 import eu.sia.pagopa.common.message._
@@ -24,10 +23,7 @@ object RendicontazioniUtil {
       payload: String,
       actorProps: ActorProps
   )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
-    log.info(s"Chiamo [$soapAction] [$receiver]")
-
-    val url = as.settings.config.getString(s"${receiver.toLowerCase}.url")
-    val timeout = as.settings.config.getInt(s"${receiver.toLowerCase}.timeoutSeconds")
+    val (url, timeout) = loadServiceConfig(soapAction, receiver)
 
     val simpleHttpReq = SimpleHttpReq(
       sessionId,
@@ -43,10 +39,7 @@ object RendicontazioniUtil {
       testCaseId
     )
 
-    for {
-      simpleHttpRes <- actorProps.actorUtility.callHttp(simpleHttpReq, actorProps)
-      _ = log.info(s"Risposto [$soapAction] [$receiver]")
-    } yield simpleHttpRes
+    callService(simpleHttpReq, soapAction, receiver, actorProps)
   }
 
   def callPrimitiveNew(
@@ -57,10 +50,8 @@ object RendicontazioniUtil {
                         payload: String,
                         actorProps: ActorProps
                       )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
-    log.info(s"calling $soapAction $receiver")
 
-    val url = as.settings.config.getString(s"${receiver.toLowerCase}.url")
-    val timeout = as.settings.config.getInt(s"${receiver.toLowerCase}.timeoutSeconds")
+    val (url, timeout) = loadServiceConfig(soapAction, receiver)
 
     val simpleHttpReq = SimpleHttpReq(
       sessionId,
@@ -76,8 +67,30 @@ object RendicontazioniUtil {
       testCaseId
     )
 
-    actorProps.actorUtility.callHttp(simpleHttpReq, actorProps)
+    callService(simpleHttpReq, soapAction, receiver, actorProps)
+  }
 
+  private def loadServiceConfig(soapAction: String,
+                                receiver: String)(implicit log: NodoLogger, as: ActorSystem) = {
+    log.info(s"Carico configurazione di $receiver per $soapAction")
+
+    val url = as.settings.config.getString(s"${receiver.toLowerCase}.url")
+    val timeout = as.settings.config.getInt(s"${receiver.toLowerCase}.timeoutSeconds")
+
+    (url, timeout)
+  }
+
+
+  private def callService(simpleHttpReq: SimpleHttpReq,
+                          soapAction: String,
+                          receiver: String,
+                          actorProps: ActorProps)(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
+    log.info(s"Chiamo $receiver per $soapAction")
+
+    for {
+      simpleHttpRes <- actorProps.actorUtility.callHttp(simpleHttpReq, actorProps)
+      _ = log.info(s"Risposta $receiver per $soapAction")
+    } yield simpleHttpRes
   }
 
 }

@@ -36,6 +36,8 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
 
   var re: Option[Re] = None
 
+  val RESPONSE_NAME = "nodoChiediElencoFlussiRendicontazioneRisposta"
+
   override def actorError(e: DigitPaException): Unit = {
     actorError(req, replyTo, ddataMap, e, re)
   }
@@ -51,7 +53,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
   }
 
   private def parseResponseNexi(payloadResponse: String): Try[Option[NodoChiediElencoFlussiRendicontazioneRisposta]] = {
-    log.debug("Parse response Nexi")
+    log.info(FdrLogConstant.logSintattico(s"Nexi $RESPONSE_NAME"))
     (for {
       _ <- XsdValid.checkOnly(payloadResponse, XmlEnum.NODO_CHIEDI_ELENCO_FLUSSI_RENDICONTAZIONE_RISPOSTA_NODOPERPA, inputXsdValid)
       body <- XmlEnum.str2nodoChiediElencoFlussiRendicontazioneResponse_nodoperpa(payloadResponse)
@@ -62,7 +64,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
   }
 
   private def createTipoElencoFlussiRendicontazione(rendicontazioni: Seq[(String, LocalDateTime)], rendicontazioniNexi: Seq[Option[TipoIdRendicontazione]]) = {
-    log.debug("Merge elenco flussi Nexi with ours")
+    log.debug("Unisco l'elenco dei flussi di Nexi con i nostri")
     val tipiIdRendi = (rendicontazioniNexi ++ rendicontazioni.map(rendi => {
       Some(TipoIdRendicontazione(rendi._1, XmlUtil.StringXMLGregorianCalendarDate.format(rendi._2, XsdDatePattern.DATE_TIME)))
     })).distinct
@@ -70,6 +72,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
   }
 
   private def findRendicontazioni(ncefr: NodoChiediElencoFlussiRendicontazione) = {
+    log.debug("Cerco rendicontazini valide a db")
     val idjIdIntPA = ddataMap.creditorInstitutionBrokers(ncefr.identificativoIntermediarioPA).brokerCode
     val idStazioniInt = ddataMap.stations.filter(_._2.brokerCode == idjIdIntPA).map(_._2.stationCode).toSeq
     val paStazPa =
@@ -110,7 +113,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
     for {
       respPayload <- XmlEnum.nodoChiediElencoFlussiRendicontazioneRisposta2Str_nodoperpa(ncefrr)
       _ <- XsdValid.checkOnly(respPayload, XmlEnum.NODO_CHIEDI_ELENCO_FLUSSI_RENDICONTAZIONE_RISPOSTA_NODOPERPA, outputXsdValid)
-      _ = log.debug("Envelope di risposta valida")
+      _ = log.debug("Risposta valida")
     } yield respPayload
   }
 
@@ -132,7 +135,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
         erogatoreDescr = Some(FaultId.FDR)
       )
     )
-    log.info(NodoLogConstant.logSintattico(actorClassId))
+    log.info(FdrLogConstant.logSintattico(actorClassId))
     val pipeline = for {
 
       ncefr <- Future.fromTry(parseInput(soapRequest))
@@ -147,12 +150,11 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
         )
       )
 
-      _ = log.info(NodoLogConstant.logSemantico(actorClassId))
+      _ = log.info(FdrLogConstant.logSemantico(actorClassId))
       (staz, psp) <- checks(ncefr)
 
       _ = re = re.map(r => r.copy(fruitoreDescr = Some(staz.stationCode), pspDescr = psp.flatMap(_.description)))
 
-      _ = log.debug("Cerco rendicontazini valide a db")
       rendicontazioni <- findRendicontazioni(ncefr)
 
       rendicontazioniFiltered = rendicontazioni.groupBy(_._1).map(a => a._2.maxBy(_._2)(Ordering.by(_.toString)))
@@ -199,22 +201,19 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
 
       ncrfrResponse = NodoChiediElencoFlussiRendicontazioneRisposta(None, elencoFlussiRendicontazione)
 
-      _ = log.debug("Creazione risposta")
-      _ = log.info(NodoLogConstant.logGeneraPayload("nodoChiediElencoFlussiRendicontazioneRisposta"))
+      _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
       env <- Future.fromTry(wrapInBundleMessage(ncrfrResponse))
     } yield SoapResponse(soapRequest.sessionId, Some(env), StatusCodes.OK.intValue, re, soapRequest.testCaseId, None)
 
     pipeline.recover({
       case e: DigitPaException =>
-        log.warn(s"Creazione response negativa [${e.getMessage}]")
-        log.info(NodoLogConstant.logGeneraPayload("nodoChiediElencoFlussiRendicontazioneRisposta"))
+        log.warn(e, FdrLogConstant.logGeneraPayload(s"negativo $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, e, re)
       case e: Throwable =>
-        log.warn(e, s"Creazione response negativa [${e.getMessage}]")
-        log.info(NodoLogConstant.logGeneraPayload("nodoChiediElencoFlussiRendicontazioneRisposta"))
+        log.warn(e, FdrLogConstant.logGeneraPayload(s"negativo $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, DigitPaErrorCodes.PPT_SYSTEM_ERROR, re)
     }) map (sr => {
-      log.info(NodoLogConstant.logEnd(actorClassId))
+      log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()
     })

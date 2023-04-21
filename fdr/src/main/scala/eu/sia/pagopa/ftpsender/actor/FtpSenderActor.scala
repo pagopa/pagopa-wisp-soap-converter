@@ -42,7 +42,7 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
 
         val pipeline = for {
           ftpconfig <- Future.successful(ftpconfigopt.get._2)
-          _ = log.info(NodoLogConstant.logSemantico(Constant.KeyName.FTP_SENDER))
+          _ = log.info(FdrLogConstant.logSemantico(Constant.KeyName.FTP_SENDER))
           _ <- Future(validateInput(filename))
           _ = log.debug(s"Recupero file da DB con fileId=[$fileId]")
           file <- repositories.fdrRepository.findFtpFileById(fileId, tipo).flatMap {
@@ -95,7 +95,7 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
             Future.successful(FTPResponse(sessionId, testCaseId, Some(DigitPaErrorCodes.PPT_SYSTEM_ERROR)))
           }
           .map(resp => {
-            log.info(NodoLogConstant.logEnd(actorClassId))
+            log.info(FdrLogConstant.logEnd(actorClassId))
             sendto ! resp
             complete()
           })
