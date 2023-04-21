@@ -37,7 +37,6 @@ class SoapActorPerRequest(
 
   override def actorError(dpe: DigitPaException): Unit = {
     MDC.put(Constant.MDCKey.SESSION_ID, message.sessionId)
-    MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
     val payload = Util.faultXmlResponse(dpe.faultCode, dpe.faultString, Some(dpe.message))
     Util.logPayload(log, Some(payload))
     complete(createHttpResponse(StatusCodes.InternalServerError.intValue, payload, message.sessionId), Constant.KeyName.SOAP_INPUT)

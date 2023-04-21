@@ -39,7 +39,6 @@ case class PollerActor(repositories: Repositories, actorProps: ActorProps) exten
     }
 
     MDC.put(Constant.MDCKey.SESSION_ID, req.sessionId)
-    MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
     MDC.put(Constant.MDCKey.ACTOR_CLASS_ID, actorClassId)
 
 

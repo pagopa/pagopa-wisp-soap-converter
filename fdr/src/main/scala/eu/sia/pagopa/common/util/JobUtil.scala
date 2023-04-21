@@ -36,7 +36,6 @@ object JobUtil {
 
   def actorError(replyTo: ActorRef, req: WorkRequest, dpe: DigitPaException, re: Option[Re]): Unit = {
     MDC.put(Constant.MDCKey.SESSION_ID, req.sessionId)
-    MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
     replyTo ! WorkResponse(req.sessionId, req.testCaseId, req.key, Some(dpe))
   }
 }

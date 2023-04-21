@@ -12,7 +12,6 @@ function Menu(props) {
             <span id="version">${props.version}</span>
             <span id="buildTime">${props.buildTime}</span>
             <span id="instance">${props.instance}</span>
-            <span id="identifier">id:${props.identifier}</span>
         </span>
         <a className="flex centeredV ${props.page==''?'selected':''}" href="#/" title="Jobs">
             <i>Jobs</i>

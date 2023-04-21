@@ -11,7 +11,7 @@ object Payment extends DefaultJsonProtocol {
           "identificativoUnivocoVersamento" -> JsString(payments.identificativoUnivocoVersamento),
           "identificativoUnivocoRiscossione" -> JsString(payments.identificativoUnivocoRiscossione),
           "singoloImportoPagato" -> JsNumber(payments.singoloImportoPagato),
-          "codiceEsitoSingoloPagamento" -> JsString(payments.codiceEsitoSingoloPagamento),
+          "codiceEsitoSingoloPagamento" -> JsString(payments.codiceEsitoSingoloPagamento.toString),
           "dataEsitoSingoloPagamento" -> JsString(payments.dataEsitoSingoloPagamento)
         )
       }

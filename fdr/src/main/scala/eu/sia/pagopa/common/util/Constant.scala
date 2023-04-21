@@ -19,11 +19,9 @@ object Constant {
 
   val SUSPEND_JOBS_KEY = "scheduler.suspendAllJobs"
 
-  val SERVICE_IDENTIFIER_KEY = "SERVICE_IDENTIFIER"
   val INSTANCE_KEY = "INSTANCE"
   val APP_NAME_KEY = "APP_NAME"
   val APP_VERSION_KEY = "APP_VERSION"
-  val SERVICE_IDENTIFIER = sys.env.get(SERVICE_IDENTIFIER_KEY).getOrElse("NOT_SET")
   val INSTANCE = sys.env.get(INSTANCE_KEY).getOrElse("")
   val APP_NAME = sys.env.get(APP_NAME_KEY).getOrElse("")
   val APP_VERSION = sys.env.get(APP_VERSION_KEY).getOrElse("")
@@ -47,7 +45,6 @@ object Constant {
   object MDCKey {
     val SESSION_ID = "sessionId"
     val ACTOR_CLASS_ID = "actorClassId"
-    val SERVICE_IDENTIFIER = "serviceIdentifier"
   }
 
   object ContentType extends Enumeration {

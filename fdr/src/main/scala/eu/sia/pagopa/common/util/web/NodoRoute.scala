@@ -6,7 +6,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.RouteDirectives
-import akka.http.scaladsl.server.{Route, RouteResult}
+import akka.http.scaladsl.server.{PathMatchers, Route, RouteResult}
 import akka.pattern.{AskTimeoutException, ask}
 import akka.stream.Materializer
 import akka.util.ByteString
@@ -18,6 +18,8 @@ import eu.sia.pagopa.common.repo.fdr.enums.SchedulerFireCheckStatus
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
 import eu.sia.pagopa.nodopoller.actor.PollerActor
+import eu.sia.pagopa.restinput.actor.RestActorPerRequest
+import eu.sia.pagopa.restinput.message.RestRouterRequest
 import eu.sia.pagopa.soapinput.actor.SoapActorPerRequest
 import eu.sia.pagopa.soapinput.message.SoapRouterRequest
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}
@@ -101,11 +103,14 @@ case class NodoRoute(
            |"version" : "${Constant.APP_VERSION}",
            |"name" : "${Constant.APP_NAME}",
            |"instance" : "${Constant.INSTANCE}",
-           |"identifier" : "${Constant.SERVICE_IDENTIFIER}"
            |}""".stripMargin
       )
     }
   }
+
+  val methods: Map[String, String] = Map(
+    "inviaFlussoRendicontazione" -> "POST"
+  )
 
   private def jobsStatus(): Route = {
     parameterMap { params =>
@@ -154,7 +159,6 @@ case class NodoRoute(
     complete {
       val sessionId = UUID.randomUUID().toString
       MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-      MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
       log.debug(s"START request Http keys[$sessionId]")
 
       val keys = Seq(
@@ -187,20 +191,18 @@ case class NodoRoute(
     complete {
       val sessionId = UUID.randomUUID().toString
       MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-      MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
       log.debug(s"START request Http config[$sessionId]")
 
-        val payload = actorProps.ddataMap.configurations.values
-          .map(cfg => {
-            s"""{
-                   |"category":"${cfg.category}","key":"${cfg.key}",
-                   |"value":"${cfg.value}"${cfg.description.map(d => s""","description":${JsString(d).toString()}""").getOrElse("")}
-                   |}""".stripMargin
-          })
-          .mkString("[", ",", "]")
+      val payload = actorProps.ddataMap.configurations.values
+        .map(cfg => {
+          s"""{
+                 |"category":"${cfg.category}","key":"${cfg.key}",
+                 |"value":"${cfg.value}"${cfg.description.map(d => s""","description":${JsString(d).toString()}""").getOrElse("")}
+                 |}""".stripMargin
+        })
+        .mkString("[", ",", "]")
 
-        HttpEntity(ContentTypes.`application/json`, payload)
-
+      HttpEntity(ContentTypes.`application/json`, payload)
     }
   }
 
@@ -216,11 +218,11 @@ case class NodoRoute(
       })
       .mkString("[", ",", "]")
   }
+
   private def changelogs(): Route = {
     complete {
       val sessionId = UUID.randomUUID().toString
       MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-      MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
       log.debug(s"START request Http config[$sessionId]")
 
       import fdrRepository.driver.api._
@@ -242,7 +244,6 @@ case class NodoRoute(
     complete {
       val sessionId = UUID.randomUUID().toString
       MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-      MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
       log.debug(s"START request Http checkRunningJobs[$sessionId]")
 
       val runningJobs = fdrRepository
@@ -259,7 +260,6 @@ case class NodoRoute(
     complete {
       val sessionId = UUID.randomUUID().toString
       MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-      MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
       log.debug(s"START request Http jobs[$sessionId]")
 
       val resp = Jobs.toSeq
@@ -300,7 +300,6 @@ case class NodoRoute(
                   import spray.json._
                   val sessionId = UUID.randomUUID().toString
                   MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-                  MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
                   log.debug(s"START request Http jobTrigger [$sessionId] $segment")
                   pollerActorRouter
                     .ask(TriggerJobRequest(sessionId, segment, parameters.get("cron"), headerTestCaseId))(BUNDLE_IDLE_TIMEOUT)
@@ -387,7 +386,6 @@ case class NodoRoute(
             complete {
               val sessionId = UUID.randomUUID().toString
               MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-              MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
 
               log.debug(s"START request Http configRefresh [$sessionId] ${segment}")
 
@@ -417,7 +415,6 @@ case class NodoRoute(
                 complete {
                   val sessionId = UUID.randomUUID().toString
                   MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-                  MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
                   log.debug(s"START request Http refreshableKey [$sessionId]")
 
                   val keys = Seq(
@@ -466,22 +463,20 @@ case class NodoRoute(
     )
   }
 
-  def akkaHttpTimeoutSoap(sessionId: String): HttpResponse = {
+  def akkaHttpTimeout(sessionId: String): HttpResponse = {
     val dpe = DigitPaErrorCodes.PPT_SYSTEM_ERROR
     val payload = Util.faultXmlResponse(dpe.faultCode, dpe.faultString, Some("Internal timeout"))
     MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-    MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
     Util.logPayload(log, Some(payload))
     log.debug(s"END request Http for AKKA HTTP TIMEOUT")
     log.info(NodoLogConstant.logEnd(Constant.KeyName.SOAP_INPUT))
     HttpResponse(status = StatusCodes.ServiceUnavailable, entity = HttpEntity(MediaTypes.`application/xml` withCharset HttpCharsets.`UTF-8`, payload))
   }
 
-  def akkaErrorEncodingSoap(sessionId: String, charset: String): HttpResponse = {
+  def akkaErrorEncoding(sessionId: String, charset: String): HttpResponse = {
     val dpe = DigitPaErrorCodes.PPT_SYSTEM_ERROR
     val payload = Util.faultXmlResponse(dpe.faultCode, dpe.faultString, Some(s"Error, data encoding is not $charset"))
     MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-    MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
     Util.logPayload(log, Some(payload))
     log.debug(s"END request Http for AKKA HTTP TIMEOUT")
     log.info(NodoLogConstant.logEnd(Constant.KeyName.SOAP_INPUT))
@@ -493,11 +488,10 @@ case class NodoRoute(
       path("webservices" / "input") {
         val sessionId = UUID.randomUUID().toString
         MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-        MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
         log.info(NodoLogConstant.logStart(Constant.KeyName.SOAP_INPUT))
         import scala.concurrent.duration._
         val httpSeverRequestTimeout = FiniteDuration(httpSeverRequestTimeoutParam, SECONDS)
-        withRequestTimeout(httpSeverRequestTimeout, _ => akkaHttpTimeoutSoap(sessionId)) {
+        withRequestTimeout(httpSeverRequestTimeout, _ => akkaHttpTimeout(sessionId)) {
           post {
             extractRequest { req =>
               extractClientIP { remoteAddress =>
@@ -544,7 +538,7 @@ case class NodoRoute(
                               _ => promise.future
                             case Failure(e) =>
                               log.warn(e, "error reading request body")
-                              complete(akkaErrorEncodingSoap(sessionId, cs.value))
+                              complete(akkaErrorEncoding(sessionId, cs.value))
                           }
                         }
                       }
@@ -557,5 +551,80 @@ case class NodoRoute(
         }
       }
     }
+  }
+
+  def restFunction(actorProps: ActorProps): Route = {
+    Primitive.rest
+      .map(primi => {
+        val primitiva = primi._1
+        val httppath = primi._2._1
+        val pathMatcher = PathMatchers.separateOnSlashes(httppath)
+        val httpmethod = methods(primitiva)
+        path(pathMatcher) {
+          val sessionId = UUID.randomUUID().toString
+          MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
+          log.info(s"Ricevuta request [$sessionId] @ ${LocalDateTime.now()} : [$primitiva]")
+          MDC.put(Constant.MDCKey.ACTOR_CLASS_ID, primitiva)
+          val httpSeverRequestTimeout = FiniteDuration(httpSeverRequestTimeoutParam, SECONDS)
+          withRequestTimeout(httpSeverRequestTimeout, _ => akkaHttpTimeout(sessionId)) {
+            method(HttpMethods.getForKey(httpmethod).get) {
+              extractRequest { req =>
+                extractClientIP { remoteAddress =>
+                  optionalHeaderValueByName(X_PDD_HEADER) { originalRequestAddresOpt =>
+                    log.debug(s"Request headers:\n${req.headers.map(s => s"${s.name()} => ${s.value()}").mkString("\n")}")
+                    extractRequestContext { ctx =>
+                      entity(as[ByteString]) { bs =>
+                        parameterSeq { params =>
+                          optionalHeaderValueByName("testCaseId") { headerTestCaseId =>
+                            val cs = req.entity.contentType.charsetOption.getOrElse(HttpCharsets.`UTF-8`)
+                            val payloadTry = Try(if (checkUTF8) {
+                              val dec = cs.nioCharset().newDecoder()
+                              dec.decode(bs.asByteBuffer).toString
+
+                            } else {
+                              bs.utf8String
+
+                            })
+                            payloadTry match {
+                              case Success(payload) =>
+                                log.info(NodoLogConstant.logStart(Constant.KeyName.REST_INPUT))
+                                val request = ctx.request
+                                log.info(s"Content-Type [${request.entity.contentType}]")
+
+                                val restRouterRequest: RestRouterRequest = RestRouterRequest(
+                                  sessionId,
+                                  if (payload.isEmpty) None else Some(payload),
+                                  Util.now(),
+                                  headerTestCaseId,
+                                  Some(req.uri.toString()),
+                                  req.headers.map(h => (h.name(), h.value())),
+                                  params,
+                                  Some(httpmethod),
+                                  originalRequestAddresOpt.flatMap(_.split(",").headOption).orElse(remoteAddress.toIP.map(_.ip.getHostAddress)),
+                                  primitiva
+                                )
+
+                                val p: Promise[RouteResult] = Promise[RouteResult]()
+                                createSystemActorPerRequestAndTell[RestRouterRequest](
+                                  restRouterRequest,
+                                  Constant.KeyName.REST_INPUT,
+                                  Props(classOf[RestActorPerRequest], ctx, p, routers, reEventFunc, actorProps)
+                                )(log, system)
+                                _ => p.future
+                              case Failure(_) =>
+                                complete(akkaErrorEncoding(sessionId, cs.value))
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
+      .fold(RouteDirectives.reject)(_ ~ _)
   }
 }

@@ -1,4 +1,4 @@
-package eu.sia.pagopa.rendicontazioni.actor
+package eu.sia.pagopa.rendicontazioni.actor.soap
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
@@ -7,7 +7,7 @@ import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
-import eu.sia.pagopa.common.json.model.rendicontazione.{CodiceEsitoSingoloPagamentoEnum, NodoInviaFlussoRendicontazioneRequest, Payment, Receiver, Sender, SenderTypeEnum}
+import eu.sia.pagopa.common.json.model.rendicontazione._
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.repo.fdr.enums.{FtpFileStatus, RendicontazioneStatus}
@@ -16,12 +16,13 @@ import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
-import eu.sia.pagopa.rendicontazioni.actor.response.NodoInviaFlussoRendicontazioneResponse
+import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoInviaFlussoRendicontazioneResponse
 import eu.sia.pagopa.rendicontazioni.util.{CheckRendicontazioni, RendicontazioniUtil}
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import it.pagopa.config.CreditorInstitution
-import scalaxbmodel.flussoriversamento.{CtFlussoRiversamento, Number0, Number3, Number9, StTipoIdentificativoUnivoco}
+import scalaxbmodel.flussoriversamento.{CtFlussoRiversamento, Number0, Number3}
 import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoRendicontazioneRisposta}
+import spray.json._
 
 import java.io.{File, FileOutputStream}
 import java.nio.file.{Files, Paths}
@@ -31,7 +32,6 @@ import java.time.{LocalDateTime, ZoneId}
 import java.util.zip.{ZipEntry, ZipOutputStream}
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import spray.json._
 
 final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps) extends PerRequestActor with NodoInviaFlussoRendicontazioneResponse {
 

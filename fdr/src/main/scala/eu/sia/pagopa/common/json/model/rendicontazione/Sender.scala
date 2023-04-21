@@ -13,7 +13,7 @@ object Sender extends DefaultJsonProtocol {
           "idBroker" -> JsString(sender.idBroker),
           "idChannel" -> JsString(sender.idChannel),
           "password" -> JsString(sender.password),
-          "type" -> JsString(sender._type),
+          "type" -> JsString(sender._type.toString),
           "id" -> JsString(sender.id)
         )
       }

@@ -38,8 +38,6 @@ object Main extends App {
 
   type ConfigData = ConfigDataV1
 
-  MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
-
   val job = args.headOption
 
   val actorSystemName: String =
@@ -295,7 +293,7 @@ object Main extends App {
           import akka.http.scaladsl.server.Directives._
           http
             .newServerAt(httpHost, httpPort)
-            .bind(routes.route ~ routes.routeSeed ~ routes.soapFunction(actorProps))
+            .bind(routes.route ~ routes.routeSeed ~ routes.soapFunction(actorProps) ~ routes.restFunction(actorProps))
             .map(f => {
               if (job.isEmpty) {
                 log.info(s"Starting AkkaManagement...")
@@ -321,7 +319,6 @@ object Main extends App {
           log.info(s"Triggering job [$jobName]")
           val sessionId = UUID.randomUUID().toString
           MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-          MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
           import akka.pattern.ask
 
           import scala.concurrent.duration._

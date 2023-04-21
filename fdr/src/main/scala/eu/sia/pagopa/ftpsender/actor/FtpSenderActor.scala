@@ -132,7 +132,6 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
 
   override def actorError(dpe: DigitPaException): Unit = {
     MDC.put(Constant.MDCKey.SESSION_ID, req.sessionId)
-    MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
     val response = FTPResponse(req.sessionId, Some(dpe.getMessage), None)
     replyTo ! response
   }

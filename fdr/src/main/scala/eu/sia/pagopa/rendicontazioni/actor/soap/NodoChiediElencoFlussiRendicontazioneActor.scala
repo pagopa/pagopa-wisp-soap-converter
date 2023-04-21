@@ -1,4 +1,4 @@
-package eu.sia.pagopa.rendicontazioni.actor
+package eu.sia.pagopa.rendicontazioni.actor.soap
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
@@ -14,7 +14,7 @@ import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XmlUtil.XsdDatePattern
 import eu.sia.pagopa.common.util.xml.{XmlUtil, XsdValid}
 import eu.sia.pagopa.commonxml.XmlEnum
-import eu.sia.pagopa.rendicontazioni.actor.response.NodoChiediElencoFlussiRendicontazioneResponse
+import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoChiediElencoFlussiRendicontazioneResponse
 import eu.sia.pagopa.rendicontazioni.util.RendicontazioniUtil
 import scalaxbmodel.nodoperpa.{NodoChiediElencoFlussiRendicontazione, NodoChiediElencoFlussiRendicontazioneRisposta, TipoElencoFlussiRendicontazione, TipoIdRendicontazione}
 
