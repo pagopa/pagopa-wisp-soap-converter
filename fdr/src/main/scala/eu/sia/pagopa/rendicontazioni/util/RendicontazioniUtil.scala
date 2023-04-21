@@ -24,7 +24,7 @@ object RendicontazioniUtil {
       payload: String,
       actorProps: ActorProps
   )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
-    log.info(s"calling $soapAction $receiver")
+    log.info(s"Chiamo [$soapAction] [$receiver]")
 
     val url = as.settings.config.getString(s"${receiver.toLowerCase}.url")
     val timeout = as.settings.config.getInt(s"${receiver.toLowerCase}.timeoutSeconds")
@@ -43,8 +43,10 @@ object RendicontazioniUtil {
       testCaseId
     )
 
-    actorProps.actorUtility.callHttp(simpleHttpReq, actorProps)
-
+    for {
+      simpleHttpRes <- actorProps.actorUtility.callHttp(simpleHttpReq, actorProps)
+      _ = log.info(s"Risposto [$soapAction] [$receiver]")
+    } yield simpleHttpRes
   }
 
   def callPrimitiveNew(

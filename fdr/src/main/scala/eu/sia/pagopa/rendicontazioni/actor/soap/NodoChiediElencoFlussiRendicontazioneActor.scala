@@ -51,6 +51,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
   }
 
   private def parseResponseNexi(payloadResponse: String): Try[Option[NodoChiediElencoFlussiRendicontazioneRisposta]] = {
+    log.debug("Parse response Nexi")
     (for {
       _ <- XsdValid.checkOnly(payloadResponse, XmlEnum.NODO_CHIEDI_ELENCO_FLUSSI_RENDICONTAZIONE_RISPOSTA_NODOPERPA, inputXsdValid)
       body <- XmlEnum.str2nodoChiediElencoFlussiRendicontazioneResponse_nodoperpa(payloadResponse)
@@ -61,6 +62,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
   }
 
   private def createTipoElencoFlussiRendicontazione(rendicontazioni: Seq[(String, LocalDateTime)], rendicontazioniNexi: Seq[Option[TipoIdRendicontazione]]) = {
+    log.debug("Merge elenco flussi Nexi with ours")
     val tipiIdRendi = (rendicontazioniNexi ++ rendicontazioni.map(rendi => {
       Some(TipoIdRendicontazione(rendi._1, XmlUtil.StringXMLGregorianCalendarDate.format(rendi._2, XsdDatePattern.DATE_TIME)))
     })).distinct
@@ -150,17 +152,17 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
 
       _ = re = re.map(r => r.copy(fruitoreDescr = Some(staz.stationCode), pspDescr = psp.flatMap(_.description)))
 
-      _ = log.debug("Query rendicontazini valide")
+      _ = log.debug("Cerco rendicontazini valide a db")
       rendicontazioni <- findRendicontazioni(ncefr)
 
       rendicontazioniFiltered = rendicontazioni.groupBy(_._1).map(a => a._2.maxBy(_._2)(Ordering.by(_.toString)))
-      _ = log.debug(s"Trovate ${rendicontazioniFiltered.size} rendicontazioni")
+      _ = log.debug(s"Trovate ${rendicontazioniFiltered.size} rendicontazioni a db")
 
       rendicontazioniNexi <- if( callNexiToo ) {
         (for {
           _ <- Future.successful(())
 
-          ncefrResponse <- RendicontazioniUtil.callPrimitiveOld(
+          response <- RendicontazioniUtil.callPrimitiveOld(
             req.sessionId,
             req.testCaseId,
             req.primitive,
@@ -169,9 +171,20 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
             actorProps
           )
 
-          flussiResponseNexi <- Future.fromTry(parseResponseNexi(ncefrResponse.payload.get))
-          tipiIdRendicontazioni = if (flussiResponseNexi.isDefined && flussiResponseNexi.get.elencoFlussiRendicontazione.isDefined) {
-            flussiResponseNexi.get.elencoFlussiRendicontazione.get.idRendicontazione
+          ncefrResponse <- Future.fromTry(parseResponseNexi(response.payload.get))
+          flussiResponseNexi <- if( ncefrResponse.isDefined ) {
+            for {
+              _ <- Future.successful(())
+              _ = ncefrResponse.get.fault.map(v=> log.warn(s"Esito da Nexi: faultCode=[${v.faultCode}, faultString=[${v.faultString}], description=[${v.description}]"))
+            } yield ncefrResponse.get.elencoFlussiRendicontazione
+          } else {
+            Future.successful(None)
+          }
+
+          tipiIdRendicontazioni = if ( flussiResponseNexi.isDefined) {
+            val flussiTrovati = flussiResponseNexi.get.idRendicontazione
+            log.debug(s"Ricevute ${flussiTrovati.size} rendicontazioni da Nexi")
+            flussiTrovati
           } else {
             Nil
           }

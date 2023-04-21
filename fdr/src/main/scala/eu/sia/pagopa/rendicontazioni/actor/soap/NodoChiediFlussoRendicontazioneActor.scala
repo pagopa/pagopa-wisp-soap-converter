@@ -210,7 +210,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
         (for {
           _ <- Future.successful(())
 
-          ncfrResponse <- RendicontazioniUtil.callPrimitiveOld(
+          response <- RendicontazioniUtil.callPrimitiveOld(
             req.sessionId,
             req.testCaseId,
             req.primitive,
@@ -219,8 +219,16 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
             actorProps
           )
 
-          flussoResponseNexi <- Future.fromTry(parseResponseNexi(ncfrResponse.payload.get))
-          xmlRendicontazione = flussoResponseNexi.flatMap(_.xmlRendicontazione)
+          ncfrResponse <- Future.fromTry(parseResponseNexi(response.payload.get))
+
+          xmlRendicontazione <- if (ncfrResponse.isDefined) {
+            for {
+              _ <- Future.successful(())
+              _ = ncfrResponse.get.fault.map(v => log.warn(s"Esito da Nexi: faultCode=[${v.faultCode}, faultString=[${v.faultString}], description=[${v.description}]"))
+            } yield ncfrResponse.get.xmlRendicontazione
+          } else {
+            Future.successful(None)
+          }
         } yield xmlRendicontazione).recoverWith({
           case _ => Future.successful(None)
         })
@@ -231,9 +239,10 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
       xmlrendicontazione <- if( rendicontazioneNexi.isDefined ) {
         Future.successful(rendicontazioneNexi)
       } else {
+        log.debug("Nessuna rendicontazione restituita da Nexi")
         for {
           _ <- Future.successful(())
-          _ = log.debug("Recupero rendicontazione")
+          _ = log.debug("Recupero rendicontazione a db")
           (_, binaryFileOption, _, pa, staz, psp) <- checksSemanticiEDuplicati(ncfr)
           _ = re = re.map(r => r.copy(fruitoreDescr = Some(staz.stationCode), pspDescr = psp.flatMap(p => p.description)))
           _ = log.debug("Creazione risposta rendicontazione")
@@ -264,6 +273,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
   }
 
   private def parseResponseNexi(payloadResponse: String): Try[Option[NodoChiediFlussoRendicontazioneRisposta]] = {
+    log.debug("Parse response Nexi")
     (for {
       _ <- XsdValid.checkOnly(payloadResponse, XmlEnum.NODO_CHIEDI_FLUSSO_RENDICONTAZIONE_RISPOSTA_NODOPERPA, inputXsdValid)
       body <- XmlEnum.str2nodoChiediFlussoRendicontazioneResponse_nodoperpa(payloadResponse)

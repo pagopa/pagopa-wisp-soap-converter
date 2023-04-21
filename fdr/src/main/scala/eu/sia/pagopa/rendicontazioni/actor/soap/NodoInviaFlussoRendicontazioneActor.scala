@@ -415,7 +415,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
     (for {
       _ <- Future.successful(())
       _ = log.info(NodoLogConstant.logGeneraPayload(s"${req.primitive} REST"))
-      nifrRequest = NodoInviaFlussoRendicontazioneRequest(
+      nifrRequest = InviaFlussoRendicontazioneRequest(
         nodoInviaFlussoRendicontazione.identificativoFlusso,
         nodoInviaFlussoRendicontazione.dataOraFlusso.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME),
         Sender(
