@@ -18,44 +18,44 @@ object RendicontazioniUtil {
   def callPrimitiveOld(
       sessionId: String,
       testCaseId: Option[String],
-      soapAction: String,
+      action: String,
       receiver: String,
       payload: String,
       actorProps: ActorProps
   )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
-    val (url, timeout) = loadServiceConfig(soapAction, receiver)
+    val (url, timeout) = loadServiceConfig(action, receiver)
 
     val simpleHttpReq = SimpleHttpReq(
       sessionId,
-      soapAction,
+      action,
       ContentTypes.`text/xml(UTF-8)`,
       HttpMethods.POST,
-      s"$url?${QUERYPARAM_SOAPACTION}=$soapAction",
+      s"$url?${QUERYPARAM_SOAPACTION}=$action",
       Some(payload),
-      Seq((HEADER_KEY_SOAPACTION, s"\"$soapAction\"")),
+      Seq((HEADER_KEY_SOAPACTION, s"\"$action\"")),
       Some(receiver),
       timeout.seconds,
       None,
       testCaseId
     )
 
-    callService(simpleHttpReq, soapAction, receiver, actorProps)
+    callService(simpleHttpReq, action, receiver, actorProps)
   }
 
   def callPrimitiveNew(
                         sessionId: String,
                         testCaseId: Option[String],
-                        soapAction: String,
+                        action: String,
                         receiver: String,
                         payload: String,
                         actorProps: ActorProps
                       )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
 
-    val (url, timeout) = loadServiceConfig(soapAction, receiver)
+    val (url, timeout) = loadServiceConfig(action, receiver)
 
     val simpleHttpReq = SimpleHttpReq(
       sessionId,
-      soapAction,
+      action,
       ContentTypes.`application/json`,
       HttpMethods.POST,
       s"$url",
@@ -67,12 +67,12 @@ object RendicontazioniUtil {
       testCaseId
     )
 
-    callService(simpleHttpReq, soapAction, receiver, actorProps)
+    callService(simpleHttpReq, action, receiver, actorProps)
   }
 
-  private def loadServiceConfig(soapAction: String,
+  private def loadServiceConfig(action: String,
                                 receiver: String)(implicit log: NodoLogger, as: ActorSystem) = {
-    log.info(s"Carico configurazione di $receiver per $soapAction")
+    log.info(s"Carico configurazione di $receiver per $action")
 
     val url = as.settings.config.getString(s"${receiver.toLowerCase}.url")
     val timeout = as.settings.config.getInt(s"${receiver.toLowerCase}.timeoutSeconds")
@@ -80,16 +80,15 @@ object RendicontazioniUtil {
     (url, timeout)
   }
 
-
   private def callService(simpleHttpReq: SimpleHttpReq,
-                          soapAction: String,
+                          action: String,
                           receiver: String,
                           actorProps: ActorProps)(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
-    log.info(s"Chiamo $receiver per $soapAction")
+    log.info(s"Chiamo $receiver per $action")
 
     for {
       simpleHttpRes <- actorProps.actorUtility.callHttp(simpleHttpReq, actorProps)
-      _ = log.info(s"Risposta $receiver per $soapAction")
+      _ = log.info(s"Risposta $receiver per $action")
     } yield simpleHttpRes
   }
 

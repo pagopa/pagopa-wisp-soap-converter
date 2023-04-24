@@ -9,28 +9,6 @@ import scala.util.{Failure, Success, Try}
 
 object DDataChecks {
 
-  val CHECK = "CHECK"
-
-  def maxIdempotencyCacheDurationDays(ddataMap:ConfigData): Long = {
-    val actko: Long = DDataChecks.getConfigurationKeys(ddataMap, "idempotency.activate.ko.duration.days").toLong
-    val outcomeko: Long = DDataChecks.getConfigurationKeys(ddataMap, "idempotency.outcome.ko.duration.days").toLong
-    val outcomeok: Long = DDataChecks.getConfigurationKeys(ddataMap, "idempotency.outcome.ok.duration.days").toLong
-
-    Math.max(Math.max(actko,outcomeko),outcomeok)
-  }
-
-  def isBizEventEnabled(ddataMap: ConfigData): Boolean = {
-    Try(DDataChecks.getConfigurationKeys(ddataMap, "sendBizEventsToEventHub").toBoolean).getOrElse(false)
-  }
-
-  def getStation(ddataMap: ConfigData, stationId: String): Station = {
-    ddataMap.stations(stationId)
-  }
-
-  def getChannel(ddataMap: ConfigData, channelId: String): Channel = {
-    ddataMap.channels(channelId)
-  }
-
   def getConfigurationKeys(ddataMap: ConfigData, key: String, bundleName: String = "GLOBAL"): String = {
     ddataMap.configurations.get(s"$bundleName-$key").map(_.value).getOrElse(throw new RuntimeException(s"$bundleName-$key non presente"))
   }
@@ -94,12 +72,12 @@ object DDataChecks {
     }
   }
 
-  def checkCanale(log: NodoLogger, ddataMap: ConfigData, idCanale: String, password: Option[String]): Try[Channel] = {
+  def checkCanale(log: NodoLogger, ddataMap: ConfigData, idCanale: String, password: Option[String], checkPassword: Boolean): Try[Channel] = {
     ddataMap.channels.get(idCanale) match {
       case Some(value) =>
         if (value.enabled) {
           log.debug(s"[$idCanale] trovato e abilitato")
-          if (password.forall(value.password.contains(_))) {
+          if (!checkPassword || password.forall(value.password.contains(_))) {
             Success(value)
           } else {
             log.warn(s"[$idCanale] trovato e abilitato, password errata")
@@ -115,13 +93,12 @@ object DDataChecks {
     }
   }
 
-  def checkStazione(log: NodoLogger, ddataMap: ConfigData, idStazione: String, password: Option[String]): Try[Station] = {
-
+  def checkStazione(log: NodoLogger, ddataMap: ConfigData, idStazione: String, password: Option[String], checkPassword: Boolean): Try[Station] = {
     ddataMap.stations.get(idStazione) match {
       case Some(value) =>
         if (value.enabled) {
           log.debug(s"[$idStazione] trovata e abilitato")
-          if (password.forall(value.password.contains(_))) {
+          if (!checkPassword || password.forall(value.password.contains(_))) {
             Success(value)
           } else {
             log.warn(s"[$idStazione] trovata e abilitato, password errata")
@@ -175,7 +152,8 @@ object DDataChecks {
       idIntermediarioPsp: String,
       idCanale: Option[String] = None,
       password: Option[String] = None,
-      tipoVers: Option[String] = None
+      tipoVers: Option[String] = None,
+      checkPassword: Boolean
   ): Try[(Option[PaymentServiceProvider], BrokerPsp, Option[Channel])] = {
 
     for {
@@ -188,7 +166,7 @@ object DDataChecks {
       intermediarioPsp <- checkIntermediarioPSP(log, ddataMap, idIntermediarioPsp)
       canaleOpt <- idCanale match {
         case Some(idc) =>
-          checkCanale(log, ddataMap, idc, password).map(Some(_))
+          checkCanale(log, ddataMap, idc, password, checkPassword).map(Some(_))
         case None =>
           Success(None)
       }
@@ -244,12 +222,13 @@ object DDataChecks {
       idIntermediarioPa: String,
       idStazione: String,
       auxDigit: Option[Long] = None,
-      password: Option[String] = None
+      password: Option[String] = None,
+      checkPassword: Boolean
   ): Try[(CreditorInstitution, BrokerCreditorInstitution, Station)] = {
     for {
       pa <- checkPA(log, ddataMap, idPa)
       intermediarioPa <- checkIntermediarioPA(log, ddataMap, idIntermediarioPa)
-      stazione <- checkStazione(log, ddataMap, idStazione, password)
+      stazione <- checkStazione(log, ddataMap, idStazione, password, checkPassword)
 
       _ <-
         if (stazione.brokerCode == intermediarioPa.brokerCode) {
@@ -277,10 +256,10 @@ object DDataChecks {
 
   }
 
-  def checkIntermediarioPaStazionePassword(log: NodoLogger, ddataMap: ConfigData, idIntermediarioPa: String, idStazione: String, password: String): Try[(BrokerCreditorInstitution, Station)] = {
+  def checkIntermediarioPaStazionePassword(log: NodoLogger, ddataMap: ConfigData, idIntermediarioPa: String, idStazione: String, password: String, checkPassword: Boolean): Try[(BrokerCreditorInstitution, Station)] = {
     for {
       intermediarioPa <- checkIntermediarioPA(log, ddataMap, idIntermediarioPa)
-      stazione <- checkStazione(log, ddataMap, idStazione, Some(password))
+      stazione <- checkStazione(log, ddataMap, idStazione, Some(password), checkPassword)
 
       _ <-
         if (stazione.brokerCode == intermediarioPa.brokerCode) {
@@ -298,7 +277,6 @@ object DDataChecks {
           log.warn(s"Stazione [$idStazione] non collegata ad alcuna PA")
           Failure(exception.DigitPaException("Configurazione pa-intermediario-stazione non corretta", DigitPaErrorCodes.PPT_AUTORIZZAZIONE))
         }
-
     } yield (intermediarioPa, stazione)
   }
 

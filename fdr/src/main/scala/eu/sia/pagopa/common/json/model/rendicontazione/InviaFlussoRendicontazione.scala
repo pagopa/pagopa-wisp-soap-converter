@@ -28,36 +28,36 @@ object InviaFlussoRendicontazioneRequest extends DefaultJsonProtocol {
 
     def read(json: JsValue): InviaFlussoRendicontazioneRequest = ???
 
-//    def read(json: JsValue): InviaFlussoRendicontazioneRequest = {
-//      val map = json.asJsObject.fields
-//      val transationId = map.get("additionalPaymentInformations").map(_.asInstanceOf[JsObject].fields("transactionId").asInstanceOf[JsString].value)
-//      val outcomePaymentGateway =
-//        map.get("additionalPaymentInformations").map(_.asInstanceOf[JsObject].fields("outcomePaymentGateway").asInstanceOf[JsString].value)
-//      val authorizationCode = map.get("additionalPaymentInformations").map(_.asInstanceOf[JsObject].fields("authorizationCode").asInstanceOf[JsString].value)
-//      val additionalPaymentInformations = if (transationId.isDefined) {
-//        Some(AdditionalPaymentInformations(transationId.get, outcomePaymentGateway.get, authorizationCode.get))
-//      } else {
-//        None
-//      }
-//
-//      Try(
-//        NodoInviaFlussoRendicontazioneRequest(
-//          map("paymentTokens").asInstanceOf[JsArray].elements.map(s => s.asInstanceOf[JsString].value),
-//          map("outcome").asInstanceOf[JsString].value,
-//          map.get("identificativoPsp").map(_.asInstanceOf[JsString].value),
-//          map.get("tipoVersamento").map(_.asInstanceOf[JsString].value),
-//          map.get("identificativoIntermediario").map(_.asInstanceOf[JsString].value),
-//          map.get("identificativoCanale").map(_.asInstanceOf[JsString].value),
-//          map.get("pspTransactionId").map(_.asInstanceOf[JsString].value),
-//          map.get("totalAmount").map(_.asInstanceOf[JsNumber].value),
-//          map.get("fee").map(_.asInstanceOf[JsNumber].value),
-//          map.get("timestampOperation").map(_.asInstanceOf[JsString].value),
-//          additionalPaymentInformations
-//        )
-//      ).recover({ case _ =>
-//        throw DeserializationException("ClosePayment expected")
-//      }).get
-//    }
+    def read(json: JsValue): InviaFlussoRendicontazioneRequest = {
+      val map = json.asJsObject.fields
+      val transationId = map.get("additionalPaymentInformations").map(_.asInstanceOf[JsObject].fields("transactionId").asInstanceOf[JsString].value)
+      val outcomePaymentGateway =
+        map.get("additionalPaymentInformations").map(_.asInstanceOf[JsObject].fields("outcomePaymentGateway").asInstanceOf[JsString].value)
+      val authorizationCode = map.get("additionalPaymentInformations").map(_.asInstanceOf[JsObject].fields("authorizationCode").asInstanceOf[JsString].value)
+      val additionalPaymentInformations = if (transationId.isDefined) {
+        Some(AdditionalPaymentInformations(transationId.get, outcomePaymentGateway.get, authorizationCode.get))
+      } else {
+        None
+      }
+
+      Try(
+        NodoInviaFlussoRendicontazioneRequest(
+          map("paymentTokens").asInstanceOf[JsArray].elements.map(s => s.asInstanceOf[JsString].value),
+          map("outcome").asInstanceOf[JsString].value,
+          map.get("identificativoPsp").map(_.asInstanceOf[JsString].value),
+          map.get("tipoVersamento").map(_.asInstanceOf[JsString].value),
+          map.get("identificativoIntermediario").map(_.asInstanceOf[JsString].value),
+          map.get("identificativoCanale").map(_.asInstanceOf[JsString].value),
+          map.get("pspTransactionId").map(_.asInstanceOf[JsString].value),
+          map.get("totalAmount").map(_.asInstanceOf[JsNumber].value),
+          map.get("fee").map(_.asInstanceOf[JsNumber].value),
+          map.get("timestampOperation").map(_.asInstanceOf[JsString].value),
+          additionalPaymentInformations
+        )
+      ).recover({ case _ =>
+        throw DeserializationException("ClosePayment expected")
+      }).get
+    }
 
   }
 }
