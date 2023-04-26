@@ -223,7 +223,7 @@ object DDataChecks {
       idStazione: String,
       auxDigit: Option[Long] = None,
       password: Option[String] = None,
-      checkPassword: Boolean
+      checkPassword: Boolean = true
   ): Try[(CreditorInstitution, BrokerCreditorInstitution, Station)] = {
     for {
       pa <- checkPA(log, ddataMap, idPa)
@@ -256,7 +256,7 @@ object DDataChecks {
 
   }
 
-  def checkIntermediarioPaStazionePassword(log: NodoLogger, ddataMap: ConfigData, idIntermediarioPa: String, idStazione: String, password: String, checkPassword: Boolean): Try[(BrokerCreditorInstitution, Station)] = {
+  def checkIntermediarioPaStazionePassword(log: NodoLogger, ddataMap: ConfigData, idIntermediarioPa: String, idStazione: String, password: String, checkPassword: Boolean = true): Try[(BrokerCreditorInstitution, Station)] = {
     for {
       intermediarioPa <- checkIntermediarioPA(log, ddataMap, idIntermediarioPa)
       stazione <- checkStazione(log, ddataMap, idStazione, Some(password), checkPassword)

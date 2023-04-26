@@ -4,17 +4,19 @@ import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
-import eu.sia.pagopa.common.json.model.rendicontazione.{InviaFlussoRendicontazioneRequest, SenderTypeEnum}
+import eu.sia.pagopa.common.json.model.rendicontazione._
+import eu.sia.pagopa.common.message.{SoapReceiverType, SoapRequest}
 import eu.sia.pagopa.common.repo.fdr.enums.{FtpFileStatus, RendicontazioneStatus}
 import eu.sia.pagopa.common.repo.fdr.model.{BinaryFile, FtpFile, Rendicontazione}
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.{XmlUtil, XsdValid}
 import eu.sia.pagopa.commonxml.XmlEnum
-import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
+import eu.sia.pagopa.rendicontazioni.util.{CheckRendicontazioni, RendicontazioniUtil}
 import it.pagopa.config.CreditorInstitution
-import scalaxbmodel.flussoriversamento.{CtFlussoRiversamento, CtIdentificativoUnivoco, CtIdentificativoUnivocoPersonaG, CtIstitutoMittente, CtIstitutoRicevente, Number1u461}
+import scalaxbmodel.flussoriversamento.{CtFlussoRiversamento, CtIdentificativoUnivoco, CtIdentificativoUnivocoPersonaG, CtIstitutoMittente, CtIstitutoRicevente, Number0, Number1u461, Number3}
 import scalaxbmodel.nodoperpsp.NodoInviaFlussoRendicontazione
+import spray.json._
 
 import java.io.{File, FileOutputStream}
 import java.nio.file.{Files, Paths}
@@ -199,27 +201,84 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
 
   }
 
-  def translateInviaFlussoRendicontazioneRest2Soap(inviaFlussoRendicontazione: InviaFlussoRendicontazioneRequest)(implicit log: NodoLogger, ec: ExecutionContext) = {
+  protected def inviaFlussoRendicontazioneSoap2Rest(req: SoapRequest, nodoInviaFlussoRendicontazione: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento) = {
+    (for {
+      _ <- Future.successful(())
+      _ = log.info(FdrLogConstant.logGeneraPayload(s"${req.primitive} REST"))
+      nifrRequest = InviaFlussoRendicontazioneRequest(
+        nodoInviaFlussoRendicontazione.identificativoFlusso,
+        nodoInviaFlussoRendicontazione.dataOraFlusso.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME),
+        Sender(
+          nodoInviaFlussoRendicontazione.identificativoPSP,
+          nodoInviaFlussoRendicontazione.identificativoIntermediarioPSP,
+          nodoInviaFlussoRendicontazione.identificativoCanale,
+          nodoInviaFlussoRendicontazione.password,
+          flussoRiversamento.istitutoMittente.identificativoUnivocoMittente.tipoIdentificativoUnivoco match {
+            case scalaxbmodel.flussoriversamento.GValue => SenderTypeEnum.LEGAL_PERSON
+            case scalaxbmodel.flussoriversamento.A => SenderTypeEnum.ABI_CODE
+            case _ => SenderTypeEnum.BIC_CODE
+          },
+          flussoRiversamento.istitutoMittente.denominazioneMittente,
+          flussoRiversamento.istitutoMittente.identificativoUnivocoMittente.codiceIdentificativoUnivoco
+        ),
+        Receiver(
+          flussoRiversamento.istitutoRicevente.identificativoUnivocoRicevente.codiceIdentificativoUnivoco,
+          nodoInviaFlussoRendicontazione.identificativoDominio,
+          flussoRiversamento.istitutoRicevente.denominazioneRicevente
+        ),
+        flussoRiversamento.identificativoUnivocoRegolamento,
+        flussoRiversamento.dataRegolamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME),
+        flussoRiversamento.codiceBicBancaDiRiversamento,
+        flussoRiversamento.datiSingoliPagamenti.map(p => {
+          Payment(
+            p.identificativoUnivocoVersamento,
+            p.identificativoUnivocoRiscossione,
+            p.indiceDatiSingoloPagamento.map(_.intValue),
+            p.singoloImportoPagato,
+            p.codiceEsitoSingoloPagamento match {
+              case Number0 => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_ESEGUITO
+              case Number3 => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_REVOCATO
+              case _ => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_NO_RPT
+            },
+            p.dataEsitoSingoloPagamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME)
+          )
+        })
+      ).toJson.toString
+
+      nifrResponse <- RendicontazioniUtil.callPrimitiveNew(
+        req.sessionId,
+        req.testCaseId,
+        req.primitive,
+        SoapReceiverType.FDRNEW.toString,
+        nifrRequest,
+        actorProps
+      )
+    } yield ()).recoverWith({
+      case _ => Future.successful(())
+    })
+  }
+
+  protected def inviaFlussoRendicontazioneRest2Soap(inviaFlussoRendicontazione: InviaFlussoRendicontazioneRequest)(implicit log: NodoLogger, ec: ExecutionContext) = {
     for {
       _ <- Future.successful(())
       _ = log.info(FdrLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
 
       flussoRiversamento = CtFlussoRiversamento(
         Number1u461,
-        inviaFlussoRendicontazione.reportingFlow,
-        DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.dateReportingFlow),
+        inviaFlussoRendicontazione.reportingFlowName,
+        DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.reportingFlowDate),
         inviaFlussoRendicontazione.regulation,
         DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.dateRegulation),
         CtIstitutoMittente(
           CtIdentificativoUnivoco(
             inviaFlussoRendicontazione.sender._type match {
-              case SenderTypeEnum.CODICE_ABI => scalaxbmodel.flussoriversamento.A
-              case SenderTypeEnum.CODICE_BIC => scalaxbmodel.flussoriversamento.B
+              case SenderTypeEnum.ABI_CODE => scalaxbmodel.flussoriversamento.A
+              case SenderTypeEnum.BIC_CODE => scalaxbmodel.flussoriversamento.B
               case _ => scalaxbmodel.flussoriversamento.GValue
             },
             inviaFlussoRendicontazione.sender.id
           ),
-          inviaFlussoRendicontazione.sender.name
+          inviaFlussoRendicontazione.sender.pspName
         ),
         inviaFlussoRendicontazione.bicCodePouringBank,
         CtIstitutoRicevente(
@@ -227,7 +286,7 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
             scalaxbmodel.flussoriversamento.G,
             inviaFlussoRendicontazione.receiver.id
           ),
-          inviaFlussoRendicontazione.receiver.nameEc
+          inviaFlussoRendicontazione.receiver.ecName
         ),
         inviaFlussoRendicontazione.payments.size,
         inviaFlussoRendicontazione.payments.map(_.singoloImportoPagato).sum
@@ -236,32 +295,19 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
       flussoRiversamentoEncoded <- Future.fromTry(XmlEnum.FlussoRiversamento2Str_flussoriversamento(flussoRiversamento))
 
       nodoInviaFlussoRendicontazione = NodoInviaFlussoRendicontazione(
-        inviaFlussoRendicontazione.sender.idPsp,
-        inviaFlussoRendicontazione.sender.idBroker,
-        inviaFlussoRendicontazione.sender.idChannel,
+        inviaFlussoRendicontazione.sender.pspId,
+        inviaFlussoRendicontazione.sender.brokerId,
+        inviaFlussoRendicontazione.sender.channelId,
         "", //TODO
-        inviaFlussoRendicontazione.receiver.idEc,
-        inviaFlussoRendicontazione.reportingFlow,
-        DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.dateReportingFlow),
+        inviaFlussoRendicontazione.receiver.ecId,
+        inviaFlussoRendicontazione.reportingFlowName,
+        DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.reportingFlowDate),
         XmlUtil.StringBase64Binary.encodeBase64(flussoRiversamentoEncoded)
       )
 
       requestString <- Future.fromTry(XmlEnum.nodoInviaFlussoRendicontazione2Str_nodoperpsp(nodoInviaFlussoRendicontazione))
 
     } yield requestString
-  }
-
-  def parseNodoInviaFlussoRendicontazione(payload: String, inputXsdValid: Boolean)(implicit log: NodoLogger) = {
-    log.debug("Parserizzazione input")
-    (for {
-      _ <- XsdValid.checkOnly(payload, XmlEnum.NODO_INVIA_FLUSSO_RENDICONTAZIONE_NODOPERPSP, inputXsdValid)
-      body <- XmlEnum.str2nodoInviaFlussoRendicontazione_nodoperpsp(payload)
-      _ = log.debug("Payload parserizzato correttamente")
-    } yield body) recoverWith { case e =>
-      log.warn(e, s"${e.getMessage}")
-      val cfb = exception.DigitPaException(e.getMessage, DigitPaErrorCodes.PPT_SINTASSI_EXTRAXSD, e)
-      Failure(cfb)
-    }
   }
 
   def checks(ddataMap: ConfigData, nodoInviaFlussoRendicontazione: NodoInviaFlussoRendicontazione, checkPassword: Boolean, actorClassId: String)(implicit log: NodoLogger) = {

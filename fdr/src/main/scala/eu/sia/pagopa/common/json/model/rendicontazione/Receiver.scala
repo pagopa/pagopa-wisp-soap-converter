@@ -9,12 +9,12 @@ object Receiver extends DefaultJsonProtocol {
     def write(receiver: Receiver): JsObject = {
       var fields: Map[String, JsValue] = {
         Map(
-          "idEc" -> JsString(receiver.idEc),
+          "ecId" -> JsString(receiver.ecId),
           "id" -> JsString(receiver.id)
         )
       }
-      if (receiver.nameEc.isDefined) {
-        fields = fields + ("nameEc" -> JsString(receiver.nameEc.get))
+      if (receiver.ecName.isDefined) {
+        fields = fields + ("ecName" -> JsString(receiver.ecName.get))
       }
       JsObject(fields)
     }
@@ -25,7 +25,7 @@ object Receiver extends DefaultJsonProtocol {
 }
 
 case class Receiver(
-                   idEc: String,
-                   id: String,
-                   nameEc: Option[String])
+                     id: String,
+                     ecId: String,
+                     ecName: Option[String])
 

@@ -9,17 +9,17 @@ object Sender extends DefaultJsonProtocol {
     def write(sender: Sender): JsObject = {
       var fields: Map[String, JsValue] = {
         Map(
-          "idPsp" -> JsString(sender.idPsp),
-          "idBroker" -> JsString(sender.idBroker),
-          "idChannel" -> JsString(sender.idChannel),
+          "pspId" -> JsString(sender.pspId),
+          "brokerId" -> JsString(sender.brokerId),
+          "channelId" -> JsString(sender.channelId),
           "password" -> JsString(sender.password),
           "type" -> JsString(sender._type.toString),
           "id" -> JsString(sender.id)
         )
       }
 
-      if (sender.name.isDefined) {
-        fields = fields + ("name" -> JsString(sender.name.get))
+      if (sender.pspName.isDefined) {
+        fields = fields + ("pspName" -> JsString(sender.pspName.get))
       }
       JsObject(fields)
     }
@@ -30,15 +30,15 @@ object Sender extends DefaultJsonProtocol {
 }
 
 case class Sender(
-                   idPsp: String,
-                   idBroker: String,
-                   idChannel: String,
+                   pspId: String,
+                   brokerId: String,
+                   channelId: String,
                    password: String,
                    _type: SenderTypeEnum.Value,
-                   name: Option[String],
+                   pspName: Option[String],
                    id: String
                  )
 
 object SenderTypeEnum extends Enumeration {
-  val PERSONA_GIURIDICA, CODICE_ABI, CODICE_BIC = Value
+  val LEGAL_PERSON, ABI_CODE, BIC_CODE = Value
 }
