@@ -8,11 +8,7 @@ object Constant {
   final val OK = "OK"
   final val KO = "KO"
 
-  val Y = "Y"
-  val N = "N"
-
   val HTTP_RESP_SESSION_ID_HEADER = "sessionId"
-  val UNKNOWN = "UNKNOWN"
 
   val UTF_8: Charset = StandardCharsets.UTF_8
   val DTF_DATETIME: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -25,11 +21,6 @@ object Constant {
   val INSTANCE = sys.env.get(INSTANCE_KEY).getOrElse("")
   val APP_NAME = sys.env.get(APP_NAME_KEY).getOrElse("")
   val APP_VERSION = sys.env.get(APP_VERSION_KEY).getOrElse("")
-
-  val SERVER = "SERVER"
-  val CLIENT = "CLIENT"
-  val REQUEST = "REQUEST"
-  val RESPONSE = "RESPONSE"
 
   object KeyName {
     val EMPTY_KEY = "NO_KEY"

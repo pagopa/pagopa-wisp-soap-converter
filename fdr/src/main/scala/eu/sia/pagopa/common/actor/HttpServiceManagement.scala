@@ -1,4 +1,4 @@
-package eu.sia.pagopa.rendicontazioni.util
+package eu.sia.pagopa.common.actor
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{ContentTypes, HttpMethods, ContentType => _}
@@ -9,13 +9,13 @@ import eu.sia.pagopa.common.util.NodoLogger
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.DurationInt
 
-object RendicontazioniUtil {
+object HttpServiceManagement {
 
   private val HEADER_KEY_SOAPACTION = "SOAPAction"
 
   private val QUERYPARAM_SOAPACTION = "soapAction"
 
-  def callPrimitiveOld(
+  def createRequestSoapAction(
       sessionId: String,
       testCaseId: Option[String],
       action: String,
@@ -42,7 +42,7 @@ object RendicontazioniUtil {
     callService(simpleHttpReq, action, receiver, actorProps)
   }
 
-  def callPrimitiveNew(
+  def createRequestRestAction(
                         sessionId: String,
                         testCaseId: Option[String],
                         action: String,

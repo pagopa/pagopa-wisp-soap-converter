@@ -1,7 +1,7 @@
 package eu.sia.pagopa.rendicontazioni.actor
 
 import eu.sia.pagopa.Main.ConfigData
-import eu.sia.pagopa.common.actor.PerRequestActor
+import eu.sia.pagopa.common.actor.{HttpServiceManagement, PerRequestActor}
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.json.model.rendicontazione._
@@ -12,7 +12,7 @@ import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.{XmlUtil, XsdValid}
 import eu.sia.pagopa.commonxml.XmlEnum
-import eu.sia.pagopa.rendicontazioni.util.{CheckRendicontazioni, RendicontazioniUtil}
+import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
 import it.pagopa.config.CreditorInstitution
 import scalaxbmodel.flussoriversamento.{CtFlussoRiversamento, CtIdentificativoUnivoco, CtIdentificativoUnivocoPersonaG, CtIstitutoMittente, CtIstitutoRicevente, Number0, Number1u461, Number3}
 import scalaxbmodel.nodoperpsp.NodoInviaFlussoRendicontazione
@@ -245,7 +245,7 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
         })
       ).toJson.toString
 
-      nifrResponse <- RendicontazioniUtil.callPrimitiveNew(
+      nifrResponse <- HttpServiceManagement.createRequestRestAction(
         req.sessionId,
         req.testCaseId,
         req.primitive,
