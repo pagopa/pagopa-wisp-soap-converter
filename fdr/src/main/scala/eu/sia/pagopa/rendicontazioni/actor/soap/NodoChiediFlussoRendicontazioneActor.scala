@@ -226,7 +226,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
           xmlRendicontazione <- if (ncfrResponse.isDefined) {
             for {
               _ <- Future.successful(())
-              _ = ncfrResponse.get.fault.map(v => log.warn(s"Esito da Nexi: faultCode=[${v.faultCode}, faultString=[${v.faultString}], description=[${v.description}]"))
+              _ = ncfrResponse.get.fault.map(v => log.warn(s"Esito da ${SoapReceiverType.NEXI.toString}: faultCode=[${v.faultCode}, faultString=[${v.faultString}], description=[${v.description}]"))
             } yield ncfrResponse.get.xmlRendicontazione
           } else {
             Future.successful(None)
@@ -241,7 +241,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
       xmlrendicontazione <- if( rendicontazioneNexi.isDefined ) {
         Future.successful(rendicontazioneNexi)
       } else {
-        log.debug("Nessuna rendicontazione restituita da Nexi")
+        log.debug(s"Nessuna rendicontazione restituita da ${SoapReceiverType.NEXI.toString}")
         for {
           _ <- Future.successful(())
           _ = log.debug(s"Cerco la rendicontazione ${ncfr.identificativoFlusso} a db")
@@ -273,7 +273,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
   }
 
   private def parseResponseNexi(payloadResponse: String): Try[Option[NodoChiediFlussoRendicontazioneRisposta]] = {
-    log.info(FdrLogConstant.logSintattico(s"Nexi $RESPONSE_NAME"))
+    log.info(FdrLogConstant.logSintattico(s"${SoapReceiverType.NEXI.toString} $RESPONSE_NAME"))
     (for {
       _ <- XsdValid.checkOnly(payloadResponse, XmlEnum.NODO_CHIEDI_FLUSSO_RENDICONTAZIONE_RISPOSTA_NODOPERPA, inputXsdValid)
       body <- XmlEnum.str2nodoChiediFlussoRendicontazioneResponse_nodoperpa(payloadResponse)

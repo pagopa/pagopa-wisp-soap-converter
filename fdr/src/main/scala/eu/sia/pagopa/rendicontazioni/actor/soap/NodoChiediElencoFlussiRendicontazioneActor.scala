@@ -38,85 +38,6 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
 
   val RESPONSE_NAME = "nodoChiediElencoFlussiRendicontazioneRisposta"
 
-  override def actorError(e: DigitPaException): Unit = {
-    actorError(req, replyTo, ddataMap, e, re)
-  }
-
-  private def parseInput(br: SoapRequest): Try[NodoChiediElencoFlussiRendicontazione] = {
-    (for {
-      _ <- XsdValid.checkOnly(br.payload, XmlEnum.NODO_CHIEDI_ELENCO_FLUSSI_RENDICONTAZIONE_NODOPERPA, inputXsdValid)
-      body <- XmlEnum.str2nodoChiediElencoFlussiRendicontazione_nodoperpa(br.payload)
-    } yield body) recoverWith { case e =>
-      log.error(e, e.getMessage)
-      Failure(exception.DigitPaException(e.getMessage, DigitPaErrorCodes.PPT_SINTASSI_EXTRAXSD))
-    }
-  }
-
-  private def parseResponseNexi(payloadResponse: String): Try[Option[NodoChiediElencoFlussiRendicontazioneRisposta]] = {
-    log.info(FdrLogConstant.logSintattico(s"Nexi $RESPONSE_NAME"))
-    (for {
-      _ <- XsdValid.checkOnly(payloadResponse, XmlEnum.NODO_CHIEDI_ELENCO_FLUSSI_RENDICONTAZIONE_RISPOSTA_NODOPERPA, inputXsdValid)
-      body <- XmlEnum.str2nodoChiediElencoFlussiRendicontazioneResponse_nodoperpa(payloadResponse)
-    } yield Some(body)) recoverWith { case e =>
-      log.error(e, e.getMessage)
-      Success(None)
-    }
-  }
-
-  private def createTipoElencoFlussiRendicontazione(rendicontazioni: Seq[(String, LocalDateTime)], rendicontazioniNexi: Seq[Option[TipoIdRendicontazione]]) = {
-    log.debug("Unisco l'elenco dei flussi di Nexi con i nostri")
-    val tipiIdRendi = (rendicontazioniNexi ++ rendicontazioni.map(rendi => {
-      Some(TipoIdRendicontazione(rendi._1, XmlUtil.StringXMLGregorianCalendarDate.format(rendi._2, XsdDatePattern.DATE_TIME)))
-    })).distinct
-    Future.successful(Some(TipoElencoFlussiRendicontazione(tipiIdRendi.size, tipiIdRendi)))
-  }
-
-  private def findRendicontazioni(ncefr: NodoChiediElencoFlussiRendicontazione) = {
-    log.debug("Cerco rendicontazini valide a db")
-    val idjIdIntPA = ddataMap.creditorInstitutionBrokers(ncefr.identificativoIntermediarioPA).brokerCode
-    val idStazioniInt = ddataMap.stations.filter(_._2.brokerCode == idjIdIntPA).map(_._2.stationCode).toSeq
-    val paStazPa =
-      ddataMap.creditorInstitutionStations.filter(spa => idStazioniInt.contains(spa._2.stationCode)).map(_._2.creditorInstitutionCode).toSeq
-    val domini = ddataMap.creditorInstitutions
-      .filter(p => ncefr.identificativoDominio.forall(d => p._1 == d))
-      .filter(pa => {
-        paStazPa.contains(pa._2.creditorInstitutionCode)
-      })
-      .keys
-      .toSeq
-    repositories.fdrRepository.findRendicontazioni(domini, ncefr.identificativoPSP, dayLimit)
-  }
-
-  private def checks(ncefr: NodoChiediElencoFlussiRendicontazione) = {
-    val identificativoDominio = ncefr.identificativoDominio
-    Future.fromTry({
-      for {
-        staz <-
-          if (identificativoDominio.isDefined) {
-            DDataChecks
-              .checkPaIntermediarioPaStazione(log, ddataMap, identificativoDominio.get, ncefr.identificativoIntermediarioPA, ncefr.identificativoStazioneIntermediarioPA, None, Some(ncefr.password))
-              .map(_._3)
-          } else {
-            DDataChecks.checkIntermediarioPaStazionePassword(log, ddataMap, ncefr.identificativoIntermediarioPA, ncefr.identificativoStazioneIntermediarioPA, ncefr.password).map(_._2)
-          }
-        psp <-
-          if (ncefr.identificativoPSP.isDefined) {
-            DDataChecks.checkPsp(log, ddataMap, ncefr.identificativoPSP.get).map(p => Some(p))
-          } else {
-            Success(None)
-          }
-      } yield (staz, psp)
-    })
-  }
-
-  private def wrapInBundleMessage(ncefrr: NodoChiediElencoFlussiRendicontazioneRisposta) = {
-    for {
-      respPayload <- XmlEnum.nodoChiediElencoFlussiRendicontazioneRisposta2Str_nodoperpa(ncefrr)
-      _ <- XsdValid.checkOnly(respPayload, XmlEnum.NODO_CHIEDI_ELENCO_FLUSSI_RENDICONTAZIONE_RISPOSTA_NODOPERPA, outputXsdValid)
-      _ = log.debug("Risposta valida")
-    } yield respPayload
-  }
-
   override def receive: Receive = { case soapRequest: SoapRequest =>
     req = soapRequest
     replyTo = sender()
@@ -177,7 +98,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
           flussiResponseNexi <- if( ncefrResponse.isDefined ) {
             for {
               _ <- Future.successful(())
-              _ = ncefrResponse.get.fault.map(v=> log.warn(s"Esito da Nexi: faultCode=[${v.faultCode}, faultString=[${v.faultString}], description=[${v.description}]"))
+              _ = ncefrResponse.get.fault.map(v=> log.warn(s"Esito da ${SoapReceiverType.NEXI.toString}: faultCode=[${v.faultCode}, faultString=[${v.faultString}], description=[${v.description}]"))
             } yield ncefrResponse.get.elencoFlussiRendicontazione
           } else {
             Future.successful(None)
@@ -185,7 +106,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
 
           tipiIdRendicontazioni = if ( flussiResponseNexi.isDefined) {
             val flussiTrovati = flussiResponseNexi.get.idRendicontazione
-            log.debug(s"Ricevute ${flussiTrovati.size} rendicontazioni da Nexi")
+            log.debug(s"Ricevute ${flussiTrovati.size} rendicontazioni da ${SoapReceiverType.NEXI.toString}")
             flussiTrovati
           } else {
             Nil
@@ -217,6 +138,85 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
       replyTo ! sr
       complete()
     })
+  }
+
+  override def actorError(e: DigitPaException): Unit = {
+    actorError(req, replyTo, ddataMap, e, re)
+  }
+
+  private def parseInput(br: SoapRequest): Try[NodoChiediElencoFlussiRendicontazione] = {
+    (for {
+      _ <- XsdValid.checkOnly(br.payload, XmlEnum.NODO_CHIEDI_ELENCO_FLUSSI_RENDICONTAZIONE_NODOPERPA, inputXsdValid)
+      body <- XmlEnum.str2nodoChiediElencoFlussiRendicontazione_nodoperpa(br.payload)
+    } yield body) recoverWith { case e =>
+      log.error(e, e.getMessage)
+      Failure(exception.DigitPaException(e.getMessage, DigitPaErrorCodes.PPT_SINTASSI_EXTRAXSD))
+    }
+  }
+
+  private def parseResponseNexi(payloadResponse: String): Try[Option[NodoChiediElencoFlussiRendicontazioneRisposta]] = {
+    log.info(FdrLogConstant.logSintattico(s"${SoapReceiverType.NEXI.toString} $RESPONSE_NAME"))
+    (for {
+      _ <- XsdValid.checkOnly(payloadResponse, XmlEnum.NODO_CHIEDI_ELENCO_FLUSSI_RENDICONTAZIONE_RISPOSTA_NODOPERPA, inputXsdValid)
+      body <- XmlEnum.str2nodoChiediElencoFlussiRendicontazioneResponse_nodoperpa(payloadResponse)
+    } yield Some(body)) recoverWith { case e =>
+      log.error(e, e.getMessage)
+      Success(None)
+    }
+  }
+
+  private def createTipoElencoFlussiRendicontazione(rendicontazioni: Seq[(String, LocalDateTime)], rendicontazioniNexi: Seq[Option[TipoIdRendicontazione]]) = {
+    log.debug(s"Unisco l'elenco dei flussi di ${SoapReceiverType.NEXI.toString} con i nostri")
+    val tipiIdRendi = (rendicontazioniNexi ++ rendicontazioni.map(rendi => {
+      Some(TipoIdRendicontazione(rendi._1, XmlUtil.StringXMLGregorianCalendarDate.format(rendi._2, XsdDatePattern.DATE_TIME)))
+    })).distinct
+    Future.successful(Some(TipoElencoFlussiRendicontazione(tipiIdRendi.size, tipiIdRendi)))
+  }
+
+  private def findRendicontazioni(ncefr: NodoChiediElencoFlussiRendicontazione) = {
+    log.debug("Cerco rendicontazini valide a db")
+    val idjIdIntPA = ddataMap.creditorInstitutionBrokers(ncefr.identificativoIntermediarioPA).brokerCode
+    val idStazioniInt = ddataMap.stations.filter(_._2.brokerCode == idjIdIntPA).map(_._2.stationCode).toSeq
+    val paStazPa =
+      ddataMap.creditorInstitutionStations.filter(spa => idStazioniInt.contains(spa._2.stationCode)).map(_._2.creditorInstitutionCode).toSeq
+    val domini = ddataMap.creditorInstitutions
+      .filter(p => ncefr.identificativoDominio.forall(d => p._1 == d))
+      .filter(pa => {
+        paStazPa.contains(pa._2.creditorInstitutionCode)
+      })
+      .keys
+      .toSeq
+    repositories.fdrRepository.findRendicontazioni(domini, ncefr.identificativoPSP, dayLimit)
+  }
+
+  private def checks(ncefr: NodoChiediElencoFlussiRendicontazione) = {
+    val identificativoDominio = ncefr.identificativoDominio
+    Future.fromTry({
+      for {
+        staz <-
+          if (identificativoDominio.isDefined) {
+            DDataChecks
+              .checkPaIntermediarioPaStazione(log, ddataMap, identificativoDominio.get, ncefr.identificativoIntermediarioPA, ncefr.identificativoStazioneIntermediarioPA, None, Some(ncefr.password))
+              .map(_._3)
+          } else {
+            DDataChecks.checkIntermediarioPaStazionePassword(log, ddataMap, ncefr.identificativoIntermediarioPA, ncefr.identificativoStazioneIntermediarioPA, ncefr.password).map(_._2)
+          }
+        psp <-
+          if (ncefr.identificativoPSP.isDefined) {
+            DDataChecks.checkPsp(log, ddataMap, ncefr.identificativoPSP.get).map(p => Some(p))
+          } else {
+            Success(None)
+          }
+      } yield (staz, psp)
+    })
+  }
+
+  private def wrapInBundleMessage(ncefrr: NodoChiediElencoFlussiRendicontazioneRisposta) = {
+    for {
+      respPayload <- XmlEnum.nodoChiediElencoFlussiRendicontazioneRisposta2Str_nodoperpa(ncefrr)
+      _ <- XsdValid.checkOnly(respPayload, XmlEnum.NODO_CHIEDI_ELENCO_FLUSSI_RENDICONTAZIONE_RISPOSTA_NODOPERPA, outputXsdValid)
+      _ = log.debug("Risposta valida")
+    } yield respPayload
   }
 
 }

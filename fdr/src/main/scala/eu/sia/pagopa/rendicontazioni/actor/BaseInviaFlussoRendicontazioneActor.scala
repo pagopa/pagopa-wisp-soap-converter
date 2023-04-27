@@ -298,7 +298,7 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
         inviaFlussoRendicontazione.sender.pspId,
         inviaFlussoRendicontazione.sender.brokerId,
         inviaFlussoRendicontazione.sender.channelId,
-        "", //TODO
+        "fakePassword", //TODO
         inviaFlussoRendicontazione.receiver.ecId,
         inviaFlussoRendicontazione.reportingFlowName,
         DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.reportingFlowDate),
