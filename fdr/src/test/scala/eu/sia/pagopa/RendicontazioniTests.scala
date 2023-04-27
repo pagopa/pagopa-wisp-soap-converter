@@ -61,7 +61,7 @@ class RendicontazioniTests() extends BaseUnitTest {
       val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
       val random = RandomStringUtils.randomNumeric(9)
       val idFlusso = s"${date}${TestItems.PSP}-$random"
-      log.info(s"idflusso:$idFlusso")
+      log.info(s"Field idflusso=[$idFlusso]")
       inviaFlussoRendicontazione(
         idFlusso = Some(idFlusso),
         responseAssert = (r) => {

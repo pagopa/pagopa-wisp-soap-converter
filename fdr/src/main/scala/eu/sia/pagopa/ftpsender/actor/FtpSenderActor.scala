@@ -30,26 +30,26 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
     req = r
     implicit val ec: ExecutionContext = context.system.dispatcher
 
-    log.debug(s"Ricevuta [$tipo] -> $destinationPath - $filename")
+    log.debug(s"Received [$tipo] -> $destinationPath - $filename")
     tipo match {
       case Constant.Sftp.RENDICONTAZIONI =>
         val sendto = sender()
         val ftpconfigopt = ddataMap.ftpServers.find(f => f._2.id == ftpServerId)
 
         if (ftpconfigopt.isEmpty) {
-          throw FtpSenderException(s"Configurazione FTP non trovata", FTPFailureReason.CONFIGURATION)
+          throw FtpSenderException(s"FTP configuration not found", FTPFailureReason.CONFIGURATION)
         }
 
         val pipeline = for {
           ftpconfig <- Future.successful(ftpconfigopt.get._2)
           _ = log.info(FdrLogConstant.logSemantico(Constant.KeyName.FTP_SENDER))
           _ <- Future(validateInput(filename))
-          _ = log.debug(s"Recupero file da DB con fileId=[$fileId]")
+          _ = log.debug(s"File recovery from DB with fileId=[$fileId]")
           file <- repositories.fdrRepository.findFtpFileById(fileId, tipo).flatMap {
             case Some(b) =>
               Future.successful(b)
             case None =>
-              val message = s"File non trovato su database"
+              val message = s"File not found on database"
               log.info(message)
               Future.failed(DigitPaException(message, DigitPaErrorCodes.PPT_SYSTEM_ERROR))
           }
@@ -61,29 +61,29 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
             }
           destpath = s"$inPath/$envPath$destinationPath"
           destfile = s"$destpath/$filename"
-          _ = log.debug(s"File da caricare in [$destfile]")
+          _ = log.debug(s"File to upload to [$destfile]")
 
           opts = SSHOptions(host = ftpconfig.host, port = ftpconfig.port, username = ftpconfig.username, password = ftpconfig.password, connectTimeout = ftpConnectTimeout)
 
-          _ = log.debug(s"Connessione al server [${opts.host}]")
+          _ = log.debug(s"Connecting to the server [${opts.host}]")
 
           ssh <- Future(new SSH(opts)).recover({ case e =>
-            log.error(e, s"Impossibile stabilire una connessione col server sftp [$opts]")
+            log.error(e, s"Unable to establish connection to SFTP server [$opts]")
             throw e
           })
           _ <- SSHFuture.ftp(ssh) { ftp: SSHFtp =>
             Try({
-              log.debug(s"Controllo esistenza directory di destinazione")
+              log.debug(s"Destination directory existence check")
               createDirs(destpath)(ftp)
-              log.info(s"Caricamento file in corso")
+              log.info(s"File upload in progress")
               ftp.putBytes(file.content, destfile)
-              log.debug(s"Caricamento file completato")
+              log.debug(s"File upload completed")
             }) match {
               case Success(_) =>
-                log.debug(s"Aggiornamento stato file a UPLOADED")
+                log.debug(s"File status update to UPLOADED")
                 repositories.fdrRepository.updateFileStatus(file.id, FtpFileStatus.UPLOADED, tipo, actorClassId)
               case Failure(ex) =>
-                log.error(ex, "Errore caricamento file")
+                log.error(ex, "File upload error")
                 repositories.fdrRepository.updateFileRetry(file, tipo, actorClassId)
             }
           }
@@ -91,7 +91,7 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
 
         pipeline
           .recoverWith { case ex: Throwable =>
-            log.warn(ex, s"Errore FTP sender:${ex.getMessage}")
+            log.warn(ex, s"FTP sender error:${ex.getMessage}")
             Future.successful(FTPResponse(sessionId, testCaseId, Some(DigitPaErrorCodes.PPT_SYSTEM_ERROR)))
           }
           .map(resp => {
@@ -101,7 +101,7 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
           })
 
       case m @ _ =>
-        log.warn(s"Messagge Type non gestito: [$m]")
+        log.warn(s"Messagge Type not managed: [$m]")
         replyTo ! FTPResponse(sessionId, testCaseId, Some(exception.DigitPaException("Tipo messaggio non gestito: [$m]", DigitPaErrorCodes.PPT_SYSTEM_ERROR)))
         complete()
     }

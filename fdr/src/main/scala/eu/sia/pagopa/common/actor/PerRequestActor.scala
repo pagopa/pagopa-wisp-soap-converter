@@ -57,7 +57,7 @@ trait PerRequestActor extends Actor with NodoLogging {
       actorError(dpe)
       complete()
     case other =>
-      log.warn(s"PerRequestActor - Tipo messaggio per request non gestito [${other.getClass.getName}]\nfrom ${sender()} \n${other}")
+      log.warn(s"PerRequestActor - Message type for unhandled request [${other.getClass.getName}]\nfrom ${sender()} \n${other}")
   }
 
   def actorError(e: DigitPaException): Unit

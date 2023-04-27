@@ -32,13 +32,13 @@ final case class PrimitiveActor(repositories: Repositories, actorProps: ActorPro
 
     MDC.put(Constant.MDCKey.ACTOR_CLASS_ID, actorClassId)
 
-    log.debug(s"creazione actor per request ${actorClassId}${extraData.map(d => s"[$d]").getOrElse("")} of class ${clazz.getSimpleName}")
+    log.debug(s"Error creating actor per request ${actorClassId}${extraData.map(d => s"[$d]").getOrElse("")} of class ${clazz.getSimpleName}")
     Try({
       val a = createActorPerRequestAndTell(request, BootstrapUtil.actorClassId(clazz), Props(clazz, repositories, actorProps.copy(actorClassId = actorClassId)))(log, context)
       context.watch(a)
       actors.incrementAndGet()
     }).recover { case e: Throwable =>
-      log.error(e, s"Errore creazione ActorPerRequest ${actorClassId}")
+      log.error(e, s"Error creating ActorPerRequest ${actorClassId}")
       sender ! "errore" //FIXME rispondere errore xml/json
     //          actorError(replyTo, soapRequet, ddataMap, DigitPaException("Errore creazione ActorPerRequest", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), None)
     }

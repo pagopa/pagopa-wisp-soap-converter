@@ -17,14 +17,14 @@ object DDataChecks {
     ddataMap.creditorInstitutions.get(idPa) match {
       case Some(value) =>
         if (value.enabled) {
-          log.debug(s"[$idPa] trovato e abilitato")
+          log.debug(s"[$idPa] found and enabled")
           Success(value)
         } else {
-          log.warn(s"[$idPa] trovato e disabilitato")
+          log.warn(s"[$idPa] found but disabled")
           Failure(DigitPaErrorCodes.PPT_DOMINIO_DISABILITATO)
         }
       case None =>
-        log.warn(s"[$idPa] non trovato")
+        log.warn(s"[$idPa] not found")
         Failure(DigitPaErrorCodes.PPT_DOMINIO_SCONOSCIUTO)
     }
   }
@@ -33,14 +33,14 @@ object DDataChecks {
     ddataMap.psps.get(idPsp) match {
       case Some(value) =>
         if (value.enabled) {
-          log.debug(s"[$idPsp] trovato e abilitato")
+          log.debug(s"[$idPsp] found and enabled")
           Success(value)
         } else {
-          log.warn(s"[$idPsp] trovato e disabilitato")
+          log.warn(s"[$idPsp] found but disabled")
           Failure(DigitPaErrorCodes.PPT_PSP_DISABILITATO)
         }
       case None =>
-        log.warn(s"[$idPsp] non trovato")
+        log.warn(s"[$idPsp] not found")
         Failure(DigitPaErrorCodes.PPT_PSP_SCONOSCIUTO)
     }
   }
@@ -49,14 +49,14 @@ object DDataChecks {
     ddataMap.pspBrokers.get(idIntPsp) match {
       case Some(value) =>
         if (value.enabled) {
-          log.debug(s"[$idIntPsp] trovato e abilitato")
+          log.debug(s"[$idIntPsp] found and enabled")
           Success(value)
         } else {
-          log.warn(s"[$idIntPsp] trovato e disabilitato")
+          log.warn(s"[$idIntPsp] found but disabled")
           Failure(DigitPaErrorCodes.PPT_INTERMEDIARIO_PSP_DISABILITATO)
         }
       case None =>
-        log.warn(s"[$idIntPsp] non trovato")
+        log.warn(s"[$idIntPsp] not found")
         Failure(DigitPaErrorCodes.PPT_INTERMEDIARIO_PSP_SCONOSCIUTO)
     }
   }
@@ -64,10 +64,10 @@ object DDataChecks {
   def checkCodifiche(log: NodoLogger, ddataMap: ConfigData, formatoCodifica: String): Try[Encoding] = {
     ddataMap.encodings.get(formatoCodifica) match {
       case Some(value) =>
-        log.debug(s"[$formatoCodifica] trovato")
+        log.debug(s"[$formatoCodifica] found")
         Success(value)
       case None =>
-        log.warn(s"[$formatoCodifica] non trovato")
+        log.warn(s"[$formatoCodifica] not found")
         Failure(DigitPaErrorCodes.PPT_CODIFICA_PSP_SCONOSCIUTA)
     }
   }
@@ -76,19 +76,19 @@ object DDataChecks {
     ddataMap.channels.get(idCanale) match {
       case Some(value) =>
         if (value.enabled) {
-          log.debug(s"[$idCanale] trovato e abilitato")
+          log.debug(s"[$idCanale] found and enabled")
           if (!checkPassword || password.forall(value.password.contains(_))) {
             Success(value)
           } else {
-            log.warn(s"[$idCanale] trovato e abilitato, password errata")
+            log.warn(s"[$idCanale] found and enabled, wrong password")
             Failure(exception.DigitPaException("Password sconosciuta o errata", DigitPaErrorCodes.PPT_AUTENTICAZIONE))
           }
         } else {
-          log.warn(s"[$idCanale] trovato e disabilitato")
+          log.warn(s"[$idCanale] found but disabled")
           Failure(DigitPaErrorCodes.PPT_CANALE_DISABILITATO)
         }
       case None =>
-        log.warn(s"[$idCanale] non trovato")
+        log.warn(s"[$idCanale] not found")
         Failure(DigitPaErrorCodes.PPT_CANALE_SCONOSCIUTO)
     }
   }
@@ -97,15 +97,15 @@ object DDataChecks {
     ddataMap.stations.get(idStazione) match {
       case Some(value) =>
         if (value.enabled) {
-          log.debug(s"[$idStazione] trovata e abilitato")
+          log.debug(s"[$idStazione] found and enabled")
           if (!checkPassword || password.forall(value.password.contains(_))) {
             Success(value)
           } else {
-            log.warn(s"[$idStazione] trovata e abilitato, password errata")
+            log.warn(s"[$idStazione] found and enabled, wrong password")
             Failure(exception.DigitPaException("Password sconosciuta o errata", DigitPaErrorCodes.PPT_AUTENTICAZIONE))
           }
         } else {
-          log.warn(s"[$idStazione] trovata e disabilitato")
+          log.warn(s"[$idStazione] found but disabled")
           Failure(DigitPaErrorCodes.PPT_STAZIONE_INT_PA_DISABILITATA)
         }
       case None =>
@@ -121,14 +121,14 @@ object DDataChecks {
       pspc.channelCode == canale.channelCode && pspc.pspCode == psp.pspCode
     })
     if (c.isEmpty) {
-      log.warn(s"[psp:${psp.pspCode},canale:${canale.channelCode}] Configurazione psp-canale non corretta")
+      log.warn(s"[psp:${psp.pspCode},canale:${canale.channelCode}] wrong configuration psp-canale")
       Failure(exception.DigitPaException("Configurazione psp-canale non corretta", DigitPaErrorCodes.PPT_AUTORIZZAZIONE))
     } else {
       c.find(a => tvopt.forall(_.paymentType == a._2.paymentType)) match {
         case Some(value) =>
           Success(value._2)
         case None =>
-          log.warn(s"[psp:${psp.pspCode},canale:${canale.channelCode},tipoVersamento:${tvopt.getOrElse("n.a")}] Configurazione psp-canale-tipoVersamento non corretta")
+          log.warn(s"[psp:${psp.pspCode},canale:${canale.channelCode},tipoVersamento:${tvopt.getOrElse("n.a")}] wrong configuration psp-canale-tipoVersamento")
           Failure(exception.DigitPaException("Configurazione psp-canale-tipoVersamento non corretta", DigitPaErrorCodes.PPT_AUTORIZZAZIONE))
       }
     }
@@ -139,7 +139,7 @@ object DDataChecks {
     ddataMap.paymentTypes.get(tipoVersamento) match {
       case Some(value) => Success(value)
       case None =>
-        log.warn(s"[$tipoVersamento] Tipo versamento sconosciuto")
+        log.warn(s"[$tipoVersamento] Unknown payment type")
         Failure(DigitPaErrorCodes.PPT_TIPO_VERSAMENTO_SCONOSCIUTO)
     }
   }
@@ -174,7 +174,7 @@ object DDataChecks {
         if (canaleOpt.forall(can => can.brokerPspCode == intermediarioPsp.brokerPspCode)) {
           Success(())
         } else {
-          log.warn(s"Id PA per [canale:${idCanale.getOrElse("n.a")},intermediarioPsp:$idIntermediarioPsp] Configurazione intermediario-canale non corretta")
+          log.warn(s"Id PA per [canale:${idCanale.getOrElse("n.a")},intermediarioPsp:$idIntermediarioPsp] wrong configuration intermediario-canale")
           Failure(exception.DigitPaException("Configurazione intermediario-canale non corretta", DigitPaErrorCodes.PPT_AUTORIZZAZIONE))
         }
       tipoVersOpt <- tipoVers match {
@@ -203,14 +203,14 @@ object DDataChecks {
     ddataMap.creditorInstitutionBrokers.get(idIntPa) match {
       case Some(value) =>
         if (value.enabled) {
-          log.debug(s"[$idIntPa] trovato e abilitato")
+          log.debug(s"[$idIntPa] found and enabled")
           Success(value)
         } else {
-          log.warn(s"[$idIntPa] trovato e disabilitato")
+          log.warn(s"[$idIntPa] found but disabled")
           Failure(DigitPaErrorCodes.PPT_INTERMEDIARIO_PA_DISABILITATO)
         }
       case None =>
-        log.warn(s"[$idIntPa] non trovato")
+        log.warn(s"[$idIntPa] not found")
         Failure(DigitPaErrorCodes.PPT_INTERMEDIARIO_PA_SCONOSCIUTO)
     }
   }
@@ -234,7 +234,7 @@ object DDataChecks {
         if (stazione.brokerCode == intermediarioPa.brokerCode) {
           Success(())
         } else {
-          log.warn(s"[stazione:$idStazione,intermediarioPa:$idIntermediarioPa] Configurazione intermediario-stazione non corretta")
+          log.warn(s"[stazione:$idStazione,intermediarioPa:$idIntermediarioPa] wrong configuration intermediario-stazione")
           Failure(exception.DigitPaException("Configurazione intermediario-stazione non corretta", DigitPaErrorCodes.PPT_AUTORIZZAZIONE))
         }
 
@@ -248,7 +248,7 @@ object DDataChecks {
         if (checkPaStazionePa) {
           Success(())
         } else {
-          log.warn(s"[stazione:$idStazione,intermediarioPa:$idIntermediarioPa,pa:$idPa] Configurazione pa-intermediario-stazione non corretta")
+          log.warn(s"[stazione:$idStazione,intermediarioPa:$idIntermediarioPa,pa:$idPa] wrong configuration pa-intermediario-stazione")
           Failure(exception.DigitPaException("Configurazione pa-intermediario-stazione non corretta", DigitPaErrorCodes.PPT_AUTORIZZAZIONE))
         }
 
@@ -265,7 +265,7 @@ object DDataChecks {
         if (stazione.brokerCode == intermediarioPa.brokerCode) {
           Success(())
         } else {
-          log.warn(s"[stazione:$idStazione,intermediarioPa:$idIntermediarioPa] Configurazione intermediario-stazione non corretta")
+          log.warn(s"[stazione:$idStazione,intermediarioPa:$idIntermediarioPa] wrong configuration intermediario-stazione")
           Failure(exception.DigitPaException("Configurazione intermediario-stazione non corretta", DigitPaErrorCodes.PPT_AUTORIZZAZIONE))
         }
 
@@ -274,7 +274,7 @@ object DDataChecks {
         if (checkPaStazionePa) {
           Success(())
         } else {
-          log.warn(s"Stazione [$idStazione] non collegata ad alcuna PA")
+          log.warn(s"Stazione [$idStazione] not connected to any PA")
           Failure(exception.DigitPaException("Configurazione pa-intermediario-stazione non corretta", DigitPaErrorCodes.PPT_AUTORIZZAZIONE))
         }
     } yield (intermediarioPa, stazione)
