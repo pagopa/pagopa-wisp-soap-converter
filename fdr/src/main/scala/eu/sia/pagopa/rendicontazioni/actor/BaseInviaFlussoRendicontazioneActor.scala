@@ -42,13 +42,13 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
                                checkUTF8: Boolean,
                                inputXsdValid: Boolean
                              )(implicit log: NodoLogger, ec: ExecutionContext) = {
-    log.debug("Check validita flusso riversamento")
+    log.debug("Check 'Flusso riversamento' element validity")
 
     for {
       content <- Future.fromTry(StringUtils.getStringDecoded(nifr.xmlRendicontazione, checkUTF8))
       r <- XsdValid.checkOnly(content, XmlEnum.FLUSSO_RIVERSAMENTO_FLUSSORIVERSAMENTO, inputXsdValid) match {
         case Success(_) =>
-          log.debug("Salvataggio rendicontazione valida")
+          log.debug("Saving valid report")
 
           val flussoRiversamento =
             XmlEnum.str2FlussoRiversamento_flussoriversamento(content).getOrElse(throw exception.DigitPaException(DigitPaErrorCodes.PPT_SINTASSI_XSD))
@@ -73,7 +73,7 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
           Future.successful(flussoRiversamento, content)
 
         case Failure(e) =>
-          log.warn(e, "Flusso riversamento non valido")
+          log.warn(e, "Invalid spill stream 'Flusso riversamento' element")
           val rendi = Rendicontazione(
             0,
             RendicontazioneStatus.INVALID,
@@ -113,7 +113,7 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
             s._2.service == Constant.KeyName.RENDICONTAZIONI
           })
         if (ftpServerConf.isEmpty) {
-          log.error("Nessun server ftp configurato")
+          log.error("No FTP server configured")
           throw exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR)
         }
         val ftpServer = ftpServerConf.get._2
@@ -342,7 +342,7 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
     (for {
       _ <- XsdValid.checkOnly(payload, XmlEnum.NODO_INVIA_FLUSSO_RENDICONTAZIONE_NODOPERPSP, inputXsdValid)
       body <- XmlEnum.str2nodoInviaFlussoRendicontazione_nodoperpsp(payload)
-      _ = log.debug("Richiesta validata correttamente")
+      _ = log.debug("Request validated successfully")
     } yield body) recoverWith { case e =>
       log.warn(e, s"${e.getMessage}")
       val cfb = exception.DigitPaException(e.getMessage, DigitPaErrorCodes.PPT_SINTASSI_EXTRAXSD, e)

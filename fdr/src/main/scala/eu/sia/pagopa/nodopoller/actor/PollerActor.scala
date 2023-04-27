@@ -45,7 +45,7 @@ case class PollerActor(repositories: Repositories, actorProps: ActorProps) exten
     val enabled = JobUtil.isJobEnabled(log, ddataMap, req.job)
     val suspend = JobUtil.areJobsSuspended(log, ddataMap)
 
-    log.info(s"ricevuto trigger ${req.job},enabled [$enabled],suspended [$suspend]")
+    log.info(s"Received trigger ${req.job}, enabled [$enabled], suspended [$suspend]")
 
     val timeLimit = Util.now().minusDays(limitJobsDays)
 
@@ -86,7 +86,7 @@ case class PollerActor(repositories: Repositories, actorProps: ActorProps) exten
         } else {
           for {
             _ <- repositories.fdrRepository.insertSchedulerTrace(req.sessionId, req.job, req.cron, SchedulerStatus.OK, None)
-            _ = log.debug(s"Trovati file da caricare,chiamata FtpSenderRetry")
+            _ = log.debug(s"Found files to upload, calling FtpSenderRetry")
             subreq = WorkRequest(req.sessionId, req.testCaseId, req.job)
             _ <- getRouter(req.job).ask(subreq).mapTo[WorkResponse]
           } yield ()

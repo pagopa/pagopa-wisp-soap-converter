@@ -498,7 +498,7 @@ case class NodoRoute(
                 optionalHeaderValueByName(X_PDD_HEADER) { originalRequestAddresOpt =>
                   log.debug(s"Request headers:\n${req.headers.map(s => s"${s.name()} => ${s.value()}").mkString("\n")}")
                   optionalHeaderValueByName("SOAPAction") { soapActionHeader =>
-                    log.info(s"Ricevuta request [$sessionId] @ ${LocalDateTime.now()} : [${soapActionHeader.getOrElse("No SOAPAction")}]")
+                    log.info(s"Ricevuta request [${soapActionHeader.getOrElse("No SOAPAction")}] @ ${LocalDateTime.now()}")
                     optionalHeaderValueByName("testCaseId") { headerTestCaseId =>
                       extractRequestContext { ctx =>
                         entity(as[ByteString]) { bs =>
@@ -563,7 +563,7 @@ case class NodoRoute(
         path(pathMatcher) {
           val sessionId = UUID.randomUUID().toString
           MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-          log.info(s"Ricevuta request [$sessionId] @ ${LocalDateTime.now()} : [$primitiva]")
+          log.info(s"Ricevuta [$primitiva] @ timestamp=[${LocalDateTime.now()}]")
           MDC.put(Constant.MDCKey.ACTOR_CLASS_ID, primitiva)
           val httpSeverRequestTimeout = FiniteDuration(httpSeverRequestTimeoutParam, SECONDS)
           withRequestTimeout(httpSeverRequestTimeout, _ => akkaHttpTimeout(sessionId)) {

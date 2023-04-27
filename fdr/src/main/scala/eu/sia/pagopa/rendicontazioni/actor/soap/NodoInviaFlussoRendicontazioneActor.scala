@@ -82,7 +82,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
 
       _ = re = re.map(r => r.copy(fruitoreDescr = canale.flatMap(c => c.description), pspDescr = psp.flatMap(p => p.description)))
 
-      _ = log.debug("Controllo duplicati su db")
+      _ = log.debug("Check duplicates on db")
       _ <- checksDB(nodoInviaFlussoRendicontazione)
 
       dataOraFlussoNew = LocalDateTime.parse(nodoInviaFlussoRendicontazione.dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault()))
@@ -93,12 +93,12 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
         LocalDateTime.of(dataOraFlussoNew.getYear, 12, 31, 23, 59, 59)
       )
 
-      _ = log.debug("Controllo dataOraFlusso new with dataOraFlusso old")
+      _ = log.debug("Check dataOraFlusso new with dataOraFlusso old")
       _ <- oldRendi match {
         case Some(old) =>
           val idDominioNew = nodoInviaFlussoRendicontazione.identificativoDominio
           if (dataOraFlussoNew.isAfter(old.dataOraFlusso)) {
-            log.debug("Controllo idDominio new with idDominio old")
+            log.debug("Check idDominio new with idDominio old")
             if (idDominioNew == old.dominio) {
               Future.successful(())
             } else {
@@ -129,7 +129,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
           notifySFTPSender(pa, req.sessionId, req.testCaseId, sftpFile.get).flatMap(resp => {
             if (resp.throwable.isDefined) {
               //HOTFIX non torno errore al chiamante se ftp non funziona
-              log.warn(s"Errore primo invio flusso di rendicontazione [${resp.throwable.get.getMessage}]")
+              log.warn(s"Error sending file first time for reporting flow [${resp.throwable.get.getMessage}]")
               Future.successful(())
             } else {
               Future.successful(())
@@ -154,10 +154,10 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
 
     pipeline.recover({
       case e: DigitPaException =>
-        log.warn(e, FdrLogConstant.logGeneraPayload(s"negativo $RESPONSE_NAME, [${e.getMessage}]"))
+        log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, e, re)
       case e: Throwable =>
-        log.warn(e, FdrLogConstant.logGeneraPayload(s"negativo $RESPONSE_NAME, [${e.getMessage}]"))
+        log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), re)
     }) map (sr => {
       log.info(FdrLogConstant.logEnd(actorClassId))
@@ -188,7 +188,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
   }
 
   private def notifySFTPSender(pa: CreditorInstitution, sessionId: String, testCaseId: Option[String], file: FtpFile): Future[FTPResponse] = {
-    log.info(s"Richiesta SFTPRequest pushFile")
+    log.info(s"SFTP Request pushFile")
 
     val ftpServerConf = ddataMap.ftpServers.find(s => {
       s._2.service == Constant.KeyName.RENDICONTAZIONI
@@ -204,7 +204,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
     for {
       respPayload <- XmlEnum.nodoInviaFlussoRendicontazioneRisposta2Str_nodoperpsp(ncefrr)
       _ <- XsdValid.checkOnly(respPayload, XmlEnum.NODO_INVIA_FLUSSO_RENDICONTAZIONE_RISPOSTA_NODOPERPSP, outputXsdValid)
-      _ = log.debug("Envelope di risposta valida")
+      _ = log.debug("Valid Response envelope")
     } yield respPayload
   }
 

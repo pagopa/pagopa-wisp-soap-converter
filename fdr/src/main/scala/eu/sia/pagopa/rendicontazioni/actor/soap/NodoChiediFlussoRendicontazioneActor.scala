@@ -64,10 +64,10 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
     paOpt match {
       case Some(pa) =>
         if (pa.reportingFtp) {
-          log.info("Rendicontazione FTP")
+          log.info("FTP reporting")
           Future.successful(None)
         } else {
-          log.info("Rendicontazione NON FTP")
+          log.info("NOT FTP reporting")
           if (binaryFileOption.isDefined) {
             val resppayload = StringBase64Binary.encodeBase64ToBase64(binaryFileOption.get.fileContent.get)
             Future.successful(Some(resppayload))
@@ -95,7 +95,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
       checkFlussoRendicontazione(ncfr.identificativoFlusso, ncfr.identificativoDominio, ncfr.identificativoPSP)
     rendiFuture flatMap {
       case Some(rendicontazione) =>
-        log.debug(s"Flusso: ${ncfr.identificativoFlusso} trovato")
+        log.debug(s"Flow: ${ncfr.identificativoFlusso} unknown")
 
         val checks = for {
           (pa, staz) <-
@@ -126,7 +126,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
 
         checks match {
           case Success((pa, staz, psp)) =>
-            log.debug("Validazioni superate")
+            log.debug("Validations passed")
             for {
               binaryFileOption <- rendicontazione.fk_binary_file match {
                 case Some(fk) =>
@@ -137,12 +137,12 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
 
             } yield (rendicontazione, binaryFileOption, ncfr.identificativoDominio, pa, staz, psp)
           case Failure(ex) =>
-            log.error(ex, s"Validazioni non superate")
+            log.error(ex, s"Validations failed")
             Future.failed(ex)
         }
 
       case None =>
-        log.error(s"Il flusso ${ncfr.identificativoFlusso} non esiste")
+        log.error(s"Flow ${ncfr.identificativoFlusso} unknown")
         Future.failed(exception.DigitPaException("Rendicontazione sconosciuta o non disponibile, riprovare in un secondo momento", DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO))
     }
   }
@@ -240,13 +240,13 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
       xmlrendicontazione <- if( rendicontazioneNexi.isDefined ) {
         Future.successful(rendicontazioneNexi)
       } else {
-        log.debug(s"Nessuna rendicontazione restituita da ${SoapReceiverType.NEXI.toString}")
+        log.debug(s"No reports returned by ${SoapReceiverType.NEXI.toString}")
         for {
           _ <- Future.successful(())
-          _ = log.debug(s"Cerco la rendicontazione ${ncfr.identificativoFlusso} a db")
+          _ = log.debug(s"Looking for reporting ${ncfr.identificativoFlusso} to db")
           (_, binaryFileOption, _, pa, staz, psp) <- checksSemanticiEDuplicati(ncfr)
           _ = re = re.map(r => r.copy(fruitoreDescr = Some(staz.stationCode), pspDescr = psp.flatMap(p => p.description)))
-          _ = log.debug("Creazione risposta con rendicontazione")
+          _ = log.debug("Make response with reporting")
           rendicontazioneDb <- elaboraRisposta(binaryFileOption, pa)
         } yield rendicontazioneDb
       }
@@ -259,10 +259,10 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
 
     pipeline.recover({
       case e: DigitPaException =>
-        log.warn(e, FdrLogConstant.logGeneraPayload(s"negativo $RESPONSE_NAME, [${e.getMessage}]"))
+        log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, e, re)
       case e: Throwable =>
-        log.warn(e, FdrLogConstant.logGeneraPayload(s"negativo $RESPONSE_NAME, [${e.getMessage}]"))
+        log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), re)
     }) map (sr => {
       log.info(FdrLogConstant.logEnd(actorClassId))

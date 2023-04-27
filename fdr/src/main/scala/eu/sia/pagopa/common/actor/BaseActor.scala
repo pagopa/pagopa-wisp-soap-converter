@@ -32,7 +32,7 @@ final case class PrimitiveActor(repositories: Repositories, actorProps: ActorPro
 
     MDC.put(Constant.MDCKey.ACTOR_CLASS_ID, actorClassId)
 
-    log.info(s"creazione actor per request ${actorClassId}${extraData.map(d => s"[$d]").getOrElse("")} of class ${clazz.getSimpleName}")
+    log.debug(s"creazione actor per request ${actorClassId}${extraData.map(d => s"[$d]").getOrElse("")} of class ${clazz.getSimpleName}")
     Try({
       val a = createActorPerRequestAndTell(request, BootstrapUtil.actorClassId(clazz), Props(clazz, repositories, actorProps.copy(actorClassId = actorClassId)))(log, context)
       context.watch(a)

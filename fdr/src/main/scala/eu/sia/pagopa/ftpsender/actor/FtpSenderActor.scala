@@ -30,7 +30,7 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
     req = r
     implicit val ec: ExecutionContext = context.system.dispatcher
 
-    log.debug(s"Ricevuta request $tipo -> $destinationPath - $filename")
+    log.debug(s"Ricevuta [$tipo] -> $destinationPath - $filename")
     tipo match {
       case Constant.Sftp.RENDICONTAZIONI =>
         val sendto = sender()

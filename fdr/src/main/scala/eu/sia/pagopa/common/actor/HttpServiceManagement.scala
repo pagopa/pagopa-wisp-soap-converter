@@ -72,7 +72,7 @@ object HttpServiceManagement {
 
   private def loadServiceConfig(action: String,
                                 receiver: String)(implicit log: NodoLogger, as: ActorSystem) = {
-    log.info(s"Carico configurazione di $receiver per $action")
+    log.debug(s"Load $receiver configuration for $action")
 
     val url = as.settings.config.getString(s"${receiver.toLowerCase}.url")
     val timeout = as.settings.config.getInt(s"${receiver.toLowerCase}.timeoutSeconds")
@@ -84,11 +84,11 @@ object HttpServiceManagement {
                           action: String,
                           receiver: String,
                           actorProps: ActorProps)(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
-    log.info(s"Chiamo $receiver per $action")
+    log.info(s"Call $receiver for $action")
 
     for {
       simpleHttpRes <- actorProps.actorUtility.callHttp(simpleHttpReq, actorProps)
-      _ = log.info(s"Risposta $receiver per $action")
+      _ = log.info(s"Response $receiver for $action")
     } yield simpleHttpRes
   }
 

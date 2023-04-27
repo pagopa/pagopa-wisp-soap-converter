@@ -113,7 +113,7 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
   def uploadFile(sessionId: String, tipo: String, ftpServerId: Long, fileIds: Seq[Long]): Future[Unit] = {
     log.info(FdrLogConstant.logStart(actorClassId) + "-per-request")
 
-    log.debug(s"Ricevuta request FTPRetryRequest[${sessionId}][$tipo]")
+    log.debug(s"Ricevuta [FTPRetryRequest] [${sessionId}][$tipo]")
     val ftpconfigopt =
       ddataMap.ftpServers.find(f => f._2.id == ftpServerId)
 

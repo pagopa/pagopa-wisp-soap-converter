@@ -78,7 +78,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
       rendicontazioni <- findRendicontazioni(ncefr)
 
       rendicontazioniFiltered = rendicontazioni.groupBy(_._1).map(a => a._2.maxBy(_._2)(Ordering.by(_.toString)))
-      _ = log.debug(s"Trovate ${rendicontazioniFiltered.size} rendicontazioni a db")
+      _ = log.debug(s"${rendicontazioniFiltered.size} reporting found on db")
 
       rendicontazioniNexi <- if( callNexiToo ) {
         (for {
@@ -105,7 +105,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
 
           tipiIdRendicontazioni = if ( flussiResponseNexi.isDefined) {
             val flussiTrovati = flussiResponseNexi.get.idRendicontazione
-            log.debug(s"Ricevute ${flussiTrovati.size} rendicontazioni da ${SoapReceiverType.NEXI.toString}")
+            log.debug(s"Received ${flussiTrovati.size} reportings by ${SoapReceiverType.NEXI.toString}")
             flussiTrovati
           } else {
             Nil
@@ -127,10 +127,10 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
 
     pipeline.recover({
       case e: DigitPaException =>
-        log.warn(e, FdrLogConstant.logGeneraPayload(s"negativo $RESPONSE_NAME, [${e.getMessage}]"))
+        log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, e, re)
       case e: Throwable =>
-        log.warn(e, FdrLogConstant.logGeneraPayload(s"negativo $RESPONSE_NAME, [${e.getMessage}]"))
+        log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, DigitPaErrorCodes.PPT_SYSTEM_ERROR, re)
     }) map (sr => {
       log.info(FdrLogConstant.logEnd(actorClassId))
@@ -165,7 +165,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
   }
 
   private def createTipoElencoFlussiRendicontazione(rendicontazioni: Seq[(String, LocalDateTime)], rendicontazioniNexi: Seq[Option[TipoIdRendicontazione]]) = {
-    log.debug(s"Unisco l'elenco dei flussi di ${SoapReceiverType.NEXI.toString} con i nostri")
+    log.debug(s"Merge the list of streams by ${SoapReceiverType.NEXI.toString} with ours")
     val tipiIdRendi = (rendicontazioniNexi ++ rendicontazioni.map(rendi => {
       Some(TipoIdRendicontazione(rendi._1, XmlUtil.StringXMLGregorianCalendarDate.format(rendi._2, XsdDatePattern.DATE_TIME)))
     })).distinct
@@ -173,7 +173,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
   }
 
   private def findRendicontazioni(ncefr: NodoChiediElencoFlussiRendicontazione) = {
-    log.debug("Cerco rendicontazini valide a db")
+    log.debug("Looking for valid reports on db")
     val idjIdIntPA = ddataMap.creditorInstitutionBrokers(ncefr.identificativoIntermediarioPA).brokerCode
     val idStazioniInt = ddataMap.stations.filter(_._2.brokerCode == idjIdIntPA).map(_._2.stationCode).toSeq
     val paStazPa =
@@ -214,7 +214,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
     for {
       respPayload <- XmlEnum.nodoChiediElencoFlussiRendicontazioneRisposta2Str_nodoperpa(ncefrr)
       _ <- XsdValid.checkOnly(respPayload, XmlEnum.NODO_CHIEDI_ELENCO_FLUSSI_RENDICONTAZIONE_RISPOSTA_NODOPERPA, outputXsdValid)
-      _ = log.debug("Risposta valida")
+      _ = log.debug("Valid response")
     } yield respPayload
   }
 
