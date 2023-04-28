@@ -56,7 +56,7 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
   }
 
   override def receive: Receive = { case sch: WorkRequest =>
-    log.info(s"Ricevuto messaggio FTPRetry[${sch.sessionId}]")
+    log.info(s"FTP Retry message received[${sch.sessionId}]")
     replyTo = sender()
 
     val jobName = Jobs.FTP_UPLOAD_RETRY.name
@@ -76,13 +76,13 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
             for {
               filesIdServerId <- fdrRepository.findToRetry(Constant.Sftp.RENDICONTAZIONI, maxRetry, timeLimit)
               grouped = filesIdServerId.groupBy(_._1)
-              _ = log.info(s"Riepilogo file trovati da caricare:\n${grouped.map(g => s"Server[${g._1}],numero files[${g._2.size}]").mkString("\n")}")
+              _ = log.info(s"File summary found to upload:\n${grouped.map(g => s"Server[${g._1}], files number[${g._2.size}]").mkString("\n")}")
               subreqs = grouped.map(f => FTPRetryRequest(sch.sessionId, Constant.Sftp.RENDICONTAZIONI, f._1, f._2.map(_._2)))
               _ <- FutureUtils.groupedSerializeFuture(log, subreqs, 50)(d => uploadFile(d.sessionId, d.messageType, d.ftpServerId, d.fileIds))
               _ <- fdrRepository
                 .stopRunningJob(jobName, Constant.KeyName.EMPTY_KEY)
                 .recover({ case e =>
-                  log.error(e, "Errore allo stop del job")
+                  log.error(e, "Job stop error")
                 })
             } yield ()
           case SchedulerFireExitStatus.JOB_RUNNING =>
@@ -95,12 +95,12 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
 
     pipeline
       .recoverWith({ case cause: Throwable =>
-        log.warn(cause, s"Errore durante ${actorClassId}, message: [${cause.getMessage}]")
+        log.warn(cause, s" Error during ${actorClassId}, message: [${cause.getMessage}]")
         for {
           _ <- fdrRepository
             .stopRunningJob(jobName, Constant.KeyName.EMPTY_KEY)
             .recover({ case e =>
-              log.error(e, "Errore allo stop del job")
+              log.error(e, "Job stop error")
             })
         } yield ()
       })
@@ -113,7 +113,7 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
   def uploadFile(sessionId: String, tipo: String, ftpServerId: Long, fileIds: Seq[Long]): Future[Unit] = {
     log.info(FdrLogConstant.logStart(actorClassId) + "-per-request")
 
-    log.debug(s"Ricevuta [FTPRetryRequest] [${sessionId}][$tipo]")
+    log.debug(s"Received [FTPRetryRequest] [${sessionId}][$tipo]")
     val ftpconfigopt =
       ddataMap.ftpServers.find(f => f._2.id == ftpServerId)
 
@@ -124,10 +124,10 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
     val pipeline = for {
       ftpconfig <- Future.successful(ftpconfigopt.get._2)
       _ = log.info(FdrLogConstant.logSemantico(Constant.KeyName.FTP_RETRY) + "-per-request")
-      _ = log.debug(s"Recupero files da DB")
+      _ = log.debug(s"File recovery from DB")
       files <- fdrRepository.findFtpFilesByIds(fileIds, tipo)
 
-      _ = log.debug(s"Recuperati ${files.size} files")
+      _ = log.debug(s"Recover ${files.size} files")
       inPath =
         if (ftpconfig.inPath.endsWith("/")) {
           ftpconfig.inPath.substring(0, ftpconfig.inPath.lastIndexOf("/"))
@@ -143,31 +143,31 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
 
       opts = SSHOptions(host = ftpconfig.host, port = ftpconfig.port, username = ftpconfig.username, password = ftpconfig.password, connectTimeout = ftpConnectTimeout, timeout = 1)
 
-      _ = log.debug(s"Connessione al server")
+      _ = log.debug(s"Connection to server")
 
       ssh <- Future(new SSH(opts))
       _ <- SSHFuture.ftp(ssh) { ftp: SSHFtp =>
         Future.sequence(filesWithData.map(f => {
           Try {
             log.info(s"File [${f._3}]")
-            log.debug(s"Controllo esistenza directory di destinazione")
+            log.debug(s"Destination directory existence check")
             createDirs(f._2)(ftp)
-            log.info(s"Caricamento file in corso")
+            log.info(s"File upload in progress")
             ftp.putBytes(f._1.content, f._3)
-            log.debug(s"Caricamento file completato")
+            log.debug(s"File upload completed")
           } match {
             case Success(_) =>
-              log.debug(s"Aggiornamento stato file a ${FtpFileStatus.UPLOADED}")
+              log.debug(s"File status update to ${FtpFileStatus.UPLOADED}")
               fdrRepository.updateFileStatus(f._1.id, FtpFileStatus.UPLOADED, tipo, actorClassId)
             case Failure(e) =>
-              log.error(e, s"Errore upload file [id:${f._1.id},path:${f._3}]")
+              log.error(e, s"File upload error [id:${f._1.id},path:${f._3}]")
               fdrRepository.updateFileRetry(f._1, tipo, actorClassId)
           }
         }))
       }
     } yield ()
     pipeline.recover({ case e =>
-      log.error(e, "Errore upload SFTP")
+      log.error(e, "SFTP upload error")
     })
   }
 

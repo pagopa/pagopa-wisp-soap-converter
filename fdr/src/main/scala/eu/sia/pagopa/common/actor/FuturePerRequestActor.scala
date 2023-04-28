@@ -43,7 +43,7 @@ trait FuturePerRequestActor extends Actor with NodoLogging {
       log.error(dpe, dpe.getMessage)
       actorError(dpe)
     case other =>
-      log.warn(s"FuturePerRequest - Tipo messaggio per request non gestito [${other.getClass.getName}]\nfrom ${sender()} \n${other}")
+      log.warn(s"FuturePerRequest - Message type for unhandled request [${other.getClass.getName}]\nfrom ${sender()} \n${other}")
 
   }
 

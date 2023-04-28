@@ -97,7 +97,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
           flussiResponseNexi <- if( ncefrResponse.isDefined ) {
             for {
               _ <- Future.successful(())
-              _ = ncefrResponse.get.fault.map(v=> log.warn(s"Esito da ${SoapReceiverType.NEXI.toString}: faultCode=[${v.faultCode}, faultString=[${v.faultString}], description=[${v.description}]"))
+              _ = ncefrResponse.get.fault.map(v=> log.warn(s"Outcome by ${SoapReceiverType.NEXI.toString}: faultCode=[${v.faultCode}, faultString=[${v.faultString}], description=[${v.description}]"))
             } yield ncefrResponse.get.elencoFlussiRendicontazione
           } else {
             Future.successful(None)

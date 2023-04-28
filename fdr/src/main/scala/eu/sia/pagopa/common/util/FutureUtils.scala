@@ -8,12 +8,12 @@ object FutureUtils {
   def groupedSerializeFuture[A, B](log: NodoLogger, l: Iterable[A], grouped: Int)(fn: A => Future[B])(implicit ec: ExecutionContext): Future[Seq[B]] = {
     val k: Seq[(Iterable[A], Int)] = l.grouped(grouped).zipWithIndex.toSeq
     val id = UUID.randomUUID().toString
-    log.debug(s"Start processo ${k.size} Blocchi ($id)")
+    log.debug(s"Start process ${k.size} blocks ($id)")
     val kk: Future[Seq[B]] = serializeFuture(k)(h => {
-      log.debug(s"Blocco ${h._2}/${k.size} ($id)")
+      log.debug(s"Block ${h._2}/${k.size} ($id)")
       Future.sequence(h._1.toSeq.map(g => fn(g)))
     }).map(r => {
-      log.debug(s"Fine processo ${k.size} Blocchi ($id)")
+      log.debug(s"End process ${k.size} blocks ($id)")
       r.flatten
     })
     kk
