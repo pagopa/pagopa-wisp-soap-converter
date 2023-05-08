@@ -188,14 +188,15 @@ stages:
               FORCE_REPLACE_DOCKER_IMAGE: ${{ parameters.FORCE_REPLACE_DOCKER_IMAGE }}
               DOCKERFILE: "$(Build.SourcesDirectory)/fdr/target/docker/stage/Dockerfile"
               DOCKERCONTEXT: "$(Build.SourcesDirectory)/fdr/target/docker/stage"
-          - task: Docker@2
-            displayName: "docker login"
-            inputs:
-              containerRegistry: "$(NEU_dockerRegistryServiceConnection)"
-              command: "login"
-          - bash: |
-              docker tag $(WEU_dockerRegistryFqdn)/$(imageRepository):$(current_version) $(NEU_dockerRegistryFqdn)/$(imageRepository):$(current_version) 
-              docker push $(NEU_dockerRegistryFqdn)/$(imageRepository):$(current_version)
+          - ${{ if in( parameters.ENV, 'dev' ) }}:
+            - task: Docker@2
+              displayName: "docker login"
+              inputs:
+                containerRegistry: "$(NEU_dockerRegistryServiceConnection)"
+                command: "login"
+            - bash: |
+                docker tag $(WEU_dockerRegistryFqdn)/$(imageRepository):$(current_version) $(NEU_dockerRegistryFqdn)/$(imageRepository):$(current_version) 
+                docker push $(NEU_dockerRegistryFqdn)/$(imageRepository):$(current_version)
 
   # Deploy Canary if prod or uat
   - ${{ if and( parameters.WEU , in( parameters.ENV, 'prod', 'uat') ) }}:
@@ -271,7 +272,7 @@ stages:
                         parameters:
                           DO_DEPLOY: true
                           ENV: ${{ parameters['ENV'] }}
-                          KUBERNETES_SERVICE_CONN: $(WEU_kubernetesServiceConnection)
+                          KUBERNETES_SERVICE_CONN: ${{ variables.WEU_kubernetesServiceConnection }}
                           NAMESPACE: "fdr"
                           APP_NAME: "$(appName)-canary"
                           VALUE_FILE: $(WEU_value_file_fdr)
