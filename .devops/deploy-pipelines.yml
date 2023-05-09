@@ -81,8 +81,10 @@ variables:
   APPROVE_NOTIFY_ADMIN: '[pagoPA-iac]\Project Administrators'
   BRANCH_NAME: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
 
-  WEU_value_file_fdr: "helm/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
-  NEU_value_file_fdr: "helm/neu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
+  WEU_value_file_fdr: "helm/fdr/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
+  WEU_value_file_cron: "helm/fdr-cron/weu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
+  NEU_value_file_fdr: "helm/fdr/neu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
+  NEU_value_file_cron: "helm/fdr-cron/neu-${{ parameters['ENV'] }}/values-${{ parameters['ENV'] }}.yaml"
 
   ${{ if eq(parameters['ENV'], 'dev') }}:
     appName: 'pagopafdrnodo'
@@ -148,6 +150,13 @@ stages:
                 echo "ThisBuild / version := \"$(NEXT_SBT_VERSION)\"" > version.sbt
 
                 CHART_FILE="helm/fdr/Chart.yaml"
+                if [[ -f "$CHART_FILE" ]]; then
+                  yq -i ".version = \"$(NEXT_SBT_VERSION)\"" "$CHART_FILE"
+                  yq -i ".appVersion = \"$(NEXT_SBT_VERSION)\"" "$CHART_FILE"
+                  git add "$CHART_FILE"
+                fi
+                
+                CHART_FILE="helm/fdr-cron/Chart.yaml"
                 if [[ -f "$CHART_FILE" ]]; then
                   yq -i ".version = \"$(NEXT_SBT_VERSION)\"" "$CHART_FILE"
                   yq -i ".appVersion = \"$(NEXT_SBT_VERSION)\"" "$CHART_FILE"
@@ -341,7 +350,7 @@ stages:
                     persistCredentials: true
                   - task: Bash@3
                     name: setup_helm_microservices_chart
-                    displayName: "Setup helm fdr chart"
+                    displayName: "Setup helm fdr and cron chart"
                     inputs:
                       targetType: "inline"
                       script: |
@@ -356,6 +365,7 @@ stages:
                           yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
                           yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
                         fi
+                        
                         helm dep build helm/
                       failOnStderr: true
                   - task: Bash@3
@@ -380,7 +390,7 @@ stages:
                           KUBERNETES_SERVICE_CONN: ${{ variables.WEU_kubernetesServiceConnection }}
                           NAMESPACE: "fdr"
                           APP_NAME: $(appNameCron)
-                          VALUE_FILE: $(WEU_value_file_fdr)
+                          VALUE_FILE: $(WEU_value_file_cron)
                           DEPLOY_VERSION: $(SBT_VERSION)
                           ARGUMENTS: >-
                             $(setupArgs.IMAGES)
@@ -440,7 +450,7 @@ stages:
                       failOnStderr: true
                   - task: Bash@3
                     name: setupArgs
-                    displayName: "Setup fdr and job args"
+                    displayName: "Setup job args"
                     inputs:
                       targetType: "inline"
                       script: |
