@@ -50,7 +50,7 @@ class ActorUtility {
 
     log.info(s"HTTP NODO -> [${req.uri}] will timeout in [${req.timeout.toString}]")
     (for {
-      httpResponse <- dispatchRequest(req.timeout, req.proxyData, akkaReq)
+      httpResponse <- dispatchRequest(req.timeout, req.proxyData, akkaReq, actorProps.httpsConnectionContext)
       payload <- Unmarshaller.stringUnmarshaller(httpResponse.entity)
       payloadResponse =
         if (payload.nonEmpty) {
@@ -69,7 +69,7 @@ class ActorUtility {
     })
   }
 
-  private def dispatchRequest(idleTimeout: Duration, proxyData: Option[ProxyData], akkaReq: HttpRequest)(implicit log: NodoLogger, system: ActorSystem): Future[HttpResponse] = {
+  private def dispatchRequest(idleTimeout: Duration, proxyData: Option[ProxyData], akkaReq: HttpRequest, ctx:HttpsConnectionContext)(implicit log: NodoLogger, system: ActorSystem): Future[HttpResponse] = {
     val httpsProxyTransport: ClientTransport = {
       if (proxyData.isDefined) {
         val proxyAddress = InetSocketAddress.createUnresolved(proxyData.get.host, proxyData.get.port)
@@ -93,9 +93,6 @@ class ActorUtility {
       ConnectionPoolSettings(system).withConnectionSettings(ClientConnectionSettings(system).withIdleTimeout(idleTimeout).withConnectingTimeout(httpConnectTimeout).withTransport(httpsProxyTransport))
 
     if (akkaReq.uri.scheme.toUpperCase == "HTTPS") {
-      val akkaSSLConfig: AkkaSSLConfig = NodoAkkaSSLConfig()(system)
-      val ctx: HttpsConnectionContext =
-        akka.http.scaladsl.Http()(system).createClientHttpsContext(akkaSSLConfig)
       akka.http.scaladsl.Http().singleRequest(akkaReq, settings = settings, connectionContext = ctx)
     } else {
       akka.http.scaladsl.Http()(system).singleRequest(akkaReq, settings = settings)
