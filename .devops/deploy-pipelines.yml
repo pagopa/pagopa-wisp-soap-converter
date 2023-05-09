@@ -156,13 +156,6 @@ stages:
                   git add "$CHART_FILE"
                 fi
                 
-#                CHART_FILE="helm/fdr-cron/Chart.yaml"
-#                if [[ -f "$CHART_FILE" ]]; then
-#                  yq -i ".version = \"$(NEXT_SBT_VERSION)\"" "$CHART_FILE"
-#                  yq -i ".appVersion = \"$(NEXT_SBT_VERSION)\"" "$CHART_FILE"
-#                  git add "$CHART_FILE"
-#                fi
-                
                 buildname="$(Build.BuildNumber) $(NEXT_SBT_VERSION)"
                 echo "##vso[build.updatebuildnumber]$buildname"
 
