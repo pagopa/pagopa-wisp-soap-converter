@@ -353,12 +353,6 @@ stages:
                           yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
                         fi
                         
-#                        CHART_FILE="helm/fdr-cron/Chart.yaml"
-#                        if [[ -f "$CHART_FILE" ]]; then
-#                          yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
-#                          yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
-#                        fi
-                        
                         helm dep build helm/
                       failOnStderr: true
 #                  - task: Bash@3
