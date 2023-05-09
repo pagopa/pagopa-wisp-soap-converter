@@ -350,7 +350,6 @@ stages:
                           yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
                           yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
                         fi
-                        helm dep build helm/
                         
                         CHART_FILE="helm/fdr-cron/Chart.yaml"
                         if [[ -f "$CHART_FILE" ]]; then
@@ -361,7 +360,7 @@ stages:
                       failOnStderr: true
                   - task: Bash@3
                     name: setupArgs
-                    displayName: "Setup fdr and job args"
+                    displayName: "Setup job args"
                     inputs:
                       targetType: "inline"
                       script: |
@@ -373,7 +372,7 @@ stages:
                       failOnStderr: true
                   - ${{ if parameters.WEU }}:
                       - bash: |
-                          echo "install WEU fdr and jobs"
+                          echo "install WEU jobs"
                       - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
                         parameters:
                           DO_DEPLOY: true
@@ -381,7 +380,7 @@ stages:
                           KUBERNETES_SERVICE_CONN: ${{ variables.WEU_kubernetesServiceConnection }}
                           NAMESPACE: "fdr"
                           APP_NAME: $(appNameCron)
-                          VALUE_FILE: $(WEU_value_file_fdr)dasdas
+                          VALUE_FILE: $(WEU_value_file_fdr)
                           DEPLOY_VERSION: $(SBT_VERSION)
                           ARGUMENTS: >-
                             $(setupArgs.IMAGES)
