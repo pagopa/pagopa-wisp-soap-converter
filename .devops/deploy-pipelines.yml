@@ -353,7 +353,7 @@ stages:
                           yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
                         fi
                         
-                        helm dep build helm/fdr
+                        helm dep build helm/
                       failOnStderr: true
 #                  - task: Bash@3
 #                    name: setupArgs
