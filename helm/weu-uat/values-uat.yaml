@@ -221,7 +221,7 @@ cj-ftp-upload:
       requiredDuringSchedulingIgnoredDuringExecution:
         nodeSelectorTerms:
           - matchExpressions:
-              - key: nodo
+              - key: nodo-cron
                 operator: In
                 values:
                   - "true"
