@@ -260,7 +260,7 @@ stages:
                       inputs:
                         targetType: "inline"
                         script: |
-                          CHART_FILE="helm/fdr/Chart.yaml"
+                          CHART_FILE="helm/Chart.yaml"
                           if [[ -f "$CHART_FILE" ]]; then
                             yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
                             yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
