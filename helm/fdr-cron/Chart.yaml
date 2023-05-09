@@ -1,0 +1,11 @@
+apiVersion: v2
+name: fdr-cron-chart
+description: Flussi di rendicontazione cron job
+type: application
+version: 1.0.0-SNAPSHOT
+appVersion: 1.0.0-SNAPSHOT
+dependencies:
+  - name: cron-chart
+    version: 2.3.0
+    repository: "https://pagopa.github.io/aks-cron-chart-blueprint"
+    alias: cj-ftp-upload

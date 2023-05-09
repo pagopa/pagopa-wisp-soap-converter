@@ -1,0 +1,79 @@
+cj-ftp-upload:
+  namespace: "fdr"
+  schedule: "4 * * * *"
+  args: [ ftpUpload ]
+  concurrencyPolicy: "Allow"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 1
+  parallelism: 1
+  terminationGracePeriodSeconds: 140
+  image:
+    repository: pagopadcommonacr.azurecr.io/pagopafdrnododeipagamenti
+    tag: "1.0.0-SNAPSHOT"
+  tmpVolumeMount:
+    create: true
+  resources:
+    requests:
+      memory: "6Gi"
+      cpu: "2048m"
+    limits:
+      memory: "8Gi"
+      cpu: "2560m"
+  externalConfigMap:
+    create: true
+    configMaps:
+      - name: fdr-cacerts
+        key: cacerts
+  envConfig:
+    MANAGEMENT_HTTP_PORT: "8558"
+    MANAGEMENT_HTTP_BIND_HOST: "0.0.0.0"
+    MANAGEMENT_HTTP_BIND_PORT: "8558"
+    SERVICE_HTTP_PORT: "8080"
+    SERVICE_HTTP_BIND_HOST: "0.0.0.0"
+    SERVICE_HTTP_BIND_PORT: "8080"
+    PROMETHEUS_HOST: "0.0.0.0"
+    PROMETHEUS_PORT: "9091"
+    MICROMETER_HOST: "0.0.0.0"
+    MICROMETER_PORT: "9092"
+    TZ: "Europe/Rome"
+    AKKA_SYSTEM_NAME: "pagopafdrnodo"
+    JAVA_OPTS: >-
+      -Dlogback.configurationFile=/mnt/file-config/logback.xml -Dconfig.app=/mnt/file-config/config-app.conf -Dapp.bundle.cacerts.path=/mnt/file-config-external/fdr-cacerts/cacerts -Duser.language=it -Duser.country=IT -Duser.timezone=Europe/Rome -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=3000 -Dcom.sun.management.jmxremote.rmi.port=3000 -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
+    DB_FDR_URL: jdbc:postgresql://pagopa-d-weu-fdr-flexible-postgresql.postgres.database.azure.com:5432/fdr?sslmode=require&prepareThreshold=0
+    DB_FDR_USER: fdr
+    INSTANCE: DEV
+  secretProvider:
+    create: true
+    envSecrets:
+      AZURE_EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
+      API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
+      DB_FDR_PASSWORD: "db-fdr-password"
+    keyvault:
+      name: "pagopa-d-fdr-kv"
+      tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
+  envFieldRef:
+    MANAGEMENT_HTTP_HOST: "status.podIP"
+    SERVICE_HTTP_HOST: "status.podIP"
+    MICROMETER_HOSTNAME: "metadata.name"
+    NAMESPACE: "metadata.namespace"
+    CINNAMON_HOST: "metadata.name"
+    APP_VERSION: "metadata.labels['app.kubernetes.io/version']"
+    APP_NAME: "metadata.labels['app.kubernetes.io/name']"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: node_type
+                operator: In
+                values:
+                  - user
+  podMonitor:
+    create: true
+    podMetricsEndpoints:
+      - interval: 10s #micrometer
+        port: 9092
+        path: /
+      - interval: 10s #cinnamon
+        port: 9091
+        path: /metrics

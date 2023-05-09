@@ -147,7 +147,7 @@ stages:
               customScriptsPostUpdateHelm: |
                 echo "ThisBuild / version := \"$(NEXT_SBT_VERSION)\"" > version.sbt
 
-                CHART_FILE="helm/Chart.yaml"
+                CHART_FILE="helm/fdr/Chart.yaml"
                 if [[ -f "$CHART_FILE" ]]; then
                   yq -i ".version = \"$(NEXT_SBT_VERSION)\"" "$CHART_FILE"
                   yq -i ".appVersion = \"$(NEXT_SBT_VERSION)\"" "$CHART_FILE"
@@ -197,6 +197,7 @@ stages:
             - bash: |
                 docker tag $(WEU_dockerRegistryFqdn)/$(imageRepository):$(current_version) $(NEU_dockerRegistryFqdn)/$(imageRepository):$(current_version) 
                 docker push $(NEU_dockerRegistryFqdn)/$(imageRepository):$(current_version)
+
 
   # Deploy Canary if prod or uat
   - ${{ if and( parameters.WEU , in( parameters.ENV, 'prod', 'uat') ) }}:
@@ -260,7 +261,7 @@ stages:
                       inputs:
                         targetType: "inline"
                         script: |
-                          CHART_FILE="helm/Chart.yaml"
+                          CHART_FILE="helm/fdr/Chart.yaml"
                           if [[ -f "$CHART_FILE" ]]; then
                             yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
                             yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
@@ -284,7 +285,6 @@ stages:
                             --set fdrnodo.canaryDelivery.ingress.weightPercent="${{ step }}"
                             --set-file fdrnodo.configMapFromFile.logback\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
                             --set-file fdrnodo.configMapFromFile.config-app\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
-
 
   # Deploy stable
   - stage: deploy_fdr_stable
@@ -345,7 +345,14 @@ stages:
                     inputs:
                       targetType: "inline"
                       script: |
-                        CHART_FILE="helm/Chart.yaml"
+                        CHART_FILE="helm/fdr/Chart.yaml"
+                        if [[ -f "$CHART_FILE" ]]; then
+                          yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                          yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                        fi
+                        helm dep build helm/
+                        
+                        CHART_FILE="helm/fdr-cron/Chart.yaml"
                         if [[ -f "$CHART_FILE" ]]; then
                           yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
                           yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
@@ -358,10 +365,8 @@ stages:
                     inputs:
                       targetType: "inline"
                       script: |
-                        SETIMAGES="--set fdrnodo.image.tag=$SBT_VERSION --set fdrnodo.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}"
-                        SETFILES="--set-file fdrnodo.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK --set-file fdrnodo.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
-                        SETIMAGES="$SETIMAGES --set cj-ftp-upload.image.tag=$SBT_VERSION"
-                        SETFILES="$SETFILES --set-file cj-ftp-upload.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK"
+                        SETIMAGES="--set cj-ftp-upload.image.tag=$SBT_VERSION"
+                        SETFILES="--set-file cj-ftp-upload.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK"
                         SETFILES="$SETFILES --set-file cj-ftp-upload.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
                         echo "##vso[task.setvariable variable=IMAGES;isOutput=true]$SETIMAGES"
                         echo "##vso[task.setvariable variable=FILES;isOutput=true]$SETFILES"
@@ -375,8 +380,8 @@ stages:
                           ENV: ${{ parameters['ENV'] }}
                           KUBERNETES_SERVICE_CONN: ${{ variables.WEU_kubernetesServiceConnection }}
                           NAMESPACE: "fdr"
-                          APP_NAME: $(appName)
-                          VALUE_FILE: $(WEU_value_file_fdr)
+                          APP_NAME: $(appNameCron)
+                          VALUE_FILE: $(WEU_value_file_fdr)dasdas
                           DEPLOY_VERSION: $(SBT_VERSION)
                           ARGUMENTS: >-
                             $(setupArgs.IMAGES)
@@ -420,7 +425,14 @@ stages:
                     inputs:
                       targetType: "inline"
                       script: |
-                        CHART_FILE="helm/Chart.yaml"
+                        CHART_FILE="helm/fdr/Chart.yaml"
+                        if [[ -f "$CHART_FILE" ]]; then
+                          yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                          yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                        fi
+                        helm dep build helm/
+                        
+                        CHART_FILE="helm/fdr-cron/Chart.yaml"
                         if [[ -f "$CHART_FILE" ]]; then
                           yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
                           yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
@@ -433,10 +445,8 @@ stages:
                     inputs:
                       targetType: "inline"
                       script: |
-                        SETIMAGES="--set fdrnodo.image.tag=$SBT_VERSION --set fdrnodo.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}"
-                        SETFILES="--set-file fdrnodo.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK --set-file fdrnodo.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
-                        SETIMAGES="$SETIMAGES --set cj-ftp-upload.image.tag=$SBT_VERSION --set cj-ftp-upload.suspend=true"
-                        SETFILES="$SETFILES --set-file cj-ftp-upload.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK"
+                        SETIMAGES="--set cj-ftp-upload.image.tag=$SBT_VERSION --set cj-ftp-upload.suspend=true"
+                        SETFILES="--set-file cj-ftp-upload.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK"
                         SETFILES="$SETFILES --set-file cj-ftp-upload.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
                         echo "##vso[task.setvariable variable=IMAGES;isOutput=true]$SETIMAGES"
                         echo "##vso[task.setvariable variable=FILES;isOutput=true]$SETFILES"
