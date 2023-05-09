@@ -108,6 +108,11 @@ fdrnodo:
 #                operator: In
 #                values:
 #                  - user
+  tolerations:
+    - key: dedicated
+      operator: Equal
+      value: nodo
+      effect: NoSchedule
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
@@ -216,6 +221,11 @@ cj-ftp-upload:
 #                operator: In
 #                values:
 #                  - user
+  tolerations:
+    - key: dedicated
+      operator: Equal
+      value: nodo-cron
+      effect: NoSchedule
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
