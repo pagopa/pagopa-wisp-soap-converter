@@ -156,6 +156,13 @@ stages:
                   git add "$CHART_FILE"
                 fi
                 
+                CHART_FILE="helm/fdr-cron/Chart.yaml"
+                if [[ -f "$CHART_FILE" ]]; then
+                  yq -i ".version = \"$(NEXT_SBT_VERSION)\"" "$CHART_FILE"
+                  yq -i ".appVersion = \"$(NEXT_SBT_VERSION)\"" "$CHART_FILE"
+                  git add "$CHART_FILE"
+                fi
+                
                 buildname="$(Build.BuildNumber) $(NEXT_SBT_VERSION)"
                 echo "##vso[build.updatebuildnumber]$buildname"
 
@@ -268,7 +275,7 @@ stages:
                             yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
                             yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
                           fi
-                          helm dep build helm/
+                          helm dep build helm/fdr
                         failOnStderr: true
                     - ${{ if parameters.WEU }}:
                       - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
@@ -280,6 +287,7 @@ stages:
                           APP_NAME: "$(appName)-canary"
                           VALUE_FILE: $(WEU_value_file_fdr)
                           DEPLOY_VERSION: $(SBT_VERSION)
+                          CHART_PATH: "helm/fdr"
                           ARGUMENTS: >-
                             --set fdrnodo.image.tag="$(SBT_VERSION)"
                             --set fdrnodo.canaryDelivery.create="true"
@@ -353,37 +361,44 @@ stages:
                           yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
                         fi
                         
-                        helm dep build helm/
+                        helm dep build helm/fdr
+                        
+                        CHART_FILE="helm/fdr-cron/Chart.yaml"
+                        if [[ -f "$CHART_FILE" ]]; then
+                          yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                          yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
+                        fi
+                        
+                        helm dep build helm/fdr-cron
                       failOnStderr: true
-#                  - task: Bash@3
-#                    name: setupArgs
-#                    displayName: "Setup job args"
-#                    inputs:
-#                      targetType: "inline"
-#                      script: |
-#                        SETIMAGES=""
-#                        SETFILES=""
-#                        SETIMAGES="--set cj-ftp-upload.image.tag=$SBT_VERSION"
-#                        SETFILES="--set-file cj-ftp-upload.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK"
-#                        SETFILES="$SETFILES --set-file cj-ftp-upload.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
-#                        echo "##vso[task.setvariable variable=IMAGES;isOutput=true]$SETIMAGES"
-#                        echo "##vso[task.setvariable variable=FILES;isOutput=true]$SETFILES"
-#                      failOnStderr: true
-#                  - ${{ if parameters.WEU }}:
-#                      - bash: |
-#                          echo "install WEU jobs"
-#                      - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
-#                        parameters:
-#                          DO_DEPLOY: true
-#                          ENV: ${{ parameters['ENV'] }}
-#                          KUBERNETES_SERVICE_CONN: ${{ variables.WEU_kubernetesServiceConnection }}
-#                          NAMESPACE: "fdr"
-#                          APP_NAME: $(appNameCron)
-#                          VALUE_FILE: $(WEU_value_file_cron)
-#                          DEPLOY_VERSION: $(SBT_VERSION)
-#                          ARGUMENTS: >-
-#                            $(setupArgs.IMAGES)
-#                            $(setupArgs.FILES)
+                  - task: Bash@3
+                    name: setupArgs
+                    displayName: "Setup job args"
+                    inputs:
+                      targetType: "inline"
+                      script: |
+                        SETIMAGES="--set cj-ftp-upload.image.tag=$SBT_VERSION"
+                        SETFILES="--set-file cj-ftp-upload.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK"
+                        SETFILES="$SETFILES --set-file cj-ftp-upload.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
+                        echo "##vso[task.setvariable variable=IMAGES;isOutput=true]$SETIMAGES"
+                        echo "##vso[task.setvariable variable=FILES;isOutput=true]$SETFILES"
+                      failOnStderr: true
+                  - ${{ if parameters.WEU }}:
+                      - bash: |
+                          echo "install WEU jobs"
+                      - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+                        parameters:
+                          DO_DEPLOY: true
+                          ENV: ${{ parameters['ENV'] }}
+                          KUBERNETES_SERVICE_CONN: ${{ variables.WEU_kubernetesServiceConnection }}
+                          NAMESPACE: "fdr"
+                          APP_NAME: $(appNameCron)
+                          VALUE_FILE: $(WEU_value_file_cron)
+                          DEPLOY_VERSION: $(SBT_VERSION)
+                          CHART_PATH: "helm/fdr-cron"
+                          ARGUMENTS: >-
+                            $(setupArgs.IMAGES)
+                            $(setupArgs.FILES)
                   - ${{ if in( parameters.ENV, 'prod', 'uat') }}:
                       - bash: |
                           echo "uninstall WEU CANARY"
@@ -397,6 +412,7 @@ stages:
                           APP_NAME: "$(appName)-canary"
                           VALUE_FILE: $(WEU_value_file_fdr)
                           DEPLOY_VERSION: $(SBT_VERSION)
+                          CHART_PATH: "helm/fdr"
                           ARGUMENTS: "$(appName)-canary"
       - ${{ if parameters.NEU }}:
         - deployment: "Approved_${{ parameters.ENV }}_NEU_Deploy"
