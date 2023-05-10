@@ -377,7 +377,7 @@ stages:
                       KUBERNETES_SERVICE_CONN: ${{ variables.WEU_kubernetesServiceConnection }}
                       NAMESPACE: "fdr"
                       APP_NAME: $(appName)
-                      VALUE_FILE: $(WEU_value_file_nodo)
+                      VALUE_FILE: $(WEU_value_file_fdr)
                       DEPLOY_VERSION: $(SBT_VERSION)
                       APPINSIGHTS_SERVICE_CONN: ${{ variables.WEU_appInsightsServiceConn }}
                       APPINSIGHTS_RESOURCE_ID: ${{ variables.WEU_appInsightsResourceId }}
