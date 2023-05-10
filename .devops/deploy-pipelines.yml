@@ -360,17 +360,33 @@ stages:
                           yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
                           yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
                         fi
-                        
                         helm dep build helm/fdr
-                        
                         CHART_FILE="helm/fdr-cron/Chart.yaml"
                         if [[ -f "$CHART_FILE" ]]; then
                           yq -i ".version = \"$(SBT_VERSION)\"" "$CHART_FILE"
                           yq -i ".appVersion = \"$(SBT_VERSION)\"" "$CHART_FILE"
                         fi
-                        
                         helm dep build helm/fdr-cron
                       failOnStderr: true
+                  - bash: |
+                      echo "install WEU fdr"
+                  - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
+                    parameters:
+                      DO_DEPLOY: true
+                      ENV: ${{ parameters['ENV'] }}
+                      KUBERNETES_SERVICE_CONN: ${{ variables.WEU_kubernetesServiceConnection }}
+                      NAMESPACE: "fdr"
+                      APP_NAME: $(appName)
+                      VALUE_FILE: $(WEU_value_file_nodo)
+                      DEPLOY_VERSION: $(SBT_VERSION)
+                      APPINSIGHTS_SERVICE_CONN: ${{ variables.WEU_appInsightsServiceConn }}
+                      APPINSIGHTS_RESOURCE_ID: ${{ variables.WEU_appInsightsResourceId }}
+                      CHART_PATH: "helm/fdr"
+                      ARGUMENTS: >-
+                        --set fdrnodo.image.tag="$(SBT_VERSION)"
+                        --set fdrnodo.forceRedeploy=${{ parameters.FORCE_REDEPLOY }}
+                        --set-file fdrnodo.configMapFromFile.logback\.xml="$(FILE_CONFIG_PATH_LOGBACK)"
+                        --set-file fdrnodo.configMapFromFile.config-app\.conf="$(FILE_CONFIG_PATH_CONFIGAPP)"
                   - task: Bash@3
                     name: setupArgs
                     displayName: "Setup job args"
