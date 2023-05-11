@@ -23,7 +23,8 @@ import scala.util.{Failure, Success, Try}
 
 final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
     extends PerRequestActor
-    with NodoChiediElencoFlussiRendicontazioneResponse {
+      with ReUtil
+      with NodoChiediElencoFlussiRendicontazioneResponse {
 
   var req: SoapRequest = _
   var replyTo: ActorRef = _
@@ -90,7 +91,8 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
             req.primitive,
             SoapReceiverType.NEXI.toString,
             req.payload,
-            actorProps
+            actorProps,
+            re.get
           )
 
           ncefrResponse <- Future.fromTry(parseResponseNexi(response.payload.get))
@@ -133,6 +135,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
         log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, DigitPaErrorCodes.PPT_SYSTEM_ERROR, re)
     }) map (sr => {
+      traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
       log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()

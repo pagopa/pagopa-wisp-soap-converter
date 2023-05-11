@@ -9,7 +9,7 @@ import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.repo.fdr.model._
 import eu.sia.pagopa.common.repo.re.model.Re
-import eu.sia.pagopa.common.util._
+import eu.sia.pagopa.common.util.{ReUtil, _}
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.actor.BaseInviaFlussoRendicontazioneActor
@@ -24,7 +24,7 @@ import java.time.{LocalDateTime, ZoneId}
 import scala.concurrent.Future
 import scala.util.Try
 
-final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps) extends BaseInviaFlussoRendicontazioneActor with NodoInviaFlussoRendicontazioneResponse {
+final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps) extends BaseInviaFlussoRendicontazioneActor with ReUtil  with NodoInviaFlussoRendicontazioneResponse {
 
   var req: SoapRequest = _
   var replyTo: ActorRef = _
@@ -160,6 +160,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
         log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), re)
     }) map (sr => {
+      traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
       log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()

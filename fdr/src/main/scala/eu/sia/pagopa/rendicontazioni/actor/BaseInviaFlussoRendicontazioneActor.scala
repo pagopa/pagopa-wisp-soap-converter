@@ -251,7 +251,8 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
         req.primitive,
         SoapReceiverType.FDRNEW.toString,
         nifrRequest,
-        actorProps
+        actorProps,
+        re.get
       )
     } yield ()).recoverWith({
       case _ => Future.successful(())

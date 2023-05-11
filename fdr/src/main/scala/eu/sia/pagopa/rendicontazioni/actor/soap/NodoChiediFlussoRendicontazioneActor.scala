@@ -24,7 +24,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
-  extends PerRequestActor with NodoChiediFlussoRendicontazioneResponse {
+  extends PerRequestActor with ReUtil with NodoChiediFlussoRendicontazioneResponse {
 
   override def actorError(e: DigitPaException): Unit = {
     actorError(req, replyTo, ddataMap, e, re)
@@ -217,7 +217,8 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
             req.primitive,
             SoapReceiverType.NEXI.toString,
             req.payload,
-            actorProps
+            actorProps,
+            re.get
           )
 
           ncfrResponse <- Future.fromTry(parseResponseNexi(response.payload.get))
@@ -265,6 +266,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
         log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), re)
     }) map (sr => {
+      traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
       log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()

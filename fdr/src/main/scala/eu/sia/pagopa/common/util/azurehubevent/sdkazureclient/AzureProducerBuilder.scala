@@ -1,7 +1,7 @@
 package eu.sia.pagopa.common.util.azurehubevent.sdkazureclient
 
 import akka.Done
-import akka.actor.{ActorSystem, CoordinatedShutdown}
+import akka.actor.{ActorRef, ActorSystem, CoordinatedShutdown}
 import akka.dispatch.MessageDispatcher
 import com.azure.core.amqp.AmqpTransportType
 import com.azure.messaging.eventhubs.{EventData, EventDataBatch, EventHubClientBuilder, EventHubProducerAsyncClient}
@@ -9,7 +9,7 @@ import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.message.ReRequest
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.AppObjectMapper
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ReEventFunc, sessionId}
+import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ReEventFunc, defaultOperation, sessionId}
 import org.slf4j.MDC
 import reactor.core.publisher.{Flux, Mono}
 
@@ -29,6 +29,9 @@ object AzureProducerBuilder {
     val eventHubName = eventConfigAzureSdkClient.getString("event-hub-name")
     val connectionString = eventConfigAzureSdkClient.getString("connection-string")
     val clientTimeoutMs = eventConfigAzureSdkClient.getLong("client-timeoput-ms")
+
+    val reXmlLog = Try(system.settings.config.getBoolean("reXmlLog")).getOrElse(true)
+    val reJsonLog = Try(system.settings.config.getBoolean("reJsonLog")).getOrElse(false)
 
     val reProducer: EventHubProducerAsyncClient =
       new EventHubClientBuilder().transportType(AmqpTransportType.AMQP_WEB_SOCKETS).connectionString(connectionString, eventHubName).buildAsyncProducerClient()
@@ -60,6 +63,7 @@ object AzureProducerBuilder {
         log.debug("CONFIGURATION_KEYS [azure-sdk-client.re-event.enabled]=false. Not forward to Azure")
         Future.successful(())
       }
+      Future(defaultOperation(request, log, reXmlLog, reJsonLog, data))
     }
   }
 

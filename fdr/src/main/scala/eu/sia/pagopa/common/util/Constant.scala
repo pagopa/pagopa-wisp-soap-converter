@@ -18,9 +18,21 @@ object Constant {
   val INSTANCE_KEY = "INSTANCE"
   val APP_NAME_KEY = "APP_NAME"
   val APP_VERSION_KEY = "APP_VERSION"
-  val INSTANCE = sys.env.get(INSTANCE_KEY).getOrElse("")
-  val APP_NAME = sys.env.get(APP_NAME_KEY).getOrElse("")
-  val APP_VERSION = sys.env.get(APP_VERSION_KEY).getOrElse("")
+  val INSTANCE = sys.env.getOrElse(INSTANCE_KEY, "")
+  val APP_NAME = sys.env.getOrElse(APP_NAME_KEY, "")
+  val APP_VERSION = sys.env.getOrElse(APP_VERSION_KEY, "")
+
+  val RE_JSON_LOG = "reJsonLog"
+  val RE_XML_LOG = "reXmlLog"
+
+  val UNKNOWN = "UNKNOWN"
+
+  val RE_UID = "eventHubId"
+
+  val SERVER = "SERVER"
+  val CLIENT = "CLIENT"
+  val REQUEST = "REQUEST"
+  val RESPONSE = "RESPONSE"
 
   object KeyName {
     val EMPTY_KEY = "NO_KEY"
@@ -36,6 +48,8 @@ object Constant {
   object MDCKey {
     val SESSION_ID = "sessionId"
     val ACTOR_CLASS_ID = "actorClassId"
+    val DATA_ORA_EVENTO = "dataOraEvento"
+    val ELAPSED = "elapsed"
   }
 
   object ContentType extends Enumeration {

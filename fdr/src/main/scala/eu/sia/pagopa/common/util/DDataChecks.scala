@@ -17,14 +17,14 @@ object DDataChecks {
     ddataMap.creditorInstitutions.get(idPa) match {
       case Some(value) =>
         if (value.enabled) {
-          log.debug(s"[$idPa] found and enabled")
+          log.debug(s"idPA=[$idPa] found and enabled")
           Success(value)
         } else {
-          log.warn(s"[$idPa] found but disabled")
+          log.warn(s"idPA[$idPa] found but disabled")
           Failure(DigitPaErrorCodes.PPT_DOMINIO_DISABILITATO)
         }
       case None =>
-        log.warn(s"[$idPa] not found")
+        log.warn(s"idPA=[$idPa] not found")
         Failure(DigitPaErrorCodes.PPT_DOMINIO_SCONOSCIUTO)
     }
   }
@@ -33,14 +33,14 @@ object DDataChecks {
     ddataMap.psps.get(idPsp) match {
       case Some(value) =>
         if (value.enabled) {
-          log.debug(s"[$idPsp] found and enabled")
+          log.debug(s"idPsp=[$idPsp] found and enabled")
           Success(value)
         } else {
-          log.warn(s"[$idPsp] found but disabled")
+          log.warn(s"idPsp=[$idPsp] found but disabled")
           Failure(DigitPaErrorCodes.PPT_PSP_DISABILITATO)
         }
       case None =>
-        log.warn(s"[$idPsp] not found")
+        log.warn(s"idPsp=[$idPsp] not found")
         Failure(DigitPaErrorCodes.PPT_PSP_SCONOSCIUTO)
     }
   }
@@ -49,14 +49,14 @@ object DDataChecks {
     ddataMap.pspBrokers.get(idIntPsp) match {
       case Some(value) =>
         if (value.enabled) {
-          log.debug(s"[$idIntPsp] found and enabled")
+          log.debug(s"idIntPsp=[$idIntPsp] found and enabled")
           Success(value)
         } else {
-          log.warn(s"[$idIntPsp] found but disabled")
+          log.warn(s"idIntPsp=[$idIntPsp] found but disabled")
           Failure(DigitPaErrorCodes.PPT_INTERMEDIARIO_PSP_DISABILITATO)
         }
       case None =>
-        log.warn(s"[$idIntPsp] not found")
+        log.warn(s"idIntPsp=[$idIntPsp] not found")
         Failure(DigitPaErrorCodes.PPT_INTERMEDIARIO_PSP_SCONOSCIUTO)
     }
   }
@@ -64,10 +64,10 @@ object DDataChecks {
   def checkCodifiche(log: NodoLogger, ddataMap: ConfigData, formatoCodifica: String): Try[Encoding] = {
     ddataMap.encodings.get(formatoCodifica) match {
       case Some(value) =>
-        log.debug(s"[$formatoCodifica] found")
+        log.debug(s"formatoCodifica=[$formatoCodifica] found")
         Success(value)
       case None =>
-        log.warn(s"[$formatoCodifica] not found")
+        log.warn(s"formatoCodifica=[$formatoCodifica] not found")
         Failure(DigitPaErrorCodes.PPT_CODIFICA_PSP_SCONOSCIUTA)
     }
   }
@@ -76,19 +76,19 @@ object DDataChecks {
     ddataMap.channels.get(idCanale) match {
       case Some(value) =>
         if (value.enabled) {
-          log.debug(s"[$idCanale] found and enabled")
+          log.debug(s"idCanale=[$idCanale] found and enabled")
           if (!checkPassword || password.forall(value.password.contains(_))) {
             Success(value)
           } else {
-            log.warn(s"[$idCanale] found and enabled, wrong password")
+            log.warn(s"idCanale=[$idCanale] found and enabled, wrong password")
             Failure(exception.DigitPaException("Password sconosciuta o errata", DigitPaErrorCodes.PPT_AUTENTICAZIONE))
           }
         } else {
-          log.warn(s"[$idCanale] found but disabled")
+          log.warn(s"idCanale=[$idCanale] found but disabled")
           Failure(DigitPaErrorCodes.PPT_CANALE_DISABILITATO)
         }
       case None =>
-        log.warn(s"[$idCanale] not found")
+        log.warn(s"idCanale=[$idCanale] not found")
         Failure(DigitPaErrorCodes.PPT_CANALE_SCONOSCIUTO)
     }
   }
@@ -97,19 +97,19 @@ object DDataChecks {
     ddataMap.stations.get(idStazione) match {
       case Some(value) =>
         if (value.enabled) {
-          log.debug(s"[$idStazione] found and enabled")
+          log.debug(s"idStazione=[$idStazione] found and enabled")
           if (!checkPassword || password.forall(value.password.contains(_))) {
             Success(value)
           } else {
-            log.warn(s"[$idStazione] found and enabled, wrong password")
+            log.warn(s"idStazione=[$idStazione] found and enabled, wrong password")
             Failure(exception.DigitPaException("Password sconosciuta o errata", DigitPaErrorCodes.PPT_AUTENTICAZIONE))
           }
         } else {
-          log.warn(s"[$idStazione] found but disabled")
+          log.warn(s"idStazione=[$idStazione] found but disabled")
           Failure(DigitPaErrorCodes.PPT_STAZIONE_INT_PA_DISABILITATA)
         }
       case None =>
-        log.warn(s"[$idStazione] non trovata")
+        log.warn(s"idStazione=[$idStazione] non trovata")
         Failure(DigitPaErrorCodes.PPT_STAZIONE_INT_PA_SCONOSCIUTA)
     }
   }

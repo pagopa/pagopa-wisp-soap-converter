@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{ContentTypes, HttpMethods, ContentType => _}
 import eu.sia.pagopa.ActorProps
 import eu.sia.pagopa.common.message._
+import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.NodoLogger
 
 import scala.concurrent.ExecutionContext
@@ -21,7 +22,8 @@ object HttpServiceManagement {
       action: String,
       receiver: String,
       payload: String,
-      actorProps: ActorProps
+      actorProps: ActorProps,
+      re: Re
   )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
     val (url, timeout) = loadServiceConfig(action, receiver)
 
@@ -34,12 +36,13 @@ object HttpServiceManagement {
       Some(payload),
       Seq((HEADER_KEY_SOAPACTION, s"\"$action\"")),
       Some(receiver),
+      re,
       timeout.seconds,
       None,
       testCaseId
     )
 
-    callService(simpleHttpReq, action, receiver, actorProps)
+    callService(simpleHttpReq, action, receiver, actorProps, true)
   }
 
   def createRequestRestAction(
@@ -48,7 +51,8 @@ object HttpServiceManagement {
                         action: String,
                         receiver: String,
                         payload: String,
-                        actorProps: ActorProps
+                        actorProps: ActorProps,
+                        re: Re
                       )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
 
     val (url, timeout) = loadServiceConfig(action, receiver)
@@ -62,12 +66,13 @@ object HttpServiceManagement {
       Some(payload),
       Seq(),
       Some(receiver),
+      re,
       timeout.seconds,
       None,
       testCaseId
     )
 
-    callService(simpleHttpReq, action, receiver, actorProps)
+    callService(simpleHttpReq, action, receiver, actorProps, false)
   }
 
   private def loadServiceConfig(action: String,
@@ -83,11 +88,12 @@ object HttpServiceManagement {
   private def callService(simpleHttpReq: SimpleHttpReq,
                           action: String,
                           receiver: String,
-                          actorProps: ActorProps)(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
+                          actorProps: ActorProps,
+                          isSoapProtocol: Boolean)(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
     log.info(s"Call $receiver for $action")
 
     for {
-      simpleHttpRes <- actorProps.actorUtility.callHttp(simpleHttpReq, actorProps)
+      simpleHttpRes <- actorProps.actorUtility.callHttp(simpleHttpReq, actorProps, isSoapProtocol)
       _ = log.info(s"Response $receiver for $action")
     } yield simpleHttpRes
   }

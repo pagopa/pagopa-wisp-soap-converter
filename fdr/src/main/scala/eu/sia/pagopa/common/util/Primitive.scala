@@ -2,7 +2,6 @@ package eu.sia.pagopa.common.util
 
 import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.ftpsender.actor.FtpRetryActorPerRequest
-import eu.sia.pagopa.rendicontazioni.actor.rest.InviaFlussoRendicontazioneActorPerRequest
 import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneActorPerRequest}
 
 object Primitive {
@@ -11,10 +10,6 @@ object Primitive {
     "nodoChiediFlussoRendicontazione" -> ("Body/_/identificativoStazioneIntermediarioPA", _ => classOf[NodoChiediFlussoRendicontazioneActorPerRequest]),
     "nodoInviaFlussoRendicontazione" -> ("Body/_/identificativoCanale", _ => classOf[NodoInviaFlussoRendicontazioneActorPerRequest]),
     "nodoChiediElencoFlussiRendicontazione" -> ("Body/_/identificativoStazioneIntermediarioPA", _ => classOf[NodoChiediElencoFlussiRendicontazioneActorPerRequest])
-  )
-
-  val rest: Map[String, (String, Boolean => Class[_ <: PerRequestActor])] = Map(
-    "inviaFlussoRendicontazione" -> ("inviaFlussoRendicontazione", _ => classOf[InviaFlussoRendicontazioneActorPerRequest])
   )
 
   val jobs: Map[String, (String, Boolean => Class[_ <: PerRequestActor])] = Map(

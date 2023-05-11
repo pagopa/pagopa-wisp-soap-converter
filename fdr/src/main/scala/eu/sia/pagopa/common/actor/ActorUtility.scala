@@ -10,14 +10,16 @@ import akka.http.scaladsl.unmarshalling.Unmarshaller
 import akka.http.scaladsl.{ClientTransport, HttpsConnectionContext}
 import akka.stream.StreamTcpException
 import akka.stream.scaladsl.TcpIdleTimeoutException
-import com.typesafe.sslconfig.akka.AkkaSSLConfig
 import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.message._
+import eu.sia.pagopa.common.util.StringUtils.Utf8String
 import eu.sia.pagopa.common.util._
 
 import java.net.InetSocketAddress
+import java.time.temporal.ChronoUnit
 import javax.net.ssl.{SSLException, SSLHandshakeException}
 import scala.concurrent.Future
 import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
@@ -31,7 +33,7 @@ class ActorUtility {
     actor.ask(req)(timeout).mapTo[S]
   }
 
-  def callHttp(req: SimpleHttpReq, actorProps: ActorProps)(implicit log: NodoLogger, system: ActorSystem) = {
+  def callHttp(req: SimpleHttpReq, actorProps: ActorProps, isSoapProtocol: Boolean)(implicit log: NodoLogger, system: ActorSystem) = {
     implicit val executionContext: MessageDispatcher = system.dispatchers.lookup("http-dispatcher")
 
     val akkaheaders = if (req.testCaseId.isDefined) {
@@ -47,11 +49,36 @@ class ActorUtility {
       case None =>
         akka.http.scaladsl.model.HttpRequest(method = req.method, uri = req.uri, headers = akkaheaders)
     }
-
+    val redate = Util.now()
     log.info(s"HTTP NODO -> [${req.uri}] will timeout in [${req.timeout.toString}]")
     (for {
       httpResponse <- dispatchRequest(req.timeout, req.proxyData, akkaReq, actorProps.httpsConnectionContext)
       payload <- Unmarshaller.stringUnmarshaller(httpResponse.entity)
+      _ = {
+        val reRequest = ReRequest(
+          sessionId = req.sessionId,
+          testCaseId = req.testCaseId,
+          re = req.re.copy(
+            status = None,
+            componente = Componente.FDR.toString,
+            categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
+            sottoTipoEvento = SottoTipoEvento.REQ.toString,
+            tipoEvento = Some(req.messageType),
+            payload = req.payload.map(_.getUtf8Bytes),
+            esito = Some(EsitoRE.INVIATA.toString),
+            insertedTimestamp = redate,
+            erogatore = req.receiver,
+            fruitore = Some(FaultId.FDR),
+            fruitoreDescr = Some(FaultId.FDR),
+            erogatoreDescr = req.receiver,
+            info = Some(req.uri)
+          ),
+          reExtra = Some(ReExtra(uri = Some(req.uri), httpMethod = Some(req.method.toString()), soapProtocol = isSoapProtocol))
+        )
+        log.info(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER))
+        actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
+      }
+
       payloadResponse =
         if (payload.nonEmpty) {
           payload.getBytes(Constant.UTF_8)
@@ -59,11 +86,60 @@ class ActorUtility {
           s"HttpStatus: [${httpResponse.status.value}], headers: [${httpResponse.headers.toString()}]".getBytes(Constant.UTF_8)
         }
 
+      _ = {
+        val now = Util.now()
+        val reRequest = ReRequest(
+          sessionId = req.sessionId,
+          testCaseId = req.testCaseId,
+          re = req.re.copy(
+            status = None,
+            componente = Componente.FDR.toString,
+            categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
+            sottoTipoEvento = SottoTipoEvento.RESP.toString,
+            tipoEvento = Some(req.messageType),
+            esito = Some(EsitoRE.RICEVUTA.toString),
+            insertedTimestamp = now,
+            erogatore = req.receiver,
+            fruitore = Some(FaultId.FDR),
+            fruitoreDescr = Some(FaultId.FDR),
+            erogatoreDescr = req.receiver,
+            payload = Some(payloadResponse),
+            info = Some(req.uri)
+          ),
+          reExtra = Some(ReExtra(uri = None, httpMethod = None, statusCode = Some(httpResponse.status.intValue()), elapsed = Some(redate.until(now, ChronoUnit.MILLIS)), soapProtocol = isSoapProtocol))
+        )
+        actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
+      }
+
       response = SimpleHttpRes(req.sessionId, httpResponse.status.intValue(), httpResponse.headers, Some(payload), None, req.testCaseId)
       _ = log.debug(s"callHttp - end")
     } yield response).recover({ case e: Throwable =>
       log.warn(e, s"callHttp -> [${req.method}] [${req.uri}] -> [${e.getMessage}]")
+
       val response = SimpleHttpRes(req.sessionId, StatusCodes.InternalServerError.intValue, Seq(), None, Some(handlerReqException(e)), req.testCaseId)
+      val redate = Util.now()
+      val reRequest = ReRequest(
+        sessionId = req.sessionId,
+        testCaseId = req.testCaseId,
+        re = req.re.copy(
+          status = None,
+          componente = Componente.FDR.toString,
+          categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
+          sottoTipoEvento = SottoTipoEvento.REQ.toString,
+          tipoEvento = Some(req.messageType),
+          esito = Some(EsitoRE.INVIATA_KO.toString),
+          insertedTimestamp = redate,
+          erogatore = req.receiver,
+          fruitore = Some(FaultId.FDR),
+          fruitoreDescr = Some(FaultId.FDR),
+          erogatoreDescr = req.receiver,
+          payload = response.payload.map(_.getUtf8Bytes),
+          info = Some(req.uri)
+        ),
+        reExtra = Some(ReExtra(uri = Some(req.uri), httpMethod = Some(req.method.toString()), soapProtocol = isSoapProtocol, statusCode = Some(response.statusCode)))
+      )
+      actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
+
       log.debug(s"callHttp - end")
       response
     })
