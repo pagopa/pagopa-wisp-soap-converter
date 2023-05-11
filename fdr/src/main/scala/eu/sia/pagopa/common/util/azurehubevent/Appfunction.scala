@@ -1,6 +1,5 @@
 package eu.sia.pagopa.common.util.azurehubevent
 
-import akka.actor.ActorRef
 import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.message.{CategoriaEvento, ReExtra, ReRequest, SottoTipoEvento}
@@ -13,8 +12,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
-import spray.json.DefaultJsonProtocol._
-import spray.json._
 
 object Appfunction {
 
@@ -176,14 +173,8 @@ object Appfunction {
           case _ => ???
         }
       } else if (!isSoapProtocol) {
-        val (faultJsonCode, faultJsonString, faultJsonDescription) = getFaultFromJson(httpType, re.businessProcess, payload)
-        if (statusCode.contains(200) && faultJsonCode.isDefined && httpType.contains(Constant.RESPONSE)) {
-          (false, Some(faultJsonCode.getOrElse("")), Some(faultJsonString.getOrElse("")), Some(faultJsonDescription.getOrElse("")), payload)
-        } else if (!statusCode.contains(200) && httpType.contains(Constant.RESPONSE)) {
-          (false, Some(faultJsonCode.getOrElse("")), Some(faultJsonString.getOrElse("")), Some(faultJsonDescription.getOrElse("")), None)
-        } else {
-          (true, None, None, None, None)
-        }
+        //al momento non ci sono chiamate di tipo REST, di conseguenza non dovrebbe MAI entrare qui
+        (true, None, None, None, None)
       } else {
         (true, None, None, None, None)
       }
@@ -263,50 +254,5 @@ object Appfunction {
       })
     })
   }
-
-  private def getFaultFromJson(httpType: Option[String], businessProcess: Option[String], json: Option[String]) = {
-    if (httpType.isDefined && httpType.contains(Constant.RESPONSE)) {
-      val jsValue = json.map(v => v.parseJson.asJsObject)
-      businessProcess match {
-        case Some(value) if (value == "nodoNotificaAnnullamento" ||
-          value == "nodoInoltraPagamentoMod1" ||
-          value == "nodoInoltraPagamentoMod2" ||
-          value == "nodoInoltraEsitoPagamentoCarta" ||
-          value == "nodoInoltraEsitoPagamentoPayPal" ||
-          value == "nodoChiediInformazioniPagamento" ||
-          value == "nodoChiediListaPsp" ||
-          value == "nodoChiediAvanzamentoPagamento" ||
-          value == "closePayment-v1" ||
-          value == "closePayment-v2") =>
-
-          val error = jsValue.flatMap(_.getFields("error").headOption).map(_.convertTo[String]).map(v => s"error=[$v]")
-          if (error.isDefined) {
-            val esito = jsValue.flatMap(_.getFields("esito").headOption).map(_.convertTo[String]).map(v => s"esito=[$v]")
-            val errorCode = jsValue.flatMap(_.getFields("errorCode").headOption).map(_.convertTo[String]).map(v => s"errorCode=[$v]")
-            val errorDesc = jsValue.flatMap(_.getFields("descrizione").headOption).map(_.convertTo[String]).map(v => s"descrizione=[$v]")
-            (
-              Some("<REST_NO_FAULT_CODE>"),
-              Some("<REST_NO_FAULT_STRING>"),
-              Some(List(esito, error, errorCode, errorDesc).flatten.mkString(", ")),
-            )
-          } else {
-            (None, None, None)
-          }
-        case Some(value) if value == "checkPosition" =>
-          val outcome = jsValue.flatMap(_.getFields("outcome").headOption).map(_.convertTo[String])
-          val description = jsValue.flatMap(_.getFields("description").headOption).map(_.convertTo[String]).map(v => s"description=[$v]")
-          if (outcome.contains(Constant.KO)) {
-            (Some("<REST_NO_FAULT_CODE>"), Some("<REST_NO_FAULT_STRING>"), Some(description.mkString))
-          } else {
-            (None, None, None)
-          }
-        case _ =>
-          (None, None, None)
-      }
-    } else {
-      (None, None, None)
-    }
-  }
-
 
 }

@@ -6,7 +6,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.RouteDirectives
-import akka.http.scaladsl.server.{PathMatchers, Route, RouteResult}
+import akka.http.scaladsl.server.{Route, RouteResult}
 import akka.pattern.{AskTimeoutException, ask}
 import akka.stream.Materializer
 import akka.util.ByteString
@@ -18,8 +18,6 @@ import eu.sia.pagopa.common.repo.fdr.enums.SchedulerFireCheckStatus
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
 import eu.sia.pagopa.nodopoller.actor.PollerActor
-import eu.sia.pagopa.restinput.actor.RestActorPerRequest
-import eu.sia.pagopa.restinput.message.RestRouterRequest
 import eu.sia.pagopa.soapinput.actor.SoapActorPerRequest
 import eu.sia.pagopa.soapinput.message.SoapRouterRequest
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}
