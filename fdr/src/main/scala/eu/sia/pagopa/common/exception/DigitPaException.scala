@@ -8,7 +8,7 @@ case class DigitPaException(
                              message: String,
                              code: DigitPaErrorCodes.Value,
                              cause: Throwable = None.orNull,
-                             reporterId: String = FaultId.FDR,
+                             reporterId: String = FaultId.NODO_DEI_PAGAMENTI_SPC,
                              originalFaultCode: Option[String] = None,
                              originalFaultString: Option[String] = None,
                              originalFaultDescription: Option[String] = None,
@@ -29,7 +29,7 @@ object DigitPaException {
       message = DigitPaErrorCodes.description(code),
       code = code,
       cause = cause,
-      reporterId = FaultId.FDR,
+      reporterId = FaultId.NODO_DEI_PAGAMENTI_SPC,
       originalFaultCode = None,
       originalFaultString = None,
       originalFaultDescription = None
@@ -39,7 +39,7 @@ object DigitPaException {
       message = DigitPaErrorCodes.description(code),
       code = code,
       cause = None.orNull,
-      reporterId = FaultId.FDR,
+      reporterId = FaultId.NODO_DEI_PAGAMENTI_SPC,
       originalFaultCode = None,
       originalFaultString = None,
       originalFaultDescription = None
@@ -68,7 +68,7 @@ object DigitPaException {
       message = message,
       code = code,
       cause = None.orNull,
-      reporterId = FaultId.FDR,
+      reporterId = FaultId.NODO_DEI_PAGAMENTI_SPC,
       originalFaultCode = originalFaultCode,
       originalFaultString = originalFaultString,
       originalFaultDescription = originalFaultDescription

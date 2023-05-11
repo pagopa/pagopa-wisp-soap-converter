@@ -68,8 +68,8 @@ class ActorUtility {
             esito = Some(EsitoRE.INVIATA.toString),
             insertedTimestamp = redate,
             erogatore = req.receiver,
-            fruitore = Some(FaultId.FDR),
-            fruitoreDescr = Some(FaultId.FDR),
+            fruitore = Some(Componente.FDR.toString),
+            fruitoreDescr = Some(Componente.FDR.toString),
             erogatoreDescr = req.receiver,
             info = Some(req.uri)
           ),
@@ -100,8 +100,8 @@ class ActorUtility {
             esito = Some(EsitoRE.RICEVUTA.toString),
             insertedTimestamp = now,
             erogatore = req.receiver,
-            fruitore = Some(FaultId.FDR),
-            fruitoreDescr = Some(FaultId.FDR),
+            fruitore = Some(Componente.FDR.toString),
+            fruitoreDescr = Some(Componente.FDR.toString),
             erogatoreDescr = req.receiver,
             payload = Some(payloadResponse),
             info = Some(req.uri)
@@ -130,8 +130,8 @@ class ActorUtility {
           esito = Some(EsitoRE.INVIATA_KO.toString),
           insertedTimestamp = redate,
           erogatore = req.receiver,
-          fruitore = Some(FaultId.FDR),
-          fruitoreDescr = Some(FaultId.FDR),
+          fruitore = Some(Componente.FDR.toString),
+          fruitoreDescr = Some(Componente.FDR.toString),
           erogatoreDescr = req.receiver,
           payload = response.payload.map(_.getUtf8Bytes),
           info = Some(req.uri)

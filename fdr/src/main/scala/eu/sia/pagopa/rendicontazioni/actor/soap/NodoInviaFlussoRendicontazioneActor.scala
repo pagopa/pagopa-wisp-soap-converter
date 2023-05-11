@@ -47,9 +47,9 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         insertedTimestamp = soapRequest.timestamp,
-        erogatore = Some(FaultId.FDR),
+        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.FDR)
+        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
       )
     )
 
@@ -67,13 +67,13 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         fruitore = Some(nodoInviaFlussoRendicontazione.identificativoCanale),
-        erogatore = Some(FaultId.FDR),
+        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
         canale = Some(nodoInviaFlussoRendicontazione.identificativoCanale),
         esito = Some(EsitoRE.RICEVUTA.toString),
         sessionId = Some(req.sessionId),
         insertedTimestamp = now,
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.FDR)
+        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
       )
       _ = re = Some(re_)
 

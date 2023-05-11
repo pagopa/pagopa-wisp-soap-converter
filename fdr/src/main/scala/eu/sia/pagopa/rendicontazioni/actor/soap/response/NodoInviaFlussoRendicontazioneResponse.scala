@@ -23,7 +23,7 @@ trait NodoInviaFlussoRendicontazioneResponse { this: NodoLogging =>
       case _ =>
         Some(e.getMessage)
     }
-    NodoInviaFlussoRendicontazioneRisposta(Option(FaultBean(e.faultCode, e.faultString, FaultId.FDR, message, None)), Constant.KO)
+    NodoInviaFlussoRendicontazioneRisposta(Option(FaultBean(e.faultCode, e.faultString, FaultId.NODO_DEI_PAGAMENTI_SPC, message, None)), Constant.KO)
   }
 
   def errorHandler(sessionId: String, testCaseId: Option[String], outputXsdValid: Boolean, e: DigitPaException, re: Option[Re]): SoapResponse = {
