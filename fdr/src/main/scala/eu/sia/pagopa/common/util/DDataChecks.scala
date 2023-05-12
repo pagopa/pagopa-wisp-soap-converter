@@ -61,17 +61,6 @@ object DDataChecks {
     }
   }
 
-  def checkCodifiche(log: NodoLogger, ddataMap: ConfigData, formatoCodifica: String): Try[Encoding] = {
-    ddataMap.encodings.get(formatoCodifica) match {
-      case Some(value) =>
-        log.debug(s"formatoCodifica=[$formatoCodifica] found")
-        Success(value)
-      case None =>
-        log.warn(s"formatoCodifica=[$formatoCodifica] not found")
-        Failure(DigitPaErrorCodes.PPT_CODIFICA_PSP_SCONOSCIUTA)
-    }
-  }
-
   def checkCanale(log: NodoLogger, ddataMap: ConfigData, idCanale: String, password: Option[String], checkPassword: Boolean): Try[Channel] = {
     ddataMap.channels.get(idCanale) match {
       case Some(value) =>
@@ -135,15 +124,6 @@ object DDataChecks {
 
   }
 
-  def checkTipoVersamento(log: NodoLogger, ddataMap: ConfigData, tipoVersamento: String): Try[PaymentType] = {
-    ddataMap.paymentTypes.get(tipoVersamento) match {
-      case Some(value) => Success(value)
-      case None =>
-        log.warn(s"[$tipoVersamento] Unknown payment type")
-        Failure(DigitPaErrorCodes.PPT_TIPO_VERSAMENTO_SCONOSCIUTO)
-    }
-  }
-
   //noinspection ScalaStyle
   def checkPspIntermediarioPspCanale(
       log: NodoLogger,
@@ -152,7 +132,6 @@ object DDataChecks {
       idIntermediarioPsp: String,
       idCanale: Option[String] = None,
       password: Option[String] = None,
-      tipoVers: Option[String] = None,
       checkPassword: Boolean
   ): Try[(Option[PaymentServiceProvider], BrokerPsp, Option[Channel])] = {
 
@@ -177,12 +156,6 @@ object DDataChecks {
           log.warn(s"Id PA per [canale:${idCanale.getOrElse("n.a")},intermediarioPsp:$idIntermediarioPsp] wrong configuration intermediario-canale")
           Failure(exception.DigitPaException("Configurazione intermediario-canale non corretta", DigitPaErrorCodes.PPT_AUTORIZZAZIONE))
         }
-      tipoVersOpt <- tipoVers match {
-        case Some(tv) =>
-          checkTipoVersamento(log, ddataMap, tv).map(Some(_))
-        case None =>
-          Success(None)
-      }
       pspcanale = for {
         psp <- pspOpt
         canale <- canaleOpt
@@ -190,7 +163,7 @@ object DDataChecks {
 
       _ <- pspcanale match {
         case Some(s) =>
-          checkPspCanaleTipoVersamento(log, ddataMap, s._1, s._2, tipoVersOpt)
+          checkPspCanaleTipoVersamento(log, ddataMap, s._1, s._2, None)
         case None =>
           Success(None)
       }

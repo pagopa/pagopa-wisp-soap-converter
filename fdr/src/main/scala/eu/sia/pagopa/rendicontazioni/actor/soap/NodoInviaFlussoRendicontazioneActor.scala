@@ -410,7 +410,6 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
           nodoInviaFlussoRendicontazione.identificativoIntermediarioPSP,
           Some(nodoInviaFlussoRendicontazione.identificativoCanale),
           Some(nodoInviaFlussoRendicontazione.password),
-          None,
           checkPassword
         )
         .map(pc => pc._1 -> pc._3)
