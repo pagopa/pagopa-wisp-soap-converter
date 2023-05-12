@@ -90,11 +90,11 @@ object HttpServiceManagement {
                           receiver: String,
                           actorProps: ActorProps,
                           isSoapProtocol: Boolean)(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
-    log.info(s"Call $receiver for $action")
+    log.debug(s"Call $receiver for $action")
 
     for {
       simpleHttpRes <- actorProps.actorUtility.callHttp(simpleHttpReq, actorProps, isSoapProtocol)
-      _ = log.info(s"Response $receiver for $action")
+      _ = log.debug(s"Response $receiver for $action")
     } yield simpleHttpRes
   }
 

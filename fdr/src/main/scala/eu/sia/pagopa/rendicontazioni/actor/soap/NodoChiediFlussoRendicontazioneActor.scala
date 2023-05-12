@@ -239,9 +239,10 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
       }
 
       xmlrendicontazione <- if( rendicontazioneNexi.isDefined ) {
+        log.info(s"Report [${ncfr.identificativoFlusso}] returned by ${SoapReceiverType.NEXI.toString}")
         Future.successful(rendicontazioneNexi)
       } else {
-        log.debug(s"No reports returned by ${SoapReceiverType.NEXI.toString}")
+        log.info(s"No report returned by ${SoapReceiverType.NEXI.toString}")
         for {
           _ <- Future.successful(())
           _ = log.debug(s"Looking for reporting ${ncfr.identificativoFlusso} to db")
