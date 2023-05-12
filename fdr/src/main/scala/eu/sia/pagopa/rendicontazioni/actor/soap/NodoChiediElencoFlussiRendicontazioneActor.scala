@@ -23,7 +23,8 @@ import scala.util.{Failure, Success, Try}
 
 final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
     extends PerRequestActor
-    with NodoChiediElencoFlussiRendicontazioneResponse {
+      with ReUtil
+      with NodoChiediElencoFlussiRendicontazioneResponse {
 
   var req: SoapRequest = _
   var replyTo: ActorRef = _
@@ -50,9 +51,9 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         insertedTimestamp = soapRequest.timestamp,
-        erogatore = Some(FaultId.FDR),
+        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.FDR)
+        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
       )
     )
     log.info(FdrLogConstant.logSintattico(actorClassId))
@@ -90,7 +91,8 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
             req.primitive,
             SoapReceiverType.NEXI.toString,
             req.payload,
-            actorProps
+            actorProps,
+            re.get
           )
 
           ncefrResponse <- Future.fromTry(parseResponseNexi(response.payload.get))
@@ -105,9 +107,10 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
 
           tipiIdRendicontazioni = if ( flussiResponseNexi.isDefined) {
             val flussiTrovati = flussiResponseNexi.get.idRendicontazione
-            log.debug(s"Received ${flussiTrovati.size} reportings by ${SoapReceiverType.NEXI.toString}")
+            log.info(s"Returned ${flussiTrovati.size} reportings by ${SoapReceiverType.NEXI.toString}")
             flussiTrovati
           } else {
+            log.info(s"No reportings returned by ${SoapReceiverType.NEXI.toString}")
             Nil
           }
         } yield tipiIdRendicontazioni).recoverWith({
@@ -133,6 +136,7 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
         log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, DigitPaErrorCodes.PPT_SYSTEM_ERROR, re)
     }) map (sr => {
+      traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
       log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()

@@ -17,7 +17,7 @@ import scalaxbmodel.nodoperpa.{FaultBean, NodoChiediFlussoRendicontazioneRispost
 trait NodoChiediFlussoRendicontazioneResponse { this: NodoLogging =>
 
   def makeResponseWithFault(e: DigitPaException): NodoChiediFlussoRendicontazioneRisposta = {
-    NodoChiediFlussoRendicontazioneRisposta(Option(FaultBean(e.faultCode, e.faultString, FaultId.FDR, Option(e.message), None)), None)
+    NodoChiediFlussoRendicontazioneRisposta(Option(FaultBean(e.faultCode, e.faultString, FaultId.NODO_DEI_PAGAMENTI_SPC, Option(e.message), None)), None)
   }
 
   def errorHandler(sessionId: String, testCaseId: Option[String], outputXsdValid: Boolean, e: DigitPaException, re: Option[Re]): SoapResponse = {

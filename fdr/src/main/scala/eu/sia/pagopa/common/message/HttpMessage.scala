@@ -2,6 +2,7 @@ package eu.sia.pagopa.common.message
 
 import akka.http.scaladsl.model.{HttpHeader, HttpMethod}
 import eu.sia.pagopa.common.exception.DigitPaException
+import eu.sia.pagopa.common.repo.re.model.Re
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -16,6 +17,7 @@ case class SimpleHttpReq(
     payload: Option[String] = None,
     headers: Seq[(String, String)] = Nil,
     receiver: Option[String],
+    re: Re,
     timeout: FiniteDuration,
     proxyData: Option[ProxyData],
     override val testCaseId: Option[String] = None

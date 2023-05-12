@@ -6,7 +6,7 @@
     </envs>
     <option name="MAIN_CLASS_NAME" value="eu.sia.pagopa.mains.MainTest" />
     <module name="fdr" />
-    <option name="VM_PARAMETERS" value="-javaagent:./agent/cinnamon-agent-2.16.2.jar -Dconfig.app=$USER_HOME$/fdr/config-app-dev.conf" />
+    <option name="VM_PARAMETERS" value="-javaagent:./agent/cinnamon-agent-2.16.2.jar -Dconfig.app=$USER_HOME$/fdr/config-app-local.conf" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="eu.sia.pagopa.mains.*" />

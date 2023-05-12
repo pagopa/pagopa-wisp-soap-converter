@@ -67,7 +67,7 @@ class ActorUtilityTest() extends ActorUtility {
 
   }
 
-  override def callHttp(req: SimpleHttpReq, actorProps: ActorProps)(implicit log: NodoLogger, system: ActorSystem): Future[SimpleHttpRes] = {
+  override def callHttp(req: SimpleHttpReq, actorProps: ActorProps, isSoapProtocol: Boolean)(implicit log: NodoLogger, system: ActorSystem): Future[SimpleHttpRes] = {
     val testCase_ = req.testCaseId
       .flatMap(tcid =>
         configuration

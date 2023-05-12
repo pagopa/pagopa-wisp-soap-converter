@@ -24,7 +24,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
-  extends PerRequestActor with NodoChiediFlussoRendicontazioneResponse {
+  extends PerRequestActor with ReUtil with NodoChiediFlussoRendicontazioneResponse {
 
   override def actorError(e: DigitPaException): Unit = {
     actorError(req, replyTo, ddataMap, e, re)
@@ -179,9 +179,9 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         insertedTimestamp = soapRequest.timestamp,
-        erogatore = Some(FaultId.FDR),
+        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.FDR)
+        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
       )
     )
     log.info(FdrLogConstant.logSintattico(actorClassId))
@@ -197,13 +197,13 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         fruitore = Some(ncfr.identificativoStazioneIntermediarioPA),
-        erogatore = Some(FaultId.FDR),
+        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
         stazione = Some(ncfr.identificativoStazioneIntermediarioPA),
         esito = Some(EsitoRE.RICEVUTA.toString),
         sessionId = Some(req.sessionId),
         insertedTimestamp = now,
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.FDR)
+        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
       )
       _ = re = Some(re_)
 
@@ -217,7 +217,8 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
             req.primitive,
             SoapReceiverType.NEXI.toString,
             req.payload,
-            actorProps
+            actorProps,
+            re.get
           )
 
           ncfrResponse <- Future.fromTry(parseResponseNexi(response.payload.get))
@@ -238,9 +239,10 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
       }
 
       xmlrendicontazione <- if( rendicontazioneNexi.isDefined ) {
+        log.info(s"Report [${ncfr.identificativoFlusso}] returned by ${SoapReceiverType.NEXI.toString}")
         Future.successful(rendicontazioneNexi)
       } else {
-        log.debug(s"No reports returned by ${SoapReceiverType.NEXI.toString}")
+        log.info(s"No report returned by ${SoapReceiverType.NEXI.toString}")
         for {
           _ <- Future.successful(())
           _ = log.debug(s"Looking for reporting ${ncfr.identificativoFlusso} to db")
@@ -265,6 +267,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
         log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), re)
     }) map (sr => {
+      traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
       log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()
