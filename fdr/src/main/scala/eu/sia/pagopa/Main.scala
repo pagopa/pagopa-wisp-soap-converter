@@ -14,8 +14,9 @@ import eu.sia.pagopa.common.actor._
 import eu.sia.pagopa.common.message.{TriggerJobRequest, TriggerJobResponse}
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
+import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ContainerBlobFunc, ReEventFunc}
 import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder
+import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
 import eu.sia.pagopa.common.util.web.NodoRoute
 import eu.sia.pagopa.config.actor.ApiConfigActor
 import eu.sia.pagopa.nodopoller.actor.PollerActor
@@ -209,11 +210,16 @@ object Main extends App {
   }
   log.info("Loading ConfigData...")
   val bootstrapFuture = (for {
-    data <- ConfigUtil.getConfigHttp(SSlContext)
-    ddata <- data match {
-      case Some(ddata) => Future.successful(ddata)
-      case None =>
-        Future.failed(new RuntimeException("Could not get ConfigData"))
+    ddata <- if( Seq("LOCAL").contains(Constant.INSTANCE) ){
+      Future.successful(TestDData.ddataMap)
+    } else {
+      for {
+        cfgData <- ConfigUtil.getConfigHttp(SSlContext)
+        data <- cfgData match {
+          case Some(c) => Future.successful(c)
+          case None => Future.failed(new RuntimeException("Could not get ConfigData"))
+        }
+      } yield  data
     }
     _ = log.info("ConfigData loaded")
     _ = log.info("Check db connections")
@@ -250,6 +256,9 @@ object Main extends App {
       log.info(s"Starting Azure Hub Event Service ...")
       val reEventFunc: ReEventFunc = AzureProducerBuilder.build()
 
+      log.info(s"Starting Azure Storage Blob Client Service ...")
+      val containerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.build()
+
       val actorProps = ActorProps(
         http,
         SSlContext,
@@ -257,6 +266,7 @@ object Main extends App {
         actorUtility = new ActorUtility,
         routers = baserouters ++ primitiverouters,
         reEventFunc = reEventFunc,
+        containerBlobFunction = containerBlobFunction,
         actorClassId = "main",
         cacertsPath = cacertsPath,
         ddataMap = data
@@ -388,6 +398,7 @@ final case class ActorProps(
                              actorUtility: ActorUtility,
                              routers: Map[String, ActorRef],
                              reEventFunc: ReEventFunc,
+                             containerBlobFunction: ContainerBlobFunc,
                              actorClassId: String,
                              cacertsPath: String,
                              var ddataMap: ConfigData

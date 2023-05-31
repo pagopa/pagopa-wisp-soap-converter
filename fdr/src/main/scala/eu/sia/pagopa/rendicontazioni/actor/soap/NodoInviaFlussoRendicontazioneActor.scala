@@ -22,7 +22,7 @@ import it.pagopa.config.CreditorInstitution
 import scalaxbmodel.flussoriversamento.CtFlussoRiversamento
 import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoRendicontazioneRisposta}
 
-import java.io.{File, FileOutputStream}
+import java.io.{ByteArrayInputStream, File, FileOutputStream}
 import java.nio.file.{Files, Paths}
 import java.security.MessageDigest
 import java.time.format.DateTimeFormatter
@@ -60,48 +60,48 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         insertedTimestamp = soapRequest.timestamp,
-        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+        erogatore = Some(Componente.FDR.toString),
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+        erogatoreDescr = Some(Componente.FDR.toString)
       )
     )
 
     val pipeline = for {
       _ <- Future.successful(())
 
-      nodoInviaFlussoRendicontazione <- Future.fromTry(parseInput(soapRequest.payload, inputXsdValid))
+      nifr <- Future.fromTry(parseInput(soapRequest.payload, inputXsdValid))
 
       now = Util.now()
       re_ = Re(
-        idDominio = Some(nodoInviaFlussoRendicontazione.identificativoDominio),
-        psp = Some(nodoInviaFlussoRendicontazione.identificativoPSP),
+        idDominio = Some(nifr.identificativoDominio),
+        psp = Some(nifr.identificativoPSP),
         componente = Componente.FDR.toString,
         categoriaEvento = CategoriaEvento.INTERNO.toString,
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
-        fruitore = Some(nodoInviaFlussoRendicontazione.identificativoCanale),
-        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-        canale = Some(nodoInviaFlussoRendicontazione.identificativoCanale),
+        fruitore = Some(nifr.identificativoCanale),
+        erogatore = Some(Componente.FDR.toString),
+        canale = Some(nifr.identificativoCanale),
         esito = Some(EsitoRE.RICEVUTA.toString),
         sessionId = Some(req.sessionId),
         insertedTimestamp = now,
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+        erogatoreDescr = Some(Componente.FDR.toString)
       )
       _ = re = Some(re_)
 
       _ = log.info(FdrLogConstant.logSemantico(actorClassId))
-      (pa, psp, canale) <- Future.fromTry(checks(ddataMap, nodoInviaFlussoRendicontazione, true, actorClassId))
+      (pa, psp, canale) <- Future.fromTry(checks(ddataMap, nifr, true, actorClassId))
 
       _ = re = re.map(r => r.copy(fruitoreDescr = canale.flatMap(c => c.description), pspDescr = psp.flatMap(p => p.description)))
 
       _ = log.debug("Check duplicates on db")
-      _ <- checksDB(nodoInviaFlussoRendicontazione)
+      _ <- checksDB(nifr)
 
-      dataOraFlussoNew = LocalDateTime.parse(nodoInviaFlussoRendicontazione.dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault()))
+      dataOraFlussoNew = LocalDateTime.parse(nifr.dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault()))
       oldRendi <- repositories.fdrRepository.findRendicontazioniByIdFlusso(
-        nodoInviaFlussoRendicontazione.identificativoPSP,
-        nodoInviaFlussoRendicontazione.identificativoFlusso,
+        nifr.identificativoPSP,
+        nifr.identificativoFlusso,
         LocalDateTime.of(dataOraFlussoNew.getYear, 1, 1, 0, 0, 0),
         LocalDateTime.of(dataOraFlussoNew.getYear, 12, 31, 23, 59, 59)
       )
@@ -109,7 +109,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
       _ = log.debug("Check dataOraFlusso new with dataOraFlusso old")
       _ <- oldRendi match {
         case Some(old) =>
-          val idDominioNew = nodoInviaFlussoRendicontazione.identificativoDominio
+          val idDominioNew = nifr.identificativoDominio
           if (dataOraFlussoNew.isAfter(old.dataOraFlusso)) {
             log.debug("Check idDominio new with idDominio old")
             if (idDominioNew == old.dominio) {
@@ -117,7 +117,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
             } else {
               Future.failed(
                 exception.DigitPaException(
-                  s"Il file con identificativoFlusso [${nodoInviaFlussoRendicontazione.identificativoFlusso}] ha idDominio old[${old.dominio}], idDominio new [$idDominioNew]",
+                  s"Il file con identificativoFlusso [${nifr.identificativoFlusso}] ha idDominio old[${old.dominio}], idDominio new [$idDominioNew]",
                   DigitPaErrorCodes.PPT_SEMANTICA
                 )
               )
@@ -125,7 +125,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
           } else {
             Future.failed(
               exception.DigitPaException(
-                s"Esiste già un file con identificativoFlusso [${nodoInviaFlussoRendicontazione.identificativoFlusso}] più aggiornato con dataOraFlusso [${old.dataOraFlusso.toString}]",
+                s"Esiste già un file con identificativoFlusso [${nifr.identificativoFlusso}] più aggiornato con dataOraFlusso [${old.dataOraFlusso.toString}]",
                 DigitPaErrorCodes.PPT_SEMANTICA
               )
             )
@@ -134,8 +134,8 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
           Future.successful(())
       }
 
-      (flussoRiversamento, flussoRiversamentoContent) <- validateRendicontazione(nodoInviaFlussoRendicontazione, checkUTF8, inputXsdValid)
-      (esito, _, sftpFile, _) <- saveRendicontazione(nodoInviaFlussoRendicontazione, flussoRiversamentoContent, flussoRiversamento, pa, ddataMap, actorClassId)
+      (flussoRiversamento, flussoRiversamentoContent) <- validateRendicontazione(nifr, checkUTF8, inputXsdValid)
+      (esito, _, sftpFile, _) <- saveRendicontazione(nifr, flussoRiversamentoContent, flussoRiversamento, pa, ddataMap, actorClassId)
 
       _ <-
         if (sftpFile.isDefined) {
@@ -152,11 +152,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
           Future.successful(())
         }
 
-//      _ <- if( callNewServiceFdr ) {
-//        inviaFlussoRendicontazioneSoap2Rest(req, nodoInviaFlussoRendicontazione, flussoRiversamento)
-//      } else {
-//        Future.successful(())
-//      }
+      _ <- actorProps.containerBlobFunction(nifr.identificativoFlusso, new ByteArrayInputStream(flussoRiversamentoContent.getBytes(Constant.UTF_8)), log)
 
       _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
       nodoInviaFlussoRisposta = NodoInviaFlussoRendicontazioneRisposta(None, esito)
