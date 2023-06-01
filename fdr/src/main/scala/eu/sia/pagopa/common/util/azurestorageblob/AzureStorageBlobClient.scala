@@ -20,25 +20,23 @@ object AzureStorageBlobClient {
     if( azureStorageBlobEnabled ) {
       val containerName = system.settings.config.getString("azure-storage-blob.container-name")
       val connectionString = system.settings.config.getString("azure-storage-blob.connection-string")
-      val defaultCredential: TokenCredential = new DefaultAzureCredentialBuilder().build()
 
       val blobServiceClient = new BlobServiceClientBuilder()
-        .credential(defaultCredential)
         .connectionString(connectionString)
         .buildClient()
 
       val containerClient = blobServiceClient.getBlobContainerClient(containerName)
 
-      (fileName: String, inputStream: InputStream, log: NodoLogger) => {
+      (fileName: String, fileContent: String, log: NodoLogger) => {
         val executionContext: MessageDispatcher = system.dispatchers.lookup("eventhub-dispatcher")
-        Future(containerClient.getBlobClient(fileName).upload(BinaryData.fromStream(inputStream)))(executionContext) recoverWith {
+        Future(containerClient.getBlobClient(fileName).upload(BinaryData.fromString(fileContent)))(executionContext) recoverWith {
           case e: Throwable =>
             log.error(e, "Error calling azure-storage-blob")
             Future.failed(e)
         }
       }
     } else {
-      (fileName: String, inputStream: InputStream, log: NodoLogger) => {
+      (fileName: String, fileContent: String, log: NodoLogger) => {
         log.debug("config-app [azure-storage-blob.enabled]=false. Not enable to storage blob")
         Future.successful(())
       }

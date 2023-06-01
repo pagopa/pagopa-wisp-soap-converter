@@ -152,7 +152,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
           Future.successful(())
         }
 
-      _ <- actorProps.containerBlobFunction(nifr.identificativoFlusso, new ByteArrayInputStream(flussoRiversamentoContent.getBytes(Constant.UTF_8)), log)
+      _ <- actorProps.containerBlobFunction(nifr.identificativoFlusso, flussoRiversamentoContent, log)
 
       _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
       nodoInviaFlussoRisposta = NodoInviaFlussoRendicontazioneRisposta(None, esito)
