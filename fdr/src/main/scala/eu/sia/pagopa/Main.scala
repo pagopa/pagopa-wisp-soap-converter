@@ -256,7 +256,6 @@ object Main extends App {
       log.info(s"Starting Azure Hub Event Service ...")
       val reEventFunc: ReEventFunc = AzureProducerBuilder.build()
 
-      log.info(s"Starting Azure Storage Blob Client Service ...")
       val containerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.build()
 
       val actorProps = ActorProps(

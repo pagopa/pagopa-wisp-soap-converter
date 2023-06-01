@@ -2,14 +2,11 @@ package eu.sia.pagopa.common.util.azurestorageblob
 
 import akka.actor.ActorSystem
 import akka.dispatch.MessageDispatcher
-import com.azure.core.credential.TokenCredential
 import com.azure.core.util.BinaryData
-import com.azure.identity.DefaultAzureCredentialBuilder
 import com.azure.storage.blob.BlobServiceClientBuilder
 import eu.sia.pagopa.common.util.NodoLogger
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ContainerBlobFunc
 
-import java.io.InputStream
 import scala.concurrent.{ExecutionContext, Future}
 
 object AzureStorageBlobClient {
@@ -18,6 +15,7 @@ object AzureStorageBlobClient {
     val azureStorageBlobEnabled = system.settings.config.getBoolean("azure-storage-blob.enabled")
 
     if( azureStorageBlobEnabled ) {
+      log.info("Starting Azure Storage Blob Client Service ...")
       val containerName = system.settings.config.getString("azure-storage-blob.container-name")
       val connectionString = system.settings.config.getString("azure-storage-blob.connection-string")
 
@@ -36,8 +34,8 @@ object AzureStorageBlobClient {
         }
       }
     } else {
+      log.info("Azure Storage Blob Client Service not enabled: config-app [azure-storage-blob.enabled]=false")
       (fileName: String, fileContent: String, log: NodoLogger) => {
-        log.debug("config-app [azure-storage-blob.enabled]=false. Not enable to storage blob")
         Future.successful(())
       }
     }
