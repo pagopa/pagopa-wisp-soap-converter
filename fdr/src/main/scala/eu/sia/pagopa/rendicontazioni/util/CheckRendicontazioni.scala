@@ -31,7 +31,6 @@ object CheckRendicontazioni {
   }
 
   def checkFormatoIdFlussoRendicontazione(identificativoFlusso: String, idPsp: String): Try[Unit] = {
-
     if (identificativoFlusso.length > IDENTIFICATIVO_FLUSSO_MAX_LEN) {
       Failure(
         exception.DigitPaException(

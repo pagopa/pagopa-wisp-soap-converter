@@ -13,7 +13,7 @@ object SoapReceiverType extends Enumeration {
 }
 
 object Componente extends Enumeration {
-  val FDR = Value
+  val FDR, FDR_NOTIFIER, QUEUE_FDR, AZURE_STORAGE_ACCOUNT = Value
 }
 
 case class ReExtra(uri: Option[String] = None, headers: Seq[(String, String)] = Nil, httpMethod: Option[String] = None, callRemoteAddress: Option[String] = None, statusCode: Option[Int] = None, elapsed: Option[Long] = None, soapProtocol: Boolean = false)

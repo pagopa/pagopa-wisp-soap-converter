@@ -23,8 +23,8 @@ trait ReUtil { this: NodoLogging =>
         sessionId = Some(message.sessionId),
         payload = Some(message.payload.getUtf8Bytes),
         insertedTimestamp = message.timestamp,
-        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+        erogatore = Some(Componente.FDR.toString),
+        erogatoreDescr = Some(Componente.FDR.toString),
         businessProcess = Some(message.primitive)
       ),
       reExtra = Some(reExtra)
@@ -46,8 +46,8 @@ trait ReUtil { this: NodoLogging =>
         sessionId = Some(message.sessionId),
         payload = message.payload.map(_.getUtf8Bytes),
         insertedTimestamp = message.timestamp,
-        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+        erogatore = Some(Componente.FDR.toString),
+        erogatoreDescr = Some(Componente.FDR.toString),
         businessProcess = Some(message.primitive)
       ),
       reExtra = Some(reExtra)

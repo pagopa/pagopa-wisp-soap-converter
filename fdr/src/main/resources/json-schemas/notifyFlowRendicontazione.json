@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "required": ["reportingFlowName", "reportingFlowDate"],
+  "properties": {
+    "reportingFlowName": {
+      "type": "string",
+      "pattern": "[a-zA-Z0-9\\-_]{1,35}"
+    },
+    "reportingFlowDate": {
+      "type": "string",
+      "format": "date-time",
+      "example": "2012-04-23T18:25:43Z"
+    }
+  },
+  "additionalProperties": false
+}

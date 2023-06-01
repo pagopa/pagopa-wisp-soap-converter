@@ -45,6 +45,11 @@ object Constant {
     val DEAD_LETTER_MONITOR = "dead-letter-monitor"
   }
 
+  object HttpStatusDescription {
+    val INTERNAL_SERVER_ERROR  = "Errore generico"
+    val BAD_REQUEST           = "Richiesta non valida"
+  }
+
   object MDCKey {
     val SESSION_ID = "sessionId"
     val ACTOR_CLASS_ID = "actorClassId"

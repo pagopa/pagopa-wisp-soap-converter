@@ -178,8 +178,14 @@ object Appfunction {
           case _ => ???
         }
       } else if (!isSoapProtocol) {
-        //al momento non ci sono chiamate di tipo REST, di conseguenza non dovrebbe MAI entrare qui
-        (true, None, None, None, None)
+        val (faultJsonCode, faultJsonString, faultJsonDescription) = getFaultFromJson(httpType, re.businessProcess, payload)
+        if (statusCode.contains(200) && faultJsonCode.isDefined && httpType.contains(Constant.RESPONSE)) {
+          (false, Some(faultJsonCode.getOrElse("")), Some(faultJsonString.getOrElse("")), Some(faultJsonDescription.getOrElse("")), payload)
+        } else if (!statusCode.contains(200) && httpType.contains(Constant.RESPONSE)) {
+          (false, Some(faultJsonCode.getOrElse("")), Some(faultJsonString.getOrElse("")), Some(faultJsonDescription.getOrElse("")), None)
+        } else {
+          (true, None, None, None, None)
+        }
       } else {
         (true, None, None, None, None)
       }
@@ -259,5 +265,29 @@ object Appfunction {
       })
     })
   }
+
+  private def getFaultFromJson(httpType: Option[String], businessProcess: Option[String], json: Option[String]) = {
+    if (httpType.isDefined && httpType.contains(Constant.RESPONSE)) {
+      val jsValue = json.map(v => v.parseJson.asJsObject)
+      businessProcess match {
+        case Some(value) if (value == "notifyFlussoRendicontazione") =>
+          val error = jsValue.flatMap(_.getFields("error").headOption).map(_.convertTo[String]).map(v => s"error=[$v]")
+          if (error.isDefined) {
+            (
+              Some("<REST_NO_FAULT_CODE>"),
+              Some("<REST_NO_FAULT_STRING>"),
+              Some(List(None, error, None, None).flatten.mkString(", ")),
+            )
+          } else {
+            (None, None, None)
+          }
+        case _ =>
+          (None, None, None)
+      }
+    } else {
+      (None, None, None)
+    }
+  }
+
 
 }

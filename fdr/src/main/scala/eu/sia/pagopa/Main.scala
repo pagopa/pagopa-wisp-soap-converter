@@ -242,7 +242,7 @@ object Main extends App {
 
       val primitiveActorsNamesAndTypes: Seq[(String, Class[_ <: BaseActor])] = job match {
         case None =>
-          (Primitive.soap.keys ++ Primitive.jobs.keys).map(s => s -> classOf[PrimitiveActor]).toSeq
+          (Primitive.soap.keys ++ Primitive.rest.keys ++ Primitive.jobs.keys).map(s => s -> classOf[PrimitiveActor]).toSeq
         case Some(j) =>
           Seq(j -> classOf[PrimitiveActor])
       }
@@ -256,6 +256,7 @@ object Main extends App {
       log.info(s"Starting Azure Hub Event Service ...")
       val reEventFunc: ReEventFunc = AzureProducerBuilder.build()
 
+      log.info(s"Starting Azure Storage Blob Client Service ...")
       val containerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.build()
 
       val actorProps = ActorProps(
@@ -301,7 +302,7 @@ object Main extends App {
           import akka.http.scaladsl.server.Directives._
           http
             .newServerAt(httpHost, httpPort)
-            .bind(routes.route ~ routes.routeSeed ~ routes.soapFunction(actorProps))
+            .bind(routes.route ~ routes.routeSeed ~ routes.soapFunction(actorProps) ~ routes.restFunction(actorProps))
             .map(f => {
               if (job.isEmpty) {
                 log.info(s"Starting AkkaManagement...")
