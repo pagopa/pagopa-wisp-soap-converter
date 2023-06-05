@@ -95,7 +95,7 @@ final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Reposi
     Try({
       val psp = restRequest.pathParams("psp")
       val fdr = restRequest.pathParams("fdr")
-      val pspOpt = checkPsp(log, ddataMap, psp) match {
+      checkPsp(log, ddataMap, psp) match {
         case Success(value) => value
         case Failure(e: DigitPaException) =>
           throw RestException(e.getMessage, Constant.HttpStatusDescription.BAD_REQUEST, StatusCodes.BadRequest.intValue)
@@ -103,7 +103,7 @@ final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Reposi
           throw RestException("", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
       }
       CheckRendicontazioni.checkFormatoIdFlussoRendicontazione(fdr, psp) match {
-        case Success(value) => value
+        case Success(_) => Success(())
         case Failure(e: DigitPaException) =>
           throw RestException(e.getMessage, Constant.HttpStatusDescription.BAD_REQUEST, StatusCodes.BadRequest.intValue)
         case _ =>
@@ -128,7 +128,7 @@ final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Reposi
         }
       }
       CheckRendicontazioni.checkFormatoIdFlussoRendicontazione(nfrReq.get.reportingFlowName, psp) match {
-        case Success(value) => value
+        case Success(_) => Success(())
         case Failure(e: DigitPaException) =>
           throw RestException(e.getMessage, Constant.HttpStatusDescription.BAD_REQUEST, StatusCodes.BadRequest.intValue)
         case _ =>
