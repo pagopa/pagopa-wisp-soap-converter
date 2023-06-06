@@ -206,64 +206,6 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
     } yield respPayload
   }
 
-//  private def inviaFlussoRendicontazioneSoap2Rest(req: SoapRequest, nodoInviaFlussoRendicontazione: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento) = {
-//    (for {
-//      _ <- Future.successful(())
-//      _ = log.info(FdrLogConstant.logGeneraPayload(s"${req.primitive} REST"))
-//      nifrRequest = Flow(
-//        nodoInviaFlussoRendicontazione.identificativoFlusso,
-//        nodoInviaFlussoRendicontazione.dataOraFlusso.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME),
-//        Sender(
-//          flussoRiversamento.istitutoMittente.identificativoUnivocoMittente.tipoIdentificativoUnivoco match {
-//            case scalaxbmodel.flussoriversamento.GValue => SenderTypeEnum.LEGAL_PERSON
-//            case scalaxbmodel.flussoriversamento.A => SenderTypeEnum.ABI_CODE
-//            case _ => SenderTypeEnum.BIC_CODE
-//          },
-//          flussoRiversamento.istitutoMittente.identificativoUnivocoMittente.codiceIdentificativoUnivoco,
-//          nodoInviaFlussoRendicontazione.identificativoPSP,
-//          flussoRiversamento.istitutoMittente.denominazioneMittente.getOrElse(""),
-//          nodoInviaFlussoRendicontazione.identificativoIntermediarioPSP,
-//          nodoInviaFlussoRendicontazione.identificativoCanale,
-//          nodoInviaFlussoRendicontazione.password
-//        ),
-//        Receiver(
-//          flussoRiversamento.istitutoRicevente.identificativoUnivocoRicevente.codiceIdentificativoUnivoco,
-//          nodoInviaFlussoRendicontazione.identificativoDominio,
-//          flussoRiversamento.istitutoRicevente.denominazioneRicevente.getOrElse("")
-//        ),
-//        flussoRiversamento.identificativoUnivocoRegolamento,
-//        flussoRiversamento.dataRegolamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME),
-//        flussoRiversamento.codiceBicBancaDiRiversamento.getOrElse("")//,
-//        //        flussoRiversamento.datiSingoliPagamenti.map(p => {
-//        //          Payment(
-//        //            p.identificativoUnivocoVersamento,
-//        //            p.identificativoUnivocoRiscossione,
-//        //            p.indiceDatiSingoloPagamento.map(_.intValue),
-//        //            p.singoloImportoPagato,
-//        //            p.codiceEsitoSingoloPagamento match {
-//        //              case Number0 => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_ESEGUITO
-//        //              case Number3 => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_REVOCATO
-//        //              case _ => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_NO_RPT
-//        //            },
-//        //            p.dataEsitoSingoloPagamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME)
-//        //          )
-//        //        })
-//      ).toJson.toString
-//
-//      nifrResponse <- HttpSoapServiceManagement.createRequestSoapAction(
-//        req.sessionId,
-//        req.testCaseId,
-//        req.primitive,
-//        SoapReceiverType.FDR.toString,
-//        nifrRequest,
-//        actorProps,
-//        re.get
-//      )
-//    } yield ()).recoverWith({
-//      case _ => Future.successful(())
-//    })
-//  }
-
   def parseInput(payload: String, inputXsdValid: Boolean): Try[NodoInviaFlussoRendicontazione] = {
     log.info(FdrLogConstant.logSintattico(actorClassId))
     (for {
