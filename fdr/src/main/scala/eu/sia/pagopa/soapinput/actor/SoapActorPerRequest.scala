@@ -72,8 +72,8 @@ class SoapActorPerRequest(
         sessionId = Some(message.sessionId),
         payload = Some(message.payload.getUtf8Bytes),
         insertedTimestamp = message.timestamp,
-        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+        erogatore = Some(Componente.FDR.toString),
+        erogatoreDescr = Some(Componente.FDR.toString)
       ),
       reExtra = Some(reExtra(message))
     )
@@ -117,8 +117,8 @@ class SoapActorPerRequest(
                   payload = sres.payload.map(_.getUtf8Bytes),
                   insertedTimestamp = now,
                   sessionId = Some(sres.sessionId),
-                  erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-                  erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+                  erogatore = Some(Componente.FDR.toString),
+                  erogatoreDescr = Some(Componente.FDR.toString)
                 )
               ),
             reExtra = Some(ReExtra(statusCode = Some(bundleResponse.statusCode), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))

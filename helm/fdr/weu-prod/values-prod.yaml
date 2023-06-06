@@ -86,6 +86,7 @@ fdrnodo:
     create: true
     envSecrets:
       AZURE_EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
+      AZURE_STORAGE_BLOB_CONNECTION_STRING: "azure-storage-blob-connection-string"
       API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
       DB_FDR_PASSWORD: "db-fdr-password"
     keyvault:
