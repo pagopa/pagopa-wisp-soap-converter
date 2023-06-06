@@ -26,7 +26,7 @@ object AzureStorageBlobClient {
       val containerClient = blobServiceClient.getBlobContainerClient(containerName)
 
       (fileName: String, fileContent: String, log: NodoLogger) => {
-        val executionContext: MessageDispatcher = system.dispatchers.lookup("eventhub-dispatcher")
+        val executionContext: MessageDispatcher = system.dispatchers.lookup("blobstorage-dispatcher")
         Future(containerClient.getBlobClient(fileName).upload(BinaryData.fromString(fileContent)))(executionContext) recoverWith {
           case e: Throwable =>
             log.error(e, "Error calling azure-storage-blob")
