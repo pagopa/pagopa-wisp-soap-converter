@@ -1,6 +1,6 @@
 package eu.sia.pagopa.common.json.model.rendicontazione
 
-import spray.json.{DefaultJsonProtocol, DeserializationException, JsArray, JsObject, JsString, JsValue, RootJsonFormat, enrichAny}
+import spray.json.{DefaultJsonProtocol, DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat, enrichAny}
 
 import scala.language.implicitConversions
 import scala.util.Try
@@ -10,13 +10,16 @@ object Flow extends DefaultJsonProtocol {
   implicit val format: RootJsonFormat[Flow] = new RootJsonFormat[Flow] {
     def write(nifr: Flow): JsObject = {
       JsObject(Map(
+        "revision" -> JsNumber(nifr.revision).value.toLong,
         "reportingFlowName" -> JsString(nifr.reportingFlowName),
         "reportingFlowDate" -> JsString(nifr.reportingFlowDate),
         "sender" -> nifr.sender.toJson,
         "receiver" -> nifr.receiver.toJson,
         "regulation" -> JsString(nifr.regulation),
         "regulationDate" -> JsString(nifr.regulationDate),
-        "bicCodePouringBank" -> JsString(nifr.bicCodePouringBank)
+        "bicCodePouringBank" -> JsString(nifr.bicCodePouringBank),
+        "totPayments" -> JsNumber(nifr.totPayments).value.toLong,
+        "sumPayments" -> JsNumber(nifr.sumPayments).value
       ))
     }
 
@@ -36,13 +39,16 @@ object Flow extends DefaultJsonProtocol {
 
       Try(
         Flow(
+          map("revision").asInstanceOf[JsNumber].value.toLong,
           map("reportingFlowName").asInstanceOf[JsString].value,
           map("reportingFlowDate").asInstanceOf[JsString].value,
           Sender(SenderTypeEnum.withName(senderType), senderId, senderPspId, senderPspName, senderBrokerId, senderChannelId, senderPassword),
           Receiver(receiverId, receiverEcId, receiverEcName),
           map("regulation").asInstanceOf[JsString].value,
           map("regulationDate").asInstanceOf[JsString].value,
-          map("bicCodePouringBank").asInstanceOf[JsString].value
+          map("bicCodePouringBank").asInstanceOf[JsString].value,
+          map("totPayments").asInstanceOf[JsNumber].value.toLong,
+          map("sumPayments").asInstanceOf[JsNumber].value
         )
       ).recover({ case _ =>
         throw DeserializationException("Flow expected")
@@ -53,13 +59,16 @@ object Flow extends DefaultJsonProtocol {
 }
 
 case class Flow(
+  revision: Long,
   reportingFlowName: String,
   reportingFlowDate: String,
   sender: Sender,
   receiver: Receiver,
   regulation: String,
   regulationDate: String,
-  bicCodePouringBank: String
+  bicCodePouringBank: String,
+  totPayments: Long,
+  sumPayments: BigDecimal
 )
 
 object FlowsResponse {}

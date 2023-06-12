@@ -1,6 +1,6 @@
 package eu.sia.pagopa.common.json.model.rendicontazione
 
-import spray.json.{DefaultJsonProtocol, DeserializationException, JsObject, JsString, JsValue, RootJsonFormat, enrichAny}
+import spray.json.{DefaultJsonProtocol, DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat, enrichAny}
 
 import scala.language.implicitConversions
 import scala.util.Try
@@ -10,8 +10,10 @@ object NotifyFlowRequest extends DefaultJsonProtocol {
   implicit val format: RootJsonFormat[NotifyFlowRequest] = new RootJsonFormat[NotifyFlowRequest] {
     def write(req: NotifyFlowRequest): JsObject = {
       JsObject(Map[String, JsValue](
-        "reportingFlowName" -> JsString(req.reportingFlowName),
-        "reportingFlowDate" -> JsString(req.reportingFlowDate)
+        "name" -> JsString(req.name),
+        "pspId" -> JsString(req.pspId),
+        "retry" -> JsNumber(req.retry),
+        "revision" -> JsNumber(req.revision)
       ))
     }
 
@@ -19,8 +21,10 @@ object NotifyFlowRequest extends DefaultJsonProtocol {
       val map = json.asJsObject.fields
       Try(
         NotifyFlowRequest(
-          map("reportingFlowName").asInstanceOf[JsString].value,
-          map("reportingFlowDate").asInstanceOf[JsString].value,
+          map("name").asInstanceOf[JsString].value,
+          map("pspId").asInstanceOf[JsString].value,
+          map("retry").asInstanceOf[JsNumber].value.toInt,
+          map("revision").asInstanceOf[JsNumber].value.toInt
         )
       ).recover({ case _ =>
                 throw DeserializationException("NotifyFlowRequest expected")
@@ -30,7 +34,7 @@ object NotifyFlowRequest extends DefaultJsonProtocol {
   }
 }
 
-case class NotifyFlowRequest(reportingFlowName: String, reportingFlowDate: String)
+case class NotifyFlowRequest(name: String, pspId: String, retry: Integer, revision: Integer)
 
 object NotifyFlowResponse {}
 

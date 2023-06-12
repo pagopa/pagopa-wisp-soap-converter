@@ -6,16 +6,13 @@ import eu.sia.pagopa.common.message.{CategoriaEvento, ReExtra, ReRequest, SottoT
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.{Constant, NodoLogger, Util}
 import org.slf4j.MDC
-import spray.json.JsString
+import spray.json.DefaultJsonProtocol._
+import spray.json.{JsString, _}
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
-import spray.json.DefaultJsonProtocol._
-import spray.json._
-
-import java.io.InputStream
 
 object Appfunction {
 
