@@ -108,7 +108,6 @@ object AzureProducerBuilder {
     val blobReConnectionString = blobContainerClient.getString("connection-string")
 
     var blobAsyncClient: Option[BlobAsyncClient] = None
-    val binaryDatas: Seq[BinaryData] = Seq()
 
     val eventDataSeq: Flux[(EventData)] = Flux.fromIterable(
       reRequestSeq
@@ -121,10 +120,11 @@ object AzureProducerBuilder {
           val fileName = s"${r.sessionId}_${r.re.flowAction.get}_$sottoTipoEvento"
 
           r.re.payload.foreach(v => {
-            val bc: BlobAsyncClient =
-              new BlobClientBuilder().connectionString(blobReConnectionString).blobName(fileName).containerName(blocContainerName).buildAsyncClient()
-            binaryDatas :+ BinaryData.fromStream(new ByteArrayInputStream(new String(v).getBytes(StandardCharsets.UTF_8)))
-            blobAsyncClient = Some(bc)
+            blobAsyncClient = Some(new BlobClientBuilder()
+              .connectionString(blobReConnectionString)
+              .blobName(fileName).containerName(blocContainerName)
+              .buildAsyncClient())
+            blobAsyncClient.get.upload(BinaryData.fromStream(new ByteArrayInputStream(new String(v).getBytes(StandardCharsets.UTF_8)))).subscribe()
           })
 
           val httpMethod: String = r.reExtra.flatMap(_.httpMethod).getOrElse("")
@@ -143,7 +143,7 @@ object AzureProducerBuilder {
             Some(httpMethod),
             r.reExtra.flatMap(_.uri),
             blobAsyncClient.map(bc => {
-              BlobBodyRef(Some(bc.getAccountName), Some(bc.getBlobName), Some(fileName), (r.re.payload.map(_.length).getOrElse(0)))
+              BlobBodyRef(Some(bc.getAccountName), Some(bc.getContainerName), Some(fileName), (r.re.payload.map(_.length).getOrElse(0)))
             }),
             r.reExtra.map(ex => ex.headers.groupBy(_._1).map(v => (v._1, v._2.map(_._2)))).getOrElse(Map())
           )
@@ -198,9 +198,6 @@ object AzureProducerBuilder {
         if (batch != null || batch.getCount > 0) {
           log.debug(s"send last event of batch")
           producer.send(batch).block(time.Duration.of(clientTimeoutMs, ChronoUnit.MILLIS))
-          binaryDatas.map(bd => {
-            blobAsyncClient.map(bc => bc.upload(bd).subscribe())
-          })
         }
       })
       .subscribe(defaultConsumer(log), errorConsumer(log), completedRunnable(log))

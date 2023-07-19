@@ -57,7 +57,7 @@ class SoapActorPerRequest(
   }
 
   def reExtra(message: SoapRouterRequest): ReExtra =
-    ReExtra(uri = message.uri, headers = message.headers.getOrElse(Nil), httpMethod = Some(HttpMethods.POST.toString()), callRemoteAddress = message.callRemoteAddress, soapProtocol = true)
+    ReExtra(uri = message.uri, headers = message.headers.getOrElse(Nil), httpMethod = Some(HttpMethods.POST.value), callRemoteAddress = message.callRemoteAddress, soapProtocol = true)
 
   def traceRequest(message: SoapRouterRequest, reEventFunc: ReEventFunc): Unit = {
     Util.logPayload(log, Some(message.payload))
