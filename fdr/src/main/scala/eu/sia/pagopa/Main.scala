@@ -210,9 +210,7 @@ object Main extends App {
   }
   log.info("Loading ConfigData...")
   val bootstrapFuture = (for {
-    ddata <- if( Seq("LOCAL").contains(Constant.INSTANCE) ){
-      Future.successful(TestDData.ddataMap)
-    } else {
+    ddata <-
       for {
         cfgData <- ConfigUtil.getConfigHttp(SSlContext)
         data <- cfgData match {
@@ -220,7 +218,7 @@ object Main extends App {
           case None => Future.failed(new RuntimeException("Could not get ConfigData"))
         }
       } yield  data
-    }
+
     _ = log.info("ConfigData loaded")
     _ = log.info("Check db connections")
     _ <- repositories.fdrRepository.testQuery()
