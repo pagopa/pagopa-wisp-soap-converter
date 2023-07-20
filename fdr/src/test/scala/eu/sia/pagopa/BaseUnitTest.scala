@@ -56,20 +56,14 @@ abstract class BaseUnitTest()
         forwarder {
             subscriptionKey=key
         }
-        azure-hub-event.azure-sdk-client {
-          re-event {
-            client-timeoput-ms = 5000
-            event-hub-name = "nodo-dei-pagamenti-re"
-            connection-string = "Endpoint=sb://pagopa-d-evh-ns01.servicebus.windows.net/;SharedAccessKeyName=nodo-dei-pagamenti-SIA;SharedAccessKey=2yd25SPaGDpniGuB4jdBTsTLT7K8P5po6pm0lGfG3YI=;EntityPath=nodo-dei-pagamenti-re"
+        blobstorage-dispatcher {
+            type = Dispatcher
+            executor = "thread-pool-executor"
+            thread-pool-executor {
+              fixed-pool-size = 16
+            }
+            throughput = 1
           }
-        }
-        azure-hub-event.azure-sdk-client{
-          biz-event {
-            client-timeoput-ms = 5000
-            event-hub-name = "nodo-dei-pagamenti-biz-evt"
-            connection-string = "Endpoint=sb://pagopa-d-evh-ns01.servicebus.windows.net/;SharedAccessKeyName=pagopa-biz-evt-tx;SharedAccessKey=rU6qCxfy91XJb0U6gN+17wY8vgb8o2Ojb/vNZHs0tgo=;EntityPath=nodo-dei-pagamenti-biz-evt"
-          }
-        }
         eventhub-dispatcher {
             type = Dispatcher
             executor = "thread-pool-executor"
@@ -274,8 +268,8 @@ abstract class BaseUnitTest()
   ): NodoInviaFlussoRendicontazioneRisposta = {
     val act =
       system.actorOf(
-        Props.create(classOf[NodoInviaFlussoRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "inviaflussorendi", routers = Map("ftp-senderRouter" -> mockActor))),
-        s"inviaflussorendi${Util.now()}"
+        Props.create(classOf[NodoInviaFlussoRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "nodoInviaFlussoRendicontazione", routers = Map("ftp-senderRouter" -> mockActor))),
+        s"nodoInviaFlussoRendicontazione${Util.now()}"
       )
     val soapres = askActor(
       act,
@@ -292,7 +286,7 @@ abstract class BaseUnitTest()
           denominazioneMittente = denominazioneMittente.get
         ),
         TestItems.testPDD,
-        "inviaflussorendi",
+        "nodoInviaFlussoRendicontazione",
         "test",
         Util.now(),
         ReExtra(),

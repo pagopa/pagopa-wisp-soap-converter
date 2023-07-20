@@ -12,8 +12,8 @@ import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.repo.fdr.enums.{FtpFileStatus, RendicontazioneStatus}
 import eu.sia.pagopa.common.repo.fdr.model._
 import eu.sia.pagopa.common.repo.re.model.Re
-import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.common.util._
+import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoInviaFlussoRendicontazioneResponse
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
@@ -22,7 +22,7 @@ import it.pagopa.config.CreditorInstitution
 import scalaxbmodel.flussoriversamento.CtFlussoRiversamento
 import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoRendicontazioneRisposta}
 
-import java.io.{ByteArrayInputStream, File, FileOutputStream}
+import java.io.{File, FileOutputStream}
 import java.nio.file.{Files, Paths}
 import java.security.MessageDigest
 import java.time.format.DateTimeFormatter
@@ -40,7 +40,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
   val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
   val inputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_input").toBoolean
   val outputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean
-  var re: Option[Re] = None
+  var reFlow: Option[Re] = None
 
 //  private val callNewServiceFdr: Boolean = Try(context.system.settings.config.getBoolean(s"callNewServiceFdr")).getOrElse(false)
 
@@ -50,9 +50,9 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
     req = soapRequest
     replyTo = sender()
 
-    re = Some(
+    reFlow = Some(
       Re(
-        componente = Componente.FDR.toString,
+        componente = Componente.NDP_FDR.toString,
         categoriaEvento = CategoriaEvento.INTERNO.toString,
         sessionId = Some(req.sessionId),
         payload = None,
@@ -60,9 +60,10 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         insertedTimestamp = soapRequest.timestamp,
-        erogatore = Some(Componente.FDR.toString),
+        erogatore = Some(Componente.NDP_FDR.toString),
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(Componente.FDR.toString)
+        erogatoreDescr = Some(Componente.NDP_FDR.toString),
+        flowAction = Some(req.primitive)
       )
     )
 
@@ -75,25 +76,27 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
       re_ = Re(
         idDominio = Some(nifr.identificativoDominio),
         psp = Some(nifr.identificativoPSP),
-        componente = Componente.FDR.toString,
+        componente = Componente.NDP_FDR.toString,
         categoriaEvento = CategoriaEvento.INTERNO.toString,
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         fruitore = Some(nifr.identificativoCanale),
-        erogatore = Some(Componente.FDR.toString),
+        erogatore = Some(Componente.NDP_FDR.toString),
         canale = Some(nifr.identificativoCanale),
         esito = Some(EsitoRE.RICEVUTA.toString),
         sessionId = Some(req.sessionId),
         insertedTimestamp = now,
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(Componente.FDR.toString)
+        erogatoreDescr = Some(Componente.NDP_FDR.toString),
+        flowName = Some(nifr.identificativoFlusso),
+        flowAction = Some(req.primitive)
       )
-      _ = re = Some(re_)
+      _ = reFlow = Some(re_)
 
       _ = log.info(FdrLogConstant.logSemantico(actorClassId))
       (pa, psp, canale) <- Future.fromTry(checks(ddataMap, nifr, true, actorClassId))
 
-      _ = re = re.map(r => r.copy(fruitoreDescr = canale.flatMap(c => c.description), pspDescr = psp.flatMap(p => p.description)))
+      _ = reFlow = reFlow.map(r => r.copy(fruitoreDescr = canale.flatMap(c => c.description), pspDescr = psp.flatMap(p => p.description)))
 
       _ = log.debug("Check duplicates on db")
       _ <- checksDB(nifr)
@@ -158,18 +161,18 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
       nodoInviaFlussoRisposta = NodoInviaFlussoRendicontazioneRisposta(None, esito)
       _ = log.info(FdrLogConstant.logSintattico(RESPONSE_NAME))
       resultMessage <- Future.fromTry(wrapInBundleMessage(nodoInviaFlussoRisposta))
-      sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, re, req.testCaseId, None)
+      sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
     } yield sr
 
     pipeline.recover({
       case e: DigitPaException =>
         log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
-        errorHandler(req.sessionId, req.testCaseId, outputXsdValid, e, re)
+        errorHandler(req.sessionId, req.testCaseId, outputXsdValid, e, reFlow)
       case e: Throwable =>
         log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
-        errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), re)
+        errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
     }) map (sr => {
-      traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
+      traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
       log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()
@@ -178,7 +181,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
   }
 
   override def actorError(e: DigitPaException): Unit = {
-    actorError(req, replyTo, ddataMap, e, re)
+    actorError(req, replyTo, ddataMap, e, reFlow)
   }
 
   private def checksDB(nifr: NodoInviaFlussoRendicontazione) = {

@@ -1,18 +1,23 @@
 package eu.sia.pagopa.common.util.azurehubevent.sdkazureclient
 
 import akka.Done
-import akka.actor.{ActorRef, ActorSystem, CoordinatedShutdown}
+import akka.actor.{ActorSystem, CoordinatedShutdown}
 import akka.dispatch.MessageDispatcher
 import com.azure.core.amqp.AmqpTransportType
+import com.azure.core.util.BinaryData
 import com.azure.messaging.eventhubs.{EventData, EventDataBatch, EventHubClientBuilder, EventHubProducerAsyncClient}
-import eu.sia.pagopa.Main.ConfigData
-import eu.sia.pagopa.common.message.ReRequest
+import com.azure.storage.blob.{BlobAsyncClient, BlobClient, BlobClientBuilder}
+import eu.sia.pagopa.Main.{ConfigData, config, file}
+import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.AppObjectMapper
+import eu.sia.pagopa.common.util.azurehubevent.{AppObjectMapper, Appfunction}
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ReEventFunc, defaultOperation, sessionId}
+import net.openhft.hashing.LongHashFunction
 import org.slf4j.MDC
 import reactor.core.publisher.{Flux, Mono}
 
+import java.io.ByteArrayInputStream
+import java.nio.charset.StandardCharsets
 import java.time
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.atomic.AtomicReference
@@ -26,6 +31,7 @@ object AzureProducerBuilder {
 
   def build()(implicit ec: ExecutionContext, system: ActorSystem, log: NodoLogger): ReEventFunc = {
     val eventConfigAzureSdkClient = system.settings.config.getConfig("azure-hub-event.azure-sdk-client.re-event")
+    val blobContainerClient = system.settings.config.getConfig("azure-hub-event.azure-sdk-client.blob-re")
     val eventHubName = eventConfigAzureSdkClient.getString("event-hub-name")
     val connectionString = eventConfigAzureSdkClient.getString("connection-string")
     val clientTimeoutMs = eventConfigAzureSdkClient.getLong("client-timeoput-ms")
@@ -55,7 +61,7 @@ object AzureProducerBuilder {
 
       if (reProudcerEnabledAzureSdkClient) {
         val executionContext: MessageDispatcher = system.dispatchers.lookup("eventhub-dispatcher")
-        Future(businessLogicForPublish(reProducer, data, request, clientTimeoutMs)(log))(executionContext) recoverWith { case e: Throwable =>
+        Future(businessLogicForPublish(reProducer, data, request, clientTimeoutMs, system)(log))(executionContext) recoverWith { case e: Throwable =>
           log.error(e, "Producer sdk azure re event error")
           Future.failed(e)
         }
@@ -67,7 +73,7 @@ object AzureProducerBuilder {
     }
   }
 
-  private def businessLogicForPublish(reProducer: EventHubProducerAsyncClient, ddataMap: ConfigData, request: ReRequest, clientTimeoutMs: Long)(implicit log: NodoLogger): Unit = {
+  private def businessLogicForPublish(reProducer: EventHubProducerAsyncClient, ddataMap: ConfigData, request: ReRequest, clientTimeoutMs: Long, system: ActorSystem)(implicit log: NodoLogger): Unit = {
     request.re.tipoEvento match {
       case Some(reTipoEvento) =>
         val key = ConfigUtil.getGdeConfigKey(reTipoEvento, request.re.sottoTipoEvento)
@@ -75,33 +81,74 @@ object AzureProducerBuilder {
           case Some(gdeConfig) =>
             if (gdeConfig.eventHubEnabled) {
               if (gdeConfig.eventHubPayloadEnabled) {
-                publish(reProducer, Array(request).toSeq, clientTimeoutMs, log)
+                publish(reProducer, Array(request).toSeq, clientTimeoutMs, log, system)
               } else {
                 log.debug("Clean re payload")
                 val newRe = request.re.copy(payload = None)
-                publish(reProducer, Array(request.copy(re = newRe)).toSeq, clientTimeoutMs, log)
+                publish(reProducer,Array(request.copy(re = newRe)).toSeq, clientTimeoutMs, log, system)
               }
             } else {
               log.debug(s"GDE_CONFIG key '$key', eventHub not enabled. Not forward to Azure")
             }
           case None =>
             log.debug(s"Cache GDE_CONFIG found but not found key '$key'. Forward to Azure")
-            publish(reProducer, Array(request).toSeq, clientTimeoutMs, log)
+            publish(reProducer,Array(request).toSeq, clientTimeoutMs, log, system)
         }
       case None =>
         log.debug(s"RE tipoEvento empty. Forward to Azure")
-        publish(reProducer, Array(request).toSeq, clientTimeoutMs, log)
+        publish(reProducer,  Array(request).toSeq, clientTimeoutMs, log, system)
     }
 
   }
 
-  private def publish(producer: EventHubProducerAsyncClient, reRequestSeq: Seq[ReRequest], clientTimeoutMs: Long, log: NodoLogger): Unit = {
+  private def publish(producer: EventHubProducerAsyncClient, reRequestSeq: Seq[ReRequest], clientTimeoutMs: Long, log: NodoLogger, system: ActorSystem): Unit = {
     log.debug(s"create eventDatas")
-    val eventDataSeq: Flux[EventData] = Flux.fromIterable(
+    val blobContainerClient = system.settings.config.getConfig("azure-hub-event.azure-sdk-client.blob-re")
+    val blocContainerName = blobContainerClient.getString("container-name")
+    val blobReConnectionString = blobContainerClient.getString("connection-string")
+
+    var blobAsyncClient: Option[BlobAsyncClient] = None
+
+    val eventDataSeq: Flux[(EventData)] = Flux.fromIterable(
       reRequestSeq
         .map(r => {
+          val sottoTipoEvento =
+            SottoTipoEvento.withName(r.re.sottoTipoEvento) match {
+              case SottoTipoEvento.REQ => SottoTipoEventoEvh.REQ.toString
+              case SottoTipoEvento.RESP => SottoTipoEventoEvh.RES.toString
+            }
+          val fileName = s"${r.sessionId}_${r.re.flowAction.get}_$sottoTipoEvento"
+
+          r.re.payload.foreach(v => {
+            blobAsyncClient = Some(new BlobClientBuilder()
+              .connectionString(blobReConnectionString)
+              .blobName(fileName).containerName(blocContainerName)
+              .buildAsyncClient())
+            blobAsyncClient.get.upload(BinaryData.fromStream(new ByteArrayInputStream(new String(v).getBytes(StandardCharsets.UTF_8)))).subscribe()
+          })
+
+          val httpMethod: String = r.reExtra.flatMap(_.httpMethod).getOrElse("")
           val key = r.sessionId
-          val eventData = new EventData(AppObjectMapper.objectMapper.writeValueAsString(r.re))
+          val reEventHub = ReEventHub(
+            Constant.FDR_VERSION,
+            r.re.uniqueId,
+            r.re.insertedTimestamp,
+            r.re.sessionId,
+            CategoriaEventoEvh.INTERFACE.toString,
+            r.re.flowName,
+            r.re.psp,
+            r.re.idDominio,
+            r.re.flowAction,
+            sottoTipoEvento,
+            Some(httpMethod),
+            r.reExtra.flatMap(_.uri),
+            blobAsyncClient.map(bc => {
+              BlobBodyRef(Some(bc.getAccountName), Some(bc.getContainerName), Some(fileName), (r.re.payload.map(_.length).getOrElse(0)))
+            }),
+            r.reExtra.map(ex => ex.headers.groupBy(_._1).map(v => (v._1, v._2.map(_._2)))).getOrElse(Map())
+          )
+
+          val eventData = new EventData(AppObjectMapper.objectMapper.writeValueAsString(reEventHub))
           eventData.getProperties.put(sessionId, key)
           MDC.getCopyOfContextMap.entrySet().asScala.map(a => eventData.getProperties.put(a.getKey, a.getValue))
           eventData

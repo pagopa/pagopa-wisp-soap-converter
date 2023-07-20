@@ -187,7 +187,7 @@ object TestDData {
       ),
       Map("Altro" -> CdsCategory("Altro"), "Tassa automobilistica" -> CdsCategory("Tassa automobilistica"), "Donazioni" -> CdsCategory("Donazioni")),
       Map(
-        "GLOBAL-azureSdkClientReEventEnabled" -> ConfigurationKey("", "", "false", None),
+        "GLOBAL-azureSdkClientReEventEnabled" -> ConfigurationKey("", "", "true", None),
         "GLOBAL-ccpRandomTraduttore" -> ConfigurationKey("", "", "true", None),
         "GLOBAL-ftp.env.path" -> ConfigurationKey("", "", "pate_", None),
         "GLOBAL-idCanaleAGID" -> ConfigurationKey("", "", TestItems.canaleAgid, None),
@@ -223,7 +223,10 @@ object TestDData {
       ),
       Map("1" -> FtpServer("localhost", 8899, true, "", "", "/", Constant.KeyName.RENDICONTAZIONI, Constant.KeyName.RENDICONTAZIONI, "", "", "", 1)),
       Map(),
-      Map(),
+      Map(
+        "INVIAFLUSSORENDI_REQ" -> GdeConfiguration("INVIAFLUSSORENDI", "REQ", true, true),
+        "INVIAFLUSSORENDI_RES" -> GdeConfiguration("INVIAFLUSSORENDI", "RES", true, true)
+      ),
       Map(
         "m1" -> MetadataDict("m1", Some("1"), OffsetDateTime.now().minusDays(1), Some(OffsetDateTime.now().plusDays(1))),
         "m2" -> MetadataDict("m2", Some("2"), OffsetDateTime.now().minusDays(1), Some(OffsetDateTime.now().plusDays(1))),

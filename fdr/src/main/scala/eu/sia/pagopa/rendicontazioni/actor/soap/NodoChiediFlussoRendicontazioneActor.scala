@@ -27,7 +27,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
   extends PerRequestActor with ReUtil with NodoChiediFlussoRendicontazioneResponse {
 
   override def actorError(e: DigitPaException): Unit = {
-    actorError(req, replyTo, ddataMap, e, re)
+    actorError(req, replyTo, ddataMap, e, reFlow)
   }
 
   var req: SoapRequest = _
@@ -40,7 +40,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
 
   val RESPONSE_NAME = "nodoChiediFlussoRendicontazioneRisposta"
 
-  var re: Option[Re] = None
+  var reFlow: Option[Re] = None
 
   private def parseInput(br: SoapRequest): Try[NodoChiediFlussoRendicontazione] = {
     (for {
@@ -169,9 +169,9 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
     req = soapRequest
     replyTo = sender()
 
-    re = Some(
+    reFlow = Some(
       Re(
-        componente = Componente.FDR.toString,
+        componente = Componente.NDP_FDR.toString,
         categoriaEvento = CategoriaEvento.INTERNO.toString,
         sessionId = Some(req.sessionId),
         payload = None,
@@ -181,31 +181,25 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
         insertedTimestamp = soapRequest.timestamp,
         erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+        flowAction = Some(req.primitive)
       )
     )
     log.info(FdrLogConstant.logSintattico(actorClassId))
     val pipeline = for {
       ncfr <- Future.fromTry(parseInput(soapRequest))
 
-      now = Util.now()
-      re_ = Re(
-        idDominio = ncfr.identificativoDominio,
-        psp = ncfr.identificativoPSP,
-        componente = Componente.FDR.toString,
-        categoriaEvento = CategoriaEvento.INTERNO.toString,
-        tipoEvento = Some(actorClassId),
-        sottoTipoEvento = SottoTipoEvento.INTERN.toString,
-        fruitore = Some(ncfr.identificativoStazioneIntermediarioPA),
-        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-        stazione = Some(ncfr.identificativoStazioneIntermediarioPA),
-        esito = Some(EsitoRE.RICEVUTA.toString),
-        sessionId = Some(req.sessionId),
-        insertedTimestamp = now,
-        businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+      _ = reFlow = reFlow.map(r =>
+        r.copy(
+          idDominio = ncfr.identificativoDominio,
+          psp = ncfr.identificativoPSP,
+          fruitore = Some(ncfr.identificativoStazioneIntermediarioPA),
+          stazione = Some(ncfr.identificativoStazioneIntermediarioPA),
+          esito = Some(EsitoRE.RICEVUTA.toString),
+          flowName = Some(ncfr.identificativoFlusso)
+        )
       )
-      _ = re = Some(re_)
+
 
       rendicontazioneNexi <- if (callNexiToo) {
         (for {
@@ -218,7 +212,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
             SoapReceiverType.NEXI.toString,
             req.payload,
             actorProps,
-            re.get
+            reFlow.get
           )
 
           ncfrResponse <- Future.fromTry(parseResponseNexi(response.payload.get))
@@ -247,7 +241,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
           _ <- Future.successful(())
           _ = log.debug(s"Looking for reporting ${ncfr.identificativoFlusso} to db")
           (_, binaryFileOption, _, pa, staz, psp) <- checksSemanticiEDuplicati(ncfr)
-          _ = re = re.map(r => r.copy(fruitoreDescr = Some(staz.stationCode), pspDescr = psp.flatMap(p => p.description)))
+          _ = reFlow = reFlow.map(r => r.copy(fruitoreDescr = Some(staz.stationCode), pspDescr = psp.flatMap(p => p.description)))
           _ = log.debug("Make response with reporting")
           rendicontazioneDb <- elaboraRisposta(binaryFileOption, pa)
         } yield rendicontazioneDb
@@ -256,18 +250,18 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
       ncfrResponse = NodoChiediFlussoRendicontazioneRisposta(None, xmlrendicontazione)
 
       resultMessage <- Future.fromTry(wrapInBundleMessage(ncfrResponse))
-      sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, re, req.testCaseId, None)
+      sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
     } yield sr
 
     pipeline.recover({
       case e: DigitPaException =>
         log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
-        errorHandler(req.sessionId, req.testCaseId, outputXsdValid, e, re)
+        errorHandler(req.sessionId, req.testCaseId, outputXsdValid, e, reFlow)
       case e: Throwable =>
         log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
-        errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), re)
+        errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
     }) map (sr => {
-      traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
+      traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
       log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()
