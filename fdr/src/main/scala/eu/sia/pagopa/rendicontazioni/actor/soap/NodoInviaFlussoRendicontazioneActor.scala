@@ -42,8 +42,6 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
   val outputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean
   var reFlow: Option[Re] = None
 
-//  private val callNewServiceFdr: Boolean = Try(context.system.settings.config.getBoolean(s"callNewServiceFdr")).getOrElse(false)
-
   val RESPONSE_NAME = "nodoInviaFlussoRendicontazioneRisposta"
 
   override def receive: Receive = { case soapRequest: SoapRequest =>
@@ -155,7 +153,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
           Future.successful(())
         }
 
-      _ <- actorProps.containerBlobFunction(nifr.identificativoFlusso, flussoRiversamentoContent, log)
+      _ <- actorProps.containerBlobFunction(nifr.identificativoFlusso, soapRequest.payload, log)
 
       _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
       nodoInviaFlussoRisposta = NodoInviaFlussoRendicontazioneRisposta(None, esito)
