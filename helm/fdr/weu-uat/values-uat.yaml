@@ -83,8 +83,8 @@ fdrnodo:
     DB_FDR_USER: fdr
     INSTANCE: UAT
     EVENT_HUB_NAME: "fdr-re"
-    BLOB_RE_CONTAINER_NAME: "pagopauweufdrresapayload"
-    AZURE_STORAGE_BLOB_NAME: "pagopadweufdrsaxmlsharefile"
+    BLOB_RE_CONTAINER_NAME: "payload"
+    AZURE_STORAGE_BLOB_NAME: "xmlsharefile"
   secretProvider:
     create: true
     envSecrets:
