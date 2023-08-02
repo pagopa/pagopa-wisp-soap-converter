@@ -57,7 +57,7 @@ class SoapActorPerRequest(
   }
 
   def reExtra(message: SoapRouterRequest): ReExtra =
-    ReExtra(uri = message.uri, headers = message.headers.getOrElse(Nil), httpMethod = Some(HttpMethods.POST.toString()), callRemoteAddress = message.callRemoteAddress, soapProtocol = true)
+    ReExtra(uri = message.uri, headers = message.headers.getOrElse(Nil), httpMethod = Some(HttpMethods.POST.value), callRemoteAddress = message.callRemoteAddress, soapProtocol = true)
 
   def traceRequest(message: SoapRouterRequest, reEventFunc: ReEventFunc): Unit = {
     Util.logPayload(log, Some(message.payload))
@@ -65,15 +65,15 @@ class SoapActorPerRequest(
       sessionId = message.sessionId,
       testCaseId = message.testCaseId,
       re = Re(
-        componente = Componente.FDR.toString,
+        componente = Componente.NDP_FDR.toString,
         categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
         sottoTipoEvento = SottoTipoEvento.REQ.toString,
         esito = Some(EsitoRE.RICEVUTA.toString),
         sessionId = Some(message.sessionId),
         payload = Some(message.payload.getUtf8Bytes),
         insertedTimestamp = message.timestamp,
-        erogatore = Some(Componente.FDR.toString),
-        erogatoreDescr = Some(Componente.FDR.toString)
+        erogatore = Some(Componente.NDP_FDR.toString),
+        erogatoreDescr = Some(Componente.NDP_FDR.toString)
       ),
       reExtra = Some(reExtra(message))
     )
@@ -100,7 +100,7 @@ class SoapActorPerRequest(
             re = sres.re
               .map(
                 _.copy(
-                  componente = Componente.FDR.toString,
+                  componente = Componente.NDP_FDR.toString,
                   categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
                   sottoTipoEvento = SottoTipoEvento.RESP.toString,
                   esito = Some(EsitoRE.INVIATA.toString),
@@ -110,15 +110,15 @@ class SoapActorPerRequest(
               )
               .getOrElse(
                 Re(
-                  componente = Componente.FDR.toString,
+                  componente = Componente.NDP_FDR.toString,
                   categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
                   sottoTipoEvento = SottoTipoEvento.RESP.toString,
                   esito = Some(EsitoRE.INVIATA.toString),
                   payload = sres.payload.map(_.getUtf8Bytes),
                   insertedTimestamp = now,
                   sessionId = Some(sres.sessionId),
-                  erogatore = Some(Componente.FDR.toString),
-                  erogatoreDescr = Some(Componente.FDR.toString)
+                  erogatore = Some(Componente.NDP_FDR.toString),
+                  erogatoreDescr = Some(Componente.NDP_FDR.toString)
                 )
               ),
             reExtra = Some(ReExtra(statusCode = Some(bundleResponse.statusCode), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
@@ -146,7 +146,7 @@ class SoapActorPerRequest(
                 sessionId = message.sessionId,
                 testCaseId = message.testCaseId,
                 re = Re(
-                  componente = Componente.FDR.toString,
+                  componente = Componente.NDP_FDR.toString,
                   categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
                   sottoTipoEvento = SottoTipoEvento.RESP.toString,
                   esito = Some(EsitoRE.INVIATA_KO.toString),
@@ -175,7 +175,7 @@ class SoapActorPerRequest(
                 sessionId = message.sessionId,
                 testCaseId = message.testCaseId,
                 re = Re(
-                  componente = Componente.FDR.toString,
+                  componente = Componente.NDP_FDR.toString,
                   categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
                   sottoTipoEvento = SottoTipoEvento.RESP.toString,
                   esito = Some(EsitoRE.INVIATA_KO.toString),
@@ -266,7 +266,7 @@ class SoapActorPerRequest(
           sessionId = message.sessionId,
           testCaseId = message.testCaseId,
           re = Re(
-            componente = Componente.FDR.toString,
+            componente = Componente.NDP_FDR.toString,
             categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
             sottoTipoEvento = SottoTipoEvento.RESP.toString,
             esito = Some(EsitoRE.INVIATA_KO.toString),
@@ -294,7 +294,7 @@ class SoapActorPerRequest(
           sessionId = message.sessionId,
           testCaseId = message.testCaseId,
           re = Re(
-            componente = Componente.FDR.toString,
+            componente = Componente.NDP_FDR.toString,
             categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
             sottoTipoEvento = SottoTipoEvento.RESP.toString,
             esito = Some(EsitoRE.INVIATA_KO.toString),

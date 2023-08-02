@@ -44,16 +44,17 @@ final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositori
 
     re = Some(
       Re(
-        componente = Componente.FDR.toString,
+        componente = Componente.NDP_FDR.toString,
         categoriaEvento = CategoriaEvento.INTERNO.toString,
         sessionId = Some(req.sessionId),
         esito = Some(EsitoRE.CAMBIO_STATO.toString),
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         insertedTimestamp = soapRequest.timestamp,
-        erogatore = Some(Componente.FDR.toString),
+        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(Componente.FDR.toString)
+        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+        flowAction = Some(req.primitive)
       )
     )
     log.info(FdrLogConstant.logSintattico(actorClassId))

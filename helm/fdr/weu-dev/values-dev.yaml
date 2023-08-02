@@ -74,15 +74,19 @@ fdrnodo:
     TZ: "Europe/Rome"
     AKKA_SYSTEM_NAME: "pagopafdrnodo"
     JAVA_OPTS: >-
-      -Dlogback.configurationFile=/mnt/file-config/logback.xml  -Dconfig.app=/mnt/file-config/config-app.conf  -Dapp.bundle.cacerts.path=/mnt/file-config-external/fdr-cacerts/cacerts  -Duser.language=it  -Duser.country=IT  -Duser.timezone=Europe/Rome  -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=3000  -Dcom.sun.management.jmxremote.rmi.port=3000  -Djava.rmi.server.hostname=127.0.0.1  -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false
-    DB_FDR_URL: jdbc:postgresql://pagopa-d-weu-fdr-flexible-postgresql.postgres.database.azure.com:5432/fdr?sslmode=require&prepareThreshold=0
+      -Dlogback.configurationFile=/mnt/file-config/logback.xml -Dconfig.app=/mnt/file-config/config-app.conf -Dapp.bundle.cacerts.path=/mnt/file-config-external/fdr-cacerts/cacerts -Duser.language=it  -Duser.country=IT -Duser.timezone=Europe/Rome -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=3000 -Dcom.sun.management.jmxremote.rmi.port=3000 -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
+    DB_FDR_URL: jdbc:postgresql://pagopa-d-weu-fdr-flexible-postgresql.postgres.database.azure.com:6432/fdr?sslmode=require&prepareThreshold=0
     DB_FDR_USER: fdr
     INSTANCE: DEV
+    EVENT_HUB_NAME: "fdr-re"
+    BLOB_RE_CONTAINER_NAME: "payload"
+    AZURE_STORAGE_BLOB_NAME: "xmlsharefile"
   secretProvider:
     create: true
     envSecrets:
-      AZURE_EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
-      AZURE_STORAGE_BLOB_CONNECTION_STRING: "azure-storage-blob-connection-string"
+      EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
+      AZURE_STORAGE_BLOB_CONNECTION_STRING: "fdr-sa-connection-string"
+      BLOB_RE_CONNECTION_STRING: "fdr-re-sa-connection-string"
       API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
       DB_FDR_PASSWORD: "db-fdr-password"
     keyvault:

@@ -33,7 +33,9 @@ case class Re(
     noticeNumber: Option[String] = None,
     creditorReferenceId: Option[String] = None,
     paymentToken: Option[String] = None,
-    sessionIdOriginal: Option[String] = None
+    sessionIdOriginal: Option[String] = None,
+    flowAction: Option[String] = None,
+    flowName: Option[String] = None
 ) {
   val dataOraEvento: String = Appfunction.formatDate(insertedTimestamp)
   val uniqueId: String = s"${dataOraEvento.substring(0, 10)}_${LongHashFunction

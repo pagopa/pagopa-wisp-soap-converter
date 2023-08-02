@@ -82,11 +82,15 @@ fdrnodo:
     DB_FDR_URL: jdbc:postgresql://pagopa-p-weu-nodo-flexible-postgresql.postgres.database.azure.com:6432/nodo?sslmode=require&prepareThreshold=0&currentSchema=offline
     DB_FDR_USER: fdr
     INSTANCE: PROD
+    EVENT_HUB_NAME: "fdr-re"
+    BLOB_RE_CONTAINER_NAME: "payload"
+    AZURE_STORAGE_BLOB_NAME: "xmlsharefile"
   secretProvider:
     create: true
     envSecrets:
-      AZURE_EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
-      AZURE_STORAGE_BLOB_CONNECTION_STRING: "azure-storage-blob-connection-string"
+      EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
+      AZURE_STORAGE_BLOB_CONNECTION_STRING: "fdr-sa-connection-string"
+      BLOB_RE_CONNECTION_STRING: "fdr-re-sa-connection-string"
       API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
       DB_FDR_PASSWORD: "db-fdr-password"
     keyvault:

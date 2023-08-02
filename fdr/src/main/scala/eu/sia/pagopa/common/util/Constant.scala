@@ -8,6 +8,8 @@ object Constant {
   final val OK = "OK"
   final val KO = "KO"
 
+  val FDR_VERSION = "FDR001"
+
   val HTTP_RESP_SESSION_ID_HEADER = "sessionId"
 
   val UTF_8: Charset = StandardCharsets.UTF_8
