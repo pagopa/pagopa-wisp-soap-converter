@@ -133,8 +133,10 @@ class RestActorPerRequest(
             case Some(e: RestException) =>
               log.error(e, s"Rest Response in errore [${e.getMessage}]")
 
-              log.info("Genero risposta negativa")
+              traceRequest(message, reEventFunc, actorProps.ddataMap)
+
               val payload = Error(e.message).toJson.toString()
+              log.info("Genero risposta negativa")
               Util.logPayload(log, Some(payload))
 
               val now = Util.now()
@@ -154,7 +156,6 @@ class RestActorPerRequest(
                 reExtra = Some(ReExtra(statusCode = Some(e.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
               )
               reEventFunc(reRequest, log, actorProps.ddataMap)
-//              traceRequest(message, reEventFunc, actorProps.ddataMap)
               complete(createHttpResponse(e.statusCode, payload, sres.sessionId), Constant.KeyName.REST_INPUT)
             case Some(e: Throwable) =>
               log.error(e, s"Rest Response in errore [${e.getMessage}]")
@@ -184,6 +185,11 @@ class RestActorPerRequest(
               traceRequest(message, reEventFunc, actorProps.ddataMap)
               complete(createHttpResponse(StatusCodes.InternalServerError.intValue, payload, sres.sessionId), Constant.KeyName.REST_INPUT)
             case None =>
+              //qualche bundle ha risposto in modo svagliato
+              log.warn(s"Rest Response in errore")
+
+              traceRequest(message, reEventFunc, actorProps.ddataMap)
+
               val now = Util.now()
               val (reRequest, payload) = sres.statusCode match {
                 case StatusCodes.OK.intValue =>
@@ -226,7 +232,6 @@ class RestActorPerRequest(
                   ), Some(errPayload))
               }
               reEventFunc(reRequest, log, actorProps.ddataMap)
-              traceRequest(message, reEventFunc, actorProps.ddataMap)
               complete(createHttpResponse(sres.statusCode, payload.map(v => v).getOrElse(""), sres.sessionId), Constant.KeyName.REST_INPUT)
           }
       }

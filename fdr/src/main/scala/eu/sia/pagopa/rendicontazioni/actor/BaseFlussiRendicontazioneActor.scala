@@ -5,17 +5,16 @@ import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
-import eu.sia.pagopa.common.json.model.rendicontazione._
 import eu.sia.pagopa.common.message.{FTPRequest, FTPResponse}
 import eu.sia.pagopa.common.repo.fdr.enums.{FtpFileStatus, RendicontazioneStatus}
 import eu.sia.pagopa.common.repo.fdr.model.{BinaryFile, FtpFile, Rendicontazione}
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.xml.{XmlUtil, XsdValid}
+import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
 import it.pagopa.config.CreditorInstitution
-import scalaxbmodel.flussoriversamento.{CtFlussoRiversamento, CtIdentificativoUnivoco, CtIdentificativoUnivocoPersonaG, CtIstitutoMittente, CtIstitutoRicevente, Number1u461}
+import scalaxbmodel.flussoriversamento.CtFlussoRiversamento
 import scalaxbmodel.nodoperpsp.NodoInviaFlussoRendicontazione
 
 import java.io.{File, FileOutputStream}
@@ -24,7 +23,6 @@ import java.security.MessageDigest
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
 import java.util.zip.{ZipEntry, ZipOutputStream}
-import javax.xml.datatype.DatatypeFactory
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
@@ -34,8 +32,6 @@ trait BaseFlussiRendicontazioneActor extends PerRequestActor {
   val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
   val inputXsdValid: Boolean = Try(DDataChecks.getConfigurationKeys(ddataMap, "validate_input").toBoolean).getOrElse(false)
   val outputXsdValid: Boolean = Try(DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean).getOrElse(false)
-  var re: Option[Re] = None
-
 
   def validateRendicontazione(
                                nifr: NodoInviaFlussoRendicontazione,
@@ -208,57 +204,57 @@ trait BaseFlussiRendicontazioneActor extends PerRequestActor {
 
   }
 
-  protected def inviaFlussoRendicontazioneRest2Soap(inviaFlussoRendicontazione: Flow)(implicit log: NodoLogger, ec: ExecutionContext) = {
-    for {
-      _ <- Future.successful(())
-      _ = log.info(FdrLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
-
-      flussoRiversamento = CtFlussoRiversamento(
-        Number1u461,
-        inviaFlussoRendicontazione.reportingFlowName,
-        DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.reportingFlowDate),
-        inviaFlussoRendicontazione.regulation,
-        DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.regulationDate),
-        CtIstitutoMittente(
-          CtIdentificativoUnivoco(
-            inviaFlussoRendicontazione.sender._type match {
-              case SenderTypeEnum.ABI_CODE => scalaxbmodel.flussoriversamento.A
-              case SenderTypeEnum.BIC_CODE => scalaxbmodel.flussoriversamento.B
-              case _ => scalaxbmodel.flussoriversamento.GValue
-            },
-            inviaFlussoRendicontazione.sender.id
-          ),
-          Some(inviaFlussoRendicontazione.sender.pspName)
-        ),
-        Some(inviaFlussoRendicontazione.bicCodePouringBank),
-        CtIstitutoRicevente(
-          CtIdentificativoUnivocoPersonaG(
-            scalaxbmodel.flussoriversamento.G,
-            inviaFlussoRendicontazione.receiver.id
-          ),
-          Some(inviaFlussoRendicontazione.receiver.ecName)
-        ),0,0
-//        inviaFlussoRendicontazione.payments.size,
-//        inviaFlussoRendicontazione.payments.map(_.singoloImportoPagato).sum
-      )
-
-      flussoRiversamentoEncoded <- Future.fromTry(XmlEnum.FlussoRiversamento2Str_flussoriversamento(flussoRiversamento))
-
-      nodoInviaFlussoRendicontazione = NodoInviaFlussoRendicontazione(
-        inviaFlussoRendicontazione.sender.pspId,
-        inviaFlussoRendicontazione.sender.brokerId,
-        inviaFlussoRendicontazione.sender.channelId,
-        inviaFlussoRendicontazione.sender.password,
-        inviaFlussoRendicontazione.receiver.ecId,
-        inviaFlussoRendicontazione.reportingFlowName,
-        DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.reportingFlowDate),
-        XmlUtil.StringBase64Binary.encodeBase64(flussoRiversamentoEncoded)
-      )
-
-      requestString <- Future.fromTry(XmlEnum.nodoInviaFlussoRendicontazione2Str_nodoperpsp(nodoInviaFlussoRendicontazione))
-
-    } yield requestString
-  }
+//  protected def inviaFlussoRendicontazioneRest2Soap(inviaFlussoRendicontazione: Flow)(implicit log: NodoLogger, ec: ExecutionContext) = {
+//    for {
+//      _ <- Future.successful(())
+//      _ = log.info(FdrLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
+//
+//      flussoRiversamento = CtFlussoRiversamento(
+//        Number1u461,
+//        inviaFlussoRendicontazione.reportingFlowName,
+//        DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.reportingFlowDate),
+//        inviaFlussoRendicontazione.regulation,
+//        DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.regulationDate),
+//        CtIstitutoMittente(
+//          CtIdentificativoUnivoco(
+//            inviaFlussoRendicontazione.sender._type match {
+//              case SenderTypeEnum.ABI_CODE => scalaxbmodel.flussoriversamento.A
+//              case SenderTypeEnum.BIC_CODE => scalaxbmodel.flussoriversamento.B
+//              case _ => scalaxbmodel.flussoriversamento.GValue
+//            },
+//            inviaFlussoRendicontazione.sender.id
+//          ),
+//          Some(inviaFlussoRendicontazione.sender.pspName)
+//        ),
+//        Some(inviaFlussoRendicontazione.bicCodePouringBank),
+//        CtIstitutoRicevente(
+//          CtIdentificativoUnivocoPersonaG(
+//            scalaxbmodel.flussoriversamento.G,
+//            inviaFlussoRendicontazione.receiver.id
+//          ),
+//          Some(inviaFlussoRendicontazione.receiver.ecName)
+//        ),0,0
+////        inviaFlussoRendicontazione.payments.size,
+////        inviaFlussoRendicontazione.payments.map(_.singoloImportoPagato).sum
+//      )
+//
+//      flussoRiversamentoEncoded <- Future.fromTry(XmlEnum.FlussoRiversamento2Str_flussoriversamento(flussoRiversamento))
+//
+//      nodoInviaFlussoRendicontazione = NodoInviaFlussoRendicontazione(
+//        inviaFlussoRendicontazione.sender.pspId,
+//        inviaFlussoRendicontazione.sender.brokerId,
+//        inviaFlussoRendicontazione.sender.channelId,
+//        inviaFlussoRendicontazione.sender.password,
+//        inviaFlussoRendicontazione.receiver.ecId,
+//        inviaFlussoRendicontazione.reportingFlowName,
+//        DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.reportingFlowDate),
+//        XmlUtil.StringBase64Binary.encodeBase64(flussoRiversamentoEncoded)
+//      )
+//
+//      requestString <- Future.fromTry(XmlEnum.nodoInviaFlussoRendicontazione2Str_nodoperpsp(nodoInviaFlussoRendicontazione))
+//
+//    } yield requestString
+//  }
 
   def checks(ddataMap: ConfigData, nodoInviaFlussoRendicontazione: NodoInviaFlussoRendicontazione, checkPassword: Boolean, actorClassId: String)(implicit log: NodoLogger) = {
     log.info(FdrLogConstant.logSemantico(actorClassId))

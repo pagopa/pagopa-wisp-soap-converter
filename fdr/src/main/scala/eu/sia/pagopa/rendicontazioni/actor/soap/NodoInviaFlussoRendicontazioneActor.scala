@@ -34,10 +34,6 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
   var req: SoapRequest = _
   var replyTo: ActorRef = _
 
-  val fdrRepository = repositories.fdrRepository
-  val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
-  val inputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_input").toBoolean
-  val outputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean
   var reFlow: Option[Re] = None
 
   val RESPONSE_NAME = "nodoInviaFlussoRendicontazioneRisposta"

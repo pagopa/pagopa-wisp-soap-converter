@@ -13,7 +13,7 @@ object Sender extends DefaultJsonProtocol {
           "id" -> JsString(sender.id),
           "pspId" -> JsString(sender.pspId),
           "pspName" -> JsString(sender.pspName),
-          "brokerId" -> JsString(sender.brokerId),
+          "pspBrokerId" -> JsString(sender.pspBrokerId),
           "channelId" -> JsString(sender.channelId),
           "password" -> JsString(sender.password)
         )
@@ -32,7 +32,7 @@ case class Sender(
                    id: String,
                    pspId: String,
                    pspName: String,
-                   brokerId: String,
+                   pspBrokerId: String,
                    channelId: String,
                    password: String
                  )

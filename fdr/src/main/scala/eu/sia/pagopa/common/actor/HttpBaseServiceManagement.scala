@@ -19,7 +19,6 @@ trait HttpBaseServiceManagement {
     val url = as.settings.config.getString(s"${receiver.toLowerCase}.$action.url")
     val timeout = as.settings.config.getInt(s"${receiver.toLowerCase}.timeoutSeconds")
 
-
     (url, timeout)
   }
 
