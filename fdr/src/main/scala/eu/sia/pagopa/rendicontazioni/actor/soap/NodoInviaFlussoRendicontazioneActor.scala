@@ -42,6 +42,8 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
   val outputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean
   var reFlow: Option[Re] = None
 
+  private val additionalFdrValidations: Boolean = Try(context.system.settings.config.getBoolean(s"additionalFdrValidations")).getOrElse(false)
+
   val RESPONSE_NAME = "nodoInviaFlussoRendicontazioneRisposta"
 
   override def receive: Receive = { case soapRequest: SoapRequest =>
@@ -265,8 +267,22 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
           ) {
             throw exception.DigitPaException("Il campo [dataOraFlusso] non è uguale al campo dentro xml flusso riversamento [dataOraFlusso]", DigitPaErrorCodes.PPT_SEMANTICA)
           }
-          Future.successful(flussoRiversamento, content)
 
+          if( additionalFdrValidations ) {
+            val numeroTotalePagamentiDeclared = flussoRiversamento.numeroTotalePagamenti
+            val totalePagamentiSent = flussoRiversamento.datiSingoliPagamenti.size
+            if (numeroTotalePagamentiDeclared != totalePagamentiSent) {
+              throw exception.DigitPaException(s"Il campo [numeroTotalePagamenti=$numeroTotalePagamentiDeclared] differisce dai [datiSingoliPagamenti=$totalePagamentiSent]", DigitPaErrorCodes.PPT_SEMANTICA)
+            }
+
+            val importoTotalePagamentiDeclared = flussoRiversamento.importoTotalePagamenti
+            val importoTotalePagamentiSent = flussoRiversamento.datiSingoliPagamenti.map(_.singoloImportoPagato).sum
+            if (importoTotalePagamentiDeclared != importoTotalePagamentiSent) {
+              throw exception.DigitPaException(s"Il campo [importoTotalePagamenti=$importoTotalePagamentiDeclared] differisce dalla somma di [datiSingoliPagamenti=$importoTotalePagamentiSent]", DigitPaErrorCodes.PPT_SEMANTICA)
+            }
+          }
+
+          Future.successful(flussoRiversamento, content)
         case Failure(e) =>
           log.warn(e, "Invalid spill stream 'Flusso riversamento' element")
           val rendi = Rendicontazione(
