@@ -79,8 +79,9 @@ fdrnodo:
     DB_FDR_USER: fdr
     INSTANCE: DEV
     EVENT_HUB_NAME: "fdr-re"
-    BLOB_RE_CONTAINER_NAME: "pagopadweufdrresapayload"
-    AZURE_STORAGE_BLOB_NAME: "pagopadweufdrsaxmlsharefile"
+    BLOB_RE_CONTAINER_NAME: "payload"
+    AZURE_STORAGE_BLOB_NAME: "xmlsharefile"
+    ADDITIONAL_FDR_VALIDATIONS: true
   secretProvider:
     create: true
     envSecrets:
