@@ -30,6 +30,7 @@ object AzureQueueClient {
           log.error(e, "Error calling azure-storage-blob")
           Future.failed(e)
       }
+
     }
   }
 }
