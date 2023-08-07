@@ -2,31 +2,16 @@ package eu.sia.pagopa.common.json.model.rendicontazione
 
 import spray.json.{DefaultJsonProtocol, DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat}
 
-import java.time.LocalDateTime
 import scala.language.implicitConversions
 import scala.util.Try
 
 object GetResponse extends DefaultJsonProtocol {
 
-  implicit val format: RootJsonFormat[GetResponse] = new RootJsonFormat[GetResponse] {
-//    def write(nifr: GetResponse): JsObject = {
-//      JsObject(Map(
-//        "revision" -> JsNumber(nifr.revision).value.toLong,
-//        "reportingFlowName" -> JsString(nifr.reportingFlowName),
-//        "reportingFlowDate" -> JsString(nifr.reportingFlowDate),
-//        "sender" -> nifr.sender.toJson,
-//        "receiver" -> nifr.receiver.toJson,
-//        "regulation" -> JsString(nifr.regulation),
-//        "regulationDate" -> JsString(nifr.regulationDate),
-//        "bicCodePouringBank" -> JsString(nifr.bicCodePouringBank),
-//        "totPayments" -> JsNumber(nifr.totPayments).value.toLong,
-//        "sumPayments" -> JsNumber(nifr.sumPayments).value
-//      ))
-//    }
+  implicit object GetResponseFormat extends RootJsonFormat[GetResponse] {
     def write(nifr: GetResponse): JsObject = ???
 
     def read(json: JsValue): GetResponse = {
-      val map = json.asJsObject.fields
+      val map = json.asInstanceOf[JsObject].fields
       val senderType = map("sender").asInstanceOf[JsObject].fields("type").asInstanceOf[JsString].value
       val senderId = map("sender").asInstanceOf[JsObject].fields("id").asInstanceOf[JsString].value
       val senderPspId = map("sender").asInstanceOf[JsObject].fields("pspId").asInstanceOf[JsString].value
@@ -63,11 +48,10 @@ object GetResponse extends DefaultJsonProtocol {
   }
 }
 
-
 case class GetResponse (
   revision: Long,
   created: String,
-  update: String,
+  updated: String,
   status: String,
   fdr: String,
   fdrDate: String,

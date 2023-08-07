@@ -117,7 +117,7 @@ object AzureProducerBuilder {
               case SottoTipoEvento.REQ => SottoTipoEventoEvh.REQ.toString
               case SottoTipoEvento.RESP => SottoTipoEventoEvh.RES.toString
             }
-          val fileName = s"${r.sessionId}_${r.re.flowAction.get}_$sottoTipoEvento"
+          val fileName = s"${r.sessionId}_${r.re.tipoEvento.get}_$sottoTipoEvento"
 
           r.re.payload.foreach(v => {
             blobAsyncClient = Some(new BlobClientBuilder()

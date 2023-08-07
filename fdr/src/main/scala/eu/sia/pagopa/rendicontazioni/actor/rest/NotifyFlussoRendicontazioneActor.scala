@@ -100,111 +100,111 @@ final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Reposi
         Future.sequence(
           Seq(Future.successful(log.info("Gestione asincrona"))) ++
           Seq(for {
-//            getResponse <- HttpFdrServiceManagement.internalGetWithRevision(req.sessionId, req.testCaseId, "internalGetWithRevision", Componente.FDR.toString, _fdr, _rev.toString, _psp, actorProps, reFlow.get)
-//
-//            getPaymentResponse <- HttpFdrServiceManagement.internalGetFdrPayment(req.sessionId, req.testCaseId, "internalGetFdrPayment", Componente.FDR.toString, _fdr,_rev.toString, _psp, actorProps, reFlow.get)
+            getResponse <- HttpFdrServiceManagement.internalGetWithRevision(req.sessionId, req.testCaseId, "internalGetWithRevision", Componente.FDR.toString, _fdr, _rev.toString, _psp, actorProps, reFlow.get)
 
-//            _ = log.info(FdrLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
-//            flussoRiversamento = CtFlussoRiversamento(
-//              Number1u461,
-//              getResponse.fdr,
-//              DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
-//              getResponse.regulation,
-//              DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.regulationDate),
-//              CtIstitutoMittente(
-//                CtIdentificativoUnivoco(
-//                  getResponse.sender._type match {
-//                    case SenderTypeEnum.ABI_CODE => scalaxbmodel.flussoriversamento.A
-//                    case SenderTypeEnum.BIC_CODE => scalaxbmodel.flussoriversamento.B
-//                    case _ => scalaxbmodel.flussoriversamento.GValue
-//                  },
-//                  getResponse.sender.id
-//                ),
-//                Some(getResponse.sender.pspName)
-//              ),
-//              Some(getResponse.bicCodePouringBank),
-//              CtIstitutoRicevente(
-//                CtIdentificativoUnivocoPersonaG(
-//                  scalaxbmodel.flussoriversamento.G,
-//                  getResponse.receiver.id
-//                ),
-//                Some(getResponse.receiver.organizationName)
-//              ),
-//              getResponse.computedTotPayments,
-//              getResponse.computedSumPayments,
-//              getPaymentResponse.data.map(p =>{
-//                CtDatiSingoliPagamenti(
-//                  p.iuv,
-//                  p.iur,
-//                  Some(BigInt.int2bigInt(p.index)),
-//                  p.pay,
-//                  p.payStatus match {
-//                    case PayStatusEnum.NO_RPT => scalaxbmodel.flussoriversamento.Number9
-//                    case PayStatusEnum.REVOKED => scalaxbmodel.flussoriversamento.Number3
-//                    case _ => scalaxbmodel.flussoriversamento.Number0
-//                  },
-//                  DatatypeFactory.newInstance().newXMLGregorianCalendar(p.payDate)
-//                )
-//              })
-//            )
-//            flussoRiversamentoEncoded <- Future.fromTry(XmlEnum.FlussoRiversamento2Str_flussoriversamento(flussoRiversamento))
-//            flussoRiversamentoBase64 = XmlUtil.StringBase64Binary.encodeBase64(flussoRiversamentoEncoded)
-//
-//            nifr = NodoInviaFlussoRendicontazione(
-//              getResponse.sender.pspId,
-//              getResponse.sender.pspBrokerId,
-//              getResponse.sender.channelId,
-//              getResponse.sender.password,
-//              getResponse.receiver.organizationId,
-//              getResponse.fdr,
-//              DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
-//              flussoRiversamentoBase64
-//            )
-//
-//            (pa, _, _) <- Future.fromTry(checks(ddataMap, nifr, false, actorClassId))
-//
-//            (esito, _, sftpFile, _) <- saveRendicontazione(
-//              getResponse.fdr,
-//              getResponse.sender.pspId,
-//              getResponse.sender.pspBrokerId,
-//              getResponse.sender.channelId,
-//              getResponse.receiver.organizationId,
-//              DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
-//              flussoRiversamentoBase64,
-//              flussoRiversamentoEncoded,
-//              flussoRiversamento,
-//              pa,
-//              ddataMap,
-//              actorClassId
-//            )
-//
-//            _ <-
-//              if (sftpFile.isDefined) {
-//                notifySFTPSender(pa, req.sessionId, req.testCaseId, sftpFile.get).flatMap(resp => {
-//                  if (resp.throwable.isDefined) {
-//                    //HOTFIX non torno errore al chiamante se ftp non funziona
-//                    log.warn(s"Error sending file first time for reporting flow [${resp.throwable.get.getMessage}]")
-//                    Future.successful(())
-//                  } else {
-//                    Future.successful(())
-//                  }
-//                })
-//              } else {
-//                Future.successful(())
-//              }
+            getPaymentResponse <- HttpFdrServiceManagement.internalGetFdrPayment(req.sessionId, req.testCaseId, "internalGetFdrPayment", Componente.FDR.toString, _fdr,_rev.toString, _psp, actorProps, reFlow.get)
 
-//            _ = if(esito == Constant.KO) {
-//              throw RestException("", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
-//            } else {
-              _ <- Future.successful(())
-//            }
+            _ = log.info(FdrLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
+            flussoRiversamento = CtFlussoRiversamento(
+              Number1u461,
+              getResponse.fdr,
+              DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
+              getResponse.regulation,
+              DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.regulationDate),
+              CtIstitutoMittente(
+                CtIdentificativoUnivoco(
+                  getResponse.sender._type match {
+                    case SenderTypeEnum.ABI_CODE => scalaxbmodel.flussoriversamento.A
+                    case SenderTypeEnum.BIC_CODE => scalaxbmodel.flussoriversamento.B
+                    case _ => scalaxbmodel.flussoriversamento.GValue
+                  },
+                  getResponse.sender.id
+                ),
+                Some(getResponse.sender.pspName)
+              ),
+              Some(getResponse.bicCodePouringBank),
+              CtIstitutoRicevente(
+                CtIdentificativoUnivocoPersonaG(
+                  scalaxbmodel.flussoriversamento.G,
+                  getResponse.receiver.id
+                ),
+                Some(getResponse.receiver.organizationName)
+              ),
+              getResponse.computedTotPayments,
+              getResponse.computedSumPayments,
+              getPaymentResponse.data.map(p =>{
+                CtDatiSingoliPagamenti(
+                  p.iuv,
+                  p.iur,
+                  Some(BigInt.int2bigInt(p.index)),
+                  p.pay,
+                  p.payStatus match {
+                    case PayStatusEnum.NO_RPT => scalaxbmodel.flussoriversamento.Number9
+                    case PayStatusEnum.REVOKED => scalaxbmodel.flussoriversamento.Number3
+                    case _ => scalaxbmodel.flussoriversamento.Number0
+                  },
+                  DatatypeFactory.newInstance().newXMLGregorianCalendar(p.payDate)
+                )
+              })
+            )
+            flussoRiversamentoEncoded <- Future.fromTry(XmlEnum.FlussoRiversamento2Str_flussoriversamento(flussoRiversamento))
+            flussoRiversamentoBase64 = XmlUtil.StringBase64Binary.encodeBase64(flussoRiversamentoEncoded)
+
+            nifr = NodoInviaFlussoRendicontazione(
+              getResponse.sender.pspId,
+              getResponse.sender.pspBrokerId,
+              getResponse.sender.channelId,
+              getResponse.sender.password,
+              getResponse.receiver.organizationId,
+              getResponse.fdr,
+              DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
+              flussoRiversamentoBase64
+            )
+
+            (pa, _, _) <- Future.fromTry(checks(ddataMap, nifr, false, actorClassId))
+
+            (esito, _, sftpFile, _) <- saveRendicontazione(
+              getResponse.fdr,
+              getResponse.sender.pspId,
+              getResponse.sender.pspBrokerId,
+              getResponse.sender.channelId,
+              getResponse.receiver.organizationId,
+              DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
+              flussoRiversamentoBase64,
+              flussoRiversamentoEncoded,
+              flussoRiversamento,
+              pa,
+              ddataMap,
+              actorClassId
+            )
+
+            _ <-
+              if (sftpFile.isDefined) {
+                notifySFTPSender(pa, req.sessionId, req.testCaseId, sftpFile.get).flatMap(resp => {
+                  if (resp.throwable.isDefined) {
+                    //HOTFIX non torno errore al chiamante se ftp non funziona
+                    log.warn(s"Error sending file first time for reporting flow [${resp.throwable.get.getMessage}]")
+                    Future.successful(())
+                  } else {
+                    Future.successful(())
+                  }
+                })
+              } else {
+                Future.successful(())
+              }
+
+            _ = if(esito == Constant.KO) {
+              throw RestException("", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
+            } else {
+              Future.successful(())
+            }
           } yield ())
         )
       })
       .recoverWith({ case e: Throwable =>
         log.error(e, s"Errore ")
         for {
-          pushRetry <- HttpFdrServiceManagement.pushRetry(req.sessionId, req.testCaseId, "pushRetry", Componente.QUEUE_FDR.toString, _fdr, _psp, actorProps, reFlow.get)
+          pushRetry <- HttpFdrServiceManagement.pushRetry(req.sessionId, req.testCaseId, req.payload.getOrElse(""), "pushRetry", Componente.QUEUE_FDR.toString, _fdr, _psp, actorProps, reFlow.get)
         } yield ()
       })
       .map(_ => {

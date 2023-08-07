@@ -37,7 +37,7 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
       HttpMethods.GET,
       s"${url.replace("{fdr}",fdr).replace("{revision}",rev).replace("{pspId}",psp)}",
       None,
-      Seq(),
+      Seq("Ocp-Apim-Subscription-Key" -> "b70beacf0326442392f9550edf23971a"),
       Some(receiver),
       re,
       timeout.seconds,
@@ -49,9 +49,9 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
       httpResponse <- callService(simpleHttpReq, action, receiver, actorProps, false)
       res = {
         if( httpResponse.statusCode != StatusCodes.OK.intValue ) {
-          throw new RestException("errore", DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue)
+          throw new RestException(s"Errore: statusCode=[${httpResponse.statusCode}], message=[${httpResponse.payload.getOrElse("")}]", DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue)
         } else {
-          Try(httpResponse.payload.get.parseJson.asInstanceOf[GetResponse]) match {
+          Try(httpResponse.payload.get.parseJson.convertTo[GetResponse]) match {
             case Success(res) => res
             case Failure(e) =>
               throw new RestException(e.getMessage, DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, e)
@@ -83,7 +83,7 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
       HttpMethods.GET,
       s"${url.replace("{fdr}",fdr).replace("{revision}",rev).replace("{pspId}",psp)}",
       None,
-      Seq(),
+      Seq("Ocp-Apim-Subscription-Key" -> "b70beacf0326442392f9550edf23971a"),
       Some(receiver),
       re,
       timeout.seconds,
@@ -97,7 +97,7 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
         if (httpResponse.statusCode != StatusCodes.OK.intValue) {
           throw new RestException("errore", DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue)
         } else {
-          Try(httpResponse.payload.get.parseJson.asInstanceOf[GetPaymentResponse]) match {
+          Try(httpResponse.payload.get.parseJson.convertTo[GetPaymentResponse]) match {
             case Success(res) => res
             case Failure(e) =>
               throw new RestException(e.getMessage, DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, e)
@@ -112,6 +112,7 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
                    sessionId: String,
                    testCaseId: Option[String],
                    action: String,
+                   payload: String,
                    receiver: String,
                    fdr: String,
                    psp: String,

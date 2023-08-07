@@ -7,7 +7,6 @@ import scala.util.Try
 
 object GetPaymentResponse extends DefaultJsonProtocol {
 
-
   implicit object PaymentsJsonFormat extends RootJsonFormat[GetPaymentResponse] {
     def write(payments: GetPaymentResponse): JsObject = ???
 
