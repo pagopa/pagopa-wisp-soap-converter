@@ -378,22 +378,18 @@ abstract class BaseUnitTest()
     p.future.map(_ => restResponse.payload.get)
   }
 
-//  https://api.dev.platform.pagopa.it/fdr/service-internal/v1/internal/history/organizations/ndp/fdrs/{fdr}/revisions/{revision}/psps/{pspId}
-
   def notifyFlussoPayload(
                            fdr: String,
                            pspId: String,
                            retry: Long,
                            revision: Long
                          ) = {
-
       s"""{
          |  "ame": "$fdr",
          |  "pspId": "$pspId",
          |  "retry": $retry,
          |  "revision": $revision
          |}""".stripMargin
-    }
   }
 
   def await[T](f: Future[T]): T = {

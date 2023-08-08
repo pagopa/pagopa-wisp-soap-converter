@@ -1,6 +1,5 @@
 package eu.sia.pagopa
 
-import akka.http.scaladsl.model.StatusCodes
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.DigitPaErrorCodes
 import eu.sia.pagopa.common.util.{Constant, RandomStringUtils, StringUtils, Util}
@@ -308,33 +307,5 @@ class RendicontazioniTests() extends BaseUnitTest {
       assert(r.fault.isDefined)
       assert(r.fault.get.faultCode == DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO.faultCode)
     })
-  }
-
-  "notifyFlussoRendicontazione OK with fdrfase 3 all OK" in {
-    val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
-    val random = RandomStringUtils.randomNumeric(9)
-    val idFlusso = s"${date}${TestItems.PSP}-$random"
-
-    actorUtility.configureMocker("OK" -> { (messageType, _) => {
-      messageType match {
-        case "getHistory" => "OK"
-        case "getHistoryPayment" => "KO"
-        case _ => "OK"
-      }
-    }
-    })
-
-//    await(
-//      notifyFlusso(
-//        idFlusso,
-//        TestItems.PSP,
-//        1,
-//        responseAssert = (resp, status) => {
-//          assert(status == StatusCodes.OK.intValue)
-//          val (_, closeVersion) = getPaymentTransactionIdAndCloseVersion(noticeNumber)
-//          assert(closeVersion == Constant.CLOSE_PAYMENT_V2)
-//        }
-//      )
-//    )
   }
 }
