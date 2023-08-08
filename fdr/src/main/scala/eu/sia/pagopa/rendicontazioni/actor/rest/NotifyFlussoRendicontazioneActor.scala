@@ -202,9 +202,9 @@ final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Reposi
         )
       })
       .recoverWith({ case e: Throwable =>
-        log.error(e, s"Errore ")
+        log.error(e, s"Error recovering FdR from NEW FDR, re-add FdR data in queue")
         for {
-          pushRetry <- HttpFdrServiceManagement.pushRetry(req.sessionId, req.testCaseId, req.payload.getOrElse(""), "pushRetry", Componente.QUEUE_FDR.toString, _fdr, _psp, actorProps, reFlow.get)
+          _ <- actorProps.queueAddFunction(_fdr, _psp, req.payload.getOrElse(""), log)
         } yield ()
       })
       .map(_ => {

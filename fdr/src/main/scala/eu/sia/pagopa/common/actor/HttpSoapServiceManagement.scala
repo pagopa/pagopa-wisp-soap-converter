@@ -24,7 +24,7 @@ object HttpSoapServiceManagement extends HttpBaseServiceManagement {
       actorProps: ActorProps,
       re: Re
   )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
-    val (url, timeout) = loadServiceConfig(action, receiver)
+    val (url, timeout, headers) = loadServiceConfig(action, receiver)
 
     val simpleHttpReq = SimpleHttpReq(
       sessionId,
@@ -33,7 +33,7 @@ object HttpSoapServiceManagement extends HttpBaseServiceManagement {
       HttpMethods.POST,
       s"$url?${QUERYPARAM_SOAPACTION}=$action",
       Some(payload),
-      Seq((HEADER_KEY_SOAPACTION, s"\"$action\"")),
+      headers ++ Seq((HEADER_KEY_SOAPACTION, s"\"$action\"")),
       Some(receiver),
       re,
       timeout.seconds,

@@ -7,7 +7,7 @@ import com.azure.core.amqp.AmqpTransportType
 import com.azure.core.util.BinaryData
 import com.azure.messaging.eventhubs.{EventData, EventDataBatch, EventHubClientBuilder, EventHubProducerAsyncClient}
 import com.azure.storage.blob.{BlobAsyncClient, BlobClient, BlobClientBuilder}
-import eu.sia.pagopa.Main.{ConfigData, config, file}
+import eu.sia.pagopa.Main.{ConfigData, config, file, log}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.{AppObjectMapper, Appfunction}
@@ -30,6 +30,7 @@ import scala.util.Try
 object AzureProducerBuilder {
 
   def build()(implicit ec: ExecutionContext, system: ActorSystem, log: NodoLogger): ReEventFunc = {
+    log.info(s"Starting Azure Hub Event Service ...")
     val eventConfigAzureSdkClient = system.settings.config.getConfig("azure-hub-event.azure-sdk-client.re-event")
     val blobContainerClient = system.settings.config.getConfig("azure-hub-event.azure-sdk-client.blob-re")
     val eventHubName = eventConfigAzureSdkClient.getString("event-hub-name")

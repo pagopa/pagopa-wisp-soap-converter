@@ -17,6 +17,7 @@ import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ContainerBlobFunc, QueueAddFunc, ReEventFunc}
 import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder
 import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
+import eu.sia.pagopa.common.util.queueclient.AzureQueueClient
 import eu.sia.pagopa.common.util.web.NodoRoute
 import eu.sia.pagopa.config.actor.ApiConfigActor
 import eu.sia.pagopa.nodopoller.actor.PollerActor
@@ -251,14 +252,11 @@ object Main extends App {
 
       log.info(s"Created Routers:\n${(baserouters.keys ++ primitiverouters.keys).grouped(5).map(_.mkString(",")).mkString("\n")}")
 
-      log.info(s"Starting Azure Hub Event Service ...")
       val reEventFunc: ReEventFunc = AzureProducerBuilder.build()
 
-      log.info(s"Starting Azure Storage Blob Client Service ...")
       val containerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.build()
 
-      log.info(s"Starting Azure Queue ClientFdr re-add Service ...")
-      val queueAddFunction: QueueAddFunc = AzureStorageBlobClient.build()
+      val queueAddFunction: QueueAddFunc = AzureQueueClient.build()
 
       val actorProps = ActorProps(
         http,
@@ -268,6 +266,7 @@ object Main extends App {
         routers = baserouters ++ primitiverouters,
         reEventFunc = reEventFunc,
         containerBlobFunction = containerBlobFunction,
+        queueAddFunction = queueAddFunction,
         actorClassId = "main",
         cacertsPath = cacertsPath,
         ddataMap = data
@@ -400,6 +399,7 @@ final case class ActorProps(
                              routers: Map[String, ActorRef],
                              reEventFunc: ReEventFunc,
                              containerBlobFunction: ContainerBlobFunc,
+                             queueAddFunction: QueueAddFunc,
                              actorClassId: String,
                              cacertsPath: String,
                              var ddataMap: ConfigData

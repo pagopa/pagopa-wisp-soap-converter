@@ -28,7 +28,7 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
                         re: Re
                       )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
 
-    val (url, timeout) = loadServiceConfig(action, receiver)
+    val (url, timeout, headers) = loadServiceConfig(action, receiver)
 
     val simpleHttpReq = SimpleHttpReq(
       sessionId,
@@ -37,7 +37,7 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
       HttpMethods.GET,
       s"${url.replace("{fdr}",fdr).replace("{revision}",rev).replace("{pspId}",psp)}",
       None,
-      Seq("Ocp-Apim-Subscription-Key" -> "b70beacf0326442392f9550edf23971a"),
+      headers,
       Some(receiver),
       re,
       timeout.seconds,
@@ -74,7 +74,7 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
                     re: Re
                   )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
 
-    val (url, timeout) = loadServiceConfig(action, receiver)
+    val (url, timeout, headers) = loadServiceConfig(action, receiver)
 
     val simpleHttpReq = SimpleHttpReq(
       sessionId,
@@ -83,7 +83,7 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
       HttpMethods.GET,
       s"${url.replace("{fdr}",fdr).replace("{revision}",rev).replace("{pspId}",psp)}",
       None,
-      Seq("Ocp-Apim-Subscription-Key" -> "b70beacf0326442392f9550edf23971a"),
+      headers,
       Some(receiver),
       re,
       timeout.seconds,
@@ -95,7 +95,7 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
       httpResponse <- callService(simpleHttpReq, action, receiver, actorProps, false)
       res = {
         if (httpResponse.statusCode != StatusCodes.OK.intValue) {
-          throw new RestException("errore", DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue)
+          throw new RestException(s"Errore: statusCode=[${httpResponse.statusCode}], message=[${httpResponse.payload.getOrElse("")}]", DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue)
         } else {
           Try(httpResponse.payload.get.parseJson.convertTo[GetPaymentResponse]) match {
             case Success(res) => res
@@ -106,38 +106,6 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
       }
     } yield res
     getPaymentResponseData
-  }
-
-  def pushRetry(
-                   sessionId: String,
-                   testCaseId: Option[String],
-                   action: String,
-                   payload: String,
-                   receiver: String,
-                   fdr: String,
-                   psp: String,
-                   actorProps: ActorProps,
-                   re: Re
-                 )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
-
-    val (url, timeout) = loadServiceConfig(action, receiver)
-
-    val simpleHttpReq = SimpleHttpReq(
-      sessionId,
-      action,
-      ContentTypes.`application/json`,
-      HttpMethods.PUT,
-      s"${url.replace("{fdr}", fdr).replace("{psp}", psp)}",
-      None,
-      Seq(),
-      Some(receiver),
-      re,
-      timeout.seconds,
-      None,
-      testCaseId
-    )
-
-    callService(simpleHttpReq, action, receiver, actorProps, false)
   }
 
 }

@@ -25,12 +25,13 @@ object AzureQueueClient {
     (fdr: String, pspId: String, fdrMessage: String, log: NodoLogger) => {
       val executionContext: MessageDispatcher = system.dispatchers.lookup("queueAdd-dispatcher")
       log.info(s"Send message. queuename=[$name], pspId=[$pspId], fdr=[$fdr]")
-      Future(containerClient.sendMessage(fdrMessage))(executionContext) recoverWith {
+      Future(containerClient.sendMessage(fdrMessage))(executionContext).map(v => {
+        log.info(s"MessageId=[${v.getMessageId}]")
+      }).recoverWith {
         case e: Throwable =>
-          log.error(e, "Error calling azure-storage-blob")
+          log.error(e, "Error calling azure-queue")
           Future.failed(e)
       }
-
     }
   }
 }
