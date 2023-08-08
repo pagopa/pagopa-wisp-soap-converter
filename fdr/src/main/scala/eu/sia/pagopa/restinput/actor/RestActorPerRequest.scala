@@ -151,7 +151,10 @@ class RestActorPerRequest(
                   sessionId = Some(message.sessionId),
                   payload = Some(payload.getUtf8Bytes),
                   insertedTimestamp = now,
-                  info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", "))
+                  info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
+                  flowName = message.pathParams.get("fdr"),
+                  flowAction = Some(message.primitiva),
+                  tipoEvento = Some(message.primitiva)
                 ),
                 reExtra = Some(ReExtra(statusCode = Some(e.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
               )
@@ -177,7 +180,10 @@ class RestActorPerRequest(
                   sessionId = Some(message.sessionId),
                   payload = Some(payload.getUtf8Bytes),
                   insertedTimestamp = now,
-                  info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", "))
+                  info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
+                  flowName = message.pathParams.get("fdr"),
+                  flowAction = Some(message.primitiva),
+                  tipoEvento = Some(message.primitiva)
                 ),
                 reExtra = Some(ReExtra(statusCode = Some(StatusCodes.InternalServerError.intValue), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
               )
@@ -187,8 +193,6 @@ class RestActorPerRequest(
             case None =>
               //qualche bundle ha risposto in modo svagliato
               log.warn(s"Rest Response in errore")
-
-              traceRequest(message, reEventFunc, actorProps.ddataMap)
 
               val now = Util.now()
               val (reRequest, payload) = sres.statusCode match {
@@ -205,7 +209,10 @@ class RestActorPerRequest(
                       payload = sres.payload.map(_.getUtf8Bytes),
                       insertedTimestamp = now,
                       info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
-                      fruitore = Some(Componente.FDR_NOTIFIER.toString)
+                      fruitore = Some(Componente.FDR_NOTIFIER.toString),
+                      flowName = message.pathParams.get("fdr"),
+                      flowAction = Some(message.primitiva),
+                      tipoEvento = Some(message.primitiva)
                     ),
                     reExtra = Some(ReExtra(statusCode = Some(sres.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
                   ), sres.payload)
@@ -226,7 +233,10 @@ class RestActorPerRequest(
                       payload = Some(errPayload.getUtf8Bytes),
                       insertedTimestamp = now,
                       info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
-                      fruitore = Some(Componente.FDR_NOTIFIER.toString)
+                      fruitore = Some(Componente.FDR_NOTIFIER.toString),
+                      flowName = message.pathParams.get("fdr"),
+                      flowAction = Some(message.primitiva),
+                      tipoEvento = Some(message.primitiva)
                     ),
                     reExtra = Some(ReExtra(statusCode = Some(sres.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
                   ), Some(errPayload))
@@ -266,7 +276,8 @@ class RestActorPerRequest(
             sessionId = Some(message.sessionId),
             payload = Some(payload.getUtf8Bytes),
             insertedTimestamp = now,
-            info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", "))
+            info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
+            flowAction = Some(message.primitiva)
           ),
           reExtra = Some(ReExtra(statusCode = Some(StatusCodes.InternalServerError.intValue), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS))))
         )
