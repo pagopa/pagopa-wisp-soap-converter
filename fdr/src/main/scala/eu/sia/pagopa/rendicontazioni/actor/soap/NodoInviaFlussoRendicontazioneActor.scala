@@ -17,10 +17,6 @@ import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoInviaFlussoRendicon
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
 import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoRendicontazioneRisposta}
 
-import java.io.ByteArrayInputStream
-import java.io.{File, FileOutputStream}
-import java.nio.file.{Files, Paths}
-import java.security.MessageDigest
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
 import scala.concurrent.Future
@@ -35,6 +31,8 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
   var replyTo: ActorRef = _
 
   var reFlow: Option[Re] = None
+
+  private val additionalFdrValidations: Boolean = Try(context.system.settings.config.getBoolean(s"additionalFdrValidations")).getOrElse(false)
 
   val RESPONSE_NAME = "nodoInviaFlussoRendicontazioneRisposta"
 
