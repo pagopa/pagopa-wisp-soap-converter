@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.introspect.ScalaAnnotationIntrospectorModule
 import eu.sia.pagopa.ActorProps
 import eu.sia.pagopa.Main.ConfigData
+import eu.sia.pagopa.common.util.Constant.HEADER_SUBSCRIPTION_KEY
 import it.pagopa.config.{CacheVersion, Service}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -24,8 +25,6 @@ import scala.util.Try
 object ConfigUtil {
 
   private var reloading: Boolean = false
-
-  private val HEADER_SUBSCRIPTION_KEY = "Ocp-Apim-Subscription-Key"
 
   //https://github.com/FasterXML/jackson-module-scala/wiki/FAQ#deserializing-optionint-seqint-and-other-primitive-challenges
   //explicitly setting type of field for Option<primitive type>,otherwise results in boxed error

@@ -24,6 +24,8 @@ object Constant {
   val APP_NAME = sys.env.getOrElse(APP_NAME_KEY, "")
   val APP_VERSION = sys.env.getOrElse(APP_VERSION_KEY, "")
 
+  val HEADER_SUBSCRIPTION_KEY = "Ocp-Apim-Subscription-Key"
+
   val RE_JSON_LOG = "reJsonLog"
   val RE_XML_LOG = "reXmlLog"
 
@@ -45,6 +47,11 @@ object Constant {
     val FTP_SENDER = "ftp-sender"
     val RENDICONTAZIONI = "rendicontazioni"
     val DEAD_LETTER_MONITOR = "dead-letter-monitor"
+  }
+
+  object HttpStatusDescription {
+    val INTERNAL_SERVER_ERROR  = "Errore generico"
+    val BAD_REQUEST           = "Richiesta non valida"
   }
 
   object MDCKey {

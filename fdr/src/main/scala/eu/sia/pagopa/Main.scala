@@ -14,9 +14,10 @@ import eu.sia.pagopa.common.actor._
 import eu.sia.pagopa.common.message.{TriggerJobRequest, TriggerJobResponse}
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ContainerBlobFunc, ReEventFunc}
+import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ContainerBlobFunc, QueueAddFunc, ReEventFunc}
 import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder
 import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
+import eu.sia.pagopa.common.util.queueclient.AzureQueueClient
 import eu.sia.pagopa.common.util.web.NodoRoute
 import eu.sia.pagopa.config.actor.ApiConfigActor
 import eu.sia.pagopa.nodopoller.actor.PollerActor
@@ -240,7 +241,7 @@ object Main extends App {
 
       val primitiveActorsNamesAndTypes: Seq[(String, Class[_ <: BaseActor])] = job match {
         case None =>
-          (Primitive.soap.keys ++ Primitive.jobs.keys).map(s => s -> classOf[PrimitiveActor]).toSeq
+          (Primitive.soap.keys ++ Primitive.rest.keys ++ Primitive.jobs.keys).map(s => s -> classOf[PrimitiveActor]).toSeq
         case Some(j) =>
           Seq(j -> classOf[PrimitiveActor])
       }
@@ -251,10 +252,11 @@ object Main extends App {
 
       log.info(s"Created Routers:\n${(baserouters.keys ++ primitiverouters.keys).grouped(5).map(_.mkString(",")).mkString("\n")}")
 
-      log.info(s"Starting Azure Hub Event Service ...")
       val reEventFunc: ReEventFunc = AzureProducerBuilder.build()
 
       val containerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.build()
+
+      val queueAddFunction: QueueAddFunc = AzureQueueClient.build()
 
       val actorProps = ActorProps(
         http,
@@ -264,6 +266,7 @@ object Main extends App {
         routers = baserouters ++ primitiverouters,
         reEventFunc = reEventFunc,
         containerBlobFunction = containerBlobFunction,
+        queueAddFunction = queueAddFunction,
         actorClassId = "main",
         cacertsPath = cacertsPath,
         ddataMap = data
@@ -299,7 +302,7 @@ object Main extends App {
           import akka.http.scaladsl.server.Directives._
           http
             .newServerAt(httpHost, httpPort)
-            .bind(routes.route ~ routes.routeSeed ~ routes.soapFunction(actorProps))
+            .bind(routes.route ~ routes.routeSeed ~ routes.soapFunction(actorProps) ~ routes.restFunction(actorProps))
             .map(f => {
               if (job.isEmpty) {
                 log.info(s"Starting AkkaManagement...")
@@ -396,6 +399,7 @@ final case class ActorProps(
                              routers: Map[String, ActorRef],
                              reEventFunc: ReEventFunc,
                              containerBlobFunction: ContainerBlobFunc,
+                             queueAddFunction: QueueAddFunc,
                              actorClassId: String,
                              cacertsPath: String,
                              var ddataMap: ConfigData

@@ -4,14 +4,17 @@ import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.event.Logging
 import akka.testkit.{ImplicitSender, TestKit}
 import com.typesafe.config.{Config, ConfigFactory}
+import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.fdr.FdrRepository
 import eu.sia.pagopa.common.repo.{DBComponent, Repositories}
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder
 import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
+import eu.sia.pagopa.common.util.queueclient.AzureQueueClient
 import eu.sia.pagopa.common.util.xml.XmlUtil
 import eu.sia.pagopa.commonxml.XmlEnum
+import eu.sia.pagopa.rendicontazioni.actor.rest.NotifyFlussoRendicontazioneActorPerRequest
 import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneActorPerRequest}
 import eu.sia.pagopa.testutil._
 import liquibase.database.DatabaseFactory
@@ -30,10 +33,11 @@ import slick.sql.SqlStreamingAction
 import slick.util.AsyncExecutor
 
 import java.io.File
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future, Promise}
 import scala.util.Try
 
 object RepositoriesUtil {
@@ -127,6 +131,7 @@ abstract class BaseUnitTest()
   val actorUtility = new ActorUtilityTest()
   val reFunction = AzureProducerBuilder.build()
   val containerBlobFunction = AzureStorageBlobClient.build()
+  val queueAddFunction = AzureQueueClient.build()
 
   val certPath = s"${new File(".").getCanonicalPath}/localresources/cacerts"
 
@@ -135,7 +140,7 @@ abstract class BaseUnitTest()
   }
   val repositories = new RepositoriesTest(system.settings.config, log)
 
-  val props = ActorProps(null, null, null, actorUtility, Map(), reFunction, containerBlobFunction, "", certPath, TestItems.ddataMap)
+  val props = ActorProps(null, null, null, actorUtility, Map(), reFunction, containerBlobFunction, queueAddFunction, "", certPath, TestItems.ddataMap)
 
   val mockActor = system.actorOf(Props.create(classOf[MockActor]), s"mock")
 
@@ -332,6 +337,59 @@ abstract class BaseUnitTest()
     assert(actRes.isSuccess)
     responseAssert(actRes.get)
     actRes.get
+  }
+
+  def notifyFlusso(
+                    fdr: String,
+                    pspId: String,
+                    retry: Long,
+                    revision: Long,
+                    testCase: Option[String] = Some("OK"),
+                    responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
+                    newdata: Option[ConfigData] = None
+                  ): Future[String] = {
+    val p = Promise[Boolean]()
+    val notifyFlusso =
+      system.actorOf(
+        Props.create(classOf[NotifyFlussoRendicontazioneActorPerRequest], p, repositories, props.copy(actorClassId = "notifyFlussoRendicontazione", ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+        s"notifyFlussoRendicontazione${Util.now()}"
+      )
+
+    val restResponse = askActor(
+      notifyFlusso,
+      RestRequest(
+        UUID.randomUUID().toString,
+        Some(
+          notifyFlussoPayload(
+            fdr, pspId, retry, revision
+          )
+        ),
+        Nil,
+        Map("fdr" -> fdr, "revision" -> revision.toString, "pspId" -> pspId),
+        TestItems.testPDD,
+        "notifyFlusso",
+        Util.now(),
+        ReExtra(),
+        testCase
+      )
+    )
+    assert(restResponse.payload.isDefined)
+    responseAssert(restResponse.payload.get, restResponse.statusCode)
+    p.future.map(_ => restResponse.payload.get)
+  }
+
+  def notifyFlussoPayload(
+                           fdr: String,
+                           pspId: String,
+                           retry: Long,
+                           revision: Long
+                         ) = {
+      s"""{
+         |  "ame": "$fdr",
+         |  "pspId": "$pspId",
+         |  "retry": $retry,
+         |  "revision": $revision
+         |}""".stripMargin
   }
 
   def await[T](f: Future[T]): T = {

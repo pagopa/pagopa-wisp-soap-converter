@@ -3,7 +3,7 @@ package eu.sia.pagopa.rendicontazioni.actor.soap
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
 import eu.sia.pagopa.ActorProps
-import eu.sia.pagopa.common.actor.{HttpServiceManagement, PerRequestActor}
+import eu.sia.pagopa.common.actor.{HttpSoapServiceManagement, PerRequestActor}
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
@@ -205,7 +205,7 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
         (for {
           _ <- Future.successful(())
 
-          response <- HttpServiceManagement.createRequestSoapAction(
+          response <- HttpSoapServiceManagement.createRequestSoapAction(
             req.sessionId,
             req.testCaseId,
             req.primitive,
