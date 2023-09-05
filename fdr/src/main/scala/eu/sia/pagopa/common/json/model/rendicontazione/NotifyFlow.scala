@@ -10,7 +10,7 @@ object NotifyFlowRequest extends DefaultJsonProtocol {
   implicit val format: RootJsonFormat[NotifyFlowRequest] = new RootJsonFormat[NotifyFlowRequest] {
     def write(req: NotifyFlowRequest): JsObject = {
       JsObject(Map[String, JsValue](
-        "name" -> JsString(req.name),
+        "fdr" -> JsString(req.fdr),
         "pspId" -> JsString(req.pspId),
         "retry" -> JsNumber(req.retry),
         "revision" -> JsNumber(req.revision)
@@ -21,7 +21,7 @@ object NotifyFlowRequest extends DefaultJsonProtocol {
       val map = json.asJsObject.fields
       Try(
         NotifyFlowRequest(
-          map("name").asInstanceOf[JsString].value,
+          map("fdr").asInstanceOf[JsString].value,
           map("pspId").asInstanceOf[JsString].value,
           map("retry").asInstanceOf[JsNumber].value.toInt,
           map("revision").asInstanceOf[JsNumber].value.toInt
@@ -34,7 +34,7 @@ object NotifyFlowRequest extends DefaultJsonProtocol {
   }
 }
 
-case class NotifyFlowRequest(name: String, pspId: String, retry: Integer, revision: Integer)
+case class NotifyFlowRequest(fdr: String, pspId: String, retry: Integer, revision: Integer)
 
 object NotifyFlowResponse {}
 

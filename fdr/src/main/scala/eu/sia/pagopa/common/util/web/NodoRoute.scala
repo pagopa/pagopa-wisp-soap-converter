@@ -558,13 +558,14 @@ case class NodoRoute(
     Primitive.rest
       .map(primi => {
         val primitiva = primi._1
-        val pathMatcher: PathMatcher[(String, String)] = "psps" / Segment / "flows" / Segment / "ready"
+        val httppath = primi._2._1
+        val pathMatcher = PathMatchers.separateOnSlashes(httppath)
         val httpmethod = methods(primitiva)
 
-        path(pathMatcher) { (psp, fdr) =>
+        path(pathMatcher) {
           val sessionId = UUID.randomUUID().toString
           MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-          log.info(s"Ricevuta [$primitiva] @ timestamp=[${LocalDateTime.now()}], psp=[$psp], fdr=[$fdr]")
+          log.info(s"Ricevuta request [$sessionId] @ ${LocalDateTime.now()} : [$primitiva]")
           MDC.put(Constant.MDCKey.ACTOR_CLASS_ID, primitiva)
           val httpSeverRequestTimeout = FiniteDuration(httpSeverRequestTimeoutParam, SECONDS)
           withRequestTimeout(httpSeverRequestTimeout, _ => akkaHttpTimeout(sessionId)) {
@@ -598,7 +599,6 @@ case class NodoRoute(
                                   Some(req.uri.toString()),
                                   req.headers.map(h => (h.name(), h.value())),
                                   params,
-                                  Map("psp" -> psp, "fdr" -> fdr),
                                   Some(httpmethod),
                                   originalRequestAddresOpt.flatMap(_.split(",").headOption).orElse(remoteAddress.toIP.map(_.ip.getHostAddress)),
                                   primitiva

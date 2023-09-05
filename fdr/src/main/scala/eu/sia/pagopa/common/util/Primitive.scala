@@ -14,7 +14,7 @@ object Primitive {
   )
 
   val rest: Map[String, (String, Boolean => Class[_ <: PerRequestActor])] = Map(
-    "notifyFlussoRendicontazione" -> ("psps/:psp/flows/:fdr/ready", _ => classOf[NotifyFlussoRendicontazioneActorPerRequest])
+    "notifyFlussoRendicontazione" -> ("notify/fdr", _ => classOf[NotifyFlussoRendicontazioneActorPerRequest])
   )
 
   val jobs: Map[String, (String, Boolean => Class[_ <: PerRequestActor])] = Map(

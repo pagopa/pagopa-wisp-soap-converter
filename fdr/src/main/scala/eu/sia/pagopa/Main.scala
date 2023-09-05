@@ -213,10 +213,16 @@ object Main extends App {
   val bootstrapFuture = (for {
     ddata <-
       for {
+        _ <- Future.successful(())
+        env = scala.util.Properties.envOrNone("INSTANCE")
         cfgData <- ConfigUtil.getConfigHttp(SSlContext)
         data <- cfgData match {
           case Some(c) => Future.successful(c)
-          case None => Future.failed(new RuntimeException("Could not get ConfigData"))
+          case None => if( env.isDefined && env.get == "LOCAL" ){
+            Future.successful(TestDData.ddataMap)
+          } else {
+            Future.failed(new RuntimeException("Could not get ConfigData"))
+          }
         }
       } yield  data
 

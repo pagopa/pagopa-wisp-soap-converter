@@ -223,8 +223,8 @@ final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Reposi
             val obj = restRequest.payload.get.parseJson.convertTo[NotifyFlowRequest]
             Success(obj)
           case Failure(e) =>
-            if (e.getMessage.contains("name")) {
-              Failure(RestException("Invalid name", "", StatusCodes.BadRequest.intValue, e))
+            if (e.getMessage.contains("fdr")) {
+              Failure(RestException("Invalid fdr", "", StatusCodes.BadRequest.intValue, e))
             } else if (e.getMessage.contains("pspId")) {
               Failure(RestException("Invalid pspId", "", StatusCodes.BadRequest.intValue, e))
             } else if (e.getMessage.contains("retry")) {
@@ -238,7 +238,7 @@ final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Reposi
       }
 
       val psp = nfrReq.get.pspId
-      val fdr = nfrReq.get.name
+      val fdr = nfrReq.get.fdr
       val revision = nfrReq.get.revision
       val retry = nfrReq.get.retry
       checkPsp(log, ddataMap, psp) match {

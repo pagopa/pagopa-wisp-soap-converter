@@ -365,7 +365,6 @@ abstract class BaseUnitTest()
           )
         ),
         Nil,
-        Map("fdr" -> fdr, "revision" -> revision.toString, "pspId" -> pspId),
         TestItems.testPDD,
         "notifyFlusso",
         Util.now(),

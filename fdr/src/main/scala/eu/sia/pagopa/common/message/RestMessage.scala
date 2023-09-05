@@ -8,7 +8,6 @@ case class RestRequest(
     override val sessionId: String,
     payload: Option[String],
     queryParameters: Seq[(String, String)] = Nil,
-    pathParams: Map[String, String],
     callRemoteAddress: String,
     primitive: String,
     timestamp: LocalDateTime,

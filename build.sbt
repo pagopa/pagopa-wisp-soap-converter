@@ -280,6 +280,7 @@ lazy val `fdr` = (project in file("fdr"))
         "org.scalaz" %% "scalaz-core" % scalazcore,
         "com.fasterxml.jackson.module" %% "jackson-module-scala" % jackson,
         "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jackson,
+        "com.fasterxml.jackson.core" % "jackson-databind" % jackson,
         "io.mola.galimatias" % "galimatias" % galimatias,
         "fr.janalyse" %% "janalyse-ssh" % janalyseSsh,
         "com.azure" % "azure-messaging-eventhubs" % azuremessagingeventhubs,

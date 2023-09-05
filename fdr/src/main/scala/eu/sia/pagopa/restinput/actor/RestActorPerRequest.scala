@@ -58,7 +58,7 @@ class RestActorPerRequest(
   }
 
   def reExtra(rrr: RestRouterRequest): ReExtra =
-    ReExtra(uri = rrr.uri.map(_.toString), headers = rrr.headers, httpMethod = rrr.httpMethod, callRemoteAddress = rrr.callRemoteAddress)
+    ReExtra(uri = rrr.uri.map(_.toString ), headers = rrr.headers, httpMethod = rrr.httpMethod, callRemoteAddress = rrr.callRemoteAddress)
 
   def traceRequest(rrr: RestRouterRequest, reEventFunc: ReEventFunc, ddataMap: ConfigData): Unit = {
     Util.logPayload(log, message.payload)
@@ -152,7 +152,6 @@ class RestActorPerRequest(
                   payload = Some(payload.getUtf8Bytes),
                   insertedTimestamp = now,
                   info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
-                  flowName = message.pathParams.get("fdr"),
                   flowAction = Some(message.primitiva),
                   tipoEvento = Some(message.primitiva)
                 ),
@@ -181,7 +180,6 @@ class RestActorPerRequest(
                   payload = Some(payload.getUtf8Bytes),
                   insertedTimestamp = now,
                   info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
-                  flowName = message.pathParams.get("fdr"),
                   flowAction = Some(message.primitiva),
                   tipoEvento = Some(message.primitiva)
                 ),
@@ -210,7 +208,6 @@ class RestActorPerRequest(
                       insertedTimestamp = now,
                       info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
                       fruitore = Some(Componente.FDR_NOTIFIER.toString),
-                      flowName = message.pathParams.get("fdr"),
                       flowAction = Some(message.primitiva),
                       tipoEvento = Some(message.primitiva)
                     ),
@@ -234,7 +231,6 @@ class RestActorPerRequest(
                       insertedTimestamp = now,
                       info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
                       fruitore = Some(Componente.FDR_NOTIFIER.toString),
-                      flowName = message.pathParams.get("fdr"),
                       flowAction = Some(message.primitiva),
                       tipoEvento = Some(message.primitiva)
                     ),
@@ -251,7 +247,7 @@ class RestActorPerRequest(
     allRouters.get(BootstrapUtil.actorRouter(message.primitiva)) match {
       case Some(router) =>
         val restRequest =
-          RestRequest(message.sessionId, message.payload, message.queryParams, message.pathParams, message.callRemoteAddress.getOrElse(""), message.primitiva, message.timestamp, reExtra(message), message.testCaseId)
+          RestRequest(message.sessionId, message.payload, message.queryParams, message.callRemoteAddress.getOrElse(""), message.primitiva, message.timestamp, reExtra(message), message.testCaseId)
         log.info(FdrLogConstant.callBundle(router.path.name))
         router ! restRequest
 
