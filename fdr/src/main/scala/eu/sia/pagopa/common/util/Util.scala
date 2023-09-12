@@ -5,8 +5,10 @@ import akka.http.scaladsl.model.{ContentType => _}
 import akka.routing.RoundRobinGroup
 import com.typesafe.config.Config
 
+import java.io.ByteArrayOutputStream
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.zip.GZIPOutputStream
 import scala.util.matching.Regex
 
 object Util {
@@ -95,5 +97,15 @@ object Util {
         s"$key : $value"
       }
       .mkString("{", ", ", "}")
+  }
+
+  def zipContent(bytes: Array[Byte]) = {
+    val bais = new ByteArrayOutputStream(bytes.length)
+    val gzipOut = new GZIPOutputStream(bais)
+    gzipOut.write(bytes)
+    gzipOut.close()
+    val compressed = bais.toByteArray
+    bais.close()
+    compressed
   }
 }

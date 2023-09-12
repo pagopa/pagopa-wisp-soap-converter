@@ -247,7 +247,7 @@ object Main extends App {
 
       val primitiveActorsNamesAndTypes: Seq[(String, Class[_ <: BaseActor])] = job match {
         case None =>
-          (Primitive.soap.keys ++ Primitive.rest.keys ++ Primitive.jobs.keys).map(s => s -> classOf[PrimitiveActor]).toSeq
+          (Primitive.soap.keys ++ Primitive.rest.keys ++ Primitive.restInternal.keys ++ Primitive.jobs.keys).map(s => s -> classOf[PrimitiveActor]).toSeq
         case Some(j) =>
           Seq(j -> classOf[PrimitiveActor])
       }
@@ -308,7 +308,7 @@ object Main extends App {
           import akka.http.scaladsl.server.Directives._
           http
             .newServerAt(httpHost, httpPort)
-            .bind(routes.route ~ routes.routeSeed ~ routes.soapFunction(actorProps) ~ routes.restFunction(actorProps))
+            .bind(routes.route ~ routes.routeSeed ~ routes.soapFunction(actorProps) ~ routes.restFunction(actorProps) ~ routes.restFunctionInternal(actorProps))
             .map(f => {
               if (job.isEmpty) {
                 log.info(s"Starting AkkaManagement...")

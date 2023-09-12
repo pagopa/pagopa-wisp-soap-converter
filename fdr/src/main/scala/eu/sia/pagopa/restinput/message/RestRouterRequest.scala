@@ -12,6 +12,7 @@ case class RestRouterRequest(
                               uri: Option[String] = None,
                               headers: Seq[(String, String)] = Nil,
                               queryParams: Seq[(String, String)] = Nil,
+                              pathParams: Map[String, String],
                               httpMethod: Option[String] = None,
                               callRemoteAddress: Option[String] = None,
                               primitiva: String,

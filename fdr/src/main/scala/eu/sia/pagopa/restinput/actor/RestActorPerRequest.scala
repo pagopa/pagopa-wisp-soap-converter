@@ -108,7 +108,9 @@ class RestActorPerRequest(
                   sottoTipoEvento = SottoTipoEvento.RESP.toString,
                   esito = Some(EsitoRE.INVIATA.toString),
                   payload = sres.payload.map(_.getUtf8Bytes),
-                  insertedTimestamp = now
+                  insertedTimestamp = now,
+                  idDominio = message.pathParams.get("organizationId"),
+                  flowName = message.pathParams.get("fdr")
                 )
               )
               .getOrElse(
@@ -120,7 +122,9 @@ class RestActorPerRequest(
                   payload = sres.payload.map(_.getUtf8Bytes),
                   insertedTimestamp = now,
                   sessionId = Some(sres.sessionId),
-                  info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", "))
+                  info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
+                  idDominio = message.pathParams.get("organizationId"),
+                  flowName = message.pathParams.get("fdr")
                 )
               ),
             reExtra = Some(ReExtra(statusCode = Some(bundleResponse.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
@@ -153,7 +157,9 @@ class RestActorPerRequest(
                   insertedTimestamp = now,
                   info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
                   flowAction = Some(message.primitiva),
-                  tipoEvento = Some(message.primitiva)
+                  tipoEvento = Some(message.primitiva),
+                  idDominio = message.pathParams.get("organizationId"),
+                  flowName = message.pathParams.get("fdr")
                 ),
                 reExtra = Some(ReExtra(statusCode = Some(e.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
               )
@@ -181,7 +187,9 @@ class RestActorPerRequest(
                   insertedTimestamp = now,
                   info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
                   flowAction = Some(message.primitiva),
-                  tipoEvento = Some(message.primitiva)
+                  tipoEvento = Some(message.primitiva),
+                  idDominio = message.pathParams.get("organizationId"),
+                  flowName = message.pathParams.get("fdr")
                 ),
                 reExtra = Some(ReExtra(statusCode = Some(StatusCodes.InternalServerError.intValue), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
               )
@@ -209,7 +217,9 @@ class RestActorPerRequest(
                       info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
                       fruitore = Some(Componente.FDR_NOTIFIER.toString),
                       flowAction = Some(message.primitiva),
-                      tipoEvento = Some(message.primitiva)
+                      tipoEvento = Some(message.primitiva),
+                      idDominio = message.pathParams.get("organizationId"),
+                      flowName = message.pathParams.get("fdr")
                     ),
                     reExtra = Some(ReExtra(statusCode = Some(sres.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
                   ), sres.payload)
@@ -232,7 +242,9 @@ class RestActorPerRequest(
                       info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
                       fruitore = Some(Componente.FDR_NOTIFIER.toString),
                       flowAction = Some(message.primitiva),
-                      tipoEvento = Some(message.primitiva)
+                      tipoEvento = Some(message.primitiva),
+                      idDominio = message.pathParams.get("organizationId"),
+                      flowName = message.pathParams.get("fdr")
                     ),
                     reExtra = Some(ReExtra(statusCode = Some(sres.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
                   ), Some(errPayload))
@@ -247,7 +259,7 @@ class RestActorPerRequest(
     allRouters.get(BootstrapUtil.actorRouter(message.primitiva)) match {
       case Some(router) =>
         val restRequest =
-          RestRequest(message.sessionId, message.payload, message.queryParams, message.callRemoteAddress.getOrElse(""), message.primitiva, message.timestamp, reExtra(message), message.testCaseId)
+          RestRequest(message.sessionId, message.payload, message.queryParams, message.pathParams, message.callRemoteAddress.getOrElse(""), message.primitiva, message.timestamp, reExtra(message), message.testCaseId)
         log.info(FdrLogConstant.callBundle(router.path.name))
         router ! restRequest
 
