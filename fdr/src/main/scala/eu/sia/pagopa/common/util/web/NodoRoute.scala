@@ -567,69 +567,7 @@ case class NodoRoute(
         val httpmethod = methods(primitiva)
 
         path(pathMatcher) {
-          val sessionId = UUID.randomUUID().toString
-          MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-          log.info(s"Ricevuta request [$sessionId] @ ${LocalDateTime.now()} : [$primitiva]")
-          MDC.put(Constant.MDCKey.ACTOR_CLASS_ID, primitiva)
-          val httpSeverRequestTimeout = FiniteDuration(httpSeverRequestTimeoutParam, SECONDS)
-          withRequestTimeout(httpSeverRequestTimeout, _ => akkaHttpTimeout(sessionId)) {
-            method(HttpMethods.getForKey(httpmethod).get) {
-              extractRequest { req =>
-                extractClientIP { remoteAddress =>
-                  optionalHeaderValueByName(X_PDD_HEADER) { originalRequestAddresOpt =>
-                    log.debug(s"Request headers:\n${req.headers.map(s => s"${s.name()} => ${s.value()}").mkString("\n")}")
-                    extractRequestContext { ctx =>
-                      entity(as[ByteString]) { bs =>
-                        parameterSeq { params =>
-                          optionalHeaderValueByName("testCaseId") { headerTestCaseId =>
-                            val cs = req.entity.contentType.charsetOption.getOrElse(HttpCharsets.`UTF-8`)
-                            val payloadTry = Try(if (checkUTF8) {
-                              val dec = cs.nioCharset().newDecoder()
-                              dec.decode(bs.asByteBuffer).toString
-                            } else {
-                              bs.utf8String
-                            })
-                            payloadTry match {
-                              case Success(payload) =>
-                                log.info(FdrLogConstant.logStart(Constant.KeyName.REST_INPUT))
-                                val request = ctx.request
-                                log.info(s"Content-Type [${request.entity.contentType}]")
-
-                                val restRouterRequest: RestRouterRequest = RestRouterRequest(
-                                  sessionId,
-                                  if (payload.isEmpty) None else Some(payload),
-                                  Util.now(),
-                                  headerTestCaseId,
-                                  Some(req.uri.toString()),
-                                  req.headers.map(h => (h.name(), h.value())),
-                                  params,
-                                  Map(),
-//                                  Map("psp" -> psp, "fdr" -> fdr),
-                                  Some(httpmethod),
-                                  originalRequestAddresOpt.flatMap(_.split(",").headOption).orElse(remoteAddress.toIP.map(_.ip.getHostAddress)),
-                                  primitiva
-                                )
-
-                                val p: Promise[RouteResult] = Promise[RouteResult]()
-                                createSystemActorPerRequestAndTell[RestRouterRequest](
-                                  restRouterRequest,
-                                  Constant.KeyName.REST_INPUT,
-                                  Props(classOf[RestActorPerRequest], ctx, p, routers, reEventFunc, actorProps)
-                                )(log, system)
-                                _ => p.future
-                              case Failure(_) =>
-                                complete(akkaErrorEncoding(sessionId, cs.value))
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-
+          restRoute(primitiva, httpmethod, Map())
         }
 
       })
@@ -645,71 +583,75 @@ case class NodoRoute(
 
         path(pathMatcherVariables) {
           (organizationId, fdr) =>
-              val sessionId = UUID.randomUUID().toString
-              MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-              log.info(s"Ricevuta request [$sessionId] @ ${LocalDateTime.now()} : [$primitiva]")
-              MDC.put(Constant.MDCKey.ACTOR_CLASS_ID, primitiva)
-              val httpSeverRequestTimeout = FiniteDuration(httpSeverRequestTimeoutParam, SECONDS)
-              withRequestTimeout(httpSeverRequestTimeout, _ => akkaHttpTimeout(sessionId)) {
-                method(HttpMethods.getForKey(httpmethod).get) {
-                  extractRequest { req =>
-                    extractClientIP { remoteAddress =>
-                      optionalHeaderValueByName(X_PDD_HEADER) { originalRequestAddresOpt =>
-                        log.debug(s"Request headers:\n${req.headers.map(s => s"${s.name()} => ${s.value()}").mkString("\n")}")
-                        extractRequestContext { ctx =>
-                          entity(as[ByteString]) { bs =>
-                            parameterSeq { params =>
-                              optionalHeaderValueByName("testCaseId") { headerTestCaseId =>
-                                val cs = req.entity.contentType.charsetOption.getOrElse(HttpCharsets.`UTF-8`)
-                                val payloadTry = Try(if (checkUTF8) {
-                                  val dec = cs.nioCharset().newDecoder()
-                                  dec.decode(bs.asByteBuffer).toString
-                                } else {
-                                  bs.utf8String
-                                })
-                                payloadTry match {
-                                  case Success(payload) =>
-                                    log.info(FdrLogConstant.logStart(Constant.KeyName.REST_INPUT))
-                                    val request = ctx.request
-                                    log.info(s"Content-Type [${request.entity.contentType}]")
+              restRoute(primitiva, httpmethod, Map("organizationId" -> organizationId, "fdr" -> fdr))
+        }
 
-                                    val restRouterRequest: RestRouterRequest = RestRouterRequest(
-                                      sessionId,
-                                      if (payload.isEmpty) None else Some(payload),
-                                      Util.now(),
-                                      headerTestCaseId,
-                                      Some(req.uri.toString()),
-                                      req.headers.map(h => (h.name(), h.value())),
-                                      params,
-                                      Map("organizationId" -> organizationId, "fdr" -> fdr),
-                                      Some(httpmethod),
-                                      originalRequestAddresOpt.flatMap(_.split(",").headOption).orElse(remoteAddress.toIP.map(_.ip.getHostAddress)),
-                                      primitiva
-                                    )
+      })
+      .fold(RouteDirectives.reject)(_ ~ _)
+  }
 
-                                    val p: Promise[RouteResult] = Promise[RouteResult]()
-                                    createSystemActorPerRequestAndTell[RestRouterRequest](
-                                      restRouterRequest,
-                                      Constant.KeyName.REST_INPUT,
-                                      Props(classOf[RestActorPerRequest], ctx, p, routers, reEventFunc, actorProps)
-                                    )(log, system)
-                                    _ => p.future
-                                  case Failure(_) =>
-                                    complete(akkaErrorEncoding(sessionId, cs.value))
-                                }
-                              }
-                            }
-                          }
-                        }
+  private def restRoute(primitiva: String, httpmethod: String, pathParams: Map[String, String]) = {
+    val sessionId = UUID.randomUUID().toString
+    MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
+    log.info(s"Ricevuta request [$sessionId] @ ${LocalDateTime.now()} : [$primitiva]")
+    MDC.put(Constant.MDCKey.ACTOR_CLASS_ID, primitiva)
+    val httpSeverRequestTimeout = FiniteDuration(httpSeverRequestTimeoutParam, SECONDS)
+    withRequestTimeout(httpSeverRequestTimeout, _ => akkaHttpTimeout(sessionId)) {
+      method(HttpMethods.getForKey(httpmethod).get) {
+        extractRequest { req =>
+          extractClientIP { remoteAddress =>
+            optionalHeaderValueByName(X_PDD_HEADER) { originalRequestAddresOpt =>
+              log.debug(s"Request headers:\n${req.headers.map(s => s"${s.name()} => ${s.value()}").mkString("\n")}")
+              extractRequestContext { ctx =>
+                entity(as[ByteString]) { bs =>
+                  parameterSeq { params =>
+                    optionalHeaderValueByName("testCaseId") { headerTestCaseId =>
+                      val cs = req.entity.contentType.charsetOption.getOrElse(HttpCharsets.`UTF-8`)
+                      val payloadTry = Try(if (checkUTF8) {
+                        val dec = cs.nioCharset().newDecoder()
+                        dec.decode(bs.asByteBuffer).toString
+                      } else {
+                        bs.utf8String
+                      })
+                      payloadTry match {
+                        case Success(payload) =>
+                          log.info(FdrLogConstant.logStart(Constant.KeyName.REST_INPUT))
+                          val request = ctx.request
+                          log.info(s"Content-Type [${request.entity.contentType}]")
+
+                          val restRouterRequest: RestRouterRequest = RestRouterRequest(
+                            sessionId,
+                            if (payload.isEmpty) None else Some(payload),
+                            Util.now(),
+                            headerTestCaseId,
+                            Some(req.uri.toString()),
+                            req.headers.map(h => (h.name(), h.value())),
+                            params,
+                            pathParams,
+                            Some(httpmethod),
+                            originalRequestAddresOpt.flatMap(_.split(",").headOption).orElse(remoteAddress.toIP.map(_.ip.getHostAddress)),
+                            primitiva
+                          )
+
+                          val p: Promise[RouteResult] = Promise[RouteResult]()
+                          createSystemActorPerRequestAndTell[RestRouterRequest](
+                            restRouterRequest,
+                            Constant.KeyName.REST_INPUT,
+                            Props(classOf[RestActorPerRequest], ctx, p, routers, reEventFunc, actorProps)
+                          )(log, system)
+                          _ => p.future
+                        case Failure(_) =>
+                          complete(akkaErrorEncoding(sessionId, cs.value))
                       }
                     }
                   }
                 }
               }
+            }
+          }
         }
-
-      })
-      .fold(RouteDirectives.reject)(_ ~ _)
+      }
+    }
   }
 
 }
