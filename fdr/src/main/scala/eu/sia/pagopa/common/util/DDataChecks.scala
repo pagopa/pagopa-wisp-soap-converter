@@ -1,8 +1,9 @@
 package eu.sia.pagopa.common.util
 
+import akka.http.scaladsl.model.StatusCodes
 import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.exception
-import eu.sia.pagopa.common.exception.DigitPaErrorCodes
+import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, RestException}
 import it.pagopa.config._
 
 import scala.util.{Failure, Success, Try}
@@ -21,11 +22,11 @@ object DDataChecks {
           Success(value)
         } else {
           log.warn(s"idPA[$idPa] found but disabled")
-          Failure(DigitPaErrorCodes.PPT_DOMINIO_DISABILITATO)
+          Failure(RestException(s"idPA $idPa found but disabled", Constant.HttpStatusDescription.BAD_REQUEST, StatusCodes.BadRequest.intValue))
         }
       case None =>
         log.warn(s"idPA=[$idPa] not found")
-        Failure(DigitPaErrorCodes.PPT_DOMINIO_SCONOSCIUTO)
+        Failure(RestException(s"idPA $idPa not found", Constant.HttpStatusDescription.NOT_FOUND, StatusCodes.NotFound.intValue))
     }
   }
 
