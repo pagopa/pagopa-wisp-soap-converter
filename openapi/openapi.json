@@ -12,6 +12,28 @@
   ],
   "tags": [],
   "paths": {
+    "/notify/fdr" : {
+      "post" : {
+        "tags" : [ "Fdr fase 1" ],
+        "summary" : "Notify fdr to convert",
+        "description" : "Notify fdr to convert",
+        "operationId" : "notifyFdrToConvert",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NotifyFdr"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success"
+            }
+          }
+        }
+      },
     "/internal/organizations/{organizationId}/fdrs/{fdr}": {
       "get": {
         "tags": [
@@ -63,6 +85,25 @@
   },
   "components": {
     "schemas": {
+      "NotifyFdr": {
+        "type": "object",
+        "required": ["fdr", "pspId", "retry", "revision"],
+        "properties": {
+          "fdr" : {
+            "type" : "string"
+          },
+          "pspId" : {
+            "type" : "string"
+          },
+          "retry" : {
+            "type" : "integer"
+          },
+          "revision" : {
+            "type" : "integer"
+          }
+        },
+        "additionalProperties": false
+      },
       "GetXmlRendicontazioneResponse": {
         "type": "object",
         "properties": {
