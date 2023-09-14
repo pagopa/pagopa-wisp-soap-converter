@@ -8,7 +8,7 @@ import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException, RestException}
 import eu.sia.pagopa.common.json.model.Error
-import eu.sia.pagopa.common.json.model.rendicontazione.{GetAllRevisionFdrResponse, NotifyFlowRequest, PayStatusEnum, SenderTypeEnum}
+import eu.sia.pagopa.common.json.model.rendicontazione.{GetXmlRendicontazioneResponse, NotifyFlowRequest, PayStatusEnum, SenderTypeEnum}
 import eu.sia.pagopa.common.json.{JsonEnum, JsonValid}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
@@ -116,7 +116,7 @@ final case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, ac
 
         _ = log.debug("Make response with reporting")
         rendicontazioneDb <- elaboraRisposta(binaryFileOption)
-      } yield RestResponse(req.sessionId, Some(GetAllRevisionFdrResponse(rendicontazioneDb.get).toJson.compactPrint), StatusCodes.OK.intValue, reFlow, req.testCaseId, None) )
+      } yield RestResponse(req.sessionId, Some(GetXmlRendicontazioneResponse(rendicontazioneDb.get).toJson.compactPrint), StatusCodes.OK.intValue, reFlow, req.testCaseId, None) )
         .recoverWith({
           case rex: RestException =>
             Future.successful(generateResponse(Some(rex)))
