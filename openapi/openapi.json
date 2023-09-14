@@ -3,7 +3,7 @@
   "info": {
     "title": "Fdr nodo - Api (local) ${service}",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "1.0.0"
+    "version": "1.0.0-SNAPSHOT"
   },
   "servers": [
     {
@@ -12,28 +12,30 @@
   ],
   "tags": [],
   "paths": {
-    "/notify/fdr" : {
-      "post" : {
-        "tags" : [ "Fdr fase 1" ],
-        "summary" : "Notify fdr to convert",
-        "description" : "Notify fdr to convert",
-        "operationId" : "notifyFdrToConvert",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/NotifyFdr"
+    "/notify/fdr": {
+      "post": {
+        "tags": [
+          "Fdr fase 1"
+        ],
+        "summary": "Notify fdr to convert",
+        "description": "Notify fdr to convert",
+        "operationId": "notifyFdrToConvert",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotifyFdr"
               }
             }
           }
         },
-        "responses" : {
-          "200" : {
-            "description" : "Success"
-            }
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
-      },
+      }
+    },
     "/internal/organizations/{organizationId}/fdrs/{fdr}": {
       "get": {
         "tags": [
@@ -87,19 +89,24 @@
     "schemas": {
       "NotifyFdr": {
         "type": "object",
-        "required": ["fdr", "pspId", "retry", "revision"],
+        "required": [
+          "fdr",
+          "pspId",
+          "retry",
+          "revision"
+        ],
         "properties": {
-          "fdr" : {
-            "type" : "string"
+          "fdr": {
+            "type": "string"
           },
-          "pspId" : {
-            "type" : "string"
+          "pspId": {
+            "type": "string"
           },
-          "retry" : {
-            "type" : "integer"
+          "retry": {
+            "type": "integer"
           },
-          "revision" : {
-            "type" : "integer"
+          "revision": {
+            "type": "integer"
           }
         },
         "additionalProperties": false
