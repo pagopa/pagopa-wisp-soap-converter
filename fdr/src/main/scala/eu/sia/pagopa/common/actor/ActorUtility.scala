@@ -73,7 +73,7 @@ class ActorUtility {
             erogatoreDescr = req.receiver,
             info = Some(req.uri)
           ),
-          reExtra = Some(ReExtra(uri = Some(req.uri), httpMethod = Some(req.method.toString()), soapProtocol = isSoapProtocol))
+          reExtra = Some(ReExtra(uri = Some(req.uri), httpMethod = Some(req.method.value), soapProtocol = isSoapProtocol))
         )
         log.info(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER))
         actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
@@ -136,7 +136,7 @@ class ActorUtility {
           payload = response.payload.map(_.getUtf8Bytes),
           info = Some(req.uri)
         ),
-        reExtra = Some(ReExtra(uri = Some(req.uri), httpMethod = Some(req.method.toString()), soapProtocol = isSoapProtocol, statusCode = Some(response.statusCode)))
+        reExtra = Some(ReExtra(uri = Some(req.uri), httpMethod = Some(req.method.value), soapProtocol = isSoapProtocol, statusCode = Some(response.statusCode)))
       )
       actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
 
