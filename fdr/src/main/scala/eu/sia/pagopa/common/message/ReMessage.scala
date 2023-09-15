@@ -34,15 +34,15 @@ case class ReRequest(
                     ) extends BaseMessage
 
 case class ReEventHub(
-                       appVersion: String,
+                       serviceIdentifier: String,
                        uniqueId: String,
                        created: LocalDateTime,
                        sessionId: Option[String] = None,
                        eventType: String,
-                       flowName: Option[String] = None,
+                       fdr: Option[String] = None,
                        pspId: Option[String] = None,
                        organizationId: Option[String] = None,
-                       flowAction: Option[String] = None,
+                       fdrAction: Option[String] = None,
                        httpType: String,
                        httpMethod: Option[String],
                        httpUrl: Option[String] = None,

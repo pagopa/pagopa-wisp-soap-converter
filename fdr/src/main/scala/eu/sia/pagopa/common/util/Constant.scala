@@ -50,8 +50,9 @@ object Constant {
   }
 
   object HttpStatusDescription {
-    val INTERNAL_SERVER_ERROR  = "Errore generico"
+    val INTERNAL_SERVER_ERROR = "Errore generico"
     val BAD_REQUEST           = "Richiesta non valida"
+    val NOT_FOUND             = "Non trovato"
   }
 
   object MDCKey {

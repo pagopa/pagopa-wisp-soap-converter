@@ -1,20 +1,18 @@
 {
   "type": "object",
-  "required": ["name", "pspId", "retry", "revision"],
+  "required": ["fdr", "pspId", "retry", "revision"],
   "properties": {
-    "name": {
-      "type": "string",
-      "pattern": "[a-zA-Z0-9\\-_]{1,35}"
+    "fdr" : {
+      "type" : "string"
     },
-    "pspId": {
-      "type": "string",
-      "pattern": "[a-zA-Z0-9\\-_]{1,35}"
+    "pspId" : {
+      "type" : "string"
     },
-    "retry": {
-      "type": "integer"
+    "retry" : {
+      "type" : "integer"
     },
-    "revision": {
-      "type": "integer"
+    "revision" : {
+      "type" : "integer"
     }
   },
   "additionalProperties": false

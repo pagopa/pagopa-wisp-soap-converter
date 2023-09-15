@@ -424,7 +424,8 @@
           "pspInformations",
           "psps",
           "stations",
-          "version"
+          "version",
+          "statusCode"
         ],
         "type": "object",
         "properties": {

@@ -6,8 +6,7 @@ import eu.sia.pagopa.ActorProps
 import eu.sia.pagopa.common.actor.HttpFdrServiceManagement
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException, RestException}
-import eu.sia.pagopa.common.json.model.Error
-import eu.sia.pagopa.common.json.model.rendicontazione.{NotifyFlowRequest, PayStatusEnum, SenderTypeEnum}
+import eu.sia.pagopa.common.json.model.rendicontazione._
 import eu.sia.pagopa.common.json.{JsonEnum, JsonValid}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
@@ -86,7 +85,105 @@ final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Reposi
         )
         _ = reFlow = Some(re_)
 
-      } yield RestResponse(req.sessionId, None, StatusCodes.OK.intValue, reFlow, req.testCaseId, None) )
+        getResponse <- HttpFdrServiceManagement.internalGetWithRevision(req.sessionId, req.testCaseId, "internalGetWithRevision", Componente.FDR.toString, _fdr, _rev.toString, _psp, actorProps, reFlow.get)
+
+        getPaymentResponse <- HttpFdrServiceManagement.internalGetFdrPayment(req.sessionId, req.testCaseId, "internalGetFdrPayment", Componente.FDR.toString, _fdr, _rev.toString, _psp, actorProps, reFlow.get)
+
+        _ = log.info(FdrLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
+        flussoRiversamento = CtFlussoRiversamento(
+          Number1u461,
+          getResponse.fdr,
+          DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
+          getResponse.regulation,
+          DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.regulationDate),
+          CtIstitutoMittente(
+            CtIdentificativoUnivoco(
+              getResponse.sender._type match {
+                case SenderTypeEnum.ABI_CODE => scalaxbmodel.flussoriversamento.A
+                case SenderTypeEnum.BIC_CODE => scalaxbmodel.flussoriversamento.B
+                case _ => scalaxbmodel.flussoriversamento.GValue
+              },
+              getResponse.sender.id
+            ),
+            Some(getResponse.sender.pspName)
+          ),
+          Some(getResponse.bicCodePouringBank),
+          CtIstitutoRicevente(
+            CtIdentificativoUnivocoPersonaG(
+              scalaxbmodel.flussoriversamento.G,
+              getResponse.receiver.id
+            ),
+            Some(getResponse.receiver.organizationName)
+          ),
+          getResponse.computedTotPayments,
+          getResponse.computedSumPayments,
+          getPaymentResponse.data.map(p => {
+            CtDatiSingoliPagamenti(
+              p.iuv,
+              p.iur,
+              Some(BigInt.int2bigInt(p.index)),
+              p.pay,
+              p.payStatus match {
+                case PayStatusEnum.NO_RPT => scalaxbmodel.flussoriversamento.Number9
+                case PayStatusEnum.REVOKED => scalaxbmodel.flussoriversamento.Number3
+                case _ => scalaxbmodel.flussoriversamento.Number0
+              },
+              DatatypeFactory.newInstance().newXMLGregorianCalendar(p.payDate)
+            )
+          })
+        )
+        flussoRiversamentoEncoded <- Future.fromTry(XmlEnum.FlussoRiversamento2Str_flussoriversamento(flussoRiversamento))
+        flussoRiversamentoBase64 = XmlUtil.StringBase64Binary.encodeBase64(flussoRiversamentoEncoded)
+
+        nifr = NodoInviaFlussoRendicontazione(
+          getResponse.sender.pspId,
+          getResponse.sender.pspBrokerId,
+          getResponse.sender.channelId,
+          getResponse.sender.password,
+          getResponse.receiver.organizationId,
+          getResponse.fdr,
+          DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
+          flussoRiversamentoBase64
+        )
+
+        (pa, _, _) <- Future.fromTry(checks(ddataMap, nifr, false, actorClassId))
+
+        (esito, _, sftpFile, _) <- saveRendicontazione(
+          getResponse.fdr,
+          getResponse.sender.pspId,
+          getResponse.sender.pspBrokerId,
+          getResponse.sender.channelId,
+          getResponse.receiver.organizationId,
+          DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
+          flussoRiversamentoBase64,
+          flussoRiversamentoEncoded,
+          flussoRiversamento,
+          pa,
+          ddataMap,
+          actorClassId
+        )
+
+//        _ <-
+//          if (sftpFile.isDefined) {
+//            notifySFTPSender(pa, req.sessionId, req.testCaseId, sftpFile.get).flatMap(resp => {
+//              if (resp.throwable.isDefined) {
+//                //HOTFIX non torno errore al chiamante se ftp non funziona
+//                log.warn(s"Error sending file first time for reporting flow [${resp.throwable.get.getMessage}]")
+//                Future.successful(())
+//              } else {
+//                Future.successful(())
+//              }
+//            })
+//          } else {
+//            Future.successful(())
+//          }
+//
+        _ = if (esito == Constant.KO) {
+          throw RestException("Error saving fdr on Db", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
+        } else {
+          Future.successful(())
+        }
+      } yield RestResponse(req.sessionId, Some(GenericResponse(GenericResponseOutcome.OK, None).toJson.toString), StatusCodes.OK.intValue, reFlow, req.testCaseId, None) )
         .recoverWith({
           case rex: RestException =>
             Future.successful(generateResponse(Some(rex)))
@@ -95,120 +192,8 @@ final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Reposi
             Future.successful(generateResponse(Some(pmae)))
       }).map( res => {
         traceInterfaceRequest(req, reFlow.get, req.reExtra, reEventFunc, ddataMap)
-        replyTo ! res
-      }).flatMap(_ => {
-        Future.sequence(
-          Seq(Future.successful(log.info("Gestione asincrona"))) ++
-          Seq(for {
-            getResponse <- HttpFdrServiceManagement.internalGetWithRevision(req.sessionId, req.testCaseId, "internalGetWithRevision", Componente.FDR.toString, _fdr, _rev.toString, _psp, actorProps, reFlow.get)
-
-            getPaymentResponse <- HttpFdrServiceManagement.internalGetFdrPayment(req.sessionId, req.testCaseId, "internalGetFdrPayment", Componente.FDR.toString, _fdr,_rev.toString, _psp, actorProps, reFlow.get)
-
-            _ = log.info(FdrLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
-            flussoRiversamento = CtFlussoRiversamento(
-              Number1u461,
-              getResponse.fdr,
-              DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
-              getResponse.regulation,
-              DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.regulationDate),
-              CtIstitutoMittente(
-                CtIdentificativoUnivoco(
-                  getResponse.sender._type match {
-                    case SenderTypeEnum.ABI_CODE => scalaxbmodel.flussoriversamento.A
-                    case SenderTypeEnum.BIC_CODE => scalaxbmodel.flussoriversamento.B
-                    case _ => scalaxbmodel.flussoriversamento.GValue
-                  },
-                  getResponse.sender.id
-                ),
-                Some(getResponse.sender.pspName)
-              ),
-              Some(getResponse.bicCodePouringBank),
-              CtIstitutoRicevente(
-                CtIdentificativoUnivocoPersonaG(
-                  scalaxbmodel.flussoriversamento.G,
-                  getResponse.receiver.id
-                ),
-                Some(getResponse.receiver.organizationName)
-              ),
-              getResponse.computedTotPayments,
-              getResponse.computedSumPayments,
-              getPaymentResponse.data.map(p =>{
-                CtDatiSingoliPagamenti(
-                  p.iuv,
-                  p.iur,
-                  Some(BigInt.int2bigInt(p.index)),
-                  p.pay,
-                  p.payStatus match {
-                    case PayStatusEnum.NO_RPT => scalaxbmodel.flussoriversamento.Number9
-                    case PayStatusEnum.REVOKED => scalaxbmodel.flussoriversamento.Number3
-                    case _ => scalaxbmodel.flussoriversamento.Number0
-                  },
-                  DatatypeFactory.newInstance().newXMLGregorianCalendar(p.payDate)
-                )
-              })
-            )
-            flussoRiversamentoEncoded <- Future.fromTry(XmlEnum.FlussoRiversamento2Str_flussoriversamento(flussoRiversamento))
-            flussoRiversamentoBase64 = XmlUtil.StringBase64Binary.encodeBase64(flussoRiversamentoEncoded)
-
-            nifr = NodoInviaFlussoRendicontazione(
-              getResponse.sender.pspId,
-              getResponse.sender.pspBrokerId,
-              getResponse.sender.channelId,
-              getResponse.sender.password,
-              getResponse.receiver.organizationId,
-              getResponse.fdr,
-              DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
-              flussoRiversamentoBase64
-            )
-
-            (pa, _, _) <- Future.fromTry(checks(ddataMap, nifr, false, actorClassId))
-
-            (esito, _, sftpFile, _) <- saveRendicontazione(
-              getResponse.fdr,
-              getResponse.sender.pspId,
-              getResponse.sender.pspBrokerId,
-              getResponse.sender.channelId,
-              getResponse.receiver.organizationId,
-              DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
-              flussoRiversamentoBase64,
-              flussoRiversamentoEncoded,
-              flussoRiversamento,
-              pa,
-              ddataMap,
-              actorClassId
-            )
-
-            _ <-
-              if (sftpFile.isDefined) {
-                notifySFTPSender(pa, req.sessionId, req.testCaseId, sftpFile.get).flatMap(resp => {
-                  if (resp.throwable.isDefined) {
-                    //HOTFIX non torno errore al chiamante se ftp non funziona
-                    log.warn(s"Error sending file first time for reporting flow [${resp.throwable.get.getMessage}]")
-                    Future.successful(())
-                  } else {
-                    Future.successful(())
-                  }
-                })
-              } else {
-                Future.successful(())
-              }
-
-            _ = if(esito == Constant.KO) {
-              throw RestException("", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
-            } else {
-              Future.successful(())
-            }
-          } yield ())
-        )
-      })
-      .recoverWith({ case e: Throwable =>
-        log.error(e, s"Error recovering FdR from NEW FDR, re-add FdR data in queue")
-        for {
-          _ <- actorProps.queueAddFunction(_fdr, _psp, req.payload.getOrElse(""), log)
-        } yield ()
-      })
-      .map(_ => {
         log.info(FdrLogConstant.logEnd(actorClassId))
+        replyTo ! res
         complete()
       })
   }
@@ -220,11 +205,11 @@ final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Reposi
       } else {
         JsonValid.check(restRequest.payload.get, JsonEnum.NOTIFY_FLOW) match {
           case Success(_) =>
-            val obj = restRequest.payload.get.parseJson.convertTo[NotifyFlowRequest]
+            val obj = restRequest.payload.get.parseJson.convertTo[NotifyFdrRequest]
             Success(obj)
           case Failure(e) =>
-            if (e.getMessage.contains("name")) {
-              Failure(RestException("Invalid name", "", StatusCodes.BadRequest.intValue, e))
+            if (e.getMessage.contains("fdr")) {
+              Failure(RestException("Invalid fdr", "", StatusCodes.BadRequest.intValue, e))
             } else if (e.getMessage.contains("pspId")) {
               Failure(RestException("Invalid pspId", "", StatusCodes.BadRequest.intValue, e))
             } else if (e.getMessage.contains("retry")) {
@@ -238,7 +223,7 @@ final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Reposi
       }
 
       val psp = nfrReq.get.pspId
-      val fdr = nfrReq.get.name
+      val fdr = nfrReq.get.fdr
       val revision = nfrReq.get.revision
       val retry = nfrReq.get.retry
       checkPsp(log, ddataMap, psp) match {
@@ -246,14 +231,14 @@ final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Reposi
         case Failure(e: DigitPaException) =>
           throw RestException(e.getMessage, Constant.HttpStatusDescription.BAD_REQUEST, StatusCodes.BadRequest.intValue)
         case _ =>
-          throw RestException("", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
+          throw RestException("Error during check psp", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
       }
       CheckRendicontazioni.checkFormatoIdFlussoRendicontazione(fdr, psp) match {
         case Success(_) => Success(())
         case Failure(e: DigitPaException) =>
           throw RestException(e.getMessage, Constant.HttpStatusDescription.BAD_REQUEST, StatusCodes.BadRequest.intValue)
         case _ =>
-          throw RestException("", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
+          throw RestException("Error during check fdr format", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
       }
       _psp = psp
       _fdr = fdr
@@ -276,7 +261,7 @@ final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Reposi
   private def makeFailureResponse(sessionId: String, tcid: Option[String], restException: RestException, re: Option[Re]): RestResponse = {
     import spray.json._
     log.error(restException, s"Errore generico: ${restException.message}")
-    val err = Error(restException.message).toJson.toString()
+    val err = GenericResponse(GenericResponseOutcome.KO, Some(restException.message)).toJson.toString()
     RestResponse(sessionId, Some(err), restException.statusCode, re, tcid, Some(restException))
   }
 
@@ -284,7 +269,8 @@ final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Reposi
     log.info(FdrLogConstant.logGeneraPayload(actorClassId + "Risposta"))
     val httpStatusCode = exception.map(_.statusCode).getOrElse(StatusCodes.OK.intValue)
     log.debug(s"Generazione risposta $httpStatusCode")
-    RestResponse(req.sessionId, None, httpStatusCode, reFlow, req.testCaseId, exception)
+    val responsePayload = exception.map(v => GenericResponse(GenericResponseOutcome.KO, Some(v.jsonMessage)).toJson.toString())
+    RestResponse(req.sessionId, responsePayload, httpStatusCode, reFlow, req.testCaseId, exception)
   }
 
 }

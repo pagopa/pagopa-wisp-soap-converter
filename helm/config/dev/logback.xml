@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="30 seconds">
 
+    <conversionRule conversionWord="bundleVersion"
+                    converterClass="eu.sia.pagopa.common.util.log.BundleVersionConverter" />
+
+    <!--
+    <property name="CONSOLE_COLOR_LOG_PATTERN" value="%cyan(%d) %highlight(%-5level) %green([%X{sessionId}]) %green([%logger]) - %msg %magenta([%X{akkaSource}]%n)"/>
+    -->
+    <property name="CONSOLE_PATTERN" value="%d %-5level [sid:%X{sessionId}] [can:%X{idCanale}] [sta:%X{idStazione}] [%logger] - %msg [%X{akkaSource}]%n"/>
+
+
     <appender name="CONSOLE_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
+
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
                 <message/>
@@ -24,7 +34,8 @@
                             <omitEmptyFields>true</omitEmptyFields>
                             <pattern>
                                 {
-                                "elapsed": "#asLong{%mdc{elapsed}}"
+                                "elapsed": "#asLong{%mdc{elapsed}}",
+                                "bundleVersion" : "%bundleVersion"
                                 }
                             </pattern>
                         </pattern>
@@ -32,6 +43,14 @@
                 </nestedField>
             </providers>
         </encoder>
+
+        <!--
+        <encoder>
+            <pattern>${CONSOLE_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+        -->
+
     </appender>
 
     <appender name="CONSOLE_APPENDER_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
@@ -40,6 +59,7 @@
 
     <logger name="eu.sia.pagopa" level="INFO" />
     <logger name="eu.sia.pagopa.input" level="INFO" />
+    <logger name="eu.sia.pagopa.common.actor.HttpActorPerRequest" level="INFO" />
 
     <logger name="com.zaxxer.hikari.HikariConfig" level="INFO"/>
 
