@@ -117,7 +117,7 @@ trait BaseFlussiRendicontazioneActor extends PerRequestActor {
           })
         if (ftpServerConf.isEmpty) {
           log.error("No FTP server configured")
-          throw exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR)
+          throw exception.DigitPaException("No FTP server configured", DigitPaErrorCodes.PPT_SYSTEM_ERROR)
         }
         val ftpServer = ftpServerConf.get._2
 
@@ -203,58 +203,6 @@ trait BaseFlussiRendicontazioneActor extends PerRequestActor {
     } yield r
 
   }
-
-//  protected def inviaFlussoRendicontazioneRest2Soap(inviaFlussoRendicontazione: Flow)(implicit log: NodoLogger, ec: ExecutionContext) = {
-//    for {
-//      _ <- Future.successful(())
-//      _ = log.info(FdrLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
-//
-//      flussoRiversamento = CtFlussoRiversamento(
-//        Number1u461,
-//        inviaFlussoRendicontazione.reportingFlowName,
-//        DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.reportingFlowDate),
-//        inviaFlussoRendicontazione.regulation,
-//        DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.regulationDate),
-//        CtIstitutoMittente(
-//          CtIdentificativoUnivoco(
-//            inviaFlussoRendicontazione.sender._type match {
-//              case SenderTypeEnum.ABI_CODE => scalaxbmodel.flussoriversamento.A
-//              case SenderTypeEnum.BIC_CODE => scalaxbmodel.flussoriversamento.B
-//              case _ => scalaxbmodel.flussoriversamento.GValue
-//            },
-//            inviaFlussoRendicontazione.sender.id
-//          ),
-//          Some(inviaFlussoRendicontazione.sender.pspName)
-//        ),
-//        Some(inviaFlussoRendicontazione.bicCodePouringBank),
-//        CtIstitutoRicevente(
-//          CtIdentificativoUnivocoPersonaG(
-//            scalaxbmodel.flussoriversamento.G,
-//            inviaFlussoRendicontazione.receiver.id
-//          ),
-//          Some(inviaFlussoRendicontazione.receiver.ecName)
-//        ),0,0
-////        inviaFlussoRendicontazione.payments.size,
-////        inviaFlussoRendicontazione.payments.map(_.singoloImportoPagato).sum
-//      )
-//
-//      flussoRiversamentoEncoded <- Future.fromTry(XmlEnum.FlussoRiversamento2Str_flussoriversamento(flussoRiversamento))
-//
-//      nodoInviaFlussoRendicontazione = NodoInviaFlussoRendicontazione(
-//        inviaFlussoRendicontazione.sender.pspId,
-//        inviaFlussoRendicontazione.sender.brokerId,
-//        inviaFlussoRendicontazione.sender.channelId,
-//        inviaFlussoRendicontazione.sender.password,
-//        inviaFlussoRendicontazione.receiver.ecId,
-//        inviaFlussoRendicontazione.reportingFlowName,
-//        DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.reportingFlowDate),
-//        XmlUtil.StringBase64Binary.encodeBase64(flussoRiversamentoEncoded)
-//      )
-//
-//      requestString <- Future.fromTry(XmlEnum.nodoInviaFlussoRendicontazione2Str_nodoperpsp(nodoInviaFlussoRendicontazione))
-//
-//    } yield requestString
-//  }
 
   def checks(ddataMap: ConfigData, nodoInviaFlussoRendicontazione: NodoInviaFlussoRendicontazione, checkPassword: Boolean, actorClassId: String)(implicit log: NodoLogger) = {
     log.info(FdrLogConstant.logSemantico(actorClassId))

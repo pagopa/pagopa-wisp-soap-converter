@@ -29,9 +29,16 @@
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "Success"
+        "responses" : {
+          "200" : {
+            "description" : "Success",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GenericResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -110,6 +117,22 @@
           }
         },
         "additionalProperties": false
+      },
+      "GenericResponse": {
+        "type": "object",
+        "required": [
+          "outcome"
+        ],
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "example": "OK"
+          },
+          "description": {
+            "type": "string",
+            "example": "error description"
+          }
+        }
       },
       "GetXmlRendicontazioneResponse": {
         "type": "object",

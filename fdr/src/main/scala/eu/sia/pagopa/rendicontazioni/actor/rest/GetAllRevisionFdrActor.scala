@@ -8,7 +8,7 @@ import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException, RestException}
 import eu.sia.pagopa.common.json.model.Error
-import eu.sia.pagopa.common.json.model.rendicontazione.{GetXmlRendicontazioneResponse, NotifyFlowRequest, PayStatusEnum, SenderTypeEnum}
+import eu.sia.pagopa.common.json.model.rendicontazione.{GetXmlRendicontazioneResponse, NotifyFdrRequest, PayStatusEnum, SenderTypeEnum}
 import eu.sia.pagopa.common.json.{JsonEnum, JsonValid}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories

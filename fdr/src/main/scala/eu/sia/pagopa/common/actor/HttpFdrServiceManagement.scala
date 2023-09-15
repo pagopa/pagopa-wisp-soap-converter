@@ -49,7 +49,7 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
       httpResponse <- callService(simpleHttpReq, action, receiver, actorProps, false)
       res = {
         if( httpResponse.statusCode != StatusCodes.OK.intValue ) {
-          throw new RestException(s"Errore: statusCode=[${httpResponse.statusCode}], message=[${httpResponse.payload.getOrElse("")}]", DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue)
+          throw new RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), s"Errore: statusCode=[${httpResponse.statusCode}], message=[${httpResponse.payload.getOrElse("")}]", StatusCodes.InternalServerError.intValue)
         } else {
           Try(httpResponse.payload.get.parseJson.convertTo[GetResponse]) match {
             case Success(res) => res
@@ -95,7 +95,7 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
       httpResponse <- callService(simpleHttpReq, action, receiver, actorProps, false)
       res = {
         if (httpResponse.statusCode != StatusCodes.OK.intValue) {
-          throw new RestException(s"Errore: statusCode=[${httpResponse.statusCode}], message=[${httpResponse.payload.getOrElse("")}]", DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue)
+          throw new RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), s"Errore: statusCode=[${httpResponse.statusCode}], message=[${httpResponse.payload.getOrElse("")}]", StatusCodes.InternalServerError.intValue)
         } else {
           Try(httpResponse.payload.get.parseJson.convertTo[GetPaymentResponse]) match {
             case Success(res) => res
