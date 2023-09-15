@@ -69,7 +69,11 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
         } else {
           log.info("NOT FTP reporting")
           if (binaryFileOption.isDefined) {
-            val resppayload = StringBase64Binary.encodeBase64ToBase64(binaryFileOption.get.fileContent.get)
+            val unzippedFilecontent = Util.unzipContent(binaryFileOption.get.fileContent.get) match {
+              case Success(content) => content
+              case Failure(e) => throw new exception.DigitPaException("Error during unzip xml content from db", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e)
+            }
+            val resppayload = StringBase64Binary.encodeBase64ToBase64(unzippedFilecontent)
             Future.successful(Some(resppayload))
           } else {
             Future.successful(None)
@@ -79,7 +83,11 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
       case None =>
         log.info("Identificativo dominio NON presente")
         if (binaryFileOption.isDefined) {
-          val resppayload = StringBase64Binary.encodeBase64ToBase64(binaryFileOption.get.fileContent.get)
+          val unzippedFilecontent = Util.unzipContent(binaryFileOption.get.fileContent.get) match {
+            case Success(content) => content
+            case Failure(e) => throw new exception.DigitPaException("Error during unzip xml content from db", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e)
+          }
+          val resppayload = StringBase64Binary.encodeBase64ToBase64(unzippedFilecontent)
           Future.successful(Some(resppayload))
         } else {
           Future.successful(None)

@@ -190,7 +190,7 @@ trait BaseFlussiRendicontazioneActor extends PerRequestActor {
           None,
           None
         )
-        val bf = BinaryFile(0, xmlRendicontazione.length, Some(xmlRendicontazione.toArray), None, Some(content))
+        val bf = BinaryFile(0, xmlRendicontazione.length, Some(Util.zipContent(xmlRendicontazione.toArray)), None, Some(Util.zipContent(content.getBytes).toString))
         fdrRepository
           .saveRendicontazioneAndBinaryFile(rendi, bf)
           .recoverWith({ case e =>

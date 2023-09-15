@@ -162,7 +162,7 @@ final case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, ac
 
   private def elaboraRisposta(binaryFileOption: Option[BinaryFile]): Future[Option[Base64Binary]] = {
       if (binaryFileOption.isDefined) {
-        val resppayload = StringBase64Binary.encodeBase64ToBase64(Util.zipContent(binaryFileOption.get.fileContent.get))
+        val resppayload = StringBase64Binary.encodeBase64ToBase64(binaryFileOption.get.fileContent.get)
         Future.successful(Some(resppayload))
       } else {
         Future.failed(RestException("FdR XML not found", Constant.HttpStatusDescription.NOT_FOUND, StatusCodes.NotFound.intValue))
