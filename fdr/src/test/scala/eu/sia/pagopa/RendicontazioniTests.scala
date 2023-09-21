@@ -1,5 +1,6 @@
 package eu.sia.pagopa
 
+import akka.http.scaladsl.model.StatusCodes
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.DigitPaErrorCodes
 import eu.sia.pagopa.common.util.{Constant, RandomStringUtils, StringUtils, Util}
@@ -307,5 +308,29 @@ class RendicontazioniTests() extends BaseUnitTest {
       assert(r.fault.isDefined)
       assert(r.fault.get.faultCode == DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO.faultCode)
     })
+  }
+
+  "notifyFdr OK" in {
+    await(
+      notifyFdr(
+        "",
+        "",
+        testCase = Some("ok"),
+        responseAssert = (resp, status) => {
+          assert(status == StatusCodes.OK.intValue)
+        }
+      )
+    )
+  }
+
+  "getAllRevisionFdr OK" in {
+    await(
+      getAllRevisionFdr(
+        "", "", testCase = Some("ok"),
+        responseAssert = (resp, status) => {
+          assert(status == StatusCodes.OK.intValue)
+        }
+      )
+    )
   }
 }
