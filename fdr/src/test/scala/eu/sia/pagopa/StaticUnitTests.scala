@@ -63,7 +63,7 @@ class StaticUnitTests() extends AnyFlatSpec with should.Matchers {
          |{
          |  "serviceIdentifier": "FDR001",
          |  "uniqueId": "$uniqueId",
-         |  "created": "$created",
+         |  "created": "${created.toString}",
          |  "sessionId": "$sessionId",
          |  "eventType": "INTERFACE",
          |  "fdr": "$flowName",
