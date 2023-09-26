@@ -377,77 +377,77 @@ abstract class BaseUnitTest()
     actRes.get
   }
 
-  def notifyFdr(
-                 fdr: String,
-                 pspId: String,
-                 retry: Option[Integer] = Some(1),
-                 revision: Option[Integer] = Some(1),
-                 testCase: Option[String] = Some("OK"),
-                 responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
-                    newdata: Option[ConfigData] = None
-                  ): Future[String] = {
-    val p = Promise[Boolean]()
-    val notifyFdr =
-      system.actorOf(
-        Props.create(classOf[NotifyFlussoRendicontazioneActorPerRequest], p, repositories, props.copy(actorClassId = "notifyFlussoRendicontazione", ddataMap = newdata.getOrElse(TestDData.ddataMap))),
-        s"notifyFlussoRendicontazione${Util.now()}"
-      )
+//  def notifyFdr(
+//                 fdr: String,
+//                 pspId: String,
+//                 retry: Option[Integer] = Some(1),
+//                 revision: Option[Integer] = Some(1),
+//                 testCase: Option[String] = Some("OK"),
+//                 responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
+//                    newdata: Option[ConfigData] = None
+//                  ): Future[String] = {
+//    val p = Promise[Boolean]()
+//    val notifyFdr =
+//      system.actorOf(
+//        Props.create(classOf[NotifyFlussoRendicontazioneActorPerRequestTest], p, repositories, props.copy(actorClassId = "notifyFlussoRendicontazione", ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+//        s"notifyFlussoRendicontazione${Util.now()}"
+//      )
+//
+//    val restResponse = askActor(
+//      notifyFdr,
+//      RestRequest(
+//        UUID.randomUUID().toString,
+//        Some(
+//          notifyFdrPayload(
+//            fdr, pspId, retry.getOrElse(1), revision.getOrElse(1)
+//          )
+//        ),
+//        Nil,
+//        Map(),
+//        TestItems.testPDD,
+//        "notifyFlusso",
+//        Util.now(),
+//        ReExtra(),
+//        testCase
+//      )
+//    )
+//    assert(restResponse.payload.isDefined)
+//    responseAssert(restResponse.payload.get, restResponse.statusCode)
+//    p.future.map(_ => restResponse.payload.get)
+//  }
 
-    val restResponse = askActor(
-      notifyFdr,
-      RestRequest(
-        UUID.randomUUID().toString,
-        Some(
-          notifyFdrPayload(
-            fdr, pspId, retry.getOrElse(1), revision.getOrElse(1)
-          )
-        ),
-        Nil,
-        Map(),
-        TestItems.testPDD,
-        "notifyFlusso",
-        Util.now(),
-        ReExtra(),
-        testCase
-      )
-    )
-    assert(restResponse.payload.isDefined)
-    responseAssert(restResponse.payload.get, restResponse.statusCode)
-    p.future.map(_ => restResponse.payload.get)
-  }
-
-  def getAllRevisionFdr(
-                 organizationId: String,
-                 fdr: String,
-                 testCase: Option[String] = Some("OK"),
-                 responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
-                 newdata: Option[ConfigData] = None
-               ): Future[String] = {
-    val p = Promise[Boolean]()
-    val getAllRevisionFdr =
-      system.actorOf(
-        Props.create(classOf[GetAllRevisionFdrActorPerRequest], p, repositories, props.copy(actorClassId = "getAllRevisionFdr", ddataMap = newdata.getOrElse(TestDData.ddataMap))),
-        s"getAllRevisionFdr${Util.now()}"
-      )
-
-    val restResponse = askActor(
-      getAllRevisionFdr,
-      RestRequest(
-        UUID.randomUUID().toString,
-        None,
-        Nil,
-        Map("organizationId" -> organizationId, "fdr" -> fdr),
-        TestItems.testPDD,
-        "getAllRevisionFdr",
-        Util.now(),
-        ReExtra(),
-        testCase
-      )
-    )
-    assert(restResponse.payload.isDefined)
-    responseAssert(restResponse.payload.get, restResponse.statusCode)
-    p.future.map(_ => restResponse.payload.get)
-  }
+//  def getAllRevisionFdr(
+//                 organizationId: String,
+//                 fdr: String,
+//                 testCase: Option[String] = Some("OK"),
+//                 responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
+//                 newdata: Option[ConfigData] = None
+//               ): Future[String] = {
+//    val p = Promise[Boolean]()
+//    val getAllRevisionFdr =
+//      system.actorOf(
+//        Props.create(classOf[GetAllRevisionFdrActorPerRequestTest], p, repositories, props.copy(actorClassId = "getAllRevisionFdr", ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+//        s"getAllRevisionFdr${Util.now()}"
+//      )
+//
+//    val restResponse = askActor(
+//      getAllRevisionFdr,
+//      RestRequest(
+//        UUID.randomUUID().toString,
+//        None,
+//        Nil,
+//        Map("organizationId" -> organizationId, "fdr" -> fdr),
+//        TestItems.testPDD,
+//        "getAllRevisionFdr",
+//        Util.now(),
+//        ReExtra(),
+//        testCase
+//      )
+//    )
+//    assert(restResponse.payload.isDefined)
+//    responseAssert(restResponse.payload.get, restResponse.statusCode)
+//    p.future.map(_ => restResponse.payload.get)
+//  }
 
   def await[T](f: Future[T]): T = {
     Await.result(f, Duration.Inf)

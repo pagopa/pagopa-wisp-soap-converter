@@ -1,14 +1,12 @@
 package eu.sia.pagopa.rendicontazioni.actor
 
-import eu.sia.pagopa.BootstrapUtil
 import eu.sia.pagopa.Main.ConfigData
-import eu.sia.pagopa.common.actor.PerRequestActor
+import eu.sia.pagopa.common.actor.NodoLogging
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
-import eu.sia.pagopa.common.message.{FTPRequest, FTPResponse}
+import eu.sia.pagopa.common.repo.fdr.FdrRepository
 import eu.sia.pagopa.common.repo.fdr.enums.{FtpFileStatus, RendicontazioneStatus}
 import eu.sia.pagopa.common.repo.fdr.model.{BinaryFile, FtpFile, Rendicontazione}
-import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
@@ -24,19 +22,15 @@ import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
 import java.util.zip.{ZipEntry, ZipOutputStream}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
-trait BaseFlussiRendicontazioneActor extends PerRequestActor {
-
-  val fdrRepository = repositories.fdrRepository
-  val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
-  val inputXsdValid: Boolean = Try(DDataChecks.getConfigurationKeys(ddataMap, "validate_input").toBoolean).getOrElse(false)
-  val outputXsdValid: Boolean = Try(DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean).getOrElse(false)
+trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
 
   def validateRendicontazione(
                                nifr: NodoInviaFlussoRendicontazione,
                                checkUTF8: Boolean,
-                               inputXsdValid: Boolean
+                               inputXsdValid: Boolean,
+                               fdrRepository: FdrRepository
                              )(implicit log: NodoLogger, ec: ExecutionContext) = {
     log.debug("Check 'Flusso riversamento' element validity")
 
@@ -107,7 +101,8 @@ trait BaseFlussiRendicontazioneActor extends PerRequestActor {
                           flussoRiversamento: CtFlussoRiversamento,
                           pa: CreditorInstitution,
                           ddataMap: ConfigData,
-                          actorClassId: String)(implicit log: NodoLogger) = {
+                          actorClassId: String,
+                          fdrRepository: FdrRepository)(implicit log: NodoLogger, ec: ExecutionContext) = {
 
     for {
       r <- if (pa.reportingFtp) {
@@ -229,7 +224,7 @@ trait BaseFlussiRendicontazioneActor extends PerRequestActor {
     })
   }
 
-  def checkFormatoIdFlussoRendicontazione(identificativoFlusso: String, idPsp: String) = {
+  def checkFormatoIdFlussoRendicontazione(identificativoFlusso: String, idPsp: String, actorClassId: String)(implicit log: NodoLogger) = {
     log.info(FdrLogConstant.logSemantico(actorClassId))
     (for {
       _ <- CheckRendicontazioni.checkFormatoIdFlussoRendicontazione(identificativoFlusso, idPsp)
@@ -239,19 +234,6 @@ trait BaseFlussiRendicontazioneActor extends PerRequestActor {
       case ex@_ =>
         Failure(exception.DigitPaException(ex.getMessage, DigitPaErrorCodes.PPT_SINTASSI_XSD, ex))
     })
-  }
-
-  protected def notifySFTPSender(pa: CreditorInstitution, sessionId: String, testCaseId: Option[String], file: FtpFile): Future[FTPResponse] = {
-    log.info(s"SFTP Request pushFile")
-
-    val ftpServerConf = ddataMap.ftpServers.find(s => {
-      s._2.service == Constant.KeyName.RENDICONTAZIONI
-    }).get
-
-    askBundle[FTPRequest, FTPResponse](
-      actorProps.routers(BootstrapUtil.actorRouter(Constant.KeyName.FTP_SENDER)),
-      FTPRequest(sessionId, testCaseId, "pushFileRendicontazioni", pa.creditorInstitutionCode, file.fileName, file.id, ftpServerConf._2.id)
-    )
   }
 
 }

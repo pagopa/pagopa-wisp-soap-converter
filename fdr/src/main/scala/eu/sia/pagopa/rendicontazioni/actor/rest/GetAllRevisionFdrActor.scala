@@ -3,39 +3,28 @@ package eu.sia.pagopa.rendicontazioni.actor.rest
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
 import eu.sia.pagopa.ActorProps
-import eu.sia.pagopa.common.actor.HttpFdrServiceManagement
+import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
-import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException, RestException}
 import eu.sia.pagopa.common.json.model.Error
-import eu.sia.pagopa.common.json.model.rendicontazione.{GetXmlRendicontazioneResponse, NotifyFdrRequest, PayStatusEnum, SenderTypeEnum}
-import eu.sia.pagopa.common.json.{JsonEnum, JsonValid}
+import eu.sia.pagopa.common.json.model.rendicontazione.GetXmlRendicontazioneResponse
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.repo.fdr.model.{BinaryFile, Rendicontazione}
 import eu.sia.pagopa.common.repo.re.model.Re
-import eu.sia.pagopa.common.util.DDataChecks.{checkPA, checkPsp}
+import eu.sia.pagopa.common.util.DDataChecks.checkPA
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.xml.XmlUtil
 import eu.sia.pagopa.common.util.xml.XmlUtil.StringBase64Binary
-import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
-import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
-import it.pagopa.config.CreditorInstitution
 import org.slf4j.MDC
-import play.api.libs.json.Json.toJson
 import scalaxb.Base64Binary
-import scalaxbmodel.flussoriversamento.{CtDatiSingoliPagamenti, CtFlussoRiversamento, CtIdentificativoUnivoco, CtIdentificativoUnivocoPersonaG, CtIstitutoMittente, CtIstitutoRicevente, Number1u461}
-import scalaxbmodel.nodoperpsp.NodoInviaFlussoRendicontazione
 import spray.json._
 
-import javax.xml.datatype.DatatypeFactory
 import scala.concurrent.Future
 import scala.language.postfixOps
-import scala.util.{Failure, Success, Try}
 
 final case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, actorProps: ActorProps)
-  extends BaseFlussiRendicontazioneActor with ReUtil {
+  extends PerRequestActor with BaseFlussiRendicontazioneActor with ReUtil {
 
   var req: RestRequest = _
   var replyTo: ActorRef = _

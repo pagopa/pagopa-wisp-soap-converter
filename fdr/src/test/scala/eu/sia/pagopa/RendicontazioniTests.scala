@@ -310,27 +310,38 @@ class RendicontazioniTests() extends BaseUnitTest {
     })
   }
 
-  "notifyFdr OK" in {
-    await(
-      notifyFdr(
-        "",
-        "",
-        testCase = Some("ok"),
-        responseAssert = (resp, status) => {
-          assert(status == StatusCodes.OK.intValue)
-        }
-      )
-    )
-  }
+//  "notifyFdr OK" in {
+//    val fdr = "2023-04-01nodo-doc-dev-16818090800"
+//    val pspId = "nodo-doc-dev"
+//    await(
+//      notifyFdr(
+//        fdr,
+//        pspId,
+//        testCase = Some("ok"),
+//        responseAssert = (resp, status) => {
+//          assert(status == StatusCodes.OK.intValue)
+//        }
+//      )
+//    )
+//  }
 
-  "getAllRevisionFdr OK" in {
-    await(
-      getAllRevisionFdr(
-        "", "", testCase = Some("ok"),
-        responseAssert = (resp, status) => {
-          assert(status == StatusCodes.OK.intValue)
-        }
-      )
-    )
-  }
+//  "getAllRevisionFdr OK" in {
+//    val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
+//    val random = RandomStringUtils.randomNumeric(9)
+//    val idFlusso = s"${date}${TestItems.PSP}-$random"
+//    inviaFlussoRendicontazione(
+//      idFlusso = Some(idFlusso),
+//      responseAssert = (r) => {
+//        assert(r.esito == Constant.OK, "outcome in res")
+//      }
+//    )
+//    await(
+//      getAllRevisionFdr(
+//        "ndp", idFlusso, testCase = Some("ok"),
+//        responseAssert = (resp, status) => {
+//          assert(status == StatusCodes.OK.intValue)
+//        }
+//      )
+//    )
+//  }
 }

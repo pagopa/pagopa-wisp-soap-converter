@@ -3,7 +3,7 @@ package eu.sia.pagopa.rendicontazioni.actor.rest
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
 import eu.sia.pagopa.ActorProps
-import eu.sia.pagopa.common.actor.HttpFdrServiceManagement
+import eu.sia.pagopa.common.actor.{HttpFdrServiceManagement, PerRequestActor}
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException, RestException}
 import eu.sia.pagopa.common.json.model.rendicontazione._
@@ -28,7 +28,7 @@ import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
 final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
-  extends BaseFlussiRendicontazioneActor with ReUtil {
+  extends PerRequestActor with BaseFlussiRendicontazioneActor with ReUtil {
 
   var req: RestRequest = _
   var replyTo: ActorRef = _
@@ -160,7 +160,8 @@ final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Reposi
           flussoRiversamento,
           pa,
           ddataMap,
-          actorClassId
+          actorClassId,
+          repositories.fdrRepository
         )
 
 //        _ <-
