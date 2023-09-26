@@ -39,19 +39,19 @@ final case class ApiConfigActor(repositories: Repositories, actorProps: ActorPro
         context.system.scheduler.scheduleOnce(scheduleMinutes, self, CheckCache(UUID.randomUUID().toString))
       })
     case GetCache(_, cacheId) =>
-      log.info(s"GetCache ${cacheId} received")
+      log.info(s"GetCache $cacheId requested")
       (for {
         cacheData <- ConfigUtil.getConfigHttp(actorProps.httpsConnectionContext)
         _ = {
           cacheData.map(cd=>{
-            log.info(s"received new configData ${cd.version},setting in memory")
+            log.info(s"Received new configData ${cd.version},setting in memory")
             actorProps.ddataMap = cd
           })
         }
-        _ = log.debug(s"GetCache ${cacheId} done")
+        _ = log.debug(s"GetCache $cacheId done")
       } yield ())
         .recover({ case e =>
-          log.error(e, s"GetCache ${cacheId} error")
+          log.error(e, s"GetCache $cacheId error")
         })
         .map(_ => {
           context.system.scheduler.scheduleOnce(scheduleMinutes, self, CheckCache(UUID.randomUUID().toString))

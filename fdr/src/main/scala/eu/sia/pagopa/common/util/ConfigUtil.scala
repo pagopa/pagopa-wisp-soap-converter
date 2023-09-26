@@ -61,8 +61,8 @@ object ConfigUtil {
     val timeout = Try(system.settings.config.getInt("apiConfigCache.timeout")).getOrElse(30)
     import scala.concurrent.duration._
     val settings = ConnectionPoolSettings(system).withConnectionSettings(ClientConnectionSettings(system).withIdleTimeout(timeout.seconds).withConnectingTimeout(5.seconds))
-    val uri = s"${apiConfigUrl}$path"
-    log.debug(s"calling [${uri}]")
+    val uri = s"$apiConfigUrl$path"
+    log.info(s"calling ApiConfigCache on [$uri]")
     for{
       req <- Future.fromTry(Try(HttpRequest(uri = uri, headers = Seq(RawHeader(HEADER_SUBSCRIPTION_KEY, subKey)))))
       res <- if (uri.startsWith("https")) {

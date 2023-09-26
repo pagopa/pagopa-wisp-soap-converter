@@ -225,8 +225,7 @@ object Main extends App {
           }
         }
       } yield  data
-
-    _ = log.info("ConfigData loaded")
+    _ = log.info(s" ConfigData ${ddata.version} loaded")
     _ = log.info("Check db connections")
     _ <- repositories.fdrRepository.testQuery()
   } yield ddata)
