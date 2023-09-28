@@ -48,7 +48,7 @@
         <appender-ref ref="CONSOLE_APPENDER" />
     </appender>
 
-    <logger name="eu.sia.pagopa" level="INFO" />
+    <logger name="eu.sia.pagopa" level="DEBUG" />
     <logger name="eu.sia.pagopa.input" level="INFO" />
     <logger name="eu.sia.pagopa.common.actor.HttpActorPerRequest" level="INFO" />
     <logger name="com.zaxxer.hikari.HikariConfig" level="INFO"/>

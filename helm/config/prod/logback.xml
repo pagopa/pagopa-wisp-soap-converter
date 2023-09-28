@@ -34,8 +34,7 @@
                             <omitEmptyFields>true</omitEmptyFields>
                             <pattern>
                                 {
-                                "elapsed": "#asLong{%mdc{elapsed}}",
-                                "bundleVersion" : "%bundleVersion"
+                                "elapsed": "#asLong{%mdc{elapsed}}"
                                 }
                             </pattern>
                         </pattern>
