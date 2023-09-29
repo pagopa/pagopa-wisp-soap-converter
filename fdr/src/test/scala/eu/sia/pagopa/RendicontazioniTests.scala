@@ -253,7 +253,7 @@ class RendicontazioniTests() extends BaseUnitTest {
     "ok" in {
       chiediFlussoRendicontazione(
         "not exists",
-        testCase = Some("ko_nexi"),
+        testCase = Some("KO_nexi"),
         responseAssert = (r) => {
           assert(r.fault.isDefined)
           assert(r.fault.get.faultCode == DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO.faultCode)
@@ -277,7 +277,7 @@ class RendicontazioniTests() extends BaseUnitTest {
 
   "chiediElencoFlussiRendicontazione Nexi KO" in {
     val idFlussoNexiToCheck = "2023-04-01nodo-doc-dev-16818090899"
-    chiediElencoFlussiRendicontazione(testCase = Some("ko_nexi"), responseAssert = (r) => {
+    chiediElencoFlussiRendicontazione(testCase = Some("KO_nexi"), responseAssert = (r) => {
       assert(r.elencoFlussiRendicontazione.isDefined)
       assert(r.elencoFlussiRendicontazione.get.idRendicontazione.nonEmpty)
       val listarendi = r.elencoFlussiRendicontazione.get.idRendicontazione
@@ -304,7 +304,7 @@ class RendicontazioniTests() extends BaseUnitTest {
 
   "chiediFlussoRendicontazione KO" in {
     val idFlussoNexiToCheck = "2023-04-01nodo-doc-dev-16818090800"
-    chiediFlussoRendicontazione(idFlussoNexiToCheck, Some("ko_nexi"), responseAssert = (r) => {
+    chiediFlussoRendicontazione(idFlussoNexiToCheck, Some("KO_nexi"), responseAssert = (r) => {
       assert(r.fault.isDefined)
       assert(r.fault.get.faultCode == DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO.faultCode)
     })
