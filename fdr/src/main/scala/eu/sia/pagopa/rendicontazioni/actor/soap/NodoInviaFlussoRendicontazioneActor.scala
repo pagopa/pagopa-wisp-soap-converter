@@ -2,12 +2,13 @@ package eu.sia.pagopa.rendicontazioni.actor.soap
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
+import eu.sia.pagopa.common.repo.fdr.model.FtpFile
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XsdValid
@@ -15,6 +16,8 @@ import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
 import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoInviaFlussoRendicontazioneResponse
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
+import eu.sia.pagopa.{ActorProps, BootstrapUtil}
+import it.pagopa.config.CreditorInstitution
 import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoRendicontazioneRisposta}
 
 import java.time.format.DateTimeFormatter
@@ -24,6 +27,7 @@ import scala.util.{Failure, Try}
 
 final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
   extends BaseFlussiRendicontazioneActor
+    with PerRequestActor
     with ReUtil
     with NodoInviaFlussoRendicontazioneResponse {
 
@@ -31,6 +35,10 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
   var replyTo: ActorRef = _
 
   var reFlow: Option[Re] = None
+
+  val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
+  val inputXsdValid: Boolean = Try(DDataChecks.getConfigurationKeys(ddataMap, "validate_input").toBoolean).getOrElse(false)
+  val outputXsdValid: Boolean = Try(DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean).getOrElse(false)
 
   private val additionalFdrValidations: Boolean = Try(context.system.settings.config.getBoolean(s"additionalFdrValidations")).getOrElse(false)
 
@@ -85,7 +93,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
 
       _ = log.info(FdrLogConstant.logSemantico(actorClassId))
       (pa, psp, canale) <- Future.fromTry(checks(ddataMap, nifr, true, actorClassId))
-      _ <- Future.fromTry(checkFormatoIdFlussoRendicontazione(nifr.identificativoFlusso, nifr.identificativoPSP))
+      _ <- Future.fromTry(checkFormatoIdFlussoRendicontazione(nifr.identificativoFlusso, nifr.identificativoPSP, actorClassId))
 
       _ = reFlow = reFlow.map(r => r.copy(fruitoreDescr = canale.flatMap(c => c.description), pspDescr = psp.flatMap(p => p.description)))
 
@@ -128,7 +136,7 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
           Future.successful(())
       }
 
-      (flussoRiversamento, flussoRiversamentoContent) <- validateRendicontazione(nifr, checkUTF8, inputXsdValid)
+      (flussoRiversamento, flussoRiversamentoContent) <- validateRendicontazione(nifr, checkUTF8, inputXsdValid, repositories.fdrRepository)
       (esito, _, sftpFile, _) <- saveRendicontazione(
         nifr.identificativoFlusso,
         nifr.identificativoPSP,
@@ -141,7 +149,8 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
         flussoRiversamento,
         pa,
         ddataMap,
-        actorClassId
+        actorClassId,
+        repositories.fdrRepository
       )
 
       _ <-
@@ -223,6 +232,19 @@ final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Rep
       val cfb = exception.DigitPaException(e.getMessage, DigitPaErrorCodes.PPT_SINTASSI_EXTRAXSD, e)
       Failure(cfb)
     }
+  }
+
+  protected def notifySFTPSender(pa: CreditorInstitution, sessionId: String, testCaseId: Option[String], file: FtpFile): Future[FTPResponse] = {
+    log.info(s"SFTP Request pushFile")
+
+    val ftpServerConf = ddataMap.ftpServers.find(s => {
+      s._2.service == Constant.KeyName.RENDICONTAZIONI
+    }).get
+
+    askBundle[FTPRequest, FTPResponse](
+      actorProps.routers(BootstrapUtil.actorRouter(Constant.KeyName.FTP_SENDER)),
+      FTPRequest(sessionId, testCaseId, "pushFileRendicontazioni", pa.creditorInstitutionCode, file.fileName, file.id, ftpServerConf._2.id)
+    )
   }
 
 }

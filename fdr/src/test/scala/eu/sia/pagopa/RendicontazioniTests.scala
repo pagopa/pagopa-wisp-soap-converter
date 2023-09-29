@@ -1,5 +1,6 @@
 package eu.sia.pagopa
 
+import akka.http.scaladsl.model.StatusCodes
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.DigitPaErrorCodes
 import eu.sia.pagopa.common.util.{Constant, RandomStringUtils, StringUtils, Util}
@@ -252,7 +253,7 @@ class RendicontazioniTests() extends BaseUnitTest {
     "ok" in {
       chiediFlussoRendicontazione(
         "not exists",
-        testCase = Some("ko_nexi"),
+        testCase = Some("KO_nexi"),
         responseAssert = (r) => {
           assert(r.fault.isDefined)
           assert(r.fault.get.faultCode == DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO.faultCode)
@@ -276,7 +277,7 @@ class RendicontazioniTests() extends BaseUnitTest {
 
   "chiediElencoFlussiRendicontazione Nexi KO" in {
     val idFlussoNexiToCheck = "2023-04-01nodo-doc-dev-16818090899"
-    chiediElencoFlussiRendicontazione(testCase = Some("ko_nexi"), responseAssert = (r) => {
+    chiediElencoFlussiRendicontazione(testCase = Some("KO_nexi"), responseAssert = (r) => {
       assert(r.elencoFlussiRendicontazione.isDefined)
       assert(r.elencoFlussiRendicontazione.get.idRendicontazione.nonEmpty)
       val listarendi = r.elencoFlussiRendicontazione.get.idRendicontazione
@@ -303,9 +304,44 @@ class RendicontazioniTests() extends BaseUnitTest {
 
   "chiediFlussoRendicontazione KO" in {
     val idFlussoNexiToCheck = "2023-04-01nodo-doc-dev-16818090800"
-    chiediFlussoRendicontazione(idFlussoNexiToCheck, Some("ko_nexi"), responseAssert = (r) => {
+    chiediFlussoRendicontazione(idFlussoNexiToCheck, Some("KO_nexi"), responseAssert = (r) => {
       assert(r.fault.isDefined)
       assert(r.fault.get.faultCode == DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO.faultCode)
     })
   }
+
+//  "notifyFdr OK" in {
+//    val fdr = "2023-04-01nodo-doc-dev-16818090800"
+//    val pspId = "nodo-doc-dev"
+//    await(
+//      notifyFdr(
+//        fdr,
+//        pspId,
+//        testCase = Some("ok"),
+//        responseAssert = (resp, status) => {
+//          assert(status == StatusCodes.OK.intValue)
+//        }
+//      )
+//    )
+//  }
+
+//  "getAllRevisionFdr OK" in {
+//    val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
+//    val random = RandomStringUtils.randomNumeric(9)
+//    val idFlusso = s"${date}${TestItems.PSP}-$random"
+//    inviaFlussoRendicontazione(
+//      idFlusso = Some(idFlusso),
+//      responseAssert = (r) => {
+//        assert(r.esito == Constant.OK, "outcome in res")
+//      }
+//    )
+//    await(
+//      getAllRevisionFdr(
+//        "ndp", idFlusso, testCase = Some("ok"),
+//        responseAssert = (resp, status) => {
+//          assert(status == StatusCodes.OK.intValue)
+//        }
+//      )
+//    )
+//  }
 }
