@@ -7,6 +7,8 @@ import net.openhft.hashing.LongHashFunction
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 class StaticUnitTests() extends AnyFlatSpec with should.Matchers {
@@ -14,7 +16,8 @@ class StaticUnitTests() extends AnyFlatSpec with should.Matchers {
   "fdr re eventhub json" should "ok" in {
     val now = Util.now()
 
-    val created = now
+    val testDTF: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+    val created = LocalDateTime.parse(testDTF.format(now))
     val sessionIdOriginal = UUID.randomUUID().toString
     val sessionId = UUID.randomUUID().toString
     val dataOraEvento = now.toString

@@ -67,7 +67,7 @@ object DDataChecks {
       case Some(value) =>
         if (value.enabled) {
           log.debug(s"idCanale=[$idCanale] found and enabled")
-          if (!checkPassword || password.forall(value.password.contains(_))) {
+          if (!checkPassword || (checkPassword && password.forall(value.password.contains(_))) ) {
             Success(value)
           } else {
             log.warn(s"idCanale=[$idCanale] found and enabled, wrong password")

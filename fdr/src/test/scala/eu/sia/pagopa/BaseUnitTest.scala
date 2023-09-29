@@ -82,24 +82,24 @@ abstract class BaseUnitTest()
             re-event {
               client-timeoput-ms = 5000
               event-hub-name = "fdr-re"
-              connection-string = "fsadsadadasdsad"
+              connection-string = "fake"
             }
             blob-re {
               enabled  = false
               container-name = "payload"
-              connection-string = "asdasdsa"
+              connection-string = "fake"
             }
           }
         }
         azure-storage-blob {
             enabled  = false
             container-name = "xmlsharefile"
-            connection-string = ""
+            connection-string = "fake"
         }
         azure-queue {
             enabled  = false
             name = "flowidsendqueue"
-            connection-string =  "qwertyuioo"
+            connection-string =  "fake"
         }
         config.http.connect-timeout = 1
         bundleTimeoutSeconds = 120

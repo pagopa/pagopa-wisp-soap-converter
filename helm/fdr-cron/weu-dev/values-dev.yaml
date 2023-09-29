@@ -56,6 +56,7 @@ cj-ftp-upload:
       BLOB_RE_CONNECTION_STRING: "fdr-re-sa-connection-string"
       API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
       FDR_SUBSCRIPTION_KEY: "fdr-subscription-key-string"
+      FDR_LEGACY_SUBSCRIPTION_KEY: "fdr-legacy-subscription-key"
       DB_FDR_PASSWORD: "db-fdr-password"
     keyvault:
       name: "pagopa-d-fdr-kv"

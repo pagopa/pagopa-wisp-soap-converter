@@ -12,6 +12,8 @@ object Constant {
 
   val HTTP_RESP_SESSION_ID_HEADER = "sessionId"
 
+  val CACHE_LOG_PREFIX = "[cache]"
+
   val UTF_8: Charset = StandardCharsets.UTF_8
   val DTF_DATETIME: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
