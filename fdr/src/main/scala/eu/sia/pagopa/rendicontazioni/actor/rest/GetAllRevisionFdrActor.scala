@@ -109,6 +109,8 @@ final case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, ac
         .recoverWith({
           case rex: RestException =>
             Future.successful(generateResponse(Some(rex)))
+          case rex: DigitPaException =>
+            Future.successful(generateResponseFromSoap(Some(rex)))
           case cause: Throwable =>
             val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
             Future.successful(generateResponse(Some(pmae)))
@@ -145,6 +147,13 @@ final case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, ac
   private def generateResponse(exception: Option[RestException]) = {
     log.info(FdrLogConstant.logGeneraPayload(actorClassId + "Response"))
     val httpStatusCode = exception.map(_.statusCode).getOrElse(StatusCodes.OK.intValue)
+    log.debug(s"Generating response $httpStatusCode")
+    RestResponse(req.sessionId, None, httpStatusCode, reFlow, req.testCaseId, exception)
+  }
+
+  private def generateResponseFromSoap(exception: Option[DigitPaException]) = {
+    log.info(FdrLogConstant.logGeneraPayload(actorClassId + "Response"))
+    val httpStatusCode = StatusCodes.BadRequest.intValue
     log.debug(s"Generating response $httpStatusCode")
     RestResponse(req.sessionId, None, httpStatusCode, reFlow, req.testCaseId, exception)
   }

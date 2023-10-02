@@ -135,12 +135,12 @@ class RestActorPerRequest(
         case None =>
           sres.throwable match {
             case Some(e: RestException) =>
-              log.error(e, s"Rest Response in errore [${e.getMessage}]")
+              log.error(e, s"Error in Rest Response: [${e.getMessage}]")
 
               traceRequest(message, reEventFunc, actorProps.ddataMap)
 
               val payload = Error(e.message).toJson.toString()
-              log.info("Genero risposta negativa")
+              log.info("Generating negative response")
               Util.logPayload(log, Some(payload))
 
               val now = Util.now()
@@ -165,11 +165,42 @@ class RestActorPerRequest(
               )
               reEventFunc(reRequest, log, actorProps.ddataMap)
               complete(createHttpResponse(e.statusCode, payload, sres.sessionId), Constant.KeyName.REST_INPUT)
+            case Some(e: DigitPaException) =>
+              log.error(e, s"Error in Rest Response: [${e.getMessage}]")
+
+              traceRequest(message, reEventFunc, actorProps.ddataMap)
+
+              val payload = Error(e.message).toJson.toString()
+              log.info("Generating negative response")
+              Util.logPayload(log, Some(payload))
+
+              val now = Util.now()
+              val reRequest = ReRequest(
+                sessionId = message.sessionId,
+                testCaseId = message.testCaseId,
+                re = Re(
+                  componente = Componente.FDR.toString,
+                  categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
+                  sottoTipoEvento = SottoTipoEvento.RESP.toString,
+                  esito = Some(EsitoRE.INVIATA_KO.toString),
+                  sessionId = Some(message.sessionId),
+                  payload = Some(payload.getUtf8Bytes),
+                  insertedTimestamp = now,
+                  info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
+                  flowAction = Some(message.primitiva),
+                  tipoEvento = Some(message.primitiva),
+                  idDominio = message.pathParams.get("organizationId"),
+                  flowName = message.pathParams.get("fdr")
+                ),
+                reExtra = Some(ReExtra(statusCode = Some(StatusCodes.BadRequest.intValue), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
+              )
+              reEventFunc(reRequest, log, actorProps.ddataMap)
+              complete(createHttpResponse(StatusCodes.BadRequest.intValue, payload, sres.sessionId), Constant.KeyName.REST_INPUT)
             case Some(e: Throwable) =>
-              log.error(e, s"Rest Response in errore [${e.getMessage}]")
+              log.error(e, s"Error in Rest Response: [${e.getMessage}]")
 
               val dpe = exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR)
-              log.info("Genero risposta negativa")
+              log.info("Generating negative response")
               val payload = Error(dpe.message).toJson.toString()
               Util.logPayload(log, Some(payload))
 
@@ -198,7 +229,7 @@ class RestActorPerRequest(
               complete(createHttpResponse(StatusCodes.InternalServerError.intValue, payload, sres.sessionId), Constant.KeyName.REST_INPUT)
             case None =>
               //qualche bundle ha risposto in modo svagliato
-              log.warn(s"Rest Response in errore")
+              log.warn(s"Error in Rest Response")
 
               val now = Util.now()
               val (reRequest, payload) = sres.statusCode match {
@@ -225,7 +256,7 @@ class RestActorPerRequest(
                   ), sres.payload)
                 case _ =>
                   val dpe = exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR)
-                  log.info("Genero risposta negativa")
+                  log.info("Generating negative response")
                   val errPayload = Error(dpe.message).toJson.toString()
                   Util.logPayload(log, sres.payload)
                   (ReRequest(
