@@ -21,7 +21,7 @@ import java.time.LocalDateTime
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-final case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
+case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
     extends PerRequestActor
       with ReUtil
       with NodoChiediElencoFlussiRendicontazioneResponse {
