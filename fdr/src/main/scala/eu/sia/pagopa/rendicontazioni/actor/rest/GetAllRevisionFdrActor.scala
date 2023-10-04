@@ -15,7 +15,6 @@ import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.DDataChecks.checkPA
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XmlUtil.StringBase64Binary
-import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
 import org.slf4j.MDC
 import scalaxb.Base64Binary
 import spray.json._
@@ -23,8 +22,7 @@ import spray.json._
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-final case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, actorProps: ActorProps)
-  extends PerRequestActor with BaseFlussiRendicontazioneActor with ReUtil {
+case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, actorProps: ActorProps) extends PerRequestActor with ReUtil {
 
   var req: RestRequest = _
   var replyTo: ActorRef = _
@@ -108,12 +106,12 @@ final case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, ac
       } yield RestResponse(req.sessionId, Some(GetXmlRendicontazioneResponse(rendicontazioneDb.get).toJson.compactPrint), StatusCodes.OK.intValue, reFlow, req.testCaseId, None) )
         .recoverWith({
           case rex: RestException =>
-            Future.successful(generateResponse(Some(rex)))
+            Future.successful(generateErrorResponse(Some(rex)))
           case rex: DigitPaException =>
-            Future.successful(generateResponseFromSoap(Some(rex)))
+            Future.successful(generateErrorResponseFromSoap(Some(rex)))
           case cause: Throwable =>
             val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
-            Future.successful(generateResponse(Some(pmae)))
+            Future.successful(generateErrorResponse(Some(pmae)))
       }).map( res => {
         traceInterfaceRequest(req, reFlow.get, req.reExtra, reEventFunc, ddataMap)
         log.info(FdrLogConstant.logEnd(actorClassId))
@@ -144,18 +142,20 @@ final case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, ac
     RestResponse(sessionId, Some(err), restException.statusCode, re, tcid, Some(restException))
   }
 
-  private def generateResponse(exception: Option[RestException]) = {
+  private def generateErrorResponse(exception: Option[RestException]) = {
     log.info(FdrLogConstant.logGeneraPayload(actorClassId + "Response"))
     val httpStatusCode = exception.map(_.statusCode).getOrElse(StatusCodes.OK.intValue)
     log.debug(s"Generating response $httpStatusCode")
-    RestResponse(req.sessionId, None, httpStatusCode, reFlow, req.testCaseId, exception)
+    val payload = exception.map(v => Error(v.getMessage).toJson.toString())
+    RestResponse(req.sessionId, payload, httpStatusCode, reFlow, req.testCaseId, exception)
   }
 
-  private def generateResponseFromSoap(exception: Option[DigitPaException]) = {
+  private def generateErrorResponseFromSoap(exception: Option[Exception]) = {
     log.info(FdrLogConstant.logGeneraPayload(actorClassId + "Response"))
     val httpStatusCode = StatusCodes.BadRequest.intValue
     log.debug(s"Generating response $httpStatusCode")
-    RestResponse(req.sessionId, None, httpStatusCode, reFlow, req.testCaseId, exception)
+    val payload = exception.map(v => Error(v.getMessage).toJson.toString())
+    RestResponse(req.sessionId, payload, httpStatusCode, reFlow, req.testCaseId, exception)
   }
 
   private def elaboraRisposta(binaryFileOption: Option[BinaryFile]): Future[Option[Base64Binary]] = {

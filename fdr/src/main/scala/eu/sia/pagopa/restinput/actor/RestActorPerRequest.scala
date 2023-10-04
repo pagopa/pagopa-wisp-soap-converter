@@ -14,7 +14,7 @@ import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.StringUtils._
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
+import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ReEventFunc, sessionId}
 import eu.sia.pagopa.restinput.message.RestRouterRequest
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import spray.json._
@@ -58,7 +58,7 @@ class RestActorPerRequest(
   }
 
   def reExtra(rrr: RestRouterRequest): ReExtra =
-    ReExtra(uri = rrr.uri.map(_.toString ), headers = rrr.headers, httpMethod = rrr.httpMethod, callRemoteAddress = rrr.callRemoteAddress)
+    ReExtra(uri = rrr.uri.map(_.toString), headers = rrr.headers, httpMethod = rrr.httpMethod, callRemoteAddress = rrr.callRemoteAddress)
 
   def traceRequest(rrr: RestRouterRequest, reEventFunc: ReEventFunc, ddataMap: ConfigData): Unit = {
     Util.logPayload(log, message.payload)
@@ -129,159 +129,28 @@ class RestActorPerRequest(
               ),
             reExtra = Some(ReExtra(statusCode = Some(bundleResponse.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
           )
-          Util.logPayload(log, sres.payload)
-          reEventFunc(reRequest, log, actorProps.ddataMap)
-          complete(createHttpResponse(StatusCode.int2StatusCode(sres.statusCode), sres.payload.getOrElse(""), sres.sessionId), Constant.KeyName.REST_INPUT)
+          traceResponse(Some(reRequest), sres.payload.getOrElse(""), StatusCode.int2StatusCode(sres.statusCode).intValue(), EsitoRE.INVIATA)
         case None =>
           sres.throwable match {
-            case Some(e: RestException) =>
-              log.error(e, s"Error in Rest Response: [${e.getMessage}]")
-
-              traceRequest(message, reEventFunc, actorProps.ddataMap)
-
-              val payload = Error(e.message).toJson.toString()
-              log.info("Generating negative response")
-              Util.logPayload(log, Some(payload))
-
-              val now = Util.now()
-              val reRequest = ReRequest(
-                sessionId = message.sessionId,
-                testCaseId = message.testCaseId,
-                re = Re(
-                  componente = Componente.FDR.toString,
-                  categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
-                  sottoTipoEvento = SottoTipoEvento.RESP.toString,
-                  esito = Some(EsitoRE.INVIATA_KO.toString),
-                  sessionId = Some(message.sessionId),
-                  payload = Some(payload.getUtf8Bytes),
-                  insertedTimestamp = now,
-                  info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
-                  flowAction = Some(message.primitiva),
-                  tipoEvento = Some(message.primitiva),
-                  idDominio = message.pathParams.get("organizationId"),
-                  flowName = message.pathParams.get("fdr")
-                ),
-                reExtra = Some(ReExtra(statusCode = Some(e.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
-              )
-              reEventFunc(reRequest, log, actorProps.ddataMap)
-              complete(createHttpResponse(e.statusCode, payload, sres.sessionId), Constant.KeyName.REST_INPUT)
-            case Some(e: DigitPaException) =>
-              log.error(e, s"Error in Rest Response: [${e.getMessage}]")
-
-              traceRequest(message, reEventFunc, actorProps.ddataMap)
-
-              val payload = Error(e.message).toJson.toString()
-              log.info("Generating negative response")
-              Util.logPayload(log, Some(payload))
-
-              val now = Util.now()
-              val reRequest = ReRequest(
-                sessionId = message.sessionId,
-                testCaseId = message.testCaseId,
-                re = Re(
-                  componente = Componente.FDR.toString,
-                  categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
-                  sottoTipoEvento = SottoTipoEvento.RESP.toString,
-                  esito = Some(EsitoRE.INVIATA_KO.toString),
-                  sessionId = Some(message.sessionId),
-                  payload = Some(payload.getUtf8Bytes),
-                  insertedTimestamp = now,
-                  info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
-                  flowAction = Some(message.primitiva),
-                  tipoEvento = Some(message.primitiva),
-                  idDominio = message.pathParams.get("organizationId"),
-                  flowName = message.pathParams.get("fdr")
-                ),
-                reExtra = Some(ReExtra(statusCode = Some(StatusCodes.BadRequest.intValue), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
-              )
-              reEventFunc(reRequest, log, actorProps.ddataMap)
-              complete(createHttpResponse(StatusCodes.BadRequest.intValue, payload, sres.sessionId), Constant.KeyName.REST_INPUT)
-            case Some(e: Throwable) =>
-              log.error(e, s"Error in Rest Response: [${e.getMessage}]")
-
-              val dpe = exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR)
-              log.info("Generating negative response")
-              val payload = Error(dpe.message).toJson.toString()
-              Util.logPayload(log, Some(payload))
-
-              val now = Util.now()
-              val reRequest = ReRequest(
-                sessionId = message.sessionId,
-                testCaseId = message.testCaseId,
-                re = Re(
-                  componente = Componente.FDR.toString,
-                  categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
-                  sottoTipoEvento = SottoTipoEvento.RESP.toString,
-                  esito = Some(EsitoRE.INVIATA_KO.toString),
-                  sessionId = Some(message.sessionId),
-                  payload = Some(payload.getUtf8Bytes),
-                  insertedTimestamp = now,
-                  info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
-                  flowAction = Some(message.primitiva),
-                  tipoEvento = Some(message.primitiva),
-                  idDominio = message.pathParams.get("organizationId"),
-                  flowName = message.pathParams.get("fdr")
-                ),
-                reExtra = Some(ReExtra(statusCode = Some(StatusCodes.InternalServerError.intValue), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
-              )
-              reEventFunc(reRequest, log, actorProps.ddataMap)
-              traceRequest(message, reEventFunc, actorProps.ddataMap)
-              complete(createHttpResponse(StatusCodes.InternalServerError.intValue, payload, sres.sessionId), Constant.KeyName.REST_INPUT)
-            case None =>
-              //qualche bundle ha risposto in modo svagliato
-              log.warn(s"Error in Rest Response")
-
-              val now = Util.now()
-              val (reRequest, payload) = sres.statusCode match {
-                case StatusCodes.OK.intValue =>
-                  (ReRequest(
-                    sessionId = message.sessionId,
-                    testCaseId = message.testCaseId,
-                    re = Re(
-                      componente = Componente.FDR.toString,
-                      categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
-                      sottoTipoEvento = SottoTipoEvento.RESP.toString,
-                      esito = Some(EsitoRE.INVIATA.toString),
-                      sessionId = Some(message.sessionId),
-                      payload = sres.payload.map(_.getUtf8Bytes),
-                      insertedTimestamp = now,
-                      info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
-                      fruitore = Some(Componente.FDR_NOTIFIER.toString),
-                      flowAction = Some(message.primitiva),
-                      tipoEvento = Some(message.primitiva),
-                      idDominio = message.pathParams.get("organizationId"),
-                      flowName = message.pathParams.get("fdr")
-                    ),
-                    reExtra = Some(ReExtra(statusCode = Some(sres.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
-                  ), sres.payload)
+            case Some(e) if e.isInstanceOf[RestException] || e.isInstanceOf[DigitPaException] =>
+              val statusCode = e match {
+                case exception: RestException =>
+                  exception.statusCode.intValue
                 case _ =>
-                  val dpe = exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR)
-                  log.info("Generating negative response")
-                  val errPayload = Error(dpe.message).toJson.toString()
-                  Util.logPayload(log, sres.payload)
-                  (ReRequest(
-                    sessionId = message.sessionId,
-                    testCaseId = message.testCaseId,
-                    re = Re(
-                      componente = Componente.FDR.toString,
-                      categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
-                      sottoTipoEvento = SottoTipoEvento.RESP.toString,
-                      esito = Some(EsitoRE.INVIATA_KO.toString),
-                      sessionId = Some(message.sessionId),
-                      payload = Some(errPayload.getUtf8Bytes),
-                      insertedTimestamp = now,
-                      info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
-                      fruitore = Some(Componente.FDR_NOTIFIER.toString),
-                      flowAction = Some(message.primitiva),
-                      tipoEvento = Some(message.primitiva),
-                      idDominio = message.pathParams.get("organizationId"),
-                      flowName = message.pathParams.get("fdr")
-                    ),
-                    reExtra = Some(ReExtra(statusCode = Some(sres.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
-                  ), Some(errPayload))
+                  StatusCodes.BadRequest.intValue
               }
-              reEventFunc(reRequest, log, actorProps.ddataMap)
-              complete(createHttpResponse(sres.statusCode, payload.map(v => v).getOrElse(""), sres.sessionId), Constant.KeyName.REST_INPUT)
+              traceErrorResponse(e, statusCode)
+            case Some(e: Throwable) =>
+              traceErrorResponse(e, StatusCodes.InternalServerError.intValue)
+            case None =>
+              //qualche bundle ha risposto in modo sbagliato
+              sres.statusCode match {
+                case StatusCodes.OK.intValue =>
+                  traceResponse(None, sres.payload.map(v => v).getOrElse(""), sres.statusCode, EsitoRE.INVIATA)
+                case _ =>
+                  traceErrorResponse(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue)
+              }
+
           }
       }
   }
@@ -293,36 +162,44 @@ class RestActorPerRequest(
           RestRequest(message.sessionId, message.payload, message.queryParams, message.pathParams, message.callRemoteAddress.getOrElse(""), message.primitiva, message.timestamp, reExtra(message), message.testCaseId)
         log.info(FdrLogConstant.callBundle(router.path.name))
         router ! restRequest
-
       case None =>
         log.error(s"Router [${message.primitiva}] not found")
-
-        traceRequest(message, reEventFunc, actorProps.ddataMap)
-
         val dpe = exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR)
-        val payload = Error(dpe.message).toJson.toString()
-        Util.logPayload(log, message.payload)
-
-        val now = Util.now()
-        val reRequest = ReRequest(
-          sessionId = message.sessionId,
-          testCaseId = message.testCaseId,
-          re = Re(
-            componente = Componente.FDR.toString,
-            categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
-            sottoTipoEvento = SottoTipoEvento.RESP.toString,
-            esito = Some(EsitoRE.INVIATA_KO.toString),
-            sessionId = Some(message.sessionId),
-            payload = Some(payload.getUtf8Bytes),
-            insertedTimestamp = now,
-            info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
-            flowAction = Some(message.primitiva)
-          ),
-          reExtra = Some(ReExtra(statusCode = Some(StatusCodes.InternalServerError.intValue), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS))))
-        )
-        reEventFunc(reRequest, log, actorProps.ddataMap)
-        complete(createHttpResponse(StatusCodes.InternalServerError.intValue, payload, message.sessionId), Constant.KeyName.REST_INPUT)
+        traceErrorResponse(dpe, StatusCodes.InternalServerError.intValue)
     }
+  }
+
+  def traceResponse(reRequestOpt: Option[ReRequest], payload: String, statusCode: Int, esitoRE: EsitoRE.Value): Unit = {
+    Util.logPayload(log, Some(payload))
+    val now = Util.now()
+    val reRequest = ReRequest(
+      sessionId = message.sessionId,
+      testCaseId = message.testCaseId,
+      re = Re(
+        componente = Componente.FDR.toString,
+        categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
+        sottoTipoEvento = SottoTipoEvento.RESP.toString,
+        esito = Some(esitoRE.toString),
+        sessionId = Some(message.sessionId),
+        payload = Some(payload.getUtf8Bytes),
+        insertedTimestamp = now,
+        info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
+        flowAction = Some(message.primitiva),
+        tipoEvento = Some(message.primitiva),
+        idDominio = message.pathParams.get("organizationId"),
+        flowName = message.pathParams.get("fdr")
+      ),
+      reExtra = Some(ReExtra(statusCode = Some(statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
+    )
+    reEventFunc(reRequestOpt.getOrElse(reRequest), log, actorProps.ddataMap)
+    complete(createHttpResponse(statusCode, payload, sessionId), Constant.KeyName.REST_INPUT)
+  }
+
+  private def traceErrorResponse(e: Throwable, statusCode: Int): Unit = {
+    log.error(e, s"Error response: [${e.getMessage}]")
+    traceRequest(message, reEventFunc, actorProps.ddataMap)
+    log.info("Generating negative response")
+    traceResponse(None, Error(e.getMessage).toJson.toString(), statusCode, EsitoRE.INVIATA_KO)
   }
 
 }
