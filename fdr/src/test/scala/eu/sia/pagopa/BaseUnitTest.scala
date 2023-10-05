@@ -123,7 +123,7 @@ abstract class BaseUnitTest()
                 url="http://localhost:8080/fdr/service-internal/v1/internal/organizations/ndp/fdrs/{fdr}/revisions/{revision}/psps/{pspId}/payments"
                 method="GET"
             }
-            subscriptionKey="b70beacf0326442392f9550edf23971a"
+            subscriptionKey=""
             timeoutSeconds=60
         }
         callNexiToo=true
