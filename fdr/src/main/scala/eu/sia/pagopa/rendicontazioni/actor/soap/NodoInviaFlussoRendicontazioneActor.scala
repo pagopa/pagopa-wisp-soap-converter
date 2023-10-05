@@ -22,6 +22,7 @@ import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoR
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
+import java.util.UUID
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
 
@@ -168,7 +169,7 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
           Future.successful(())
         }
 
-      _ <- actorProps.containerBlobFunction(nifr.identificativoFlusso, soapRequest.payload, log)
+      _ <- actorProps.containerBlobFunction(s"${nifr.identificativoFlusso}_${UUID.randomUUID().toString}", soapRequest.payload, log)
 
       _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
       nodoInviaFlussoRisposta = NodoInviaFlussoRendicontazioneRisposta(None, esito)
