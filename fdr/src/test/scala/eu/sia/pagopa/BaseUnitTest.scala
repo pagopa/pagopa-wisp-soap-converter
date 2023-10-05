@@ -114,6 +114,18 @@ abstract class BaseUnitTest()
             }
             timeoutSeconds=60
         }
+        fdr{
+            internalGetWithRevision {
+                url="http://localhost:8080/fdr/service-internal/v1/internal/organizations/ndp/fdrs/{fdr}/revisions/{revision}/psps/{pspId}"
+                method="GET"
+            }
+            internalGetFdrPayment {
+                url="http://localhost:8080/fdr/service-internal/v1/internal/organizations/ndp/fdrs/{fdr}/revisions/{revision}/psps/{pspId}/payments"
+                method="GET"
+            }
+            subscriptionKey="b70beacf0326442392f9550edf23971a"
+            timeoutSeconds=60
+        }
         callNexiToo=true
         limitjobs = true
         config.ftp.connect-timeout = "1000"
@@ -290,15 +302,6 @@ abstract class BaseUnitTest()
       .replace("{stationPwd}", stationPwd)
   }
 
-  def notifyFdrPayload(fdr: String, pspId: String, retry: Integer, revision: Integer) = {
-    s"""{
-       |  "fdr": "$fdr",
-       |  "pspId": "$pspId",
-       |  "retry": "$retry",
-       |  "revision": "$revision"
-      }"""".stripMargin
-  }
-
   def inviaFlussoRendicontazione(
                                   testCase: Option[String] = None,
                                   pa: String = TestItems.PA,
@@ -377,6 +380,38 @@ abstract class BaseUnitTest()
     assert(actRes.isSuccess)
     responseAssert(actRes.get)
     actRes.get
+  }
+
+  def notifyFlussoRendicontazione(
+                         payload: Option[String],
+                         testCase: Option[String] = Some("OK"),
+                         responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
+                         newdata: Option[ConfigData] = None
+                       ): Future[String] = {
+    val p = Promise[Boolean]()
+    val notifyFlussoRendicontazione =
+      system.actorOf(
+        Props.create(classOf[NotifyFlussoRendicontazioneTest], p, repositories, props.copy(actorClassId = "notifyFlussoRendicontazione", ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+        s"notifyFlussoRendicontazione${Util.now()}"
+      )
+
+    val restResponse = askActor(
+      notifyFlussoRendicontazione,
+      RestRequest(
+        UUID.randomUUID().toString,
+        payload,
+        Nil,
+        Map(),
+        TestItems.testPDD,
+        "notifyFlussoRendicontazione",
+        Util.now(),
+        ReExtra(),
+        testCase
+      )
+    )
+    assert(restResponse.payload.isDefined)
+    responseAssert(restResponse.payload.get, restResponse.statusCode)
+    p.future.map(_ => restResponse.payload.get)
   }
 
   def getAllRevisionFdr(

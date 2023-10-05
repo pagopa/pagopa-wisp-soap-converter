@@ -1,0 +1,10 @@
+{
+  "httpStatusCode": 400,
+  "httpStatusDescription": "Bad Request",
+  "appErrorCode": "FDR-0702",
+  "errors": [
+    {
+      "message": "Reporting Fdr [<fdr>] is invalid"
+    }
+  ]
+}

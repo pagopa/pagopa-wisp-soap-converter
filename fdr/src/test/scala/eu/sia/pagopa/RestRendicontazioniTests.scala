@@ -14,109 +14,89 @@ import java.time.format.DateTimeFormatter
 //@org.scalatest.Ignore
 class RestRendicontazioniTests() extends BaseUnitTest {
 
-  "getAllFdr" must {
+  "notifyFlussoRendicontazione" must {
     "ok" in {
       val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
       val random = RandomStringUtils.randomNumeric(9)
       val idFlusso = s"${date}${TestItems.PSP}-$random"
 
-      inviaFlussoRendicontazione(
-        idFlusso = Some(idFlusso),
-        responseAssert = (r) => {
-          assert(r.esito == Constant.OK, "outcome in res")
-        }
-      )
+      val payload = s"""{
+         |  "fdr": "$idFlusso",
+         |  "pspId": "${TestItems.PSP}",
+         |  "retry": 1,
+         |  "revision": 1
+      }""".stripMargin
 
       await(
-        getAllRevisionFdr(
-          TestItems.PA,
-          idFlusso,
+        notifyFlussoRendicontazione(
+          Some(payload),
+          testCase = Some("OK"),
           responseAssert = (resp, status) => {
             assert(status == StatusCodes.OK.intValue)
-            val respObject = resp.parseJson.convertTo[GetXmlRendicontazioneResponse]
-            assert(respObject.xmlRendicontazione.nonEmpty)
-            val ctFlussoRiversamento = XmlEnum.str2FlussoRiversamento_flussoriversamento(XmlUtil.StringBase64Binary.decodeBase64(respObject.xmlRendicontazione))
-            assert(ctFlussoRiversamento.get.identificativoFlusso == idFlusso)
+            assert(resp.contains("{\"outcome\":\"OK\"}"))
           }
         )
       )
     }
-    "ko pa not found" in {
-      val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
-      val random = RandomStringUtils.randomNumeric(9)
-      val idFlusso = s"${date}${TestItems.PSP}-$random"
-      val paNotFound = "paNotFound"
-      await(
-        getAllRevisionFdr(
-          paNotFound,
-          idFlusso,
-          responseAssert = (resp, status) => {
-            assert(status == StatusCodes.BAD_REQUEST.intValue())
-            val respObject = resp.parseJson.convertTo[Error]
-            assert(respObject.error == s"idPA $paNotFound not found")
-          }
-        )
-      )
-    }
-    "ko pa not enabled" in {
+    "ko fdr fase3 error" in {
       val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
       val random = RandomStringUtils.randomNumeric(9)
       val idFlusso = s"${date}${TestItems.PSP}-$random"
 
+      val payload =
+        s"""{
+           |  "fdr": "$idFlusso",
+           |  "pspId": "${TestItems.PSP}",
+           |  "retry": 1,
+           |  "revision": 1
+      }""".stripMargin
+
       await(
-        getAllRevisionFdr(
-          TestItems.PA_DISABLED,
-          idFlusso,
+        notifyFlussoRendicontazione(
+          Some(payload),
+          testCase = Some("KO"),
           responseAssert = (resp, status) => {
-            assert(status == StatusCodes.BAD_REQUEST.intValue())
-            val respObject = resp.parseJson.convertTo[Error]
-            assert(respObject.error == s"idPA ${TestItems.PA_DISABLED} found but disabled")
+            assert(status == StatusCodes.INTERNAL_SERVER_ERROR.intValue)
+            assert(resp.contains("{\"description\":\"Errore generico.\",\"outcome\":\"KO\"}"))
           }
         )
       )
     }
-    "ko flusso not found" in {
+    "ko fdr fase3 error payments" in {
       val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
       val random = RandomStringUtils.randomNumeric(9)
       val idFlusso = s"${date}${TestItems.PSP}-$random"
 
-      await(
-        getAllRevisionFdr(
-          TestItems.PA,
-          idFlusso,
-          responseAssert = (resp, status) => {
-            assert(status == StatusCodes.NOT_FOUND.intValue())
-            val respObject = resp.parseJson.convertTo[Error]
-            assert(respObject.error == "FdR unknown or not available")
+      val payload =
+        s"""{
+           |  "fdr": "$idFlusso",
+           |  "pspId": "${TestItems.PSP}",
+           |  "retry": 1,
+           |  "revision": 1
+      }""".stripMargin
+
+      await({
+        actorUtility.configureMocker("OK" -> { (messageType, _) => {
+          messageType match {
+            case "internalGetFdrPayment" => "KO"
+            case _ => "OK"
           }
-        )
-      )
-    }
-    "ko flusso not in db" in {
-      val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
-      val random = RandomStringUtils.randomNumeric(9)
-      val idFlusso = s"${date}${TestItems.PSP}-$random"
-
-      inviaFlussoRendicontazione(
-        idFlusso = Some(idFlusso),
-        pa = TestItems.PA_FTP,
-        responseAssert = (r) => {
-          assert(r.esito == Constant.OK, "outcome in res")
         }
-      )
+        })
 
-      await(
-        getAllRevisionFdr(
-          TestItems.PA_FTP,
-          idFlusso,
+        notifyFlussoRendicontazione(
+          Some(payload),
+          testCase = Some("KO"),
           responseAssert = (resp, status) => {
-            assert(status == StatusCodes.NOT_FOUND.intValue())
-            val respObject = resp.parseJson.convertTo[Error]
-            assert(respObject.error == "FdR XML not found")
+            assert(status == StatusCodes.INTERNAL_SERVER_ERROR.intValue)
+            assert(resp.contains("{\"description\":\"Errore generico.\",\"outcome\":\"KO\"}"))
           }
         )
-      )
+      })
     }
   }
+
+
+
 
 }
