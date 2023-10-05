@@ -61,7 +61,8 @@ object TestDData {
         "77777777777" -> basePA.copy(creditorInstitutionCode = "77777777777", true, description = Some("77777777777"), businessName = Some("77777777777")),
         TestItems.PA_FTP -> basePA.copy(creditorInstitutionCode = TestItems.PA_FTP, reportingFtp = true),
         TestItems.PA_old -> basePA.copy(creditorInstitutionCode = TestItems.PA_old),
-        TestItems.PA_2 -> basePA.copy(creditorInstitutionCode = TestItems.PA_2)
+        TestItems.PA_2 -> basePA.copy(creditorInstitutionCode = TestItems.PA_2),
+        TestItems.PA_DISABLED -> basePA.copy(creditorInstitutionCode = TestItems.PA_DISABLED, enabled = false)
       ),
       Map(TestItems.testIntPA -> BrokerCreditorInstitution(TestItems.testIntPA, true, Some("INTPAT"), false)),
       Map(

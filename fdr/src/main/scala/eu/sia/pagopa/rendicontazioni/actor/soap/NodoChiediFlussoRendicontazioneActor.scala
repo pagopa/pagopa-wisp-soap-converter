@@ -23,7 +23,7 @@ import scalaxbmodel.nodoperpa.{NodoChiediFlussoRendicontazione, NodoChiediFlusso
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
+case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
   extends PerRequestActor with ReUtil with NodoChiediFlussoRendicontazioneResponse {
 
   override def actorError(e: DigitPaException): Unit = {

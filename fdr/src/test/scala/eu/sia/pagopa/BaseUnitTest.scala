@@ -5,16 +5,12 @@ import akka.event.Logging
 import akka.testkit.{ImplicitSender, TestKit}
 import com.typesafe.config.{Config, ConfigFactory}
 import eu.sia.pagopa.Main.ConfigData
-import eu.sia.pagopa.common.message.{ReRequest, _}
+import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.fdr.FdrRepository
 import eu.sia.pagopa.common.repo.{DBComponent, Repositories}
-import eu.sia.pagopa.common.util.{NodoLogger, _}
-import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder
-import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
-import eu.sia.pagopa.common.util.queueclient.AzureQueueClient
 import eu.sia.pagopa.common.util.xml.XmlUtil
+import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.commonxml.XmlEnum
-import eu.sia.pagopa.rendicontazioni.actor.rest.{GetAllRevisionFdrActorPerRequest, NotifyFlussoRendicontazioneActorPerRequest}
 import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneActorPerRequest}
 import eu.sia.pagopa.testutil._
 import liquibase.database.DatabaseFactory
@@ -33,7 +29,6 @@ import slick.sql.SqlStreamingAction
 import slick.util.AsyncExecutor
 
 import java.io.File
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
@@ -119,6 +114,18 @@ abstract class BaseUnitTest()
             }
             timeoutSeconds=60
         }
+        fdr{
+            internalGetWithRevision {
+                url="http://localhost:8080/fdr/service-internal/v1/internal/organizations/ndp/fdrs/{fdr}/revisions/{revision}/psps/{pspId}"
+                method="GET"
+            }
+            internalGetFdrPayment {
+                url="http://localhost:8080/fdr/service-internal/v1/internal/organizations/ndp/fdrs/{fdr}/revisions/{revision}/psps/{pspId}/payments"
+                method="GET"
+            }
+            subscriptionKey="b70beacf0326442392f9550edf23971a"
+            timeoutSeconds=60
+        }
         callNexiToo=true
         limitjobs = true
         config.ftp.connect-timeout = "1000"
@@ -149,8 +156,8 @@ abstract class BaseUnitTest()
   }
 
   system.registerOnTermination(() => {
-//    Thread.sleep(5000)
-//    fdrRepository.db.close()
+    //    Thread.sleep(5000)
+    //    fdrRepository.db.close()
   })
 
   implicit val log: NodoLogger = new NodoLogger(Logging(system, getClass.getCanonicalName))
@@ -159,15 +166,22 @@ abstract class BaseUnitTest()
   val fdrRepository: FdrRepository = RepositoriesUtil.getFdrRepository
 
   val actorUtility = new ActorUtilityTest()
-  val reFunction = (a: ReRequest, b: NodoLogger, c: ConfigData) => {Future.successful(())}
-  val containerBlobFunction = (a: String, b: String, c: NodoLogger) => {Future.successful(())}
-  val queueAddFunction = (a: String, b: String, c: String, d: NodoLogger) => {Future.successful(())}
+  val reFunction = (a: ReRequest, b: NodoLogger, c: ConfigData) => {
+    Future.successful(())
+  }
+  val containerBlobFunction = (a: String, b: String, c: NodoLogger) => {
+    Future.successful(())
+  }
+  val queueAddFunction = (a: String, b: String, c: String, d: NodoLogger) => {
+    Future.successful(())
+  }
 
   val certPath = s"${new File(".").getCanonicalPath}/localresources/cacerts"
 
   class RepositoriesTest(override val config: Config, override val log: NodoLogger) extends Repositories(config, log) {
     override lazy val fdrRepository: FdrRepository = RepositoriesUtil.getFdrRepository
   }
+
   val repositories = new RepositoriesTest(system.settings.config, log)
 
   val props = ActorProps(null, null, null, actorUtility, Map(), reFunction, containerBlobFunction, queueAddFunction, "", certPath, TestItems.ddataMap)
@@ -202,23 +216,23 @@ abstract class BaseUnitTest()
   }
 
   def inviaFlussoRendicontazionePayload(
-      psp: String = TestItems.PSP,
-      brokerPsp: String = TestItems.intPSP,
-      channel: String = TestItems.canale,
-      channelPwd: String = TestItems.canalePwd,
-      pa: String = TestItems.PA,
-      idFlussoReq: Option[String] = None,
-      dateReq: Option[String],
-      dataOraFlussoBusta: Option[String],
-      dataOraFlussoAllegato: Option[String],
-      istitutoMittente: Option[String],
-      flussoNonValido: Boolean = false,
-      denominazioneMittente : String
-  ) = {
+                                         psp: String = TestItems.PSP,
+                                         brokerPsp: String = TestItems.intPSP,
+                                         channel: String = TestItems.canale,
+                                         channelPwd: String = TestItems.canalePwd,
+                                         pa: String = TestItems.PA,
+                                         idFlussoReq: Option[String] = None,
+                                         dateReq: Option[String],
+                                         dataOraFlussoBusta: Option[String],
+                                         dataOraFlussoAllegato: Option[String],
+                                         istitutoMittente: Option[String],
+                                         flussoNonValido: Boolean = false,
+                                         denominazioneMittente: String
+                                       ) = {
     val date = dateReq.getOrElse(DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now()))
     val _dataOraFlussoBusta = dataOraFlussoBusta.getOrElse(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'hh:mm:ss").format(Util.now()))
     val _dataOraFlussoAllegato = dataOraFlussoAllegato.getOrElse(_dataOraFlussoBusta)
-//    val idflusso = idFlussoReq.getOrElse(s"${date}${psp}-${RandomStringUtils.randomNumeric(9)}")
+    //    val idflusso = idFlussoReq.getOrElse(s"${date}${psp}-${RandomStringUtils.randomNumeric(9)}")
     val rendi = if (flussoNonValido) {
       "flusso non valido"
     } else {
@@ -243,16 +257,16 @@ abstract class BaseUnitTest()
   }
 
   def chiediFlussoRendicontazionePayload(
-      idFlusso: String,
-      psp: String = TestItems.PSP,
-      brokerPsp: String = TestItems.intPSP,
-      channel: String = TestItems.canale,
-      channelPwd: String = TestItems.canalePwd,
-      pa: String = TestItems.PA,
-      brokerPa: String = TestItems.testIntPA,
-      station: String = TestItems.stazione,
-      stationPwd: String = TestItems.stazionePwd
-  ) = {
+                                          idFlusso: String,
+                                          psp: String = TestItems.PSP,
+                                          brokerPsp: String = TestItems.intPSP,
+                                          channel: String = TestItems.canale,
+                                          channelPwd: String = TestItems.canalePwd,
+                                          pa: String = TestItems.PA,
+                                          brokerPa: String = TestItems.testIntPA,
+                                          station: String = TestItems.stazione,
+                                          stationPwd: String = TestItems.stazionePwd
+                                        ) = {
 
     payload("/requests/nodoChiediFlussoRendicontazione")
       .replace("{psp}", psp)
@@ -267,15 +281,15 @@ abstract class BaseUnitTest()
   }
 
   def chiediElencoFlussiRendicontazionePayload(
-      psp: String = TestItems.PSP,
-      brokerPsp: String = TestItems.intPSP,
-      channel: String = TestItems.canale,
-      channelPwd: String = TestItems.canalePwd,
-      pa: String = TestItems.PA,
-      brokerPa: String = TestItems.testIntPA,
-      station: String = TestItems.stazione,
-      stationPwd: String = TestItems.stazionePwd
-  ) = {
+                                                psp: String = TestItems.PSP,
+                                                brokerPsp: String = TestItems.intPSP,
+                                                channel: String = TestItems.canale,
+                                                channelPwd: String = TestItems.canalePwd,
+                                                pa: String = TestItems.PA,
+                                                brokerPa: String = TestItems.testIntPA,
+                                                station: String = TestItems.stazione,
+                                                stationPwd: String = TestItems.stazionePwd
+                                              ) = {
 
     payload("/requests/nodoChiediElencoFlussiRendicontazione")
       .replace("{psp}", psp)
@@ -288,27 +302,18 @@ abstract class BaseUnitTest()
       .replace("{stationPwd}", stationPwd)
   }
 
-  def notifyFdrPayload(fdr: String, pspId: String, retry: Integer, revision: Integer) = {
-      s"""{
-         |  "fdr": "$fdr",
-         |  "pspId": "$pspId",
-         |  "retry": "$retry",
-         |  "revision": "$revision"
-      }"""".stripMargin
-  }
-
   def inviaFlussoRendicontazione(
-      testCase: Option[String] = None,
-      pa: String = TestItems.PA,
-      idFlusso: Option[String] = None,
-      date: Option[String] = None,
-      dataOraFlussoBusta: Option[String] = None,
-      dataOraFlussoAllegato: Option[String] = None,
-      istitutoMittente: Option[String] = None,
-      flussoNonValido: Boolean = false,
-      responseAssert: NodoInviaFlussoRendicontazioneRisposta => Assertion = (_) => assert(true),
-      denominazioneMittente: Option[String] = Option("Banca Sella")
-  ): NodoInviaFlussoRendicontazioneRisposta = {
+                                  testCase: Option[String] = None,
+                                  pa: String = TestItems.PA,
+                                  idFlusso: Option[String] = None,
+                                  date: Option[String] = None,
+                                  dataOraFlussoBusta: Option[String] = None,
+                                  dataOraFlussoAllegato: Option[String] = None,
+                                  istitutoMittente: Option[String] = None,
+                                  flussoNonValido: Boolean = false,
+                                  responseAssert: NodoInviaFlussoRendicontazioneRisposta => Assertion = (_) => assert(true),
+                                  denominazioneMittente: Option[String] = Option("Banca Sella")
+                                ): NodoInviaFlussoRendicontazioneRisposta = {
     val act =
       system.actorOf(
         Props.create(classOf[NodoInviaFlussoRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "nodoInviaFlussoRendicontazione", routers = Map("ftp-senderRouter" -> mockActor))),
@@ -344,10 +349,10 @@ abstract class BaseUnitTest()
   }
 
   def chiediFlussoRendicontazione(
-      idFlusso: String,
-      testCase: Option[String] = None,
-      responseAssert: NodoChiediFlussoRendicontazioneRisposta => Assertion = (_) => assert(true)
-  ): NodoChiediFlussoRendicontazioneRisposta = {
+                                   idFlusso: String,
+                                   testCase: Option[String] = None,
+                                   responseAssert: NodoChiediFlussoRendicontazioneRisposta => Assertion = (_) => assert(true)
+                                 ): NodoChiediFlussoRendicontazioneRisposta = {
     val act =
       system.actorOf(Props.create(classOf[NodoChiediFlussoRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "nodoChiediFlussoRendicontazione")), s"nodoChiediFlussoRendicontazione${Util.now()}")
     val soapres =
@@ -360,9 +365,9 @@ abstract class BaseUnitTest()
   }
 
   def chiediElencoFlussiRendicontazione(
-      testCase: Option[String] = None,
-      responseAssert: NodoChiediElencoFlussiRendicontazioneRisposta => Assertion = (_) => assert(true)
-  ): NodoChiediElencoFlussiRendicontazioneRisposta = {
+                                         testCase: Option[String] = None,
+                                         responseAssert: NodoChiediElencoFlussiRendicontazioneRisposta => Assertion = (_) => assert(true)
+                                       ): NodoChiediElencoFlussiRendicontazioneRisposta = {
     val act =
       system.actorOf(
         Props.create(classOf[NodoChiediElencoFlussiRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "nodoChiediElencoFlussiRendicontazione")),
@@ -377,84 +382,74 @@ abstract class BaseUnitTest()
     actRes.get
   }
 
-//  def notifyFdr(
-//                 fdr: String,
-//                 pspId: String,
-//                 retry: Option[Integer] = Some(1),
-//                 revision: Option[Integer] = Some(1),
-//                 testCase: Option[String] = Some("OK"),
-//                 responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
-//                    newdata: Option[ConfigData] = None
-//                  ): Future[String] = {
-//    val p = Promise[Boolean]()
-//    val notifyFdr =
-//      system.actorOf(
-//        Props.create(classOf[NotifyFlussoRendicontazioneActorPerRequestTest], p, repositories, props.copy(actorClassId = "notifyFlussoRendicontazione", ddataMap = newdata.getOrElse(TestDData.ddataMap))),
-//        s"notifyFlussoRendicontazione${Util.now()}"
-//      )
-//
-//    val restResponse = askActor(
-//      notifyFdr,
-//      RestRequest(
-//        UUID.randomUUID().toString,
-//        Some(
-//          notifyFdrPayload(
-//            fdr, pspId, retry.getOrElse(1), revision.getOrElse(1)
-//          )
-//        ),
-//        Nil,
-//        Map(),
-//        TestItems.testPDD,
-//        "notifyFlusso",
-//        Util.now(),
-//        ReExtra(),
-//        testCase
-//      )
-//    )
-//    assert(restResponse.payload.isDefined)
-//    responseAssert(restResponse.payload.get, restResponse.statusCode)
-//    p.future.map(_ => restResponse.payload.get)
-//  }
+  def notifyFlussoRendicontazione(
+                         payload: Option[String],
+                         testCase: Option[String] = Some("OK"),
+                         responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
+                         newdata: Option[ConfigData] = None
+                       ): Future[String] = {
+    val p = Promise[Boolean]()
+    val notifyFlussoRendicontazione =
+      system.actorOf(
+        Props.create(classOf[NotifyFlussoRendicontazioneTest], p, repositories, props.copy(actorClassId = "notifyFlussoRendicontazione", ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+        s"notifyFlussoRendicontazione${Util.now()}"
+      )
 
-//  def getAllRevisionFdr(
-//                 organizationId: String,
-//                 fdr: String,
-//                 testCase: Option[String] = Some("OK"),
-//                 responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
-//                 newdata: Option[ConfigData] = None
-//               ): Future[String] = {
-//    val p = Promise[Boolean]()
-//    val getAllRevisionFdr =
-//      system.actorOf(
-//        Props.create(classOf[GetAllRevisionFdrActorPerRequestTest], p, repositories, props.copy(actorClassId = "getAllRevisionFdr", ddataMap = newdata.getOrElse(TestDData.ddataMap))),
-//        s"getAllRevisionFdr${Util.now()}"
-//      )
-//
-//    val restResponse = askActor(
-//      getAllRevisionFdr,
-//      RestRequest(
-//        UUID.randomUUID().toString,
-//        None,
-//        Nil,
-//        Map("organizationId" -> organizationId, "fdr" -> fdr),
-//        TestItems.testPDD,
-//        "getAllRevisionFdr",
-//        Util.now(),
-//        ReExtra(),
-//        testCase
-//      )
-//    )
-//    assert(restResponse.payload.isDefined)
-//    responseAssert(restResponse.payload.get, restResponse.statusCode)
-//    p.future.map(_ => restResponse.payload.get)
-//  }
+    val restResponse = askActor(
+      notifyFlussoRendicontazione,
+      RestRequest(
+        UUID.randomUUID().toString,
+        payload,
+        Nil,
+        Map(),
+        TestItems.testPDD,
+        "notifyFlussoRendicontazione",
+        Util.now(),
+        ReExtra(),
+        testCase
+      )
+    )
+    assert(restResponse.payload.isDefined)
+    responseAssert(restResponse.payload.get, restResponse.statusCode)
+    p.future.map(_ => restResponse.payload.get)
+  }
+
+  def getAllRevisionFdr(
+                         organizationId: String,
+                         fdr: String,
+                         testCase: Option[String] = Some("OK"),
+                         responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
+                         newdata: Option[ConfigData] = None
+                       ): Future[String] = {
+    val p = Promise[Boolean]()
+    val getAllRevisionFdr =
+      system.actorOf(
+        Props.create(classOf[GetAllRevisionFdrTest], p, repositories, props.copy(actorClassId = "getAllRevisionFdr", ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+        s"getAllRevisionFdr${Util.now()}"
+      )
+
+    val restResponse = askActor(
+      getAllRevisionFdr,
+      RestRequest(
+        UUID.randomUUID().toString,
+        None,
+        Nil,
+        Map("organizationId" -> organizationId, "fdr" -> fdr),
+        TestItems.testPDD,
+        "getAllRevisionFdr",
+        Util.now(),
+        ReExtra(),
+        testCase
+      )
+    )
+    assert(restResponse.payload.isDefined)
+    responseAssert(restResponse.payload.get, restResponse.statusCode)
+    p.future.map(_ => restResponse.payload.get)
+  }
+
 
   def await[T](f: Future[T]): T = {
     Await.result(f, Duration.Inf)
-  }
-  def askActor(actor: ActorRef, restRequest: RestRequest) = {
-    import akka.pattern.ask
-    Await.result(actor.ask(restRequest)(singletesttimeout).mapTo[RestResponse], Duration.Inf)
   }
 
   def askActor(actor: ActorRef, soapRequest: SoapRequest) = {
@@ -462,14 +457,15 @@ abstract class BaseUnitTest()
     Await.result(actor.ask(soapRequest)(singletesttimeout).mapTo[SoapResponse], Duration.Inf)
   }
 
-  def askActor(actor: ActorRef, wr: WorkRequest) = {
+  def askActor(actor: ActorRef, restRequest: RestRequest) = {
     import akka.pattern.ask
-    Await.result(actor.ask(wr)(singletesttimeout).mapTo[WorkResponse], Duration.Inf)
+    Await.result(actor.ask(restRequest)(singletesttimeout).mapTo[RestResponse], Duration.Inf)
   }
 
   def runQuery[T](repo: DBComponent, action: DBIOAction[Vector[T], Streaming[T], slick.dbio.Effect]) = {
     Await.result(repo.db.run(action), Duration.Inf).head
   }
+
   def runQueryList[T](repo: DBComponent, action: SqlStreamingAction[Vector[T], T, slick.dbio.Effect]) = {
     Await.result(repo.db.run(action), Duration.Inf)
   }

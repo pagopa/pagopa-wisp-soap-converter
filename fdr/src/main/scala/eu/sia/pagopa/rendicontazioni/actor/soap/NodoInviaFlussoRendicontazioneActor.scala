@@ -25,7 +25,7 @@ import java.time.{LocalDateTime, ZoneId}
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
 
-final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
+case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
   extends BaseFlussiRendicontazioneActor
     with PerRequestActor
     with ReUtil

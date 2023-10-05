@@ -18,28 +18,6 @@ object Util {
     LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
   }
 
-  def getNoticeNumberData(noticeNumber: String): (String, Option[Long], Option[Int], Option[Long]) = {
-    val auxDigit = noticeNumber.substring(0, 1).toLong
-    val segregazione = auxDigit match {
-      case 3 | 4 => Some(noticeNumber.substring(1, 3).toLong)
-      case _     => None
-    }
-    val progressivo = auxDigit match {
-      case 0 => Some(noticeNumber.substring(1, 3).toInt)
-      case _ => None
-    }
-    val auxValue = auxDigit match {
-      case 0 | 3 => None
-      case _     => Option(auxDigit)
-    }
-    val iuv = if (auxDigit == 0) {
-      noticeNumber.substring(3)
-    } else {
-      noticeNumber.substring(1)
-    }
-    (iuv, segregazione, progressivo, auxValue)
-  }
-
   val OBFUSCATE_REGEX_MAP = Seq(new Regex("(<(?:\\w*?:{0,1})password(?:.*)>)(.*)(<\\/(?:\\w*?:{0,1})password(?:.*)>)") -> "$1XXXXXXXXXX$3")
 
   def obfuscate(str: String): String = {
