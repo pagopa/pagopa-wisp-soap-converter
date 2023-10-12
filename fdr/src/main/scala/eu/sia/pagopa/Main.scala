@@ -216,13 +216,14 @@ object Main extends App {
         _ <- Future.successful(())
         env = scala.util.Properties.envOrNone("INSTANCE")
         cfgData <- ConfigUtil.getConfigHttp(SSlContext)
-        data <- cfgData match {
-          case Some(c) => Future.successful(c)
-          case None => if( env.isDefined && env.get == "LOCAL" ){
-            Future.successful(TestDData.ddataMap)
-          } else {
-            Future.failed(new RuntimeException("Could not get ConfigData"))
+        data <- if( env.isDefined && env.get == "LOCAL" ) {
+          Future.successful(TestDData.ddataMap)
+        } else {
+          cfgData match {
+            case Some(c) => Future.successful(c)
+            case None => Future.failed(new RuntimeException("Could not get ConfigData"))
           }
+
         }
       } yield  data
     _ = log.info(s" ConfigData ${ddata.version} loaded")
