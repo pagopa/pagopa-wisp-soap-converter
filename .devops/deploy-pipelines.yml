@@ -93,6 +93,8 @@ variables:
     WEU_dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
     WEU_dockerRegistryFqdn: $(DEV_CONTAINER_NAMESPACE)
     WEU_poolImage: '$(DEPLOY-POOL-DEV)'
+    WEU_appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_DEV)"
+    WEU_appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_DEV)"
     WEU_kubernetesServiceConnection: $(DEV_KUBERNETES_SERVICE_CONN)
     NEU_dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
     NEU_dockerRegistryFqdn: $(DEV_CONTAINER_NAMESPACE)
@@ -104,6 +106,8 @@ variables:
     appNameCron: 'pagopafdrnodocron'
     lightbend_key_secret: $(lightbend_key_uat)
     weight_steps: "10,30"
+    WEU_appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_UAT)"
+    WEU_appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_UAT)"
     WEU_dockerRegistryServiceConnection: $(UAT_CONTAINER_REGISTRY_SERVICE_CONN)
     WEU_dockerRegistryFqdn: $(UAT_CONTAINER_NAMESPACE)
     WEU_kubernetesServiceConnection: '$(UAT_KUBERNETES_SERVICE_CONN)'
@@ -114,6 +118,8 @@ variables:
     appNameCron: 'pagopafdrnodocron'
     lightbend_key_secret: $(lightbend_key_prod)
     weight_steps: "10,30,50"
+    WEU_appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_PROD)"
+    WEU_appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_PROD)"
     WEU_dockerRegistryServiceConnection: $(PROD_CONTAINER_REGISTRY_SERVICE_CONN)
     WEU_dockerRegistryFqdn: $(PROD_CONTAINER_NAMESPACE)
     WEU_kubernetesServiceConnection: '$(PROD_KUBERNETES_SERVICE_CONN)'
@@ -287,6 +293,8 @@ stages:
                           APP_NAME: "$(appName)-canary"
                           VALUE_FILE: $(WEU_value_file_fdr)
                           DEPLOY_VERSION: $(SBT_VERSION)
+                          APPINSIGHTS_SERVICE_CONN: ${{ variables.WEU_appInsightsServiceConn }}
+                          APPINSIGHTS_RESOURCE_ID: ${{ variables.WEU_appInsightsResourceId }}
                           CHART_PATH: "helm/fdr"
                           ARGUMENTS: >-
                             --set fdrnodo.image.tag="$(SBT_VERSION)"
@@ -379,6 +387,8 @@ stages:
                       APP_NAME: $(appName)
                       VALUE_FILE: $(WEU_value_file_fdr)
                       DEPLOY_VERSION: $(SBT_VERSION)
+                      APPINSIGHTS_SERVICE_CONN: ${{ variables.WEU_appInsightsServiceConn }}
+                      APPINSIGHTS_RESOURCE_ID: ${{ variables.WEU_appInsightsResourceId }}
                       CHART_PATH: "helm/fdr"
                       ARGUMENTS: >-
                         --set fdrnodo.image.tag="$(SBT_VERSION)"
@@ -409,6 +419,8 @@ stages:
                           APP_NAME: $(appNameCron)
                           VALUE_FILE: $(WEU_value_file_cron)
                           DEPLOY_VERSION: $(SBT_VERSION)
+                          APPINSIGHTS_SERVICE_CONN: ${{ variables.WEU_appInsightsServiceConn }}
+                          APPINSIGHTS_RESOURCE_ID: ${{ variables.WEU_appInsightsResourceId }}
                           CHART_PATH: "helm/fdr-cron"
                           ARGUMENTS: >-
                             $(setupArgs.IMAGES)
@@ -426,6 +438,8 @@ stages:
                           APP_NAME: "$(appName)-canary"
                           VALUE_FILE: $(WEU_value_file_fdr)
                           DEPLOY_VERSION: $(SBT_VERSION)
+                          APPINSIGHTS_SERVICE_CONN: ${{ variables.WEU_appInsightsServiceConn }}
+                          APPINSIGHTS_RESOURCE_ID: ${{ variables.WEU_appInsightsResourceId }}
                           CHART_PATH: "helm/fdr"
                           ARGUMENTS: "$(appName)-canary"
       - ${{ if parameters.NEU }}:
@@ -490,6 +504,8 @@ stages:
                       APP_NAME: $(appNameCron)
                       VALUE_FILE: $(NEU_value_file_cron)
                       DEPLOY_VERSION: $(SBT_VERSION)
+                      APPINSIGHTS_SERVICE_CONN: ${{ variables.NEU_appInsightsServiceConn }}
+                      APPINSIGHTS_RESOURCE_ID: ${{ variables.NEU_appInsightsResourceId }}
                       ARGUMENTS: >-
                         $(setupArgs.IMAGES)
                         $(setupArgs.FILES)
@@ -525,4 +541,6 @@ stages:
                         APP_NAME: "$(appName)-canary"
                         VALUE_FILE: $(WEU_value_file_fdr)
                         DEPLOY_VERSION: $(SBT_VERSION)
+                        APPINSIGHTS_SERVICE_CONN: ${{ variables.WEU_appInsightsServiceConn }}
+                        APPINSIGHTS_RESOURCE_ID: ${{ variables.WEU_appInsightsResourceId }}
                         ARGUMENTS: "$(appName)-canary"

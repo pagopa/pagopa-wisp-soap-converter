@@ -1,11 +1,12 @@
 package eu.sia.pagopa.config.actor
 
+import eu.sia.pagopa.Main.SSlContext
 import eu.sia.pagopa.common.actor.BaseActor
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.repo.fdr.enums.SchedulerFireExitStatus
 import eu.sia.pagopa.common.util.{ConfigUtil, Constant, JobUtil}
-import eu.sia.pagopa.{ActorProps, BootstrapUtil}
+import eu.sia.pagopa.{ActorProps, BootstrapUtil, TestDData}
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -40,15 +41,18 @@ final case class ApiConfigActor(repositories: Repositories, actorProps: ActorPro
       })
     case GetCache(_, cacheId) =>
       log.info(s"GetCache $cacheId requested")
+      val env = scala.util.Properties.envOrNone("INSTANCE")
       (for {
         cacheData <- ConfigUtil.getConfigHttp(actorProps.httpsConnectionContext)
-        _ = {
-          cacheData.map(cd=>{
+        _ = if (env.isDefined && env.get == "LOCAL") {
+          actorProps.ddataMap = TestDData.ddataMap
+        } else {
+          cacheData.map(cd => {
             log.info(s"Received new configData ${cd.version},setting in memory")
             actorProps.ddataMap = cd
           })
+          log.debug(s"GetCache $cacheId done")
         }
-        _ = log.debug(s"GetCache $cacheId done")
       } yield ())
         .recover({ case e =>
           log.error(e, s"GetCache $cacheId error")
