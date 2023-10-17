@@ -2,8 +2,8 @@ apiVersion: v2
 name: fdr-cron-chart
 description: Flussi di rendicontazione cron job
 type: application
-version: 2.0.0-NOD-519-risposta-ppt-system-error-invio-blob-azure
-appVersion: 2.0.0-NOD-519-risposta-ppt-system-error-invio-blob-azure
+version: 2.0.1
+appVersion: 2.0.1
 dependencies:
   - name: cron-chart
     version: 2.3.0
