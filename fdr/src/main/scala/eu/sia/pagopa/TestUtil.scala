@@ -26,7 +26,7 @@ object TestItems {
   val auxDigit = "0"
   val PAUnknown = "01010101010"
 
-  val PSP = "MARIOGAM"
+  val PSP = "60000000001"
   val PSPAgid = "AGID_01"
   val PSPCD = "AGID_01"
   val PSPECOMMERCE = "PSP_ECOMMERCE"
@@ -34,12 +34,12 @@ object TestItems {
 
   val testIntPA = "15376371009"
 
-  val intPSP = "15376371009"
+  val intPSP = "60000000001"
   val intPSPAgid = "97735020584"
   val intPSPCD = "97735020584"
   val intPSPMod3New = "15376371009"
 
-  val canale = "15376371009_03"
+  val canale = "15376371009_04"
   val canaleImmediato = "canaleImmediato"
   val canaleDifferito = "canaleDifferito"
   val canaleAgid = "97735020584_02"
@@ -54,7 +54,7 @@ object TestItems {
   val canalePull = "canalePull"
   val canaleIrr = "canaleIrraggiungibile"
 
-  val canalePwd = "Mario123"
+  val canalePwd = "PLACEHOLDER"
 
   val testDTF: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
   val httpConnectTimeout: FiniteDuration = 10.seconds
