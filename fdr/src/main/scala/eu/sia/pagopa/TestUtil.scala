@@ -11,49 +11,39 @@ import scala.concurrent.duration.{FiniteDuration, _}
 import scala.util.{Success, Try}
 object TestItems {
 
-  val PA = "00000000099"
+  val PA = "15376371009"
   val PA_2 = "12345678902"
-  val PA_3 = "12345678903"
   val PA_old = "12345678901"
   val PA_FTP = "90000000002"
-  val prefixOld = "002"
   val prefixNew = "001"
-  val stazione = "nodo-doc-dev"
+  val stazione = "15376371009_03"
   val stazioneNonIstantanea = "stazioneTestNonIstantanea"
   val stazionePV2 = "stazionePV2"
   val stazionePV2Broadcast = "stazionePV2BroadCast"
-  val prefixstazionePV2 = "003"
   val stazioneOld = "stazioneTestOld"
   val paOldStazioneOld = "paOldStazioneOld"
-  val stazionePwd = "canaleTestPwd"
-  val codStazionePA = "02"
+  val stazionePwd = "PLACEHOLDER"
   val auxDigit = "0"
-  val codIUV = "171920000002204"
   val PAUnknown = "01010101010"
 
-  val PSP = "nodo-doc-dev"
+  val PSP = "60000000001"
   val PSPAgid = "AGID_01"
   val PSPCD = "AGID_01"
-  val PSPCHECKOUT = "PSP_CHECKOUT"
   val PSPECOMMERCE = "PSP_ECOMMERCE"
   val PSPMod3New = "15376371009"
-  val PSPUnknown = "pspUnknown"
 
-  val testIntPA = "nodo-doc-dev"
+  val testIntPA = "15376371009"
 
-  val intPSP = "nodo-doc-dev"
+  val intPSP = "60000000001"
   val intPSPAgid = "97735020584"
   val intPSPCD = "97735020584"
   val intPSPMod3New = "15376371009"
-  val intPSPUnknown = "intPspUnknown"
 
-  val canale = "nodo-doc-dev"
+  val canale = "15376371009_04"
   val canaleImmediato = "canaleImmediato"
   val canaleDifferito = "canaleDifferito"
   val canaleAgid = "97735020584_02"
   val canaleCD = "97735020584_03"
-  val canaleCHECKOUT = "97735020584_98"
-  val canaleECOMMERCE = "97735020584_99"
   val canaleMod3new = "15376371009_01"
   val canalePayPal = "canalePayPal"
   val canaleBPay = "canaleBPay"
@@ -63,9 +53,8 @@ object TestItems {
   val canaleNodoPayWrongModello = "canaleNodoPayWrongModello"
   val canalePull = "canalePull"
   val canaleIrr = "canaleIrraggiungibile"
-  val canaleUnknown = "canaleUnknown"
 
-  val canalePwd = "pwdpwdpwd"
+  val canalePwd = "PLACEHOLDER"
 
   val testDTF: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
   val httpConnectTimeout: FiniteDuration = 10.seconds
