@@ -71,6 +71,13 @@ parameters:
     values:
       - False
       - True
+  - name: "DISABLE_ALL_JOBS"
+    displayName: "Disable jobs at start"
+    type: boolean
+    default: True
+    values:
+      - False
+      - True
 
 variables:
   imageRepository: '$(IMAGE_REPOSITORY_NAME)'
@@ -391,7 +398,7 @@ stages:
                     inputs:
                       targetType: "inline"
                       script: |
-                        SETIMAGES="--set cj-ftp-upload.image.tag=$SBT_VERSION"
+                        SETIMAGES="--set cj-ftp-upload.image.tag=$SBT_VERSION --set cj-ftp-upload.suspend=${{ parameters.DISABLE_ALL_JOBS }}"
                         SETFILES="--set-file cj-ftp-upload.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK"
                         SETFILES="$SETFILES --set-file cj-ftp-upload.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP"
                         echo "##vso[task.setvariable variable=IMAGES;isOutput=true]$SETIMAGES"
@@ -449,7 +456,7 @@ stages:
 
                   - task: Bash@3
                     name: setup_helm_microservices_chart
-                    displayName: "Setup helm nodo chart"
+                    displayName: "Setup helm fdr chart"
                     inputs:
                       targetType: "inline"
                       script: |
