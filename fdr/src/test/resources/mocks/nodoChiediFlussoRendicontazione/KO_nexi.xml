@@ -6,7 +6,7 @@
                 <faultCode>PPT_ID_FLUSSO_SCONOSCIUTO</faultCode>
                 <faultString>Identificativo flusso sconosciuto.</faultString>
                 <id>NodoDeiPagamentiSPC</id>
-                <description>Rendicontazione sconosciuta o non disponibile, riprovare in un secondo momento</description>
+                <description>Rendicontazione sconosciuta o presente in SFTP</description>
             </fault>
         </ppt:nodoChiediFlussoRendicontazioneRisposta>
     </soapenv:Body>
