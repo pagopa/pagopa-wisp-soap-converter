@@ -47,7 +47,7 @@ object DigitPaErrorCodes extends Enumeration {
     case PPT_INTERMEDIARIO_PA_DISABILITATO      => "Intermediario dominio disabilitato."
     case PPT_STAZIONE_INT_PA_SCONOSCIUTA        => "IdentificativoStazioneRichiedente sconosciuto."
     case PPT_STAZIONE_INT_PA_DISABILITATA       => "Stazione disabilitata."
-    case PPT_ID_FLUSSO_SCONOSCIUTO              => "Identificativo flusso sconosciuto."
+    case PPT_ID_FLUSSO_SCONOSCIUTO              => "Identificativo flusso sconosciuto o presente in SFTP"
     case PPT_SOAPACTION_ERRATA                  => "SOAPAction errata."
     case _                                      => "Errore generico."
   }

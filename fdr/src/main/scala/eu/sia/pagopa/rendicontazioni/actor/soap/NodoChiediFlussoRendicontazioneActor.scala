@@ -151,7 +151,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
 
       case None =>
         log.error(s"Flow ${ncfr.identificativoFlusso} unknown")
-        Future.failed(exception.DigitPaException("Rendicontazione sconosciuta o non disponibile, riprovare in un secondo momento", DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO))
+        Future.failed(exception.DigitPaException("Rendicontazione sconosciuta o presente in SFTP", DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO))
     }
   }
 
@@ -164,7 +164,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
       if (idDominio.isDefined && rendicontazione.dominio != idDominio.get || idPsp.isDefined && rendicontazione.psp != idPsp.get) {
         Failure(
           exception.DigitPaException(
-            "Rendicontazione sconosciuta o non disponibile, riprovare in un secondo momento",
+            "Rendicontazione sconosciuta o presente in SFTP",
             DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO
           )
         )
