@@ -525,7 +525,7 @@ stages:
                         $(setupArgs.FILES)
 
   # uninstall canary id prod or uat
-  - ${{ if in( parameters.ENV, 'prod', 'uat') }}:
+  - ${{ if and( parameters.CANARY_ENABLED, in( parameters.ENV, 'prod', 'uat') ) }}:
     - stage: uninstall
       displayName: "Uninstall ${{ parameters.ENV }} canary"
       condition: and( ${{ in( parameters.ENV, 'prod', 'uat') }} ,failed())
