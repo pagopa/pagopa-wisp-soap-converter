@@ -57,6 +57,13 @@ parameters:
     values:
       - False
       - True
+  - name: "CANARY_ENABLED"
+    displayName: "Enable Canary"
+    type: boolean
+    default: False
+    values:
+      - False
+      - True
   - name: "FORCE_REPLACE_DOCKER_IMAGE"
     displayName: "Force the existing docker image to be replaced"
     type: boolean
@@ -222,7 +229,7 @@ stages:
 
 
   # Deploy Canary if prod or uat
-  - ${{ if and( parameters.WEU , in( parameters.ENV, 'prod', 'uat') ) }}:
+  - ${{ if and( parameters.CANARY_ENABLED, and( parameters.WEU , in(parameters.ENV, 'prod', 'uat') ) ) }}:
     - ${{ each step in split(variables.weight_steps, ',')}}:
       - stage: deploy_fdr_${{ step }}
         displayName: "Deploy ${{ parameters.ENV }} canary ${{ step }}%"
