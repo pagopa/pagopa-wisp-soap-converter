@@ -4,23 +4,52 @@
     "title": "API-Config Cacher",
     "description": "Generate cache for regarding Nodo dei Pagamenti configuration",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.4.0"
+    "version": "0.8.3"
   },
   "servers": [
     {
-      "url": "http://localhost:8080",
-      "description": "Generated server url"
+      "url": "http://localhost:8080"
+    },
+    {
+      "url": "https://{host}/{basePath}",
+      "variables": {
+        "host": {
+          "default": "api.dev.platform.pagopa.it",
+          "enum": [
+            "api.dev.platform.pagopa.it",
+            "api.uat.platform.pagopa.it",
+            "api.platform.pagopa.it"
+          ]
+        },
+        "basePath": {
+          "default": "api-config-cache/o/v1",
+          "enum": [
+            "api-config-cache/o/v1",
+            "api-config-cache/p/v1",
+            "api-config-cache/odev/v1"
+          ]
+        }
+      }
     }
   ],
   "paths": {
     "/stakeholders/fdr/cache/schemas/v1": {
       "get": {
         "tags": [
-          "FdrCache"
+          "Cache"
         ],
-        "summary": "Get selected key of fdr v1 config",
+        "summary": "Get selected key of cache v1 config",
         "operationId": "cache",
         "parameters": [
+          {
+            "name": "refresh",
+            "in": "query",
+            "description": "to force the refresh of the cache",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
           {
             "name": "keys",
             "in": "query",
@@ -74,8 +103,8 @@
               }
             }
           },
-          "500": {
-            "description": "Service unavailable",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -87,8 +116,11 @@
           "429": {
             "description": "Too many requests"
           },
-          "400": {
-            "description": "Bad Request",
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Service unavailable",
             "content": {
               "application/json": {
                 "schema": {
@@ -96,9 +128,6 @@
                 }
               }
             }
-          },
-          "401": {
-            "description": "Unauthorized"
           }
         },
         "security": [
@@ -111,39 +140,16 @@
     "/stakeholders/fdr/cache/schemas/v1/id": {
       "get": {
         "tags": [
-          "FdrCache"
+          "Cache"
         ],
-        "summary": "Get last fdr v1 cache version",
+        "summary": "Get last v1 cache version",
         "operationId": "idV1",
         "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CacheVersion"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden"
-          },
           "404": {
             "description": "Not Found"
           },
-          "500": {
-            "description": "Service unavailable",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemJson"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests"
+          "403": {
+            "description": "Forbidden"
           },
           "400": {
             "description": "Bad Request",
@@ -155,8 +161,31 @@
               }
             }
           },
+          "429": {
+            "description": "Too many requests"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CacheVersion"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -314,7 +343,7 @@
           "digital_stamp",
           "enabled",
           "flag_io",
-          "flag_psp_cp",
+          "flag_travaso",
           "new_fault_code",
           "password",
           "payment_model",
@@ -392,7 +421,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "flag_psp_cp": {
+          "flag_travaso": {
             "type": "boolean"
           }
         }
@@ -424,8 +453,7 @@
           "pspInformations",
           "psps",
           "stations",
-          "version",
-          "statusCode"
+          "version"
         ],
         "type": "object",
         "properties": {
