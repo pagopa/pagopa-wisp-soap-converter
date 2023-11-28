@@ -2,8 +2,8 @@ apiVersion: v2
 name: fdr-cron-chart
 description: Flussi di rendicontazione cron job
 type: application
-version: 2.1.0
-appVersion: 2.1.0
+version: 2.1.1
+appVersion: 2.1.1
 dependencies:
   - name: cron-chart
     version: 2.3.0
