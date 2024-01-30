@@ -49,6 +49,7 @@ class StaticUnitTests() extends AnyFlatSpec with should.Matchers {
       created,
       Some(sessionId),
       "INTERFACE",
+      None,
       Some(flowName),
       Some(psp),
       Some(idDominio),
