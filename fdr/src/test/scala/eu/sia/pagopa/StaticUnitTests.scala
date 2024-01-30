@@ -70,6 +70,7 @@ class StaticUnitTests() extends AnyFlatSpec with should.Matchers {
          |  "created": "${created.toString}",
          |  "sessionId": "$sessionId",
          |  "eventType": "INTERFACE",
+         |  "fdrStatus": null,
          |  "fdr": "$flowName",
          |  "pspId": "nodo-doc-dev",
          |  "organizationId": "00000000099",
