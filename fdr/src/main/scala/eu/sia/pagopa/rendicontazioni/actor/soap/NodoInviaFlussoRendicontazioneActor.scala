@@ -175,6 +175,8 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
       nodoInviaFlussoRisposta = NodoInviaFlussoRendicontazioneRisposta(None, esito)
       _ = log.info(FdrLogConstant.logSintattico(RESPONSE_NAME))
       resultMessage <- Future.fromTry(wrapInBundleMessage(nodoInviaFlussoRisposta))
+      _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
+      _ = traceInternalRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
       sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
     } yield sr
 

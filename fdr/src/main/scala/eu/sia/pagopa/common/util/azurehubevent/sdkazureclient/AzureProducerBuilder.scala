@@ -8,7 +8,7 @@ import com.azure.core.util.BinaryData
 import com.azure.messaging.eventhubs.{EventData, EventDataBatch, EventHubClientBuilder, EventHubProducerAsyncClient}
 import com.azure.storage.blob.{BlobAsyncClient, BlobClient, BlobClientBuilder}
 import eu.sia.pagopa.Main.{ConfigData, config, file, log}
-import eu.sia.pagopa.common.message._
+import eu.sia.pagopa.common.message.{SottoTipoEvento, _}
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.{AppObjectMapper, Appfunction}
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ReEventFunc, defaultOperation, sessionId}
@@ -104,29 +104,21 @@ object AzureProducerBuilder {
 
   private def publish(producer: EventHubProducerAsyncClient, reRequestSeq: Seq[ReRequest], clientTimeoutMs: Long, log: NodoLogger, system: ActorSystem): Unit = {
     log.debug(s"create eventDatas")
-    val blobContainerClient = system.settings.config.getConfig("azure-hub-event.azure-sdk-client.blob-re")
-    val blocContainerName = blobContainerClient.getString("container-name")
-    val blobReConnectionString = blobContainerClient.getString("connection-string")
-
-    var blobAsyncClient: Option[BlobAsyncClient] = None
 
     val eventDataSeq: Flux[(EventData)] = Flux.fromIterable(
       reRequestSeq
         .map(r => {
-          val sottoTipoEvento =
+          val blobBodyRef =
             SottoTipoEvento.withName(r.re.sottoTipoEvento) match {
-              case SottoTipoEvento.REQ => SottoTipoEventoEvh.REQ.toString
-              case SottoTipoEvento.RESP => SottoTipoEventoEvh.RES.toString
+              case SottoTipoEvento.REQ | SottoTipoEvento.RESP =>
+                saveBlobToAzure(r, system)
+              case SottoTipoEvento.INTERN => None
             }
-          val fileName = s"${r.sessionId}_${r.re.tipoEvento.get}_$sottoTipoEvento"
 
-          r.re.payload.foreach(v => {
-            blobAsyncClient = Some(new BlobClientBuilder()
-              .connectionString(blobReConnectionString)
-              .blobName(fileName).containerName(blocContainerName)
-              .buildAsyncClient())
-            blobAsyncClient.get.upload(BinaryData.fromStream(new ByteArrayInputStream(new String(v).getBytes(StandardCharsets.UTF_8)))).subscribe()
-          })
+          val eventType = CategoriaEvento.withName(r.re.categoriaEvento) match {
+            case CategoriaEvento.INTERNO => CategoriaEventoEvh.INTERNAL
+            case CategoriaEvento.INTERFACCIA => CategoriaEventoEvh.INTERFACE
+          }
 
           val httpMethod: String = r.reExtra.flatMap(_.httpMethod).getOrElse("")
           val key = r.sessionId
@@ -135,17 +127,16 @@ object AzureProducerBuilder {
             r.re.uniqueId,
             r.re.insertedTimestamp,
             r.re.sessionId,
-            CategoriaEventoEvh.INTERFACE.toString,
+            eventType.toString,
+            r.re.status,
             r.re.flowName,
             r.re.psp,
             r.re.idDominio,
             r.re.flowAction,
-            sottoTipoEvento,
+            r.re.sottoTipoEvento,
             Some(httpMethod),
             r.reExtra.flatMap(_.uri),
-            blobAsyncClient.map(bc => {
-              BlobBodyRef(Some(bc.getAccountName), Some(bc.getContainerName), Some(fileName), (r.re.payload.map(_.length).getOrElse(0)))
-            }),
+            blobBodyRef,
             r.reExtra.map(ex => ex.headers.groupBy(_._1).map(v => (v._1, v._2.map(_._2)))).getOrElse(Map())
           )
 
@@ -202,6 +193,24 @@ object AzureProducerBuilder {
         }
       })
       .subscribe(defaultConsumer(log), errorConsumer(log), completedRunnable(log))
+  }
+
+  private def saveBlobToAzure(r: ReRequest, system: ActorSystem): Option[BlobBodyRef] = {
+    val fileName = s"${sessionId}_${r.re.tipoEvento.get}_${r.re.sottoTipoEvento}"
+    val blobContainerClient = system.settings.config.getConfig("azure-hub-event.azure-sdk-client.blob-re")
+    val blocContainerName = blobContainerClient.getString("container-name")
+    val blobReConnectionString = blobContainerClient.getString("connection-string")
+    var blobAsyncClient: Option[BlobAsyncClient] = None
+    r.re.payload.foreach(v => {
+      blobAsyncClient = Some(new BlobClientBuilder()
+        .connectionString(blobReConnectionString)
+        .blobName(fileName).containerName(blocContainerName)
+        .buildAsyncClient())
+      blobAsyncClient.get.upload(BinaryData.fromStream(new ByteArrayInputStream(new String(v).getBytes(StandardCharsets.UTF_8)))).subscribe()
+    })
+    blobAsyncClient.map(bc => {
+      BlobBodyRef(Some(bc.getAccountName), Some(bc.getContainerName), Some(fileName), (r.re.payload.map(_.length).getOrElse(0)))
+    })
   }
 
   private def defaultConsumer(log: NodoLogger): Consumer[_ >: Void] = { (f: Void) =>
