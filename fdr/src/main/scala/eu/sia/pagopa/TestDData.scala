@@ -187,7 +187,7 @@ object TestDData {
       ),
       Map("Altro" -> CdsCategory("Altro"), "Tassa automobilistica" -> CdsCategory("Tassa automobilistica"), "Donazioni" -> CdsCategory("Donazioni")),
       Map(
-        "GLOBAL-azureSdkClientReEventEnabled" -> ConfigurationKey("", "", "false", None),
+        "GLOBAL-azureSdkClientReEventEnabled" -> ConfigurationKey("", "", "true", None),
         "GLOBAL-ccpRandomTraduttore" -> ConfigurationKey("", "", "true", None),
         "GLOBAL-ftp.env.path" -> ConfigurationKey("", "", "pate_", None),
         "GLOBAL-idCanaleAGID" -> ConfigurationKey("", "", TestItems.canaleAgid, None),

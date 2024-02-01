@@ -24,6 +24,7 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
                         fdr: String,
                         rev: String,
                         psp: String,
+                        organizationId: String,
                         actorProps: ActorProps,
                         re: Re
                       )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
@@ -35,7 +36,7 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
       action,
       ContentTypes.`application/json`,
       HttpMethods.GET,
-      s"${url.replace("{fdr}",fdr).replace("{revision}",rev).replace("{pspId}",psp)}",
+      s"${url.replace("{organizationId}", organizationId).replace("{fdr}",fdr).replace("{revision}",rev).replace("{pspId}",psp)}",
       None,
       headers,
       Some(receiver),
@@ -70,6 +71,7 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
                     fdr: String,
                     rev: String,
                     psp: String,
+                    organizationId: String,
                     actorProps: ActorProps,
                     re: Re
                   )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
@@ -81,7 +83,7 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
       action,
       ContentTypes.`application/json`,
       HttpMethods.GET,
-      s"${url.replace("{fdr}",fdr).replace("{revision}",rev).replace("{pspId}",psp)}",
+      s"${url.replace("{organizationId}", organizationId).replace("{fdr}",fdr).replace("{fdr}",fdr).replace("{revision}",rev).replace("{pspId}",psp)}",
       None,
       headers,
       Some(receiver),

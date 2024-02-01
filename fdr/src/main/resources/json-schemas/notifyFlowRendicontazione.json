@@ -1,11 +1,14 @@
 {
   "type": "object",
-  "required": ["fdr", "pspId", "retry", "revision"],
+  "required": ["fdr", "pspId", "organizationId", "retry", "revision"],
   "properties": {
     "fdr" : {
       "type" : "string"
     },
     "pspId" : {
+      "type" : "string"
+    },
+    "organizationId" : {
       "type" : "string"
     },
     "retry" : {

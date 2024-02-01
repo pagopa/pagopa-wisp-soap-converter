@@ -12,6 +12,7 @@ object NotifyFdrRequest extends DefaultJsonProtocol {
       JsObject(Map[String, JsValue](
         "fdr" -> JsString(req.fdr),
         "pspId" -> JsString(req.pspId),
+        "organizationId" -> JsString(req.organizationId),
         "retry" -> JsNumber(req.retry),
         "revision" -> JsNumber(req.revision)
       ))
@@ -23,6 +24,7 @@ object NotifyFdrRequest extends DefaultJsonProtocol {
         NotifyFdrRequest(
           map("fdr").asInstanceOf[JsString].value,
           map("pspId").asInstanceOf[JsString].value,
+          map("organizationId").asInstanceOf[JsString].value,
           map("retry").asInstanceOf[JsNumber].value.toInt,
           map("revision").asInstanceOf[JsNumber].value.toInt
         )
@@ -34,7 +36,7 @@ object NotifyFdrRequest extends DefaultJsonProtocol {
   }
 }
 
-case class NotifyFdrRequest(fdr: String, pspId: String, retry: Integer, revision: Integer)
+case class NotifyFdrRequest(fdr: String, pspId: String, organizationId: String, retry: Integer, revision: Integer)
 
 //object NotifyFdrResponse extends DefaultJsonProtocol {
 //
