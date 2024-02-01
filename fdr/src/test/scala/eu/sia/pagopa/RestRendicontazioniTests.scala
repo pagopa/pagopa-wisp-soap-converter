@@ -23,6 +23,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
       val payload = s"""{
          |  "fdr": "$idFlusso",
          |  "pspId": "${TestItems.PSP}",
+         |  "organizationId": "${TestItems.PA}",
          |  "retry": 1,
          |  "revision": 1
       }""".stripMargin
@@ -47,6 +48,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
         s"""{
            |  "fdr": "$idFlusso",
            |  "pspId": "${TestItems.PSP}",
+           |  "organizationId": "${TestItems.PA}",
            |  "retry": 1,
            |  "revision": 1
       }""".stripMargin
@@ -71,6 +73,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
         s"""{
            |  "fdr": "$idFlusso",
            |  "pspId": "${TestItems.PSP}",
+           |  "organizationId": "${TestItems.PA}",
            |  "retry": 1,
            |  "revision": 1
       }""".stripMargin
