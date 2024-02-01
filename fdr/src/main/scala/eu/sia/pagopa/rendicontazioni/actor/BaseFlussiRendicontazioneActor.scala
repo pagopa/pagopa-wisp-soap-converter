@@ -8,6 +8,7 @@ import eu.sia.pagopa.common.repo.fdr.FdrRepository
 import eu.sia.pagopa.common.repo.fdr.enums.{FtpFileStatus, RendicontazioneStatus}
 import eu.sia.pagopa.common.repo.fdr.model.{BinaryFile, FtpFile, Rendicontazione}
 import eu.sia.pagopa.common.util._
+import eu.sia.pagopa.common.util.xml.XmlUtil.StringBase64Binary
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
@@ -97,7 +98,7 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
                           identificativoDominio: String,
                           dataOraFlusso: javax.xml.datatype.XMLGregorianCalendar,
                           xmlRendicontazione: scalaxb.Base64Binary,
-                          content: String,
+                          checkUTF8: Boolean,
                           flussoRiversamento: CtFlussoRiversamento,
                           pa: CreditorInstitution,
                           ddataMap: ConfigData,
@@ -117,6 +118,10 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
         val ftpServer = ftpServerConf.get._2
 
         val normalizedIdFlusso = s"${CheckRendicontazioni.normalizeIdFlusso(identificativoFlusso)}.xml"
+        val content = StringUtils.getStringDecoded(xmlRendicontazione, checkUTF8) match {
+          case Success(c) => c
+          case Failure(e) =>  throw new DigitPaException("Errore decodifica rendicontazione", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e)
+        }
         val (filename, contenutoFileBytes) = if (pa.reportingZip) {
           val zipFile = File.createTempFile(normalizedIdFlusso, ".zip")
           val zip = new ZipOutputStream(new FileOutputStream(zipFile))
@@ -185,7 +190,11 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
           None,
           None
         )
-        val bf = BinaryFile(0, xmlRendicontazione.length, Some(Util.zipContent(xmlRendicontazione.toArray)), None, Some(Util.zipContent(content.getBytes).toString))
+        val content = StringUtils.getStringDecoded(xmlRendicontazione, checkUTF8) match {
+          case Success(c) => c
+          case Failure(e) => throw new DigitPaException("Errore decodifica rendicontazione", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e)
+        }
+        val bf = BinaryFile(0, xmlRendicontazione.length, Some(Util.zipContent(content.getBytes)), None)
         fdrRepository
           .saveRendicontazioneAndBinaryFile(rendi, bf)
           .recoverWith({ case e =>

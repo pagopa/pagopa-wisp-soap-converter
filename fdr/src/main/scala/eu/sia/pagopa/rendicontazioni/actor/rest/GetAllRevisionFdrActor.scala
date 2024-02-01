@@ -2,6 +2,7 @@ package eu.sia.pagopa.rendicontazioni.actor.rest
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
+import com.nimbusds.jose.util.StandardCharset
 import eu.sia.pagopa.ActorProps
 import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
@@ -14,11 +15,10 @@ import eu.sia.pagopa.common.repo.fdr.model.{BinaryFile, Rendicontazione}
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.DDataChecks.checkPA
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.xml.XmlUtil.StringBase64Binary
 import org.slf4j.MDC
-import scalaxb.Base64Binary
 import spray.json._
 
+import java.util.Base64
 import scala.concurrent.Future
 import scala.language.postfixOps
 
@@ -103,7 +103,8 @@ case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, actorPro
 
         _ = log.debug("Make response with reporting")
         rendicontazioneDb <- elaboraRisposta(binaryFileOption)
-      } yield RestResponse(req.sessionId, Some(GetXmlRendicontazioneResponse(rendicontazioneDb.get).toJson.compactPrint), StatusCodes.OK.intValue, reFlow, req.testCaseId, None) )
+      } yield RestResponse(req.sessionId, Some(GetXmlRendicontazioneResponse(rendicontazioneDb).toJson.compactPrint),
+        StatusCodes.OK.intValue, reFlow, req.testCaseId, None) )
         .recoverWith({
           case rex: RestException =>
             Future.successful(generateErrorResponse(Some(rex)))
@@ -158,10 +159,9 @@ case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, actorPro
     RestResponse(req.sessionId, payload, httpStatusCode, reFlow, req.testCaseId, exception)
   }
 
-  private def elaboraRisposta(binaryFileOption: Option[BinaryFile]): Future[Option[Base64Binary]] = {
+  private def elaboraRisposta(binaryFileOption: Option[BinaryFile]): Future[String] = {
       if (binaryFileOption.isDefined) {
-        val resppayload = StringBase64Binary.encodeBase64ToBase64(binaryFileOption.get.fileContent.get)
-        Future.successful(Some(resppayload))
+          Future.successful(new String(Base64.getEncoder.encode(binaryFileOption.get.fileContent.get), StandardCharset.UTF_8))
       } else {
         Future.failed(RestException("FdR XML not found", Constant.HttpStatusDescription.NOT_FOUND, StatusCodes.NotFound.intValue))
       }

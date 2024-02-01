@@ -146,7 +146,7 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
         nifr.identificativoDominio,
         nifr.dataOraFlusso,
         nifr.xmlRendicontazione,
-        flussoRiversamentoContent,
+        checkUTF8,
         flussoRiversamento,
         pa,
         ddataMap,

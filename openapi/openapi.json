@@ -1,16 +1,27 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Fdr nodo - Api (local) ${service}",
+    "title": "FDR - Flussi di rendicontazione FASE 1",
+    "description": "FDR - Flussi di rendicontazione FASE 1",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "2.1.3"
+    "version": "2.1.4"
   },
   "servers": [
     {
-      "url": "${host}/fdr-nodo/api/v1 - APIM"
+      "url": "http://localhost:8080/"
     }
   ],
-  "tags": [],
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Fdr fase 1",
+      "description": "Fdr fase 1"
+    }
+  ],
   "paths": {
     "/notify/fdr": {
       "post": {
@@ -24,7 +35,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NotifyFdr"
+                "$ref": "#/components/schemas/Fdr"
               }
             }
           }
@@ -42,118 +53,62 @@
           }
         }
       }
-    },
-    "/internal/organizations/{organizationId}/fdrs/{fdr}": {
-      "get": {
-        "tags": [
-          "Info"
-        ],
-        "summary": "Get xml of FDR",
-        "parameters": [
-          {
-            "name": "organizationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "fdr",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "500": {
-            "description": "Service unavailable.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetXmlRendicontazioneResponse"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
     "schemas": {
-      "NotifyFdr": {
+      "GenericResponse": {
         "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Success"
+          }
+        }
+      },
+      "Fdr": {
         "required": [
           "fdr",
           "pspId",
+          "organizationId",
           "retry",
           "revision"
         ],
+        "type": "object",
         "properties": {
           "fdr": {
-            "type": "string"
+            "description": "[XML NodoInviaFlussoRendicontazione]=[identificativoFlusso]",
+            "pattern": "[a-zA-Z0-9\\-_]{1,35}",
+            "type": "string",
+            "example": "2016-08-16pspTest-1178"
           },
           "pspId": {
-            "type": "string"
+            "type": "string",
+            "example": "1"
+          },
+          "organizationId": {
+            "type": "string",
+            "example": "1"
           },
           "retry": {
-            "type": "integer"
+            "format": "int64",
+            "type": "integer",
+            "example": 1
           },
           "revision": {
-            "type": "integer"
-          }
-        },
-        "additionalProperties": false
-      },
-      "GenericResponse": {
-        "type": "object",
-        "required": [
-          "outcome"
-        ],
-        "properties": {
-          "outcome": {
-            "type": "string",
-            "example": "OK"
-          },
-          "description": {
-            "type": "string",
-            "example": "error description"
-          }
-        }
-      },
-      "GetXmlRendicontazioneResponse": {
-        "type": "object",
-        "properties": {
-          "xmlRendicontazione": {
-            "type": "string",
-            "example": "Y2lhbwo="
-          }
-        }
-      },
-      "Error": {
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "string",
-            "example": "Si è verificato un errore"
+            "format": "int64",
+            "type": "integer",
+            "example": 1
           }
         }
       }
     },
     "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "Ocp-Apim-Subscription-Key",
+        "in": "header"
+      },
       "SecurityScheme": {
         "type": "http",
         "description": "Authentication",

@@ -41,6 +41,8 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
 
   var reFlow: Option[Re] = None
 
+  val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
+
   override def receive: Receive = {
     case restRequest: RestRequest =>
       replyTo = sender()
@@ -158,7 +160,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
           getResponse.receiver.organizationId,
           DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
           flussoRiversamentoBase64,
-          flussoRiversamentoEncoded,
+          checkUTF8,
           flussoRiversamento,
           pa,
           ddataMap,
@@ -171,7 +173,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
         } else {
           Future.successful(())
         }
-      } yield RestResponse(req.sessionId, Some(GenericResponse(GenericResponseOutcome.OK, None).toJson.toString), StatusCodes.OK.intValue, reFlow, req.testCaseId, None) )
+      } yield RestResponse(req.sessionId, Some(GenericResponse(GenericResponseOutcome.OK.toString).toJson.toString), StatusCodes.OK.intValue, reFlow, req.testCaseId, None) )
         .recoverWith({
           case rex: RestException =>
             Future.successful(generateResponse(Some(rex)))
@@ -253,7 +255,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
   private def makeFailureResponse(sessionId: String, tcid: Option[String], restException: RestException, re: Option[Re]): RestResponse = {
     import spray.json._
     log.error(restException, s"Errore generico: ${restException.message}")
-    val err = GenericResponse(GenericResponseOutcome.KO, Some(restException.message)).toJson.toString()
+    val err = GenericResponse(GenericResponseOutcome.KO.toString).toJson.toString()
     RestResponse(sessionId, Some(err), restException.statusCode, re, tcid, Some(restException))
   }
 
@@ -261,7 +263,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
     log.info(FdrLogConstant.logGeneraPayload(actorClassId + "Risposta"))
     val httpStatusCode = exception.map(_.statusCode).getOrElse(StatusCodes.OK.intValue)
     log.debug(s"Generazione risposta $httpStatusCode")
-    val responsePayload = exception.map(v => GenericResponse(GenericResponseOutcome.KO, Some(v.jsonMessage)).toJson.toString())
+    val responsePayload = exception.map(v => GenericResponse(GenericResponseOutcome.KO.toString).toJson.toString())
     RestResponse(req.sessionId, responsePayload, httpStatusCode, reFlow, req.testCaseId, exception)
   }
 
