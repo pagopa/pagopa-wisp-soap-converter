@@ -196,7 +196,7 @@ object AzureProducerBuilder {
   }
 
   private def saveBlobToAzure(r: ReRequest, system: ActorSystem): Option[BlobBodyRef] = {
-    val fileName = s"${sessionId}_${r.re.tipoEvento.get}_${r.re.sottoTipoEvento}"
+    val fileName = s"${r.sessionId}_${r.re.tipoEvento.get}_${r.re.sottoTipoEvento}"
     val blobContainerClient = system.settings.config.getConfig("azure-hub-event.azure-sdk-client.blob-re")
     val blocContainerName = blobContainerClient.getString("container-name")
     val blobReConnectionString = blobContainerClient.getString("connection-string")

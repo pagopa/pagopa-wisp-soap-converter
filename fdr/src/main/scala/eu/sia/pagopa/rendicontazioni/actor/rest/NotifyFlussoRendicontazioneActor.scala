@@ -34,6 +34,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
   var replyTo: ActorRef = _
 
   private var _psp: String = _
+  private var _organizationId: String = _
   private var _fdr: String = _
   private var _rev: Integer = _
   private var _retry: Integer = _
@@ -69,6 +70,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
 
         re_ = Re(
           psp = Some(_psp),
+          idDominio = Some(_organizationId),
           componente = Componente.NDP_FDR.toString,
           categoriaEvento = CategoriaEvento.INTERNO.toString,
           sessionId = Some(req.sessionId),
@@ -85,9 +87,9 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
         )
         _ = reFlow = Some(re_)
 
-        getResponse <- HttpFdrServiceManagement.internalGetWithRevision(req.sessionId, req.testCaseId, "internalGetWithRevision", Componente.FDR.toString, _fdr, _rev.toString, _psp, actorProps, reFlow.get)
+        getResponse <- HttpFdrServiceManagement.internalGetWithRevision(req.sessionId, req.testCaseId, "internalGetWithRevision", Componente.FDR.toString, _fdr, _rev.toString, _psp, _organizationId, actorProps, reFlow.get)
 
-        getPaymentResponse <- HttpFdrServiceManagement.internalGetFdrPayment(req.sessionId, req.testCaseId, "internalGetFdrPayment", Componente.FDR.toString, _fdr, _rev.toString, _psp, actorProps, reFlow.get)
+        getPaymentResponse <- HttpFdrServiceManagement.internalGetFdrPayment(req.sessionId, req.testCaseId, "internalGetFdrPayment", Componente.FDR.toString, _fdr, _rev.toString, _psp, _organizationId, actorProps, reFlow.get)
 
         _ = log.info(FdrLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
         flussoRiversamento = CtFlussoRiversamento(
@@ -164,21 +166,6 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
           repositories.fdrRepository
         )
 
-//        _ <-
-//          if (sftpFile.isDefined) {
-//            notifySFTPSender(pa, req.sessionId, req.testCaseId, sftpFile.get).flatMap(resp => {
-//              if (resp.throwable.isDefined) {
-//                //HOTFIX non torno errore al chiamante se ftp non funziona
-//                log.warn(s"Error sending file first time for reporting flow [${resp.throwable.get.getMessage}]")
-//                Future.successful(())
-//              } else {
-//                Future.successful(())
-//              }
-//            })
-//          } else {
-//            Future.successful(())
-//          }
-//
         _ = if (esito == Constant.KO) {
           throw RestException("Error saving fdr on Db", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
         } else {
@@ -213,6 +200,8 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
               Failure(RestException("Invalid fdr", "", StatusCodes.BadRequest.intValue, e))
             } else if (e.getMessage.contains("pspId")) {
               Failure(RestException("Invalid pspId", "", StatusCodes.BadRequest.intValue, e))
+            } else if (e.getMessage.contains("organizationId")) {
+              Failure(RestException("Invalid organizationId", "", StatusCodes.BadRequest.intValue, e))
             } else if (e.getMessage.contains("retry")) {
               Failure(RestException("Invalid retry", "", StatusCodes.BadRequest.intValue, e))
             } else if (e.getMessage.contains("revision")) {
@@ -224,6 +213,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
       }
 
       val psp = nfrReq.get.pspId
+      val organizationId = nfrReq.get.organizationId
       val fdr = nfrReq.get.fdr
       val revision = nfrReq.get.revision
       val retry = nfrReq.get.retry
@@ -242,6 +232,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
           throw RestException("Error during check fdr format", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
       }
       _psp = psp
+      _organizationId = organizationId
       _fdr = fdr
       _rev = revision
       _retry = retry
