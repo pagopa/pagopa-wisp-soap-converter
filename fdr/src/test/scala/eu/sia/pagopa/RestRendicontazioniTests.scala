@@ -34,7 +34,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
           testCase = Some("OK"),
           responseAssert = (resp, status) => {
             assert(status == StatusCodes.OK.intValue)
-            assert(resp.contains("{\"outcome\":\"OK\"}"))
+            assert(resp.contains("{\"message\":\"OK\"}"))
           }
         )
       )
@@ -92,7 +92,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
           testCase = Some("KO"),
           responseAssert = (resp, status) => {
             assert(status == StatusCodes.INTERNAL_SERVER_ERROR.intValue)
-            assert(resp.contains("{\"description\":\"Errore generico.\",\"outcome\":\"KO\"}"))
+            assert(resp.contains("{\"description\":\"Errore generico.\",\"message\":\"KO\"}"))
           }
         )
       })
