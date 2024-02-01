@@ -8,10 +8,10 @@ import scala.language.implicitConversions
 
 object GenericResponse extends DefaultJsonProtocol with SprayJsonSupport {
 
-  implicit object GenericResponseFormat extends JsonFormat[GenericResponseOutcome.Value] {
-    def write(enum: GenericResponseOutcome.Value) = JsString(enum.toString)
+  implicit object GenericResponseFormat extends JsonFormat[String] {
+    def write(enum: String) = JsString(enum)
     def read(json: JsValue) = json match {
-      case JsString(esito) => GenericResponseOutcome.withName(esito)
+      case JsString(esito) => esito
       case other           => deserializationError("Expected GenericResponseOutcome, got: " + other)
     }
   }
@@ -23,7 +23,7 @@ object GenericResponse extends DefaultJsonProtocol with SprayJsonSupport {
       case other         => deserializationError("Expected URI, got: " + other)
     }
   }
-  implicit val jsonFormat: RootJsonFormat[GenericResponse] = jsonFormat2(GenericResponse.apply)
+  implicit val jsonFormat: RootJsonFormat[GenericResponse] = jsonFormat1(GenericResponse.apply)
 }
 case class GenericResponse(message: String)
 
