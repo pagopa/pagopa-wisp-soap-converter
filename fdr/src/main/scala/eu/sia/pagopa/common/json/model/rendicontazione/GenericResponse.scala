@@ -25,7 +25,7 @@ object GenericResponse extends DefaultJsonProtocol with SprayJsonSupport {
   }
   implicit val jsonFormat: RootJsonFormat[GenericResponse] = jsonFormat2(GenericResponse.apply)
 }
-case class GenericResponse(message: GenericResponseOutcome.Value, description: Option[String])
+case class GenericResponse(message: String)
 
 object GenericResponseOutcome extends Enumeration {
   val OK, KO = Value
