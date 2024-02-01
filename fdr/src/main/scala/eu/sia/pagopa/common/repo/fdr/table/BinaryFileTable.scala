@@ -12,10 +12,10 @@ trait BinaryFileTable { self: DBComponent =>
     def fileSize = column[Long](adjustName("FILE_SIZE"))
     def fileContent = column[Option[Array[Byte]]](adjustName("FILE_CONTENT"))
     def signatureType = column[Option[String]](adjustName("SIGNATURE_TYPE"))
-    def xmlFileContent = column[Option[String]](adjustName("XML_FILE_CONTENT"))
+//    def xmlFileContent = column[Option[String]](adjustName("XML_FILE_CONTENT"))
 
     override def * =
-      (objId, fileSize, fileContent, signatureType, xmlFileContent) <> (BinaryFile.tupled, BinaryFile.unapply)
+      (objId, fileSize, fileContent, signatureType) <> (BinaryFile.tupled, BinaryFile.unapply)
   }
 
   def binaryFilesTable = TableQuery[BinaryFileTable]

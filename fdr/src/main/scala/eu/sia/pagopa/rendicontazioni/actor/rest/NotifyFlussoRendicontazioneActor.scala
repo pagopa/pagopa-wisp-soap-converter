@@ -41,6 +41,8 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
 
   var reFlow: Option[Re] = None
 
+  val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
+
   override def receive: Receive = {
     case restRequest: RestRequest =>
       replyTo = sender()
@@ -158,7 +160,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
           getResponse.receiver.organizationId,
           DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
           flussoRiversamentoBase64,
-          flussoRiversamentoEncoded,
+          checkUTF8,
           flussoRiversamento,
           pa,
           ddataMap,
