@@ -17,17 +17,18 @@ object GetXmlRendicontazioneResponse {
       ))
     }
 
-    def read(json: JsValue): GetXmlRendicontazioneResponse = {
-      val map = json.asJsObject.fields
-      val xmlRendicontazione = map("xmlRendicontazione").asInstanceOf[JsString].value
-      val xmlUnzipped = Util.unzipContent(Base64.getDecoder().decode(xmlRendicontazione))
-      Try(GetXmlRendicontazioneResponse(XmlUtil.StringBase64Binary.encodeBase64(new String(xmlUnzipped.get))))
-        .recover({ case _ =>
-          throw DeserializationException("GetXmlRendicontazioneResponse expected")
-        })
-        .get
-    }
+//    def read(json: JsValue): GetXmlRendicontazioneResponse = {
+//      val map = json.asJsObject.fields
+//      val xmlRendicontazione = map("xmlRendicontazione").asInstanceOf[JsString].value
+//      val xmlUnzipped = Util.unzipContent(Base64.getDecoder().decode(xmlRendicontazione))
+//      Try(GetXmlRendicontazioneResponse(XmlUtil.StringBase64Binary.encodeBase64(new String(xmlUnzipped.get))))
+//        .recover({ case _ =>
+//          throw DeserializationException("GetXmlRendicontazioneResponse expected")
+//        })
+//        .get
+//    }
 
+    def read(json: JsValue): GetXmlRendicontazioneResponse = ???
 
   }
 }

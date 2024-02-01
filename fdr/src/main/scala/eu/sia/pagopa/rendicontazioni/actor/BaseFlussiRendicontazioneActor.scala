@@ -8,6 +8,7 @@ import eu.sia.pagopa.common.repo.fdr.FdrRepository
 import eu.sia.pagopa.common.repo.fdr.enums.{FtpFileStatus, RendicontazioneStatus}
 import eu.sia.pagopa.common.repo.fdr.model.{BinaryFile, FtpFile, Rendicontazione}
 import eu.sia.pagopa.common.util._
+import eu.sia.pagopa.common.util.xml.XmlUtil.StringBase64Binary
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
@@ -185,7 +186,7 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
           None,
           None
         )
-        val bf = BinaryFile(0, xmlRendicontazione.length, Some(Util.zipContent(xmlRendicontazione.toArray)), None, Some(Util.zipContent(content.getBytes).toString))
+        val bf = BinaryFile(0, xmlRendicontazione.length, Some(Util.zipContent(xmlRendicontazione.toArray)), None, Some(StringBase64Binary.encodeBase64(Util.zipContent(content.getBytes)).toString))
         fdrRepository
           .saveRendicontazioneAndBinaryFile(rendi, bf)
           .recoverWith({ case e =>

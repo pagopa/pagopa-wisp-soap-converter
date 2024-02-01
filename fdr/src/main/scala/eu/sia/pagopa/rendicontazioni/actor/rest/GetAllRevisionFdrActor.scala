@@ -21,6 +21,7 @@ import spray.json._
 
 import scala.concurrent.Future
 import scala.language.postfixOps
+import scala.util.{Failure, Success, Try}
 
 case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, actorProps: ActorProps) extends PerRequestActor with ReUtil {
 
@@ -103,7 +104,7 @@ case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, actorPro
 
         _ = log.debug("Make response with reporting")
         rendicontazioneDb <- elaboraRisposta(binaryFileOption)
-      } yield RestResponse(req.sessionId, Some(GetXmlRendicontazioneResponse(rendicontazioneDb.get).toJson.compactPrint), StatusCodes.OK.intValue, reFlow, req.testCaseId, None) )
+      } yield RestResponse(req.sessionId, Some(GetXmlRendicontazioneResponse(rendicontazioneDb).toJson.compactPrint), StatusCodes.OK.intValue, reFlow, req.testCaseId, None) )
         .recoverWith({
           case rex: RestException =>
             Future.successful(generateErrorResponse(Some(rex)))
@@ -158,10 +159,13 @@ case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, actorPro
     RestResponse(req.sessionId, payload, httpStatusCode, reFlow, req.testCaseId, exception)
   }
 
-  private def elaboraRisposta(binaryFileOption: Option[BinaryFile]): Future[Option[Base64Binary]] = {
+  private def elaboraRisposta(binaryFileOption: Option[BinaryFile]): Future[Base64Binary] = {
       if (binaryFileOption.isDefined) {
-        val resppayload = StringBase64Binary.encodeBase64ToBase64(binaryFileOption.get.fileContent.get)
-        Future.successful(Some(resppayload))
+        Util.unzipContent(binaryFileOption.get.fileContent.get) match {
+          case Success(content) => Future.successful(StringBase64Binary.encodeBase64(content))
+          case Failure(e) => Future.failed(RestException("FdR XML not found", Constant.HttpStatusDescription.NOT_FOUND, StatusCodes.NotFound.intValue))
+        }
+
       } else {
         Future.failed(RestException("FdR XML not found", Constant.HttpStatusDescription.NOT_FOUND, StatusCodes.NotFound.intValue))
       }
