@@ -1,2 +1,2 @@
-# pagopa-fdr-nodo-dei-pagamenti
-Manage FdR Nodo Dei Pagamenti
+# pagoPA WISP SOAP Converter
+Manage WISP primitives for Nodo Dei Pagamenti
