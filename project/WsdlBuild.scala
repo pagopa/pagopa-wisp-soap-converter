@@ -10,14 +10,14 @@ case class MessagePart(name: String, element: Element)
 
 object WsdlBuild extends App {
 
-  val srcManagedDir = s"${args.head}/sbt-xsd/eu/sia/pagopa/commonxml"
+  val srcManagedDir = s"${args.head}/sbt-xsd/it/gov/pagopa/commonxml"
   val schemadir = "/xml-schema"
   val resManagerdDir = s"${args(1)}$schemadir"
   if (!new File(srcManagedDir).exists()) {
     Files.createDirectories(Paths.get(srcManagedDir))
   }
   if (!new File(resManagerdDir).exists()) {
-//    println(s"creazione $resManagerdDir")
+    //    println(s"creazione $resManagerdDir")
     Files.createDirectories(Paths.get(resManagerdDir))
   }
 
@@ -46,7 +46,7 @@ object WsdlBuild extends App {
       .replaceAll("PA([A-Z])", "PA_$1")
       .toUpperCase
 
-//  println(s"copying all xsd files")
+  //  println(s"copying all xsd files")
   val wsdls: Seq[(String, (Seq[Element], Seq[Message]))] = rootFolder.listFiles.toList
     .filter(_.isDirectory)
     .flatMap(folder => {
@@ -70,8 +70,8 @@ object WsdlBuild extends App {
         folder.listFiles
           .filter(f => f.getName.endsWith(".wsdl"))
           .map(wsdlfile => {
-//          println(s"reading ${wsdlfile.getName}")
-//          println(s"extracting wsdl inline schemas")
+            //          println(s"reading ${wsdlfile.getName}")
+            //          println(s"extracting wsdl inline schemas")
             val wsdl = XML.loadFile(wsdlfile)
             val schemas = wsdl \ "types" \ "schema"
             schemas.zipWithIndex.foreach(s => {
@@ -100,7 +100,7 @@ object WsdlBuild extends App {
 
             val toplevelxsds = xsdfiles.filter(f => !imported.contains(f.getName))
 
-//          println(s"reading elements from xsds:\n[${toplevelxsds.mkString("\n")}]")
+            //          println(s"reading elements from xsds:\n[${toplevelxsds.mkString("\n")}]")
             val folderElements = xsdfiles
               .flatMap(xsdfile => {
                 val xsd = XML.loadFile(xsdfile)
@@ -112,7 +112,7 @@ object WsdlBuild extends App {
               })
               .toSeq
 
-//          println("reading messages from wsdl")
+            //          println("reading messages from wsdl")
 
             val folderMessages = (wsdl \ "message").map(mex => {
               val name = mex.\@("name")
@@ -149,8 +149,8 @@ object WsdlBuild extends App {
 
         val folderElements = toplevelxsds
           .flatMap(xsdfile => {
-//          println(s"reading ${xsdfile.getName}")
-//          println(s"reading elements from xsds:\n[${xsdfile}]")
+            //          println(s"reading ${xsdfile.getName}")
+            //          println(s"reading elements from xsds:\n[${xsdfile}]")
             val xsd = XML.loadFile(xsdfile)
             val ns = xsd.\@("targetNamespace")
             val elements = xsd \ "element"
@@ -165,7 +165,7 @@ object WsdlBuild extends App {
 
   val xmlenum =
     s"""
-       |package eu.sia.pagopa.commonxml
+       |package it.gov.pagopa.commonxml
        |
        |import javax.xml.parsers.{DocumentBuilder, DocumentBuilderFactory, SAXParserFactory}
        |import javax.xml.transform.Source
@@ -329,15 +329,15 @@ object WsdlBuild extends App {
             val scalaxbclassbody = s"scalaxbmodel.${f._1}.${body.element.`type`.capitalize}"
 
             s"""def ${mex.body.element.`type`}${head.map(_ => "WithHeader").getOrElse("")}2Str_${f._1}(${head
-                 .map(h => s"header:scalaxbmodel.${f._1}.${h.element.`type`.capitalize},")
-                 .getOrElse("")}body: ${scalaxbclassbody}): Try[String] = {
+              .map(h => s"header:scalaxbmodel.${f._1}.${h.element.`type`.capitalize},")
+              .getOrElse("")}body: ${scalaxbclassbody}): Try[String] = {
                |    Try{
                |      ${head
-                 .map(h => {
-                   s"""val scopeHeader = Some("${h.element.namespace}")
-               |      val headerDr = DataRecord(scopeHeader, Some("${h.element.name}"),header)""".stripMargin
-                 })
-                 .getOrElse("")}
+              .map(h => {
+                s"""val scopeHeader = Some("${h.element.namespace}")
+                   |      val headerDr = DataRecord(scopeHeader, Some("${h.element.name}"),header)""".stripMargin
+              })
+              .getOrElse("")}
                |      val scopeBody = Some("${body.element.namespace}")
                |      val bodyDr = DataRecord(scopeBody, Some("${body.element.name}"),body)
                |      val scopeEnv = scalaxbmodel.${f._1}.defaultScope
@@ -370,18 +370,18 @@ object WsdlBuild extends App {
             val scalaxbclassbody = s"scalaxbmodel.${f._1}.${body.element.`type`.capitalize}"
 
             s"""  def str2${mex.name}${head.map(_ => "WithHeader").getOrElse("")}_${f._1}(xml: String): Try[${head
-                 .map(h => s"(${s"scalaxbmodel.${f._1}.${h.element.`type`.capitalize}"},${scalaxbclassbody})")
-                 .getOrElse(scalaxbclassbody)}] = {
+              .map(h => s"(${s"scalaxbmodel.${f._1}.${h.element.`type`.capitalize}"},${scalaxbclassbody})")
+              .getOrElse(scalaxbclassbody)}] = {
                |    for {
                |      x <- Try(XML.withSAXParser(saxParser).loadString(xml))
                |      ${head
-                 .map(h => {
-                   val scalaxbclasshead = s"scalaxbmodel.${f._1}.${h.element.`type`.capitalize}"
-                   s"""headerTry <- getHeader(x)
-                        |header <- Try(scalaxb.fromXML[${scalaxbclasshead}](headerTry).asInstanceOf[${scalaxbclasshead}])
-                        |""".stripMargin
-                 })
-                 .getOrElse("")}
+              .map(h => {
+                val scalaxbclasshead = s"scalaxbmodel.${f._1}.${h.element.`type`.capitalize}"
+                s"""headerTry <- getHeader(x)
+                   |header <- Try(scalaxb.fromXML[${scalaxbclasshead}](headerTry).asInstanceOf[${scalaxbclasshead}])
+                   |""".stripMargin
+              })
+              .getOrElse("")}
                |      bodyTry <- getBody(x)
                |      body <- Try(scalaxb.fromXML[${scalaxbclassbody}](bodyTry).asInstanceOf[${scalaxbclassbody}])
                |    } yield ${head.map(_ => "(header,body)").getOrElse("body")}
@@ -403,7 +403,7 @@ object WsdlBuild extends App {
        |
        |}""".stripMargin
 
-//  println("writing file")
+  //  println("writing file")
   val pw = new PrintWriter(new File(s"$srcManaged/XmlEnum.scala"))
   pw.write(xmlenum)
   pw.close()

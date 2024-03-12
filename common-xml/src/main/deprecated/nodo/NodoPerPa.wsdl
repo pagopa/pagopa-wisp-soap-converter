@@ -132,9 +132,6 @@
       <xsd:element name="nodoInviaCarrelloRPT" type="ppt:nodoInviaCarrelloRPT" />
       <xsd:element name="nodoInviaCarrelloRPTRisposta" type="ppt:nodoInviaCarrelloRPTRisposta" />
 
-      <xsd:element name="nodoChiediInformativaPSP" type="ppt:nodoChiediInformativaPSP" />
-      <xsd:element name="nodoChiediInformativaPSPRisposta" type="ppt:nodoChiediInformativaPSPRisposta" />
-
       <xsd:element name="nodoPAChiediInformativaPA" type="ppt:nodoPAChiediInformativaPA" />
       <xsd:element name="nodoPAChiediInformativaPARisposta" type="ppt:nodoPAChiediInformativaPARisposta" />
 
@@ -394,26 +391,6 @@
         </xsd:sequence>
       </xsd:complexType>
 
-      <xsd:complexType name="nodoChiediInformativaPSP">
-        <xsd:sequence>
-          <xsd:element name="identificativoIntermediarioPA" type="ppt:stText35" />
-          <xsd:element name="identificativoStazioneIntermediarioPA" type="ppt:stText35" />
-          <xsd:element name="password" type="ppt:stPassword" />
-          <xsd:element name="identificativoDominio" type="ppt:stText35" minOccurs="0" />
-          <xsd:element name="identificativoPSP" type="ppt:stText35" minOccurs="0" />
-        </xsd:sequence>
-      </xsd:complexType>
-
-      <xsd:complexType name="nodoChiediInformativaPSPRisposta">
-        <xsd:complexContent>
-          <xsd:extension base="ppt:risposta">
-            <xsd:sequence>
-              <xsd:element name="xmlInformativa" type="xsd:base64Binary" minOccurs="0" xmime:expectedContentTypes="application/octet-stream" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" />
-            </xsd:sequence>
-          </xsd:extension>
-        </xsd:complexContent>
-      </xsd:complexType>
-
       <xsd:complexType name="nodoPAChiediInformativaPA">
         <xsd:sequence>
           <xsd:element name="identificativoIntermediarioPA" type="ppt:stText35" />
@@ -606,14 +583,6 @@
     <wsdl:part name="bodyrisposta" element="ppt:nodoChiediListaPendentiRPTRisposta"></wsdl:part>
   </wsdl:message>
 
-  <wsdl:message name="nodoChiediInformativaPSP">
-    <wsdl:part name="bodyrichiesta" element="ppt:nodoChiediInformativaPSP" />
-  </wsdl:message>
-
-  <wsdl:message name="nodoChiediInformativaPSPResponse">
-    <wsdl:part name="bodyrisposta" element="ppt:nodoChiediInformativaPSPRisposta" />
-  </wsdl:message>
-
   <wsdl:message name="nodoPAChiediInformativaPA">
     <wsdl:part name="bodyrichiesta" element="ppt:nodoPAChiediInformativaPA"></wsdl:part>
   </wsdl:message>
@@ -692,10 +661,6 @@
     <wsdl:operation name="nodoChiediCopiaRT">
       <wsdl:input name="nodoChiediCopiaRT" message="tns:nodoChiediCopiaRT" wsam:Action="http://ws.pagamenti.telematici.gov/PPT/nodoChiediCopiaRTRichiesta" wsaw:Action="http://ws.pagamenti.telematici.gov/PPT/nodoChiediCopiaRTRichiesta"></wsdl:input>
       <wsdl:output name="nodoChiediCopiaRTResponse" message="tns:nodoChiediCopiaRTResponse" wsam:Action="http://ws.pagamenti.telematici.gov/PPT/nodoChiediCopiaRTRisposta" wsaw:Action="http://ws.pagamenti.telematici.gov/PPT/nodoChiediCopiaRTRisposta"></wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="nodoChiediInformativaPSP">
-      <wsdl:input name="nodoChiediInformativaPSP" message="tns:nodoChiediInformativaPSP" wsam:Action="http://ws.pagamenti.telematici.gov/PPT/nodoChiediInformativaPSPRichiesta" wsaw:Action="http://ws.pagamenti.telematici.gov/PPT/nodoChiediInformativaPSPRichiesta" />
-      <wsdl:output name="nodoChiediInformativaPSPResponse" message="tns:nodoChiediInformativaPSPResponse" wsam:Action="http://ws.pagamenti.telematici.gov/PPT/nodoChiediInformativaPSPRisposta" wsaw:Action="http://ws.pagamenti.telematici.gov/PPT/nodoChiediInformativaPSPRisposta" />
     </wsdl:operation>
     <wsdl:operation name="nodoPAChiediInformativaPA">
       <wsdl:input name="nodoPAChiediInformativaPA" message="tns:nodoPAChiediInformativaPA" wsam:Action="http://ws.pagamenti.telematici.gov/PPT/nodoPAChiediInformativaPARichiesta" wsaw:Action="http://ws.pagamenti.telematici.gov/PPT/nodoPAChiediInformativaPARichiesta" />
@@ -778,15 +743,6 @@
         <soap:body use="literal" />
       </wsdl:input>
       <wsdl:output name="nodoChiediCopiaRTResponse">
-        <soap:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="nodoChiediInformativaPSP">
-      <soap:operation soapAction="nodoChiediInformativaPSP" style="document" />
-      <wsdl:input name="nodoChiediInformativaPSP">
-        <soap:body use="literal" />
-      </wsdl:input>
-      <wsdl:output name="nodoChiediInformativaPSPResponse">
         <soap:body use="literal" />
       </wsdl:output>
     </wsdl:operation>

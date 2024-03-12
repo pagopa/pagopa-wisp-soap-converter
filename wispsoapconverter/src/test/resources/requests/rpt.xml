@@ -1,0 +1,32 @@
+<RPT xmlns="http://www.digitpa.gov.it/schemas/2011/Pagamenti/">
+    <versioneOggetto>0</versioneOggetto>
+    <dominio>
+        <identificativoDominio>{pa}</identificativoDominio>
+    </dominio>
+    <identificativoMessaggioRichiesta>3179612d79fa3366</identificativoMessaggioRichiesta>
+    <dataOraMessaggioRichiesta>{dataOraMessaggioRichiesta}T17:13:30</dataOraMessaggioRichiesta>
+    <autenticazioneSoggetto>USR</autenticazioneSoggetto>
+    <soggettoPagatore>
+        <identificativoUnivocoPagatore>
+            <tipoIdentificativoUnivoco>F</tipoIdentificativoUnivoco>
+            <codiceIdentificativoUnivoco>TTTTTT11T11T123T</codiceIdentificativoUnivoco>
+        </identificativoUnivocoPagatore>
+        <anagraficaPagatore>Utente Test</anagraficaPagatore>
+    </soggettoPagatore>
+    <enteBeneficiario>
+        <identificativoUnivocoBeneficiario>
+            <tipoIdentificativoUnivoco>G</tipoIdentificativoUnivoco>
+            <codiceIdentificativoUnivoco>00053070918</codiceIdentificativoUnivoco>
+        </identificativoUnivocoBeneficiario>
+        <denominazioneBeneficiario>Comune di Nuoro</denominazioneBeneficiario>
+    </enteBeneficiario>
+    <datiVersamento>
+        <dataEsecuzionePagamento>{dataEsecuzionePagamento}</dataEsecuzionePagamento>
+        <importoTotaleDaVersare>{amount}</importoTotaleDaVersare>
+        <tipoVersamento>{tipoVersamento}</tipoVersamento>
+        <identificativoUnivocoVersamento>{iuv}</identificativoUnivocoVersamento>
+        <codiceContestoPagamento>{ccp}</codiceContestoPagamento>
+        <firmaRicevuta>0</firmaRicevuta>
+        {versamenti}
+    </datiVersamento>
+</RPT>

@@ -5,12 +5,13 @@
     <envs>
       <env name="INSTANCE" value="LOCAL" />
     </envs>
-    <option name="MAIN_CLASS_NAME" value="eu.sia.pagopa.mains.MainTest" />
-    <module name="fdr" />
-    <option name="VM_PARAMETERS" value="-javaagent:./agent/cinnamon-agent-2.16.2.jar -Dconfig.app=$USER_HOME$/fdr/config-app-local.conf" />
+    <option name="MAIN_CLASS_NAME" value="it.gov.pagopa.tests.mains.MainTest" />
+    <module name="wispsoapconverter" />
+    <shortenClasspath name="ARGS_FILE" />
+    <option name="VM_PARAMETERS" value="-javaagent:./agent/cinnamon-agent-2.17.2.jar -Dconfig.app=$USER_HOME$/wispsoapconverter/config-app-local.conf" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="eu.sia.pagopa.mains.*" />
+        <option name="PATTERN" value="it.gov.pagopa.mains.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
