@@ -27,7 +27,7 @@ wispsoapconverter:
       memory: "512M"
       cpu: "512m"
     limits:
-      memory: "1Gi"
+      memory: "2Gi"
       cpu: "1024m"
   autoscaling:
     enable: true
