@@ -92,7 +92,7 @@ fdrnodo:
   secretProvider:
     create: true
     envSecrets:
-      APPLICATIONINSIGHTS_CONNECTION_STRING: "ai-connection-string"
+      APPLICATIONINSIGHTS_CONNECTION_STRING: "ai-u-connection-string"
       EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
       AZURE_STORAGE_BLOB_CONNECTION_STRING: "fdr-sa-connection-string"
       AZURE_QUEUE_CONNECTION_STRING: "fdr-sa-connection-string"
