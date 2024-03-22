@@ -153,12 +153,11 @@ lazy val `common-xml` = (project in file("common-xml"))
       Seq("javax.xml.bind" % "jaxb-api" % jaxbapi, "org.scala-lang.modules" %% "scala-xml" % scalaXmlVersion, "org.scala-lang.modules" %% "scala-parser-combinators" % scalaParserCombinators)
     },
     `gen-xml-enum` := {
-      println(s"@@@@@@@@@@@@@@ is Jenkins build $isJenkinsBuild @@@@@@@@@@@@@@@")
+      println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+      println(s"########## generating xml classes ##########")
       sys.env.foreach { case (key, value) =>
         println(s"$key -> $value")
       }
-      println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-      println(s"########## generating xml classes ##########")
 
       val srcMain = (Compile / baseDirectory).value / "src/main"
       val file = (Compile / target).value / "wsdl-schema"
