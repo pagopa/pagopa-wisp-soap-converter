@@ -4,31 +4,31 @@ wispsoapconverter:
   fullnameOverride: ""
   terminationGracePeriodSeconds: 140
   image:
-    repository: pagopadcommonacr.azurecr.io/pagopawispsoapconverter
-    tag: 1.0.0-SNAPSHOT
+    repository: ghcr.io/pagopa/pagopa-wisp-soap-converter
+    tag: latest
   livenessProbe:
     httpGet:
       path: /alive
       port: 8558
-    initialDelaySeconds: 15
+    initialDelaySeconds: 60
     failureThreshold: 10
     periodSeconds: 5
   readinessProbe:
     httpGet:
       path: /ready
       port: 8558
-    initialDelaySeconds: 10
+    initialDelaySeconds: 60
     failureThreshold: 10
     periodSeconds: 5
   tmpVolumeMount:
     create: true
   resources:
     requests:
-      memory: "6Gi"
-      cpu: "2048m"
+      memory: "512M"
+      cpu: "512m"
     limits:
-      memory: "8Gi"
-      cpu: "2560m"
+      memory: "1Gi"
+      cpu: "1024m"
   autoscaling:
     enable: true
     triggers:
@@ -79,6 +79,7 @@ wispsoapconverter:
     AZURE_STORAGE_TABLE_NAME: "events"
     AZURE_COSMOS_DB_NAME: "wispconverter"
     AZURE_COSMOS_TABLE_NAME: "data"
+    ADAPTER_ECOMMERCE_URL: "http://adapterecommerce.pagopa.it"
   secretProvider:
     create: true
     envSecrets:

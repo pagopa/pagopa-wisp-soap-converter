@@ -61,7 +61,7 @@ jobs:
           cluster_name: ${{ vars.CLUSTER_NAME }}
           resource_group: ${{ vars.CLUSTER_RESOURCE_GROUP }}
           app_name: ${{ env.APP_NAME }}
-          helm_upgrade_options: --set-file wispsoapconverter.configMapFromFile.logback\.xml="./helm/config/${{ inputs.environment }}/logback.xml" --set-file wispsoapconverter.configMapFromFile.config-app\.conf="./helm/config/${{ inputs.environment }}/config-app.conf"
+          helm_upgrade_options: --set-file wispsoapconverter.configMapFromFile.logback\.xml=./helm/config/logback.xml --set-file wispsoapconverter.configMapFromFile.config-app\.conf=./helm/config/config-app.conf
 
   cleanup_runner:
     name: Cleanup Runner
