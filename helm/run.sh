@@ -1,10 +1,10 @@
 #!/bin/bash
 
 DIR=.
-NAME=pagopafdrnodo
-NAMESPACE=fdr
-FILE_CONFIG_PATH_LOGBACK=../dev/logback.xml
-FILE_CONFIG_PATH_CONFIGAPP=../dev/config-app.conf
+NAME=wispsoapconverter
+NAMESPACE=nodo
+FILE_CONFIG_PATH_LOGBACK=../config/dev/logback.xml
+FILE_CONFIG_PATH_CONFIGAPP=../config/dev/config-app.conf
 
 location=weu
 
@@ -93,10 +93,10 @@ if [ "$install" == 1 ]; then
   if [ "$canary" == 1 ]; then
     echo "Installing canary version $version"
     helm upgrade --dry-run --namespace $NAMESPACE --install --values $valuesFile \
-      --set fdr.canaryDelivery.create="true" \
-      --set fdr.image.tag=$version \
-      --set-file fdr.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK \
-      --set-file fdr.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP \
+      --set wispsoapconverter.canaryDelivery.create="true" \
+      --set wispsoapconverter.image.tag=$version \
+      --set-file wispsoapconverter.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK \
+      --set-file wispsoapconverter.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP \
       $NAME-canary $DIR > dry-canary.yaml
     exit 0
   else

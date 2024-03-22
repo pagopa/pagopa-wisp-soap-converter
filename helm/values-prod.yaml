@@ -1,5 +1,5 @@
-fdrnodo:
-  namespace: "fdr"
+wispsoapconverter:
+  namespace: "nodo"
   nameOverride: ""
   fullnameOverride: ""
   terminationGracePeriodSeconds: 140

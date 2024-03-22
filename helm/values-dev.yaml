@@ -1,5 +1,5 @@
-fdrnodo:
-  namespace: "fdr"
+wispsoapconverter:
+  namespace: "nodo"
   nameOverride: ""
   fullnameOverride: ""
   terminationGracePeriodSeconds: 140
@@ -57,7 +57,7 @@ fdrnodo:
                 periodSeconds: 20
   envConfig:
     AZURE_INSIGHTS_ENABLED: "true"
-    APPLICATIONINSIGHTS_ROLE_NAME: "fdr-nodo"
+    APPLICATIONINSIGHTS_ROLE_NAME: "wispsoapconverter"
     MANAGEMENT_HTTP_PORT: "8558"
     MANAGEMENT_HTTP_BIND_HOST: "0.0.0.0"
     MANAGEMENT_HTTP_BIND_PORT: "8558"
@@ -69,7 +69,7 @@ fdrnodo:
     MICROMETER_HOST: "0.0.0.0"
     MICROMETER_PORT: "9092"
     TZ: "Europe/Rome"
-    AKKA_SYSTEM_NAME: "pagopafdrnodo"
+    AKKA_SYSTEM_NAME: "wispsoapconverter"
     JAVA_OPTS: >-
       -Dlogback.configurationFile=/mnt/file-config/logback.xml -Dconfig.app=/mnt/file-config/config-app.conf -Duser.language=it  -Duser.country=IT -Duser.timezone=Europe/Rome -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=3000 -Dcom.sun.management.jmxremote.rmi.port=3000 -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
     INSTANCE: DEV
