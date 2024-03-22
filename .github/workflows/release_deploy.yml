@@ -91,14 +91,60 @@ jobs:
     outputs:
       version: ${{ steps.release.outputs.version }}
     steps:
-      - name: Make Release
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+      - name: Set branch
+        run: |
+          echo "BRANCH=-${{github.ref_name}}" >> $GITHUB_ENV
+        if: ${{ github.ref_name != 'main' }}
+        shell: bash
+      - name: Update Semantic Version
         id: release
-        uses: pagopa/github-actions-template/maven-release@v1.5.4
-        with:
-          semver: ${{ needs.setup.outputs.semver }}
-          github_token: ${{ secrets.BOT_TOKEN_GITHUB }}
-          beta: ${{ inputs.beta }}
-          skip_ci: false
+        run: |
+          if [ ! -f "version.sbt" ]; then
+            echo "File 'version.sbt' does not exists"
+            exit 1
+          fi
+  
+          IFS='"'
+          arrIN=($(cat version.sbt))
+          SBT_VERSION="${arrIN[1]}"
+          IFS=' '
+  
+          echo "SBT_VERSION: $SBT_VERSION"
+          IFS="-" read VERSION PRE_RELEASE <<< $SBT_VERSION; IFS="\n"
+          IFS="." read MAJOR MINOR PATCH <<< $VERSION; IFS="\n"
+          IFS="." read PRE_RELEASE_NAME PRE_RELEASE_VERSION <<< $PRE_RELEASE; IFS="\n"
+  
+          echo "VERSION: $VERSION"
+          echo "PRE_RELEASE: $PRE_RELEASE"
+          echo "MAJOR: $MAJOR"
+          echo "MINOR: $MINOR"
+          echo "PATCH: $PATCH"
+          echo "PRE_RELEASE_NAME: $PRE_RELEASE_NAME"
+          echo "PRE_RELEASE_VERSION: $PRE_RELEASE_VERSION"
+          
+          if [ "${{ needs.setup.outputs.semver }}" == "skip" ]; then
+            OVERRIDE_SBT_VERSION=$SBT_VERSION
+          elif [ "${{ needs.setup.outputs.semver }}" == "buildNumber" ]; then
+            OVERRIDE_SBT_VERSION=$MAJOR.$MINOR.$PATCH-${{env.BRANCH}}
+          elif [[ "${{ needs.setup.outputs.semver }}" == "patch" ]]; then
+            OVERRIDE_SBT_VERSION=$MAJOR.$(current_version_release.MINOR).$(($PATCH+1))
+          elif [[ "${{ needs.setup.outputs.semver }}" == "minor" ]]; then
+            OVERRIDE_SBT_VERSION=$MAJOR.$(($MINOR+1)).0
+          else
+            OVERRIDE_SBT_VERSION=$(($MAJOR+1)).0.0
+          fi
+          echo "version is ${OVERRIDE_SBT_VERSION}"
+          echo "BRANCH=-${{github.ref_name}}" >> $GITHUB_ENV
+#        uses: pagopa/github-actions-template/maven-release@v1.5.4
+#        with:
+#          semver: ${{ needs.setup.outputs.semver }}
+#          github_token: ${{ secrets.BOT_TOKEN_GITHUB }}
+#          beta: ${{ inputs.beta }}
+#          skip_ci: false
 
   image:
     needs: [ setup, release ]
@@ -134,11 +180,13 @@ jobs:
             ${{ needs.release.outputs.version }}
             type=ref,event=branch
             type=sha
-
+      - name: Create Dockerfile
+        run: |
+          ./sbt -v docker:stage
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: /wispsoapconverter/target/docker/stage/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
