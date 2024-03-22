@@ -95,6 +95,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup JDK
         uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: sbt
       - name: Set branch
         run: |
           echo "BRANCH=-${{github.ref_name}}" >> $GITHUB_ENV
