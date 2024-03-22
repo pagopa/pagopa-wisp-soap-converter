@@ -1,0 +1,47 @@
+<RPT xmlns="http://www.digitpa.gov.it/schemas/2011/Pagamenti/">
+    <versioneOggetto>0</versioneOggetto>
+    <dominio>
+        <identificativoDominio>{pa}</identificativoDominio>
+    </dominio>
+    <identificativoMessaggioRichiesta>3179612d79fa3366</identificativoMessaggioRichiesta>
+    <dataOraMessaggioRichiesta>2017-09-06T17:13:30</dataOraMessaggioRichiesta>
+    <autenticazioneSoggetto>USR</autenticazioneSoggetto>
+    <soggettoPagatore>
+        <identificativoUnivocoPagatore>
+            <tipoIdentificativoUnivoco>F</tipoIdentificativoUnivoco>
+            <codiceIdentificativoUnivoco>TTTTTT11T11T123T</codiceIdentificativoUnivoco>
+        </identificativoUnivocoPagatore>
+        <anagraficaPagatore>Utente Test</anagraficaPagatore>
+    </soggettoPagatore>
+    <enteBeneficiario>
+        <identificativoUnivocoBeneficiario>
+            <tipoIdentificativoUnivoco>G</tipoIdentificativoUnivoco>
+            <codiceIdentificativoUnivoco>00053070918</codiceIdentificativoUnivoco>
+        </identificativoUnivocoBeneficiario>
+        <denominazioneBeneficiario>Comune di Nuoro</denominazioneBeneficiario>
+    </enteBeneficiario>
+    <datiVersamento>
+        <dataEsecuzionePagamento>2017-09-06</dataEsecuzionePagamento>
+        <importoTotaleDaVersare>{amount}</importoTotaleDaVersare>
+        <tipoVersamento>{tipoVersamento}</tipoVersamento>
+        <identificativoUnivocoVersamento>{iuv}</identificativoUnivocoVersamento>
+        <codiceContestoPagamento>{ccp}</codiceContestoPagamento>
+        <firmaRicevuta>0</firmaRicevuta>
+        <datiSingoloVersamento>
+            <importoSingoloVersamento>{amountVersamento1}</importoSingoloVersamento>
+            <ibanAccredito>IT96R0123454321000000012345</ibanAccredito>
+            <causaleVersamento>Pagamento di prova</causaleVersamento>
+            <datiSpecificiRiscossione>9/tipodovuto_6</datiSpecificiRiscossione>
+        </datiSingoloVersamento>
+        <datiSingoloVersamento>
+            <importoSingoloVersamento>{amountBollo}</importoSingoloVersamento>
+            <causaleVersamento>Pagamento di prova</causaleVersamento>
+            <datiSpecificiRiscossione>9/tipodovuto_7</datiSpecificiRiscossione>
+            <datiMarcaBolloDigitale>
+                <tipoBollo>01</tipoBollo>
+                <hashDocumento>YWVvbGlhbQ==</hashDocumento>
+                <provinciaResidenza>MI</provinciaResidenza>
+            </datiMarcaBolloDigitale>
+        </datiSingoloVersamento>
+    </datiVersamento>
+</RPT>

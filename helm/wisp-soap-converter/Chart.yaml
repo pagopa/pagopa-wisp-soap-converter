@@ -1,0 +1,11 @@
+apiVersion: v2
+name: wisp-soap-converter-chart
+description: Wisp Soap Conveter
+type: application
+version: 2.1.4
+appVersion: 2.1.4
+dependencies:
+  - name: microservice-chart
+    version: 3.0.0
+    repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
+    alias: wispsoapconverter

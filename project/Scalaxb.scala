@@ -6,15 +6,12 @@ import sbtscalaxb.ScalaxbPlugin.baseScalaxbSettings
 object Scalaxb {
   lazy val wsdls =
     "nodoperpa" ::
-    "aim128" ::
-    "barcode" ::
-    "paginf" ::
-    "qrcode" ::
-    "flussoriversamento" ::
-    "nodeforpsp" ::
-    "nodeforpa" ::
-    "nodoperpsp" ::
-    Nil
+      "paginf" ::
+      "tabelladellecontroparti" ::
+      "tabelladellecontropartiestesa" ::
+      "tassaautomobilistica" ::
+      "templateinformativa" ::
+      Nil
 
   def scalaxbSettings: Seq[Def.Setting[_]] = {
     val namedConfig = wsdls.map(wsdl => {
@@ -36,7 +33,6 @@ object Scalaxb {
     baseScalaxbSettings ++ inTask(scalaxb)(
       Seq(
         sourceManaged := (Compile / sourceManaged).value,
-        scalaxbGenerateRuntime := (base == "nodeforpsp"),
         scalaxbGenerateDispatchClient := false,
         scalaxbPackageName := s"scalaxbmodel.${base.toLowerCase}",
         scalaxbProtocolFileName := s"${base}_xmlprotocol.scala",

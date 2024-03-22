@@ -1,0 +1,31 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="MainTest dev" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="11" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <envs>
+      <env name="INSTANCE" value="local" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="it.gov.pagopa.mains.MainTest" />
+    <module name="wispsoapconverter" />
+    <option name="VM_PARAMETERS" value="-javaagent:./agent/cinnamon-agent-2.17.2.jar" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="it.gov.pagopa.mains.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="false" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+      </ENTRIES>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
