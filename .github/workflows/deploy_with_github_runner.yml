@@ -61,7 +61,9 @@ jobs:
           cluster_name: ${{ vars.CLUSTER_NAME }}
           resource_group: ${{ vars.CLUSTER_RESOURCE_GROUP }}
           app_name: ${{ env.APP_NAME }}
-          helm_upgrade_options: ${{ inputs.environment == 'dev' && ' --debug --set postgresql.enabled=true --set oracle.enabled=true --set oracledev.enabled=true --set oracleprod.enabled=true' || ' --debug --set postgresql.enabled=true --set oracle.enabled=true' }}
+          helm_upgrade_options: |
+            --set-file wispsoapconverter.configMapFromFile.logback\.xml="./config/${{ inputs.environment }}/logback.xml"
+            --set-file wispsoapconverter.configMapFromFile.config-app\.conf="./config/${{ inputs.environment }}/config-app.conf"
 
   cleanup_runner:
     name: Cleanup Runner
