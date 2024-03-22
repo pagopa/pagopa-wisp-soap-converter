@@ -133,7 +133,7 @@ jobs:
           if [ "${{ needs.setup.outputs.semver }}" == "skip" ]; then
             OVERRIDE_SBT_VERSION=$SBT_VERSION
           elif [ "${{ needs.setup.outputs.semver }}" == "buildNumber" ]; then
-            OVERRIDE_SBT_VERSION=$MAJOR.$MINOR.$PATCH-${{env.BRANCH}}
+            OVERRIDE_SBT_VERSION=$MAJOR.$MINOR.$PATCH${{env.BRANCH}}
           elif [[ "${{ needs.setup.outputs.semver }}" == "patch" ]]; then
             OVERRIDE_SBT_VERSION=$MAJOR.$(current_version_release.MINOR).$(($PATCH+1))
           elif [[ "${{ needs.setup.outputs.semver }}" == "minor" ]]; then
@@ -142,7 +142,6 @@ jobs:
             OVERRIDE_SBT_VERSION=$(($MAJOR+1)).0.0
           fi
           echo "version is ${OVERRIDE_SBT_VERSION}"
-          echo "BRANCH=-${{github.ref_name}}" >> $GITHUB_ENV
 #        uses: pagopa/github-actions-template/maven-release@v1.5.4
 #        with:
 #          semver: ${{ needs.setup.outputs.semver }}
