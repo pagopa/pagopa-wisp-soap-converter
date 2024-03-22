@@ -3,8 +3,8 @@
 DIR=.
 NAME=pagopafdrnodo
 NAMESPACE=fdr
-FILE_CONFIG_PATH_LOGBACK=../config/dev/logback.xml
-FILE_CONFIG_PATH_CONFIGAPP=../config/dev/config-app.conf
+FILE_CONFIG_PATH_LOGBACK=../dev/logback.xml
+FILE_CONFIG_PATH_CONFIGAPP=../dev/config-app.conf
 
 location=weu
 
