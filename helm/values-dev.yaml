@@ -137,8 +137,3 @@ wispsoapconverter:
     annotations:
       nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
     proxyBodySize: 100m
-microservice-chart:
-  image:
-    tag: 0.0.3-fix_actions
-  canaryDelivery:
-    create: false
