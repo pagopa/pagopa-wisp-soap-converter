@@ -50,13 +50,13 @@ object ConfigUtil {
     decoder.decodeMessage(response)
   }
 
-  private def callApiConfig(path:String)(implicit log: AppLogger, system:ActorSystem, ex: ExecutionContext): Future[HttpResponse] = {
+  private def callApiConfig(path:String,params:String="")(implicit log: AppLogger, system:ActorSystem, ex: ExecutionContext): Future[HttpResponse] = {
     val apiConfigUrl = system.settings.config.getString("apiConfigCache.url")
     val subKey = Try(system.settings.config.getString("apiConfigCache.subscriptionKey")).getOrElse("n/d")
     val timeout = Try(system.settings.config.getInt("apiConfigCache.timeout")).getOrElse(30)
     import scala.concurrent.duration._
     val settings = ConnectionPoolSettings(system).withConnectionSettings(ClientConnectionSettings(system).withIdleTimeout(timeout.seconds).withConnectingTimeout(5.seconds))
-    val uri = s"$apiConfigUrl$path"
+    val uri = s"$apiConfigUrl$path$params"
     log.info(s"calling ApiConfigCache on [$uri]")
     for{
       req <- Future.fromTry(Try(HttpRequest(uri = uri, headers = Seq(RawHeader(HEADER_SUBSCRIPTION_KEY, subKey)))))
@@ -65,8 +65,9 @@ object ConfigUtil {
   }
 
   def getConfigHttp()(implicit log: AppLogger, system:ActorSystem, ex: ExecutionContext) = {
+    val keys = system.settings.config.getString("apiConfigCache.keys")
     for {
-      res <- callApiConfig(s"")
+      res <- callApiConfig(s"",keys)
       resDec = decodeResponse(res)
       resBody <- Unmarshaller.stringUnmarshaller(resDec.entity)
       d = mapper.readValue(resBody, classOf[ConfigData])
