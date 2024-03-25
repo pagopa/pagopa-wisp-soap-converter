@@ -43,7 +43,7 @@ object ConfigUtil {
         Coders.Deflate
       case HttpEncodings.identity =>
         Coders.NoCoding
-      case other =>
+      case _ =>
         Coders.NoCoding
     }
 
@@ -81,6 +81,7 @@ object ConfigUtil {
       d = mapper.readValue(resBody,classOf[CacheVersion])
     } yield Some(d.version)).recover({
       case e =>
+        log.error(e,"Errore getConfigVersion")
         None
     })
   }
