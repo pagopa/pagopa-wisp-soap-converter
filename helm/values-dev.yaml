@@ -1,11 +1,13 @@
+microservice-chart:
+  image: &imagetag
+    repository: ghcr.io/pagopa/pagopa-wisp-soap-converter
+    tag: latest
 wispsoapconverter:
   namespace: "nodo"
   nameOverride: ""
   fullnameOverride: ""
   terminationGracePeriodSeconds: 140
-  image:
-    repository: ghcr.io/pagopa/pagopa-wisp-soap-converter
-    tag: latest
+  !!merge <<: *imagetag
   livenessProbe:
     httpGet:
       path: /alive
