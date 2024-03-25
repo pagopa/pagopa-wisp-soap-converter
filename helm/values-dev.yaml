@@ -139,6 +139,6 @@ wispsoapconverter:
     proxyBodySize: 100m
 microservice-chart:
   image:
-    tag: 0.0.3-SNAPSHOT-fix_actions-fix_actions
+    tag: 0.0.3-fix_actions
   canaryDelivery:
     create: false
