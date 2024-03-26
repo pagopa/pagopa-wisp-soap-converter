@@ -134,7 +134,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorPr
 
       _ = re = re.map(r => r.copy(pspDescr = psp.description, fruitoreDescr = Some(stazione.stationCode)))
 
-      (payloadNodoInviaRPTRisposta, _) <- manageNormal(intestazionePPT, nodoInviaRPT, modelloUno, isAGID)
+      (payloadNodoInviaRPTRisposta, _) <- manageNormal(intestazionePPT, modelloUno, isAGID)
 
     } yield SoapResponse(soapRequest.sessionId, payloadNodoInviaRPTRisposta, StatusCodes.OK.intValue, re, soapRequest.testCaseId)
 
@@ -150,7 +150,6 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorPr
 
   private def manageNormal(
       intestazionePPT: IntestazionePPT,
-      nodoInviaRPT: NodoInviaRPT,
       modelloUno: Boolean,
       isAGID: Boolean
   ): Future[(String, NodoInviaRPTRisposta)] = {
@@ -158,7 +157,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorPr
       _ <- Future.successful(())
       _ = log.debug("Salvataggio messaggio su Cosmos")
       _ = insertTime = Util.now()
-      _ <- saveData(intestazionePPT, nodoInviaRPT, updateTokenItem = false)
+      _ <- saveData(intestazionePPT, updateTokenItem = false)
       _ = if( isAGID ) {
         reCambioStato(StatoRPTEnum.RPT_ACCETTATA_NODO.toString, Util.now())
       } else {
@@ -208,11 +207,10 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorPr
       Future.successful(SoapResponse(req.sessionId, resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
   }
 
-  def saveData(intestazionePPT: IntestazionePPT, nodoInviaRPT: NodoInviaRPT, updateTokenItem: Boolean): Future[String] = {
+  def saveData(intestazionePPT: IntestazionePPT, updateTokenItem: Boolean): Future[String] = {
     log.debug("Salvataggio messaggio RPT")
     val id = RPTUtil.getUniqueKey(req,intestazionePPT)
-    val (headerstr,bodystr) = RPTUtil.RPT2Str(intestazionePPT,nodoInviaRPT).get
-    cosmosRepository.save(CosmosPrimitive(re.get.insertedTimestamp.toString.substring(0,10),id,actorClassId,headerstr,bodystr))
+    cosmosRepository.save(CosmosPrimitive(re.get.insertedTimestamp.toString.substring(0,10),id,actorClassId,req.payload))
     Future.successful(id)
   }
 

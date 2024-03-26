@@ -263,7 +263,6 @@ lazy val `wispsoapconverter` = (project in file("wispsoapconverter"))
     libraryDependencies += Cinnamon.library.cinnamonJvmMetricsProducer,
     libraryDependencies += Cinnamon.library.cinnamonAkkaHttp,
     libraryDependencies += Cinnamon.library.cinnamonJmxImporter,
-    libraryDependencies += Cinnamon.library.cinnamonHikariCPJmxImporter,
     Test / javaOptions += s"-Duser.dir=${(ThisBuild / baseDirectory).value}/wispsoapconverter/..",
     run / cinnamon := true,
     test / cinnamon := true,
