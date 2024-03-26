@@ -2,6 +2,7 @@ package it.gov.pagopa.actors
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
+import com.nimbusds.jose.util.StandardCharset
 import it.gov.pagopa.ActorProps
 import it.gov.pagopa.actors.response.NodoInviaRPTResponse
 import it.gov.pagopa.common.actor.PerRequestActor
@@ -15,10 +16,11 @@ import it.gov.pagopa.common.util._
 import it.gov.pagopa.config.Channel
 import it.gov.pagopa.exception.{RptFaultBeanException, WorkflowExceptionErrorCodes}
 import org.slf4j.MDC
-import scalaxbmodel.nodoperpa.{IntestazionePPT, NodoInviaRPT, NodoInviaRPTRisposta}
+import scalaxbmodel.nodoperpa.{IntestazionePPT, NodoInviaRPTRisposta}
 import scalaxbmodel.paginf.CtRichiestaPagamentoTelematico
 
 import java.time.LocalDateTime
+import java.util.Base64
 import scala.concurrent.Future
 
 case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorProps: ActorProps) extends PerRequestActor with NodoInviaRPTResponse with RptFlow with ReUtil {
@@ -210,7 +212,8 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorPr
   def saveData(intestazionePPT: IntestazionePPT, updateTokenItem: Boolean): Future[String] = {
     log.debug("Salvataggio messaggio RPT")
     val id = RPTUtil.getUniqueKey(req,intestazionePPT)
-    cosmosRepository.save(CosmosPrimitive(re.get.insertedTimestamp.toString.substring(0,10),id,actorClassId,req.payload))
+    val zipped = Util.zipContent(req.payload.getBytes(StandardCharset.UTF_8))
+    cosmosRepository.save(CosmosPrimitive(re.get.insertedTimestamp.toString.substring(0,10),id,actorClassId,Base64.getEncoder.encodeToString(zipped)))
     Future.successful(id)
   }
 

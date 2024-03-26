@@ -2,6 +2,7 @@ package it.gov.pagopa.actors
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
+import com.nimbusds.jose.util.StandardCharset
 import it.gov.pagopa.ActorProps
 import it.gov.pagopa.actors.flow.CarrelloFlow
 import it.gov.pagopa.actors.response.NodoInviaCarrelloRPTResponse
@@ -20,6 +21,7 @@ import scalaxbmodel.nodoperpa.{IntestazioneCarrelloPPT, NodoInviaCarrelloRPT, No
 import scalaxbmodel.paginf.CtRichiestaPagamentoTelematico
 
 import java.time.LocalDateTime
+import java.util.Base64
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
 case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository,actorProps: ActorProps) extends PerRequestActor with NodoInviaCarrelloRPTResponse with CarrelloFlow with ReUtil {
@@ -61,7 +63,8 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
   ): Future[Int] = {
     log.debug("Salvataggio messaggio Carrello")
     val id = RPTUtil.getUniqueKey(req,intestazioneCarrelloPPT)
-    cosmosRepository.save(CosmosPrimitive(re.get.insertedTimestamp.toString.substring(0,10),id,actorClassId,req.payload))
+    val zipped = Util.zipContent(req.payload.getBytes(StandardCharset.UTF_8))
+    cosmosRepository.save(CosmosPrimitive(re.get.insertedTimestamp.toString.substring(0,10),id,actorClassId,Base64.getEncoder.encodeToString(zipped)))
   }
 
   def manageCarrello(nodoInviaCarrelloRPT: NodoInviaCarrelloRPT, intestazioneCarrelloPPT: IntestazioneCarrelloPPT, rpts: Seq[CtRichiestaPagamentoTelematico]): Future[SoapResponse] = {
