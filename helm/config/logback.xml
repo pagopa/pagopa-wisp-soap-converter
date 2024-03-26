@@ -55,7 +55,6 @@
     </appender>
 
     <logger name="it.gov.pagopa" level="INFO" />
-    <logger name="it.gov.pagopa.actors.ApiConfigActor"    level="DEBUG" />
 
     <root level="INFO">
         <appender-ref ref="CONSOLE_APPENDER_ASYNC" />
