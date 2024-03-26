@@ -60,6 +60,7 @@ wispsoapconverter:
                 value: 100
                 periodSeconds: 20
   envConfig:
+    SERVICE_IDENTIFIER: "WSC001"
     AZURE_INSIGHTS_ENABLED: "true"
     APPLICATIONINSIGHTS_ROLE_NAME: "wispsoapconverter"
     MANAGEMENT_HTTP_PORT: "8558"
