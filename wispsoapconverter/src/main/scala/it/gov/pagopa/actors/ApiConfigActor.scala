@@ -14,7 +14,7 @@ final case class ApiConfigActor(cosmosRepository: CosmosRepository,actorProps: A
 
   implicit val system = context.system
 
-  private val scheduleMinutes: FiniteDuration = 10.seconds//context.system.settings.config.getInt("configScheduleMinutes").minute
+  private val scheduleMinutes: FiniteDuration = context.system.settings.config.getInt("configScheduleMinutes").minute
 
   context.system.scheduler.scheduleOnce(scheduleMinutes, self, CheckCache(UUID.randomUUID().toString))
 
