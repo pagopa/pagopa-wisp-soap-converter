@@ -47,29 +47,33 @@ case class StorageBuilder() {
     val reJsonLog = Try(system.settings.config.getBoolean("reJsonLog")).getOrElse(false)
 
     (request: ReRequest, log: AppLogger, data: ConfigData) => {
-      log.info(s"${request.re}")
-      ((for{
-        _ <- Future.successful(())
-        payloadSize = request.re.payload.map(pl=>{
-          val zippedPayload = Util.zipContent(pl);
-          blobContainerClient.getBlobClient(request.re.uniqueId).upload(BinaryData.fromBytes(zippedPayload))
-          zippedPayload.length
-        })
-        tableEntity = new TableEntity(request.re.insertedTimestamp.toString.substring(0,10), request.re.uniqueId)
-        _ = tableEntity.setProperties(request.re.toProperties())
-        _ = {
-          payloadSize.map(ps=>{
-            tableEntity.addProperty(StorageBuilder.BLOB_REF,request.re.uniqueId)
-            tableEntity.addProperty(StorageBuilder.BLOB_LEN,ps)
-          })
-        }
-        _ = tableContainerClient.createEntity(tableEntity)
-        _ <- Future(defaultOperation(request, log, reXmlLog, reJsonLog, data))
-      } yield ())(executionContext))recoverWith {
-        case e: Throwable =>
-          log.error(e, "Error calling azure-storage-blob")
-          Future.failed(e)
-      }
+      Future.sequence(
+        Seq(
+          Future(defaultOperation(request, log, reXmlLog, reJsonLog, data)),
+          ((for{
+            _ <- Future.successful(())
+            payloadSize = request.re.payload.map(pl=>{
+              val zippedPayload = Util.zipContent(pl);
+              blobContainerClient.getBlobClient(request.re.uniqueId).upload(BinaryData.fromBytes(zippedPayload))
+              zippedPayload.length
+            })
+            tableEntity = new TableEntity(request.re.insertedTimestamp.toString.substring(0,10), request.re.uniqueId)
+            _ = tableEntity.setProperties(request.re.toProperties())
+            _ = {
+              payloadSize.map(ps=>{
+                tableEntity.addProperty(StorageBuilder.BLOB_REF,request.re.uniqueId)
+                tableEntity.addProperty(StorageBuilder.BLOB_LEN,ps)
+              })
+            }
+            _ = tableContainerClient.createEntity(tableEntity)
+          } yield ())(executionContext))recoverWith {
+            case e: Throwable =>
+              log.error(e, "Error calling azure-storage-blob")
+              Future.failed(e)
+          }
+        )
+      ).flatMap(_=>Future.successful(()))
+
     }
   }
 

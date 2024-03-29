@@ -75,7 +75,7 @@ object Appfunction {
     }
   }
 
-  private def formatHeaders(headersOpt: Option[Seq[(String, String)]]): String = {
+  def formatHeaders(headersOpt: Option[Seq[(String, String)]]): String = {
     headersOpt
       .map(d => {
         if (d.isEmpty) {
@@ -87,11 +87,11 @@ object Appfunction {
       .getOrElse(Constant.UNKNOWN)
   }
 
-  private def param(s: Option[String]): String = {
+  def param(s: Option[String]): String = {
     s"[${s.getOrElse(Constant.UNKNOWN)}]"
   }
 
-  private def fmtMessage(re: Re, reExtra: Option[ReExtra]): Try[String] = {
+  def fmtMessage(re: Re, reExtra: Option[ReExtra]): Try[String] = {
     Try({
       if (re.categoriaEvento == CategoriaEvento.INTERFACCIA.toString) {
         val mod = if (re.esito.isDefined) {
@@ -115,64 +115,57 @@ object Appfunction {
           s"[${Constant.UNKNOWN}]"
         }
         s"""Re Request => $mod
-        httpUri: ${param(reExtra.flatMap(a => a.uri))}
-        httpHeaders: ${param(reExtra.map(a => formatHeaders(Some(a.headers))))}
-        httpStatusCode: ${param(reExtra.flatMap(a => a.statusCode.map(_.toString)))}
-        elapsed: $elapsed
-        payload: ${
-            param(re.payload.map(as => {
-              Util.obfuscate(new String(as))
-            }))
-        }
-        ${re.standIn.map(si => s"standin: [$si]").getOrElse("")}"""
+        |httpUri: ${param(reExtra.flatMap(a => a.uri))}
+        |httpHeaders: ${param(reExtra.map(a => formatHeaders(Some(a.headers))))}
+        |httpStatusCode: ${param(reExtra.flatMap(a => a.statusCode.map(_.toString)))}
+        |elapsed: $elapsed
+        |payload: ${
+        param(re.payload.map(as => {
+          Util.obfuscate(new String(as))
+        }))
+        }${re.standIn.map(si => s"\nstandin: [$si]").getOrElse("")}""".stripMargin
       } else {
         s"Re Request => TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] ESITO[${re.esito.getOrElse("ESITO non presente")}] STATO[${re.status.getOrElse("STATO non presente")}]"
       }
     })
   }
 
-  private def fmtMessageJson(re: Re, reExtra: Option[ReExtra], data: ConfigData): Try[String] = {
+  def fmtMessageJson(re: Re, reExtra: Option[ReExtra], data: ConfigData): Try[String] = {
     Try({
       val nd = "nd"
-      val (isServerRequest, isServerResponse, isClientRequest, isClientResponse, caller, httpType, subject, subjectDescr, isKO) = if (re.categoriaEvento == CategoriaEvento.INTERFACCIA.toString) {
+      val (isServerRequest, isServerResponse, caller, httpType, subject, subjectDescr) = if (re.categoriaEvento == CategoriaEvento.INTERFACCIA.toString) {
         if (re.esito.isDefined) {
           if ((re.esito.contains(EsitoRE.RICEVUTA.toString) || re.esito.contains(EsitoRE.RICEVUTA_KO.toString)) && re.sottoTipoEvento == SottoTipoEvento.REQ.toString) {
-            (true, false, false, false, Some(Constant.SERVER), Some(Constant.REQUEST), Some(re.fruitore.getOrElse(nd)), Some(re.fruitoreDescr.getOrElse(nd)), false)
+            (true, false, Some(Constant.SERVER), Some(Constant.REQUEST), Some(re.fruitore.getOrElse(nd)), Some(re.fruitoreDescr.getOrElse(nd)))
           } else if ((re.esito.contains(EsitoRE.INVIATA.toString) || re.esito.contains(EsitoRE.INVIATA_KO.toString)) && re.sottoTipoEvento == SottoTipoEvento.RESP.toString) {
-            (false, true, false, false, Some(Constant.SERVER), Some(Constant.RESPONSE), Some(re.fruitore.getOrElse(nd)), Some(re.fruitoreDescr.getOrElse(nd)), false)
+            (false, true, Some(Constant.SERVER), Some(Constant.RESPONSE), Some(re.fruitore.getOrElse(nd)), Some(re.fruitoreDescr.getOrElse(nd)))
           } else {
-            (false, false, false, false, Some(nd), Some(nd), Some(nd), Some(nd), false)
+            (false, false, Some(nd), Some(nd), Some(nd), Some(nd))
           }
         } else {
-          (false, false, false, false, Some(nd), Some(nd), Some(nd), Some(nd), false)
+          (false, false, Some(nd), Some(nd), Some(nd), Some(nd))
         }
       } else {
-        (false, false, false, false, None, None, None, None, false)
+        (false, false, None, None, None, None)
       }
 
-      val isSoapProtocol = reExtra.exists(r => r.soapProtocol)
+//      val isSoapProtocol = reExtra.exists(r => r.soapProtocol)
       val categoriaEvento = re.categoriaEvento
       val statusCode = reExtra.flatMap(_.statusCode)
-      val uri = reExtra.flatMap(_.uri)
       val payload = re.payload.map(v => new String(v, Constant.UTF_8))
-      val (isSuccess, faultCode, faultString, faultDescription, jsonError) = if (isSoapProtocol) {
+      val (isSuccess, faultCode, faultString, faultDescription) = {
         val fault = payload.flatMap(v => getFaultFromXml(v))
         fault match {
-          case Some((code, str, descr)) if !isKO =>
-            (false, Some(code), str, descr, None)
-          case None if isKO =>
-            (false, None, None, None, payload)
+          case Some((code, str, descr)) =>
+            (false, Some(code), str, descr)
           case None =>
-            (true, None, None, None, None)
-          case _ => ???
+            (true, None, None, None)
         }
-      } else {
-        (true, None, None, None, None)
       }
       val esitoComplex = if (isSuccess) {
         s" [esito:OK]"
       } else {
-        s" [esito:KO]${faultCode.map(v => s" [faultCode:$v]").getOrElse("")}${faultString.map(v => s" [faultString:$v]").getOrElse("")}${faultDescription.map(v => s" [faultDescription:$v]").getOrElse("")}${jsonError.map(v => s" [genericError:$v]").getOrElse("")}"
+        s" [esito:KO]${faultCode.map(v => s" [faultCode:$v]").getOrElse("")}${faultString.map(v => s" [faultString:$v]").getOrElse("")}${faultDescription.map(v => s" [faultDescription:$v]").getOrElse("")}"
       }
       val elapsed = reExtra.flatMap(_.elapsed)
       val soapAction = reExtra.flatMap(h => h.headers.find(_._1 == "SOAPAction").map(_._2))
@@ -184,11 +177,7 @@ object Appfunction {
             s"${caller.getOrElse("")} --> ${httpType.getOrElse("")}: messaggio da [subject:${subject.getOrElse("")}]"
           } else if (isServerResponse) {
             s"${caller.getOrElse("")} --> ${httpType.getOrElse("")}: risposta a [subject:${subject.getOrElse("")}]${elapsed.map(v => s" [elapsed:${v}ms]").getOrElse("")}${statusCode.map(v => s" [statusCode:$v]").getOrElse("")}$esitoComplex"
-          } else if (isClientRequest) {
-            s"${caller.getOrElse("")} --> ${httpType.getOrElse("")}: messaggio a [subject:${subject.getOrElse("")}]${uri.map(v => s" [uri:$v]").getOrElse("")}"
-          } else if (isClientResponse) {
-            s"${caller.getOrElse("")} --> ${httpType.getOrElse("")}: risposta da [subject:${subject.getOrElse("")}]${elapsed.map(v => s" [elapsed:${v}ms]").getOrElse("")}${statusCode.map(v => s" [statusCode:$v]").getOrElse("")}$esitoComplex${uri.map(v => s" [from-uri:$v]").getOrElse("")}"
-          } else {
+          }  else {
             "Tipo di REQ/RESP non identificata per sotto tipo evento non valido"
           }
         } else {
@@ -208,7 +197,7 @@ object Appfunction {
       stringBuilder.append(s""","categoriaEvento":"$categoriaEvento"""")
       caller.foreach(v => stringBuilder.append(s""","caller":"$v""""))
       httpType.foreach(v => stringBuilder.append(s""","httpType":"$v""""))
-      stringBuilder.append(s""","isSoapProtocol":$isSoapProtocol""")
+//      stringBuilder.append(s""","isSoapProtocol":$isSoapProtocol""")
       soapAction.foreach(v => stringBuilder.append(s""","soapAction":${JsString(v)}"""))
       elapsed.foreach(v => stringBuilder.append(s""","elapsed":$v"""))
       statusCode.foreach(v => stringBuilder.append(s""","statusCode":$v"""))
@@ -220,7 +209,7 @@ object Appfunction {
       faultCode.foreach(v => stringBuilder.append(s""","faultCode":${JsString(v)}"""))
       faultString.foreach(v => stringBuilder.append(s""","faultString":${JsString(v)}"""))
       faultDescription.foreach(v => stringBuilder.append(s""","faultDescription":${JsString(v)}"""))
-      jsonError.foreach(v => stringBuilder.append(s""","genericError":${JsString(v)}"""))
+//      jsonError.foreach(v => stringBuilder.append(s""","genericError":${JsString(v)}"""))
       businessProcess.foreach(v => stringBuilder.append(s""","businessProcess":"$v""""))
       tipoEvento.foreach(v => stringBuilder.append(s""","tipoEvento":"$v""""))
       subject.foreach(v => stringBuilder.append(s""","subject":"$v""""))
