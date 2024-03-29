@@ -46,7 +46,20 @@ case class NodoRoute(
     FiniteDuration(system.settings.config.getInt("bundleTimeoutSeconds"), TimeUnit.SECONDS)
 
   val route: Route = pathEndOrSingleSlash {
-    complete(s"Server up and running ${Constant.KeyName.REST_INPUT}")
+    complete(s"Server up and running")
+  }
+  def infoRoute(actorProps: ActorProps): Route = {
+    complete {
+      HttpEntity(
+        ContentTypes.`application/json`,
+        s"""{
+           |"version" : "${it.gov.pagopa.BuildInfo.version}",
+           |"buildTime" : ${it.gov.pagopa.BuildInfo.buildTime},
+           |"identifier" : "${Constant.SERVICE_IDENTIFIER}",
+           |"cacheVersion": "${actorProps.ddataMap.version}"
+           |}""".stripMargin
+      )
+    }
   }
 
   def akkaHttpTimeout(sessionId: String): HttpResponse = {

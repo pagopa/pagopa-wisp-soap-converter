@@ -214,7 +214,7 @@ lazy val `common-xml` = (project in file("common-xml"))
 import com.github.eikek.sbt.openapi.{CustomMapping, Field, Imports, Pkg, ScalaConfig, TypeDef}
 lazy val `wispsoapconverter` = (project in file("wispsoapconverter"))
   .dependsOn(`common-xml`)
-  .enablePlugins(Cinnamon, JavaAppPackaging, DockerPlugin, JavaAgent, OpenApiSchema)
+  .enablePlugins(BuildInfoPlugin,Cinnamon, JavaAppPackaging, DockerPlugin, JavaAgent, OpenApiSchema)
   .settings(sonarSettings)
   .settings(
     coverageExcludedPackages := ".*tests.*;.*commonxml.*;it\\.gov\\.pagopa\\.soapinput\\.message.*;.*exception.*;.*it.gov.pagopa.common.repo.*",
@@ -267,6 +267,15 @@ lazy val `wispsoapconverter` = (project in file("wispsoapconverter"))
     run / cinnamon := true,
     test / cinnamon := true,
     cinnamonLogLevel := "INFO",
+    buildInfoKeys := Seq[BuildInfoKey](
+      name,
+      version,
+      BuildInfoKey.action("buildTime") {
+        System.currentTimeMillis
+      }
+    ),
+    buildInfoPackage := "it.gov.pagopa",
+    buildInfoOptions += BuildInfoOption.ToJson,
     Compile / mainClass := Some("it.gov.pagopa.Main"),
     Docker / packageName := "wisp-soap-converter",
     dockerBaseImage := "adoptopenjdk:11-jdk-hotspot",

@@ -21,7 +21,6 @@ object Constant {
 
   object KeyName {
     val SOAP_INPUT = "soap-input"
-    val REST_INPUT = "rest-input"
     val RE_FEEDER = "re-feeder"
     val DEAD_LETTER_MONITOR = "dead-letter-monitor"
   }
