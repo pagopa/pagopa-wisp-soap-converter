@@ -30,7 +30,7 @@ class MainTests  extends AnyFlatSpec with should.Matchers {
         )
         .respond(response().withBody(
           s"""{
-             |"version":"${sessionid}",
+             |"version": "${sessionid}",
              |"configurations":{
              |        "GLOBAL-validate_input": {
              |            "category": "GLOBAL",
@@ -92,6 +92,13 @@ class MainTests  extends AnyFlatSpec with should.Matchers {
 
       val clientresponse2 = clientrequest2.send(backend)
       assert(clientresponse2.code.code == 200)
+
+      val clientrequest3 = basicRequest
+        .get(uri"http://localhost:${mockServer.getPort+1}/info")
+
+      val clientresponse3 = clientrequest3.send(backend)
+      assert(clientresponse3.code.code == 200)
+      assert(clientresponse3.body.getOrElse("").contains(s""""cacheVersion": "${sessionid}""""))
 
       mockServer.stop()
       assert(true)
