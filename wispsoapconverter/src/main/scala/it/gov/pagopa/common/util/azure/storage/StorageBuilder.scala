@@ -8,10 +8,12 @@ import com.azure.data.tables.{TableClient, TableServiceClient, TableServiceClien
 import com.azure.storage.blob.{BlobContainerClient, BlobServiceClient, BlobServiceClientBuilder}
 import com.typesafe.config.Config
 import it.gov.pagopa.common.message.ReRequest
+import it.gov.pagopa.common.util.ConfigUtil.ConfigData
 import it.gov.pagopa.common.util._
-import it.gov.pagopa.common.util.azure.Appfunction.ReEventFunc
+import it.gov.pagopa.common.util.azure.Appfunction.{ReEventFunc, defaultOperation}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 object StorageBuilder{
   private val BLOB_REF:String="payload_ref_id"
@@ -23,6 +25,7 @@ case class StorageBuilder() {
     val storageConnectionString = config.getString("azure-storage.connection-string")
     val blobcontainerName = config.getString("azure-storage.blob-name")
     val tableName = config.getString("azure-storage.table-name")
+
     val blobServiceClient: BlobServiceClient = new BlobServiceClientBuilder()
       .connectionString(storageConnectionString)
       .buildClient()
@@ -40,7 +43,10 @@ case class StorageBuilder() {
     val (tableContainerClient,blobContainerClient) = getClients(system.settings.config)
     val executionContext: MessageDispatcher = system.dispatchers.lookup("azurestorage-dispatcher")
 
-    (request: ReRequest, log: AppLogger) => {
+    val reXmlLog = Try(system.settings.config.getBoolean("reXmlLog")).getOrElse(true)
+    val reJsonLog = Try(system.settings.config.getBoolean("reJsonLog")).getOrElse(false)
+
+    (request: ReRequest, log: AppLogger, data: ConfigData) => {
       log.info(s"${request.re}")
       ((for{
         _ <- Future.successful(())
@@ -58,6 +64,7 @@ case class StorageBuilder() {
           })
         }
         _ = tableContainerClient.createEntity(tableEntity)
+        _ <- Future(defaultOperation(request, log, reXmlLog, reJsonLog, data))
       } yield ())(executionContext))recoverWith {
         case e: Throwable =>
           log.error(e, "Error calling azure-storage-blob")

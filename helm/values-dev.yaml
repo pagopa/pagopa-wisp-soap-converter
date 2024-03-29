@@ -85,6 +85,8 @@ wispsoapconverter:
     AZURE_COSMOS_DB_NAME: "wispconverter"
     AZURE_COSMOS_TABLE_NAME: "data"
     ADAPTER_ECOMMERCE_URL: "http://adapterecommerce.pagopa.it"
+    RE_XML_LOG_ACTIVE: "false"
+    RE_JSON_LOG_ACTIVE: "true"
   secretProvider:
     create: true
     envSecrets:

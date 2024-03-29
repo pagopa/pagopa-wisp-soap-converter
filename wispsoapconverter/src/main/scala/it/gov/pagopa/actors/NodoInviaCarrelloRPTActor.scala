@@ -110,7 +110,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
           now = Util.now()
           _ ={
             val reCambioStato = re.get.copy(status = Some(StatoCarrelloEnum.CART_ACCETTATO_NODO.toString), insertedTimestamp = now)
-            reEventFunc(reRequest.copy(re = reCambioStato), log)
+            reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
             rpts.map(rpt=>{
               val reCambioStatorpt = re.get.copy(
                 iuv = Some(rpt.datiVersamento.identificativoUnivocoVersamento),
@@ -119,7 +119,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
                 status = Some(StatoRPTEnum.RPT_ACCETTATA_NODO.toString),
                 insertedTimestamp = now
               )
-              reEventFunc(reRequest.copy(re = reCambioStatorpt), log)
+              reEventFunc(reRequest.copy(re = reCambioStatorpt), log, ddataMap)
             })
           }
           ctRPT = rpts.head
@@ -128,7 +128,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
           _ = if(isAGID){
             val now = Util.now()
             val reCambioStato = re.get.copy(status = Some(StatoCarrelloEnum.CART_PARCHEGGIATO_NODO.toString), insertedTimestamp = now)
-            reEventFunc(reRequest.copy(re = reCambioStato), log)
+            reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
             rpts.map(rpt=>{
               val reCambioStatorpt = re.get.copy(
                 iuv = Some(rpt.datiVersamento.identificativoUnivocoVersamento),
@@ -137,7 +137,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
                 status = Some(StatoRPTEnum.RPT_PARCHEGGIATA_NODO.toString),
                 insertedTimestamp = now
               )
-              reEventFunc(reRequest.copy(re = reCambioStatorpt), log)
+              reEventFunc(reRequest.copy(re = reCambioStatorpt), log, ddataMap)
             })
           }
           url = RPTUtil.getAdapterEcommerceUri(uriAdapterEcommerce,req,intestazioneCarrelloPPT)
@@ -201,7 +201,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
 
       now = Util.now()
       reCambioStato = re.get.copy(status = Some(StatoCarrelloEnum.CART_RICEVUTO_NODO.toString), insertedTimestamp = now)
-      _ = reEventFunc(reRequest.copy(re = reCambioStato), log)
+      _ = reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
       _ = log.info(LogConstant.logSemantico(actorClassId))
       soapResponse <- manageCarrello(nodoInviaCarrelloRPT, intestazioneCarrelloPPT, rpts)
 
@@ -210,7 +210,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
     pipeline
       .recoverWith(recoverPipeline)
       .map(sr => {
-        traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc)
+        traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
         log.info(LogConstant.logEnd(actorClassId))
         replyTo ! sr
         complete()
@@ -232,7 +232,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
               _ <- Future.successful(())
               now = Util.now()
               reCambioStato = re.get.copy(status = Some(StatoCarrelloEnum.CART_RIFIUTATO_NODO.toString), insertedTimestamp = now)
-              _ = reEventFunc(reRequest.copy(re = reCambioStato), log)
+              _ = reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
               res = errorHandler(req.sessionId, req.testCaseId, cfb, re)
             } yield res) recoverWith recoverGenericError
 

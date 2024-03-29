@@ -9,6 +9,7 @@ import it.gov.pagopa.common.enums.EsitoRE
 import it.gov.pagopa.common.exception
 import it.gov.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import it.gov.pagopa.common.message._
+import it.gov.pagopa.common.util.ConfigUtil.ConfigData
 import it.gov.pagopa.common.util.StringUtils._
 import it.gov.pagopa.common.util._
 import it.gov.pagopa.common.util.azure.Appfunction.ReEventFunc
@@ -56,7 +57,7 @@ class SoapActorPerRequest(
   def reExtra(message: SoapRouterRequest): ReExtra =
     ReExtra(uri = message.uri, headers = message.headers.getOrElse(Nil), httpMethod = Some(HttpMethods.POST.toString()), callRemoteAddress = message.callRemoteAddress, soapProtocol = true)
 
-  def traceRequest(message: SoapRouterRequest, reEventFunc: ReEventFunc): Unit = {
+  def traceRequest(message: SoapRouterRequest, reEventFunc: ReEventFunc, ddataMap: ConfigData): Unit = {
     Util.logPayload(log, Some(message.payload))
     val reRequestReq = ReRequest(
       sessionId = message.sessionId,
@@ -74,7 +75,7 @@ class SoapActorPerRequest(
       ),
       reExtra = Some(reExtra(message))
     )
-    reEventFunc(reRequestReq, log)
+    reEventFunc(reRequestReq, log, ddataMap)
   }
 
   override def receive: Receive = {
@@ -121,7 +122,7 @@ class SoapActorPerRequest(
 
           Util.logPayload(log, Some(sres.payload))
           log.info(LogConstant.callBundle(Constant.KeyName.RE_FEEDER, isInput = false))
-          actorProps.reEventFunc(reRequest, log)
+          actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
           complete(createHttpResponse(StatusCode.int2StatusCode(bundleResponse.statusCode), bundleResponse.payload, sres.sessionId), Constant.KeyName.SOAP_INPUT)
   }
 
@@ -189,7 +190,7 @@ class SoapActorPerRequest(
       case sre: SoapRouterException =>
         log.error(sre, "SoapRouterException")
 
-        traceRequest(message, actorProps.reEventFunc)
+        traceRequest(message, actorProps.reEventFunc, actorProps.ddataMap)
 
         val payload = Util.faultXmlResponse(sre.faultcode, sre.faultstring, sre.detail)
         Util.logPayload(log, Some(payload))
@@ -209,14 +210,14 @@ class SoapActorPerRequest(
           ),
           reExtra = Some(ReExtra(statusCode = Some(sre.statusCode), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
         )
-        actorProps.reEventFunc(reRequestResp, log)
+        actorProps.reEventFunc(reRequestResp, log, actorProps.ddataMap)
 
         complete(createHttpResponse(sre.statusCode, payload, message.sessionId), Constant.KeyName.SOAP_INPUT)
 
       case e: Throwable =>
         log.error(e, "General Error Throwable")
 
-        traceRequest(message,actorProps.reEventFunc)
+        traceRequest(message,actorProps.reEventFunc, actorProps.ddataMap)
 
         val dpe = exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR)
         val payload = Util.faultXmlResponse(dpe.faultCode, dpe.faultString, Some(dpe.message))
@@ -237,7 +238,7 @@ class SoapActorPerRequest(
           ),
           reExtra = Some(ReExtra(statusCode = Some(StatusCodes.InternalServerError.intValue), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
         )
-        actorProps.reEventFunc(reRequest, log)
+        actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
         complete(createHttpResponse(StatusCodes.InternalServerError.intValue, payload, message.sessionId), Constant.KeyName.SOAP_INPUT)
     }
   }
