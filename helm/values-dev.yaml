@@ -1,44 +1,40 @@
-fdrnodo:
-  namespace: "fdr"
+microservice-chart: &microservice-chart
+  namespace: "nodo"
+  image:
+    repository: ghcr.io/pagopa/pagopa-wisp-soap-converter
+    tag: 0.0.3-34-fix_actions
+  canaryDelivery:
+    create: false
+wispsoapconverter:
+  !!merge <<: *microservice-chart
   nameOverride: ""
   fullnameOverride: ""
   terminationGracePeriodSeconds: 140
-  image:
-    repository: pagopaucommonacr.azurecr.io/pagopafdrnododeipagamenti
-    tag: 1.0.0-SNAPSHOT
   livenessProbe:
     httpGet:
       path: /alive
       port: 8558
-    initialDelaySeconds: 15
+    initialDelaySeconds: 60
     failureThreshold: 10
     periodSeconds: 5
   readinessProbe:
     httpGet:
       path: /ready
       port: 8558
-    initialDelaySeconds: 10
+    initialDelaySeconds: 60
     failureThreshold: 10
     periodSeconds: 5
-  externalConfigMap:
-    create: true
-    configMaps:
-      - name: fdr-cacerts
-        key: cacerts
   tmpVolumeMount:
     create: true
   resources:
     requests:
-      memory: "6Gi"
-      cpu: "2048m"
+      memory: "512M"
+      cpu: "512m"
     limits:
-      memory: "8Gi"
-      cpu: "2560m"
+      memory: "2Gi"
+      cpu: "1024m"
   autoscaling:
     enable: true
-    minReplica: 1
-    maxReplica: 2
-    pollingInterval: 10 # seconds
     triggers:
       - type: cpu
         metricType: Utilization
@@ -49,7 +45,6 @@ fdrnodo:
         metadata:
           value: "80"
     advanced:
-      restoreToOriginalReplicaCount: false
       horizontalPodAutoscalerConfig:
         behavior:
           scaleDown:
@@ -65,8 +60,9 @@ fdrnodo:
                 value: 100
                 periodSeconds: 20
   envConfig:
+    SERVICE_IDENTIFIER: "WSC001"
     AZURE_INSIGHTS_ENABLED: "true"
-    APPLICATIONINSIGHTS_ROLE_NAME: "fdr-nodo"
+    APPLICATIONINSIGHTS_ROLE_NAME: "wispsoapconverter"
     MANAGEMENT_HTTP_PORT: "8558"
     MANAGEMENT_HTTP_BIND_HOST: "0.0.0.0"
     MANAGEMENT_HTTP_BIND_PORT: "8558"
@@ -78,31 +74,26 @@ fdrnodo:
     MICROMETER_HOST: "0.0.0.0"
     MICROMETER_PORT: "9092"
     TZ: "Europe/Rome"
-    AKKA_SYSTEM_NAME: "pagopafdrnodo"
+    AKKA_SYSTEM_NAME: "wispsoapconverter"
     JAVA_OPTS: >-
-      -Dlogback.configurationFile=/mnt/file-config/logback.xml  -Dconfig.app=/mnt/file-config/config-app.conf  -Dapp.bundle.cacerts.path=/mnt/file-config-external/fdr-cacerts/cacerts  -Duser.language=it  -Duser.country=IT  -Duser.timezone=Europe/Rome  -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=3000  -Dcom.sun.management.jmxremote.rmi.port=3000  -Djava.rmi.server.hostname=127.0.0.1  -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false
-    DB_FDR_URL: jdbc:postgresql://fdr-db.u.internal.postgresql.pagopa.it:6432/fdr?sslmode=require&prepareThreshold=0
-    DB_FDR_USER: fdr
-    INSTANCE: UAT
-    EVENT_HUB_NAME: "fdr-re"
-    BLOB_RE_CONTAINER_NAME: "payload"
-    AZURE_STORAGE_BLOB_NAME: "xmlsharefile"
-    ADDITIONAL_FDR_VALIDATIONS: "true"
-    AZURE_QUEUE_NAME: "queueconversion"
+      -Dlogback.configurationFile=/mnt/file-config/logback.xml -Dconfig.app=/mnt/file-config/config-app.conf -Duser.language=it  -Duser.country=IT -Duser.timezone=Europe/Rome -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=3000 -Dcom.sun.management.jmxremote.rmi.port=3000 -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
+    INSTANCE: DEV
+    API_CONFIG_CACHE_URL: "https://api.dev.platform.pagopa.it/api-config-cache/p/v1/cache"
+    AZURE_COSMOS_ENDPOINT: "https://pagopa-d-weu-nodo-wispconv-cosmos-account.documents.azure.com:443/"
+    AZURE_STORAGE_BLOB_NAME: "payloads"
+    AZURE_STORAGE_TABLE_NAME: "events"
+    AZURE_COSMOS_DB_NAME: "wispconverter"
+    AZURE_COSMOS_TABLE_NAME: "data"
+    ADAPTER_ECOMMERCE_URL: "http://adapterecommerce.pagopa.it"
   secretProvider:
     create: true
     envSecrets:
-      APPLICATIONINSIGHTS_CONNECTION_STRING: "ai-connection-string"
-      EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
-      AZURE_STORAGE_BLOB_CONNECTION_STRING: "fdr-sa-connection-string"
-      AZURE_QUEUE_CONNECTION_STRING: "fdr-sa-connection-string"
-      BLOB_RE_CONNECTION_STRING: "fdr-re-sa-connection-string"
+      APPLICATIONINSIGHTS_CONNECTION_STRING: "ai-d-connection-string"
       API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
-      FDR_SUBSCRIPTION_KEY: "fdr-subscription-key-string"
-      FDR_LEGACY_SUBSCRIPTION_KEY: "fdr-legacy-subscription-key"
-      DB_FDR_PASSWORD: "db-fdr-password"
+      AZURE_COSMOS_KEY: "cosmosdb-wisp-converter-account-key"
+      AZURE_STORAGE_CONNECTION_STRING: "wisp-converter-re-sa-connection-string-key"
     keyvault:
-      name: "pagopa-u-fdr-kv"
+      name: "pagopa-d-nodo-kv"
       tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
   envFieldRef:
     MANAGEMENT_HTTP_HOST: "status.podIP"
@@ -144,8 +135,8 @@ fdrnodo:
       - 9092 #micrometer
   ingress:
     create: true
-    host: "weuuat.fdr.internal.uat.platform.pagopa.it"
-    path: /pagopa-fdr-nodo-service(/|$)(.*)
+    host: "weudev.nodo.internal.dev.platform.pagopa.it"
+    path: /wisp-soap-converter(/|$)(.*)
     annotations:
       nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
     proxyBodySize: 100m

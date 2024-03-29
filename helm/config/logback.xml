@@ -55,19 +55,6 @@
     </appender>
 
     <logger name="it.gov.pagopa" level="INFO" />
-    <logger name="it.gov.pagopa.input" level="INFO" />
-    <logger name="it.gov.pagopa.common.actor.HttpActorPerRequest" level="INFO" />
-
-    <logger name="com.zaxxer.hikari.HikariConfig" level="INFO"/>
-
-    <logger name="slick" level="INFO" />
-    <logger name="slick.jdbc.DriverDataSource"              level="INFO" />
-    <logger name="slick.jdbc.JdbcBackend.statement"         level="INFO" />
-    <logger name="slick.jdbc.JdbcBackend.parameter"         level="INFO" />
-    <logger name="slick.jdbc.JdbcBackend.benchmark"         level="INFO" />
-    <logger name="slick.jdbc.StatementInvoker.result"       level="INFO" />
-    <logger name="slick.compiler"                           level="INFO" />
-    <logger name="slick.compiler.QueryCompilerBenchmark"    level="INFO" />
 
     <root level="INFO">
         <appender-ref ref="CONSOLE_APPENDER_ASYNC" />

@@ -2,6 +2,7 @@ package it.gov.pagopa.actors
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
+import com.nimbusds.jose.util.StandardCharset
 import it.gov.pagopa.ActorProps
 import it.gov.pagopa.actors.response.NodoInviaRPTResponse
 import it.gov.pagopa.common.actor.PerRequestActor
@@ -15,10 +16,11 @@ import it.gov.pagopa.common.util._
 import it.gov.pagopa.config.Channel
 import it.gov.pagopa.exception.{RptFaultBeanException, WorkflowExceptionErrorCodes}
 import org.slf4j.MDC
-import scalaxbmodel.nodoperpa.{IntestazionePPT, NodoInviaRPT, NodoInviaRPTRisposta}
+import scalaxbmodel.nodoperpa.{IntestazionePPT, NodoInviaRPTRisposta}
 import scalaxbmodel.paginf.CtRichiestaPagamentoTelematico
 
 import java.time.LocalDateTime
+import java.util.Base64
 import scala.concurrent.Future
 
 case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorProps: ActorProps) extends PerRequestActor with NodoInviaRPTResponse with RptFlow with ReUtil {
@@ -134,7 +136,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorPr
 
       _ = re = re.map(r => r.copy(pspDescr = psp.description, fruitoreDescr = Some(stazione.stationCode)))
 
-      (payloadNodoInviaRPTRisposta, _) <- manageNormal(intestazionePPT, nodoInviaRPT, modelloUno, isAGID)
+      (payloadNodoInviaRPTRisposta, _) <- manageNormal(intestazionePPT, modelloUno, isAGID)
 
     } yield SoapResponse(soapRequest.sessionId, payloadNodoInviaRPTRisposta, StatusCodes.OK.intValue, re, soapRequest.testCaseId)
 
@@ -150,7 +152,6 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorPr
 
   private def manageNormal(
       intestazionePPT: IntestazionePPT,
-      nodoInviaRPT: NodoInviaRPT,
       modelloUno: Boolean,
       isAGID: Boolean
   ): Future[(String, NodoInviaRPTRisposta)] = {
@@ -158,7 +159,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorPr
       _ <- Future.successful(())
       _ = log.debug("Salvataggio messaggio su Cosmos")
       _ = insertTime = Util.now()
-      _ <- saveData(intestazionePPT, nodoInviaRPT, updateTokenItem = false)
+      _ <- saveData(intestazionePPT, updateTokenItem = false)
       _ = if( isAGID ) {
         reCambioStato(StatoRPTEnum.RPT_ACCETTATA_NODO.toString, Util.now())
       } else {
@@ -208,11 +209,11 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorPr
       Future.successful(SoapResponse(req.sessionId, resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
   }
 
-  def saveData(intestazionePPT: IntestazionePPT, nodoInviaRPT: NodoInviaRPT, updateTokenItem: Boolean): Future[String] = {
+  def saveData(intestazionePPT: IntestazionePPT, updateTokenItem: Boolean): Future[String] = {
     log.debug("Salvataggio messaggio RPT")
     val id = RPTUtil.getUniqueKey(req,intestazionePPT)
-    val (headerstr,bodystr) = RPTUtil.RPT2Str(intestazionePPT,nodoInviaRPT).get
-    cosmosRepository.save(CosmosPrimitive(re.get.insertedTimestamp.toString.substring(0,10),id,actorClassId,headerstr,bodystr))
+    val zipped = Util.zipContent(req.payload.getBytes(StandardCharset.UTF_8))
+    cosmosRepository.save(CosmosPrimitive(re.get.insertedTimestamp.toString.substring(0,10),id,actorClassId,Base64.getEncoder.encodeToString(zipped)))
     Future.successful(id)
   }
 

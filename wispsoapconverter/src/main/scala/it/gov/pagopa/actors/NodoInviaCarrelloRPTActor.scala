@@ -2,6 +2,7 @@ package it.gov.pagopa.actors
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
+import com.nimbusds.jose.util.StandardCharset
 import it.gov.pagopa.ActorProps
 import it.gov.pagopa.actors.flow.CarrelloFlow
 import it.gov.pagopa.actors.response.NodoInviaCarrelloRPTResponse
@@ -20,6 +21,7 @@ import scalaxbmodel.nodoperpa.{IntestazioneCarrelloPPT, NodoInviaCarrelloRPT, No
 import scalaxbmodel.paginf.CtRichiestaPagamentoTelematico
 
 import java.time.LocalDateTime
+import java.util.Base64
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
 case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository,actorProps: ActorProps) extends PerRequestActor with NodoInviaCarrelloRPTResponse with CarrelloFlow with ReUtil {
@@ -58,12 +60,11 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
   def saveCarrello(
       now: LocalDateTime,
       intestazioneCarrelloPPT: IntestazioneCarrelloPPT,
-      nodoInviaCarrelloRPT: NodoInviaCarrelloRPT,
   ): Future[Int] = {
     log.debug("Salvataggio messaggio Carrello")
     val id = RPTUtil.getUniqueKey(req,intestazioneCarrelloPPT)
-    val (headerstr,bodystr) = RPTUtil.Carrello2Str(intestazioneCarrelloPPT,nodoInviaCarrelloRPT).get
-    cosmosRepository.save(CosmosPrimitive(re.get.insertedTimestamp.toString.substring(0,10),id,actorClassId,headerstr,bodystr))
+    val zipped = Util.zipContent(req.payload.getBytes(StandardCharset.UTF_8))
+    cosmosRepository.save(CosmosPrimitive(re.get.insertedTimestamp.toString.substring(0,10),id,actorClassId,Base64.getEncoder.encodeToString(zipped)))
   }
 
   def manageCarrello(nodoInviaCarrelloRPT: NodoInviaCarrelloRPT, intestazioneCarrelloPPT: IntestazioneCarrelloPPT, rpts: Seq[CtRichiestaPagamentoTelematico]): Future[SoapResponse] = {
@@ -105,7 +106,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
 
           _ = log.debug("Salvataggio carrello")
           _ = insertTime = Util.now()
-          _ <- saveCarrello(insertTime,intestazioneCarrelloPPT, nodoInviaCarrelloRPT)
+          _ <- saveCarrello(insertTime,intestazioneCarrelloPPT)
           now = Util.now()
           _ ={
             val reCambioStato = re.get.copy(status = Some(StatoCarrelloEnum.CART_ACCETTATO_NODO.toString), insertedTimestamp = now)

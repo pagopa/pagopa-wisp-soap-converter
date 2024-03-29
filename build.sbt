@@ -153,12 +153,11 @@ lazy val `common-xml` = (project in file("common-xml"))
       Seq("javax.xml.bind" % "jaxb-api" % jaxbapi, "org.scala-lang.modules" %% "scala-xml" % scalaXmlVersion, "org.scala-lang.modules" %% "scala-parser-combinators" % scalaParserCombinators)
     },
     `gen-xml-enum` := {
-      println(s"@@@@@@@@@@@@@@ is Jenkins build $isJenkinsBuild @@@@@@@@@@@@@@@")
+      println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+      println(s"########## generating xml classes ##########")
       sys.env.foreach { case (key, value) =>
         println(s"$key -> $value")
       }
-      println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-      println(s"########## generating xml classes ##########")
 
       val srcMain = (Compile / baseDirectory).value / "src/main"
       val file = (Compile / target).value / "wsdl-schema"
@@ -264,24 +263,16 @@ lazy val `wispsoapconverter` = (project in file("wispsoapconverter"))
     libraryDependencies += Cinnamon.library.cinnamonJvmMetricsProducer,
     libraryDependencies += Cinnamon.library.cinnamonAkkaHttp,
     libraryDependencies += Cinnamon.library.cinnamonJmxImporter,
-    libraryDependencies += Cinnamon.library.cinnamonHikariCPJmxImporter,
     Test / javaOptions += s"-Duser.dir=${(ThisBuild / baseDirectory).value}/wispsoapconverter/..",
     run / cinnamon := true,
     test / cinnamon := true,
     cinnamonLogLevel := "INFO",
     Compile / mainClass := Some("it.gov.pagopa.Main"),
     Docker / packageName := "wisp-soap-converter",
-    if(isJenkinsBuild) {
-      dockerBaseImage := "toolbox.sia.eu/docker/adoptopenjdk:11-jdk-hotspot"
-    }
-    else {
-      dockerBaseImage := "adoptopenjdk:11-jdk-hotspot"
-    },
+    dockerBaseImage := "adoptopenjdk:11-jdk-hotspot",
     dockerExposedPorts := Seq(8080, 8558, 2552),
     dockerUpdateLatest := true,
-    //    dockerUsername := sys.props.get("docker.username"),
     dockerRepository := sys.props.get("docker.registry"),
-    //dockerRepository := Some("toolbox.sia.eu/docker"),
     Compile / resourceDirectories += baseDirectory.value / "fe" / "build",
     libraryDependencies ++= {
       Seq(

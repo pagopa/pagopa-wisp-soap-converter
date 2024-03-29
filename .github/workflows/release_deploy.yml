@@ -93,7 +93,7 @@ jobs:
     steps:
       - name: Make Release
         id: release
-        uses: pagopa/github-actions-template/maven-release@v1.5.4
+        uses: pagopa/github-actions-template/sbt-release@v1.11.0
         with:
           semver: ${{ needs.setup.outputs.semver }}
           github_token: ${{ secrets.BOT_TOKEN_GITHUB }}
@@ -134,11 +134,13 @@ jobs:
             ${{ needs.release.outputs.version }}
             type=ref,event=branch
             type=sha
-
+      - name: Create Dockerfile
+        run: |
+          ./sbt -v docker:stage
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ./wispsoapconverter/target/docker/stage
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

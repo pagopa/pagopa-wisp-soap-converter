@@ -1,10 +1,10 @@
 #!/bin/bash
 
 DIR=.
-NAME=pagopafdrnodo
-NAMESPACE=fdr
-FILE_CONFIG_PATH_LOGBACK=../config/dev/logback.xml
-FILE_CONFIG_PATH_CONFIGAPP=../config/dev/config-app.conf
+NAME=wispsoapconverter
+NAMESPACE=nodo
+FILE_CONFIG_PATH_LOGBACK=./config/logback.xml
+FILE_CONFIG_PATH_CONFIGAPP=./config/config-app.conf
 
 location=weu
 
@@ -75,7 +75,7 @@ if [ -n "$update" ]; then
 fi
 
 if [ "$location" == "weu" ]; then
-  valuesFile=$location-dev/values-dev.yaml
+  valuesFile=values-dev.yaml
   context="pagopa-d-$location-dev-aks"
 else
   valuesFile=$location-dev/values-dev.yaml
@@ -85,6 +85,8 @@ fi
 echo "Using
 context      | $context
 valuesFile   | $valuesFile
+install $install
+canary $canary
 "
 
 kubectl config use-context $context
@@ -93,18 +95,15 @@ if [ "$install" == 1 ]; then
   if [ "$canary" == 1 ]; then
     echo "Installing canary version $version"
     helm upgrade --dry-run --namespace $NAMESPACE --install --values $valuesFile \
-      --set fdr.canaryDelivery.create="true" \
-      --set fdr.image.tag=$version \
-      --set-file fdr.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK \
-      --set-file fdr.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP \
+      --set-file wispsoapconverter.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK \
+      --set-file wispsoapconverter.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP \
       $NAME-canary $DIR > dry-canary.yaml
     exit 0
   else
     echo "Installing stable version $version"
     helm upgrade --namespace $NAMESPACE --install --values $valuesFile \
-      --set fdrnodo.image.tag=$version cj-ftp-upload.image.tag=$version\
-      --set-file fdrnodo.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK cj-ftp-upload.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK \
-      --set-file fdrnodo.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP cj-ftp-upload.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP\
+      --set-file wispsoapconverter.configMapFromFile.logback\\.xml=$FILE_CONFIG_PATH_LOGBACK \
+      --set-file wispsoapconverter.configMapFromFile.config-app\\.conf=$FILE_CONFIG_PATH_CONFIGAPP \
       $NAME $DIR
     exit 0
   fi

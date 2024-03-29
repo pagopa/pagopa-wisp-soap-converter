@@ -1,1 +1,1 @@
-ThisBuild / version := "0.0.0"
+ThisBuild / version := "0.0.3-34-fix_actions"
