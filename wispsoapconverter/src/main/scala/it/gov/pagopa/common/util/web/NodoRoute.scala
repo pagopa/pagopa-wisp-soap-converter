@@ -2,7 +2,6 @@ package it.gov.pagopa.common.util.web
 
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Route, RouteResult}
 import akka.util.ByteString

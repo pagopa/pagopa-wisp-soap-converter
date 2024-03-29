@@ -22,5 +22,5 @@ lightbend.sbt
 /helm/Chart.lock
 /helm/charts/
 
-
+.scannerwork
 .terraform
