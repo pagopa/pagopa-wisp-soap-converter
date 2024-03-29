@@ -8,7 +8,25 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8080/"
+      "url": "https://{host}/{basePath}",
+      "variables": {
+        "host": {
+          "default": "api.dev.platform.pagopa.it",
+          "enum": [
+            "api.dev.platform.pagopa.it",
+            "api.uat.platform.pagopa.it",
+            "api.platform.pagopa.it"
+          ]
+        },
+        "basePath": {
+          "default": "api-config-cache/o/v1",
+          "enum": [
+            "api-config-cache/o/v1",
+            "api-config-cache/p/v1",
+            "api-config-cache/odev/v1"
+          ]
+        }
+      }
     }
   ],
   "security": [
