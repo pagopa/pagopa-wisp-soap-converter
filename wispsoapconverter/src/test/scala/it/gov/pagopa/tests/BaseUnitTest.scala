@@ -60,6 +60,7 @@ abstract class BaseUnitTest()
         waitAsyncProcesses=true
         apiConfigCache{
           url="http://localhost:${mockServer.getPort}"
+          keys="?keys=version,creditorInstitutions,creditorInstitutionBrokers,stations,creditorInstitutionStations,ibans,psps,pspBrokers,paymentTypes,pspChannelPaymentTypes,channels,plugins,configurations"
           subscriptionKey=1234567890
           timeout=30
         }
