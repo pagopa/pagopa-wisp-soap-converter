@@ -7,10 +7,6 @@ object Scalaxb {
   lazy val wsdls =
     "nodoperpa" ::
       "paginf" ::
-      "tabelladellecontroparti" ::
-      "tabelladellecontropartiestesa" ::
-      "tassaautomobilistica" ::
-      "templateinformativa" ::
       Nil
 
   def scalaxbSettings: Seq[Def.Setting[_]] = {
