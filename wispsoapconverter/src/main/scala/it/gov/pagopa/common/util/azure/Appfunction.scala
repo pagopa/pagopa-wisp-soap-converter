@@ -148,8 +148,6 @@ object Appfunction {
       } else {
         (false, false, None, None, None, None)
       }
-
-//      val isSoapProtocol = reExtra.exists(r => r.soapProtocol)
       val categoriaEvento = re.categoriaEvento
       val statusCode = reExtra.flatMap(_.statusCode)
       val payload = re.payload.map(v => new String(v, Constant.UTF_8))
@@ -197,7 +195,6 @@ object Appfunction {
       stringBuilder.append(s""","categoriaEvento":"$categoriaEvento"""")
       caller.foreach(v => stringBuilder.append(s""","caller":"$v""""))
       httpType.foreach(v => stringBuilder.append(s""","httpType":"$v""""))
-//      stringBuilder.append(s""","isSoapProtocol":$isSoapProtocol""")
       soapAction.foreach(v => stringBuilder.append(s""","soapAction":${JsString(v)}"""))
       elapsed.foreach(v => stringBuilder.append(s""","elapsed":$v"""))
       statusCode.foreach(v => stringBuilder.append(s""","statusCode":$v"""))
@@ -209,7 +206,6 @@ object Appfunction {
       faultCode.foreach(v => stringBuilder.append(s""","faultCode":${JsString(v)}"""))
       faultString.foreach(v => stringBuilder.append(s""","faultString":${JsString(v)}"""))
       faultDescription.foreach(v => stringBuilder.append(s""","faultDescription":${JsString(v)}"""))
-//      jsonError.foreach(v => stringBuilder.append(s""","genericError":${JsString(v)}"""))
       businessProcess.foreach(v => stringBuilder.append(s""","businessProcess":"$v""""))
       tipoEvento.foreach(v => stringBuilder.append(s""","tipoEvento":"$v""""))
       subject.foreach(v => stringBuilder.append(s""","subject":"$v""""))
