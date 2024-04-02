@@ -36,13 +36,13 @@ jobs:
     steps:
       - name: Checkout the code
         uses: actions/checkout@v3
-
-#      - name: Build the Docker image
-#        run: docker build . --file ${{ env.DOCKERFILE }} --tag localbuild/testimage:latest
+      - name: Create Dockerfile
+        run: |
+          ./sbt -v docker:stage
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ./wispsoapconverter/target/docker/stage
           push: false
           tags: localbuild/testimage:latest
           secrets: |

@@ -21,7 +21,6 @@ lightbend.sbt
 /devops/deploy-local/kustomize-nodo-cron/dev/resources/
 /helm/Chart.lock
 /helm/charts/
-/helm/nodo-cron/Chart.lock
-/helm/nodo/Chart.lock
-/helm/nodo/charts/
-/helm/nodo-cron/charts/
+
+.scannerwork
+.terraform

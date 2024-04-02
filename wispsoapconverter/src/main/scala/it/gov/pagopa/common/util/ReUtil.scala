@@ -3,11 +3,12 @@ package it.gov.pagopa.common.util
 import it.gov.pagopa.common.actor.NodoLogging
 import it.gov.pagopa.common.enums.EsitoRE
 import it.gov.pagopa.common.message._
+import it.gov.pagopa.common.util.ConfigUtil.ConfigData
 import it.gov.pagopa.common.util.azure.Appfunction.ReEventFunc
 
 trait ReUtil { this: NodoLogging =>
 
-  def traceInterfaceRequest(message: SoapRequest, re: Re, reExtra: ReExtra, reEventFunc: ReEventFunc): Unit = {
+  def traceInterfaceRequest(message: SoapRequest, re: Re, reExtra: ReExtra, reEventFunc: ReEventFunc, ddataMap: ConfigData): Unit = {
     import StringUtils.Utf8String
     Util.logPayload(log, Some(message.payload))
     val reRequestReq = ReRequest(
@@ -23,7 +24,7 @@ trait ReUtil { this: NodoLogging =>
       ),
       reExtra = Some(reExtra)
     )
-    reEventFunc(reRequestReq, log)
+    reEventFunc(reRequestReq, log, ddataMap)
   }
 
 }

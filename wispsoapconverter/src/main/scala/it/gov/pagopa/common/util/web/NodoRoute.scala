@@ -2,7 +2,6 @@ package it.gov.pagopa.common.util.web
 
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Route, RouteResult}
 import akka.util.ByteString
@@ -46,7 +45,24 @@ case class NodoRoute(
     FiniteDuration(system.settings.config.getInt("bundleTimeoutSeconds"), TimeUnit.SECONDS)
 
   val route: Route = pathEndOrSingleSlash {
-    complete(s"Server up and running ${Constant.KeyName.REST_INPUT}")
+    complete(s"Server up and running")
+  }
+  def infoRoute(actorProps: ActorProps): Route = {
+    path("info"){
+      get{
+        complete {
+          HttpEntity(
+            ContentTypes.`application/json`,
+            s"""{
+               |"version" : "${it.gov.pagopa.BuildInfo.version}",
+               |"buildTime" : ${it.gov.pagopa.BuildInfo.buildTime},
+               |"identifier" : "${Constant.SERVICE_IDENTIFIER}",
+               |"cacheVersion": "${actorProps.ddataMap.version}"
+               |}""".stripMargin
+          )
+        }
+      }
+    }
   }
 
   def akkaHttpTimeout(sessionId: String): HttpResponse = {

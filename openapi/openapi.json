@@ -1,0 +1,104 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Wisp soap converter",
+    "description": "Wisp soap converter",
+    "termsOfService": "https://www.pagopa.gov.it/",
+    "version": "0.1.1-41-uat_prd_files"
+  },
+  "servers": [
+    {
+      "url": "https://{host}/{basePath}",
+      "variables": {
+        "host": {
+          "default": "api.dev.platform.pagopa.it",
+          "enum": [
+            "api.dev.platform.pagopa.it",
+            "api.uat.platform.pagopa.it",
+            "api.platform.pagopa.it"
+          ]
+        },
+        "basePath": {
+          "default": "api-config-cache/o/v1",
+          "enum": [
+            "api-config-cache/o/v1",
+            "api-config-cache/p/v1",
+            "api-config-cache/odev/v1"
+          ]
+        }
+      }
+    }
+  ],
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "WSC",
+      "description": "Wisp Soap Converter"
+    }
+  ],
+  "paths": {
+    "/info": {
+      "get": {
+        "tags": [
+          "WSC"
+        ],
+        "summary": "Get application info",
+        "description": "Get application info",
+        "operationId": "info",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "InfoResponse": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "example": "0.0.1"
+          },
+          "buildTime": {
+            "type": "integer",
+            "example": 1711708917201
+          },
+          "identifier": {
+            "type": "string",
+            "example": "WSC_000"
+          },
+          "cacheVersion": {
+            "type": "string",
+            "example": "4080316481440056"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "Ocp-Apim-Subscription-Key",
+        "in": "header"
+      },
+      "SecurityScheme": {
+        "type": "http",
+        "description": "Authentication",
+        "scheme": "basic"
+      }
+    }
+  }
+}

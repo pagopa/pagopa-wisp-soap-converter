@@ -77,25 +77,23 @@ wispsoapconverter:
     AKKA_SYSTEM_NAME: "wispsoapconverter"
     JAVA_OPTS: >-
       -Dlogback.configurationFile=/mnt/file-config/logback.xml -Dconfig.app=/mnt/file-config/config-app.conf -Duser.language=it  -Duser.country=IT -Duser.timezone=Europe/Rome -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=3000 -Dcom.sun.management.jmxremote.rmi.port=3000 -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
-    INSTANCE: DEV
-    API_CONFIG_CACHE_URL: "https://api.dev.platform.pagopa.it/api-config-cache/p/v1/cache"
-    AZURE_COSMOS_ENDPOINT: "https://pagopa-d-weu-nodo-wispconv-cosmos-account.documents.azure.com:443/"
+    INSTANCE: UAT
+    API_CONFIG_CACHE_URL: "https://api.uat.platform.pagopa.it/api-config-cache/p/v1/cache"
+    AZURE_COSMOS_ENDPOINT: "https://pagopa-u-weu-nodo-wispconv-cosmos-account.documents.azure.com:443/"
     AZURE_STORAGE_BLOB_NAME: "payloads"
     AZURE_STORAGE_TABLE_NAME: "events"
     AZURE_COSMOS_DB_NAME: "wispconverter"
     AZURE_COSMOS_TABLE_NAME: "data"
     ADAPTER_ECOMMERCE_URL: "http://adapterecommerce.pagopa.it"
-    RE_XML_LOG_ACTIVE: "false"
-    RE_JSON_LOG_ACTIVE: "true"
   secretProvider:
     create: true
     envSecrets:
-      APPLICATIONINSIGHTS_CONNECTION_STRING: "ai-d-connection-string"
+      APPLICATIONINSIGHTS_CONNECTION_STRING: "ai-u-connection-string"
       API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
       AZURE_COSMOS_KEY: "cosmosdb-wisp-converter-account-key"
       AZURE_STORAGE_CONNECTION_STRING: "wisp-converter-re-sa-connection-string-key"
     keyvault:
-      name: "pagopa-d-nodo-kv"
+      name: "pagopa-u-nodo-kv"
       tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
   envFieldRef:
     MANAGEMENT_HTTP_HOST: "status.podIP"
@@ -137,7 +135,7 @@ wispsoapconverter:
       - 9092 #micrometer
   ingress:
     create: true
-    host: "weudev.nodo.internal.dev.platform.pagopa.it"
+    host: "weuuat.nodo.internal.uat.platform.pagopa.it"
     path: /wisp-soap-converter(/|$)(.*)
     annotations:
       nginx.ingress.kubernetes.io/proxy-read-timeout: "130"

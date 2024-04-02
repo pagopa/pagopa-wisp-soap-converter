@@ -231,7 +231,7 @@ trait MainTrait {
         import akka.http.scaladsl.server.Directives._
         http
           .newServerAt(httpHost, httpPort)
-          .bind(routes.route ~ routes.soapFunction(actorProps))
+          .bind(routes.route ~ routes.infoRoute(actorProps) ~ routes.soapFunction(actorProps))
           .map(f => {
             log.info(s"Starting AkkaManagement...")
             val management: AkkaManagement = AkkaManagement(system)

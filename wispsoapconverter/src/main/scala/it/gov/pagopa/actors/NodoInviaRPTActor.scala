@@ -143,7 +143,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorPr
     pipeline
       .recoverWith(recoverFuture)
       .map(sr2 => {
-        traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc)
+        traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
         log.info(LogConstant.logEnd(actorClassId))
         replyTo ! sr2
         complete()
@@ -220,7 +220,8 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorPr
   def reCambioStato(stato: String, time: LocalDateTime, tipo: Option[String] = None): Unit = {
     reEventFunc(
       ReRequest(req.sessionId, req.testCaseId, re.get.copy(status = Some(s"${tipo.getOrElse("")}${stato}"), insertedTimestamp = time, esito = Some(EsitoRE.CAMBIO_STATO.toString)), None),
-      log
+      log,
+      ddataMap
     )
   }
 
