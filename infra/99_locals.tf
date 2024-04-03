@@ -12,7 +12,7 @@ locals {
     hostname = var.env == "prod" ? "weuprod.nodo.internal.platform.pagopa.it" : "weu${var.env}.nodo.internal.${var.env}.platform.pagopa.it"
 
     product_id            = "wisp_soap_converter"
-    display_name          = "WISPSOAPCONVERTER"
+    display_name          = "WISP Soap Converter"
     description           = "Wisp soap converter"
     subscription_required = true
     subscription_limit    = 1000

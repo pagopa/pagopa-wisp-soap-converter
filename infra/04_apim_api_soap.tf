@@ -6,8 +6,7 @@ resource "azurerm_api_management_api_version_set" "api_wispsoapconverter_api_soa
   versioning_scheme   = "Segment"
 }
 
-resource "azurerm_api_management_api" "apim_node_for_psp_api_v1_dev" {
-  count = var.env_short == "d" ? 1 : 0
+resource "azurerm_api_management_api" "api_wispsoapconverter_api_soap_v1_dev" {
 
   name                  = format("%s-wisp-soap-converter-soap-api", local.project)
   api_management_name   = local.apim.name
@@ -23,6 +22,8 @@ resource "azurerm_api_management_api" "apim_node_for_psp_api_v1_dev" {
   path         = local.wispsoapconverter_locals.soap_path
   protocols    = ["https"]
 
+  api_type  = "soap"
+
   import {
     content_format = "wsdl"
     content_value  = file("./api/wispsoapconverter/nodoPerPa/v1/NodoPerPa.wsdl")
@@ -34,8 +35,15 @@ resource "azurerm_api_management_api" "apim_node_for_psp_api_v1_dev" {
 
 }
 
-resource "azurerm_api_management_api_policy" "apim_wisp_soap_converter_policy" {
+resource "azurerm_api_management_product_api" "api_wispsoapconverter_product_api_auth" {
   api_name            = format("%s-wisp-soap-converter-soap-api", local.project)
+  product_id          = local.apim.product_id
+  api_management_name = local.apim.name
+  resource_group_name = local.apim.rg
+}
+
+resource "azurerm_api_management_api_policy" "apim_wisp_soap_converter_policy" {
+  api_name            = azurerm_api_management_api.api_wispsoapconverter_api_soap_v1_dev.name
   api_management_name = local.apim.name
   resource_group_name = local.apim.rg
   xml_content = templatefile("./api/wispsoapconverter/nodoPerPa/v1/_base_policy.xml.tpl",{
