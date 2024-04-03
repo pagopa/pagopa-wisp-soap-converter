@@ -1,4 +1,5 @@
 import com.typesafe.sbt.packager.Keys.{dockerBaseImage, dockerExposedPorts, dockerUpdateLatest, packageName}
+import com.typesafe.sbt.packager.docker.{Cmd, ExecCmd}
 import sbt.{Resolver, ThisBuild, url}
 import sbtrelease.ReleaseStateTransformations._
 import sbtsonar.SonarPlugin.autoImport.sonarProperties
@@ -278,10 +279,15 @@ lazy val `wispsoapconverter` = (project in file("wispsoapconverter"))
     buildInfoOptions += BuildInfoOption.ToJson,
     Compile / mainClass := Some("it.gov.pagopa.Main"),
     Docker / packageName := "wisp-soap-converter",
-    dockerBaseImage := "adoptopenjdk:11-jdk-hotspot",
+    dockerBaseImage := "eclipse-temurin:11.0.22_7-jre-alpine",
     dockerExposedPorts := Seq(8080, 8558, 2552),
     dockerUpdateLatest := true,
     dockerRepository := sys.props.get("docker.registry"),
+    dockerCommands ++= Seq(
+      Cmd("USER", "root"),
+      ExecCmd("RUN","apk","add","--no-cache", "bash"),
+      Cmd("USER", "demiourgos728")
+    ),
     Compile / resourceDirectories += baseDirectory.value / "fe" / "build",
     libraryDependencies ++= {
       Seq(
