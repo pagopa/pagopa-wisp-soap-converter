@@ -2,7 +2,7 @@ resource "azurerm_api_management_api_version_set" "api_wispsoapconverter_api_res
   name                = format("%s-wisp-soap-converter-rest-api", var.env_short)
   resource_group_name = local.apim.rg
   api_management_name = local.apim.name
-  display_name        = "${local.wispsoapconverter_locals.display_name} - WSC rest"
+  display_name        = "${local.wispsoapconverter_locals.display_name} - rest (INTERNAL)"
   versioning_scheme   = "Segment"
 }
 
@@ -18,7 +18,7 @@ module "apim_api_wispsoapconverter_api_v1_rest" {
   api_version    = "v1"
 
   description  = local.wispsoapconverter_locals.description
-  display_name = "${local.wispsoapconverter_locals.display_name} - rest"
+  display_name = "${local.wispsoapconverter_locals.display_name} - rest (INTERNAL)"
 
   path        = local.wispsoapconverter_locals.rest_path
   protocols   = ["https"]

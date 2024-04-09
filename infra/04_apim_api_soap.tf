@@ -2,7 +2,7 @@ resource "azurerm_api_management_api_version_set" "api_wispsoapconverter_api_soa
   name                = format("%s-wisp-soap-converter-soap-api", var.env_short)
   resource_group_name = local.apim.rg
   api_management_name = local.apim.name
-  display_name        = "${local.wispsoapconverter_locals.display_name} - WSC soap"
+  display_name        = "${local.wispsoapconverter_locals.display_name} - soap (INTERNAL)"
   versioning_scheme   = "Segment"
 }
 
@@ -18,7 +18,7 @@ resource "azurerm_api_management_api" "api_wispsoapconverter_api_soap_v1_dev" {
   revision              = "1"
 
   description  = local.wispsoapconverter_locals.description
-  display_name = "${local.wispsoapconverter_locals.display_name} - soap"
+  display_name = "${local.wispsoapconverter_locals.display_name} - soap (INTERNAL)"
   path         = local.wispsoapconverter_locals.soap_path
   protocols    = ["https"]
 
