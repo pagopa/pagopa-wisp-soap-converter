@@ -12,10 +12,10 @@ import scala.xml.XML
 object RPTUtil {
 
   def getAdapterEcommerceUri(uri: String, req:SoapRequest, int:IntestazioneCarrelloPPT): String = {
-    s"${uri}?idSession=${getUniqueKey(req, int)}"
+    s"${uri}${getUniqueKey(req, int)}"
   }
   def getAdapterEcommerceUri(uri: String, req:SoapRequest, int:IntestazionePPT): String = {
-    s"${uri}?idSession=${getUniqueKey(req, int)}"
+    s"${uri}${getUniqueKey(req, int)}"
   }
 
   def getUniqueKey(req:SoapRequest, int:IntestazioneCarrelloPPT) = {
