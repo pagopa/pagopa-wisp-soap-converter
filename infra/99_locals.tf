@@ -5,13 +5,13 @@ locals {
   apim = {
     name       = "${local.product}-apim"
     rg         = "${local.product}-api-rg"
-    product_id = "wisp_soap_converter"
+    product_id = "pagopa-wisp-converter"
     hostname = "api.${var.apim_dns_zone_prefix}.${var.external_domain}"
   }
   wispsoapconverter_locals = {
     hostname = var.env == "prod" ? "weuprod.nodo.internal.platform.pagopa.it" : "weu${var.env}.nodo.internal.${var.env}.platform.pagopa.it"
 
-    product_id            = "wisp_soap_converter"
+    product_id            = "pagopa-wisp-converter"
     display_name          = "WISP Soap Converter"
     description           = "Wisp soap converter"
     subscription_required = true
