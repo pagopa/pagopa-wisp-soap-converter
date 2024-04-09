@@ -2,8 +2,8 @@ apiVersion: v2
 name: wisp-soap-converter-chart
 description: Wisp Soap Conveter
 type: application
-version: 2.22.0
-appVersion: 0.2.1
+version: 2.23.0
+appVersion: 0.2.1-47-redirect_uri
 dependencies:
   - name: microservice-chart
     version: 3.0.0
