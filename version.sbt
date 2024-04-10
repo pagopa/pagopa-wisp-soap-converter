@@ -1,1 +1,1 @@
-ThisBuild / version := "0.2.1-47-redirect_uri"
+ThisBuild / version := "0.2.1-48-redirect_uri"
