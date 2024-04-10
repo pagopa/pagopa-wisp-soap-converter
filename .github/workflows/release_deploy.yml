@@ -135,6 +135,8 @@ jobs:
             type=ref,event=branch
             type=sha
       - name: Create Dockerfile
+        env:
+          LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
         run: |
           ./sbt -v docker:stage
       - name: Build and push
@@ -146,8 +148,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           secrets: |
             GH_TOKEN=${{ secrets.READ_PACKAGES_TOKEN }}
-        env:
-          LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
 
   deploy_aks:
     name: Deploy on AKS
