@@ -67,13 +67,12 @@ lazy val azureIdentity = "1.9.0"
 
 lazy val applicationinsightsagentName = "applicationinsights-agent"
 lazy val applicationinsightsagentVersion = "3.4.10"
-val lightbendKey = sys.env.getOrElse("LIGHTBEND_KEY","or3B1auQImlZDkYZz72Yk9XJ-iT8SIDBwsTEriVrqeymHNLc")
-val isJenkinsBuild  = sys.env.getOrElse("JENKINS_BUILD", "false").equalsIgnoreCase("true")
+val lightbendKey = sys.env("LIGHTBEND_KEY")
 
-val resolverName = if(isJenkinsBuild) { "Artifactory"} else {"lightbend-commercial-mvn"}
-val resolverAt = if(isJenkinsBuild) { "https://toolbox.sia.eu/artifactory/sbt-pagopa/"} else {s"https://repo.lightbend.com/pass/${lightbendKey}/commercial-releases"}
-val resolverIvyName = if(isJenkinsBuild) { "Artifactory-ivy" } else { "lightbend-commercial-ivy" }
-val resolverIvyURL = if (isJenkinsBuild) { "https://toolbox.sia.eu/artifactory/sbt-pagopa" } else {s"https://repo.lightbend.com/pass/${lightbendKey}/commercial-releases"}
+val resolverName = "lightbend-commercial-mvn"
+val resolverAt = s"https://repo.lightbend.com/pass/${lightbendKey}/commercial-releases"
+val resolverIvyName = "lightbend-commercial-ivy"
+val resolverIvyURL = s"https://repo.lightbend.com/pass/${lightbendKey}/commercial-releases"
 
 
 lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
