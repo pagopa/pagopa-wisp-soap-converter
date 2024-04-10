@@ -146,8 +146,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           secrets: |
             GH_TOKEN=${{ secrets.READ_PACKAGES_TOKEN }}
-          env:
-            LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
+        env:
+          LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
 
   deploy_aks:
     name: Deploy on AKS
