@@ -139,8 +139,6 @@ jobs:
           ./sbt -v docker:stage
       - name: Build and push
         uses: docker/build-push-action@v4
-        env:
-          LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
         with:
           context: ./wispsoapconverter/target/docker/stage
           push: true
@@ -148,6 +146,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           secrets: |
             GH_TOKEN=${{ secrets.READ_PACKAGES_TOKEN }}
+          env:
+            LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
 
   deploy_aks:
     name: Deploy on AKS
