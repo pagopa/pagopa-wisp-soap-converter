@@ -18,7 +18,7 @@ import org.mockito.MockitoSugar.{mock, when}
 import scalaxbmodel.nodoperpa.{IntestazioneCarrelloPPT, NodoInviaCarrelloRPT, TipoElementoListaRPT, TipoListaRPT}
 
 import java.nio.charset.{Charset, StandardCharsets}
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.UUID
 import scala.util.Try
 //@org.scalatest.Ignore
@@ -26,7 +26,7 @@ import scala.util.Try
 case class ValidationActorCarrello() extends Actor with NodoInviaCarrelloRPTResponse with CommonRptCheck with ValidateRpt with NodoLogging {
   override def receive: Receive = {
     case ("errorCarrello",sid:String)=>
-      this.actorError(sender(),SoapRequest(sid,"","","","",LocalDateTime.now(),null,false,None),None,DigitPaErrorCodes.PPT_SYSTEM_ERROR,None,None,None)
+      this.actorError(sender(),SoapRequest(sid,"","","","",Instant.now(),null,false,None),None,DigitPaErrorCodes.PPT_SYSTEM_ERROR,None,None,None)
   }
 }
 

@@ -7,6 +7,7 @@ import it.gov.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import it.gov.pagopa.common.util.ConfigUtil.ConfigData
 import scalaxbmodel.paginf.{AD, CtDatiVersamentoRPT, CtRichiestaPagamentoTelematico, OBEP, POValue}
 
+import java.time.{LocalDate, ZoneId}
 import javax.xml.datatype.XMLGregorianCalendar
 import scala.util.{Failure, Success, Try}
 
@@ -140,10 +141,9 @@ trait ValidateRpt extends NodoLogging {
   }
 
   private def dataCheck(dataOraMessaggioRichiesta: XMLGregorianCalendar, dataEsecuzionePagamento: XMLGregorianCalendar): Try[Boolean] = {
-    val dataOraMessaggioRichiestaDate =
-      dataOraMessaggioRichiesta.toGregorianCalendar.toZonedDateTime.toLocalDateTime.toLocalDate
-    val dataEsecuzionePagamentoDate =
-      dataEsecuzionePagamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime.toLocalDate
+    val zone = ZoneId.systemDefault()
+    val dataOraMessaggioRichiestaDate = LocalDate.ofInstant(dataOraMessaggioRichiesta.toGregorianCalendar.toZonedDateTime.toInstant,zone)
+    val dataEsecuzionePagamentoDate = LocalDate.ofInstant(dataEsecuzionePagamento.toGregorianCalendar.toZonedDateTime.toInstant,zone)
 
     val dataScadenzaEsecuzionePagamento = dataOraMessaggioRichiestaDate.plusDays(GIORNI_SCADENZA)
 

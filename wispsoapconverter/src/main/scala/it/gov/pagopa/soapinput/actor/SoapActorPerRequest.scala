@@ -5,7 +5,6 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.{RequestContext, RouteResult}
 import it.gov.pagopa.common.actor.FuturePerRequestActor
-import it.gov.pagopa.common.enums.EsitoRE
 import it.gov.pagopa.common.exception
 import it.gov.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import it.gov.pagopa.common.message._
@@ -13,6 +12,7 @@ import it.gov.pagopa.common.util.ConfigUtil.ConfigData
 import it.gov.pagopa.common.util.StringUtils._
 import it.gov.pagopa.common.util._
 import it.gov.pagopa.common.util.azure.Appfunction.ReEventFunc
+import it.gov.pagopa.common.util.azure.cosmos.{CallType, CategoriaEvento, Componente, Esito, SottoTipoEvento}
 import it.gov.pagopa.commonxml.XmlEnum
 import it.gov.pagopa.exception.SoapRouterException
 import it.gov.pagopa.soapinput.message.SoapRouterRequest
@@ -55,7 +55,7 @@ class SoapActorPerRequest(
   }
 
   def reExtra(message: SoapRouterRequest): ReExtra =
-    ReExtra(uri = message.uri, headers = message.headers.getOrElse(Nil), httpMethod = Some(HttpMethods.POST.toString()), callRemoteAddress = message.callRemoteAddress, soapProtocol = true)
+    ReExtra(callType = Some(CallType.SERVER),uri = message.uri, headers = message.headers.getOrElse(Nil), httpMethod = Some(HttpMethods.POST.toString()), callRemoteAddress = message.callRemoteAddress, soapProtocol = true)
 
   def traceRequest(message: SoapRouterRequest, reEventFunc: ReEventFunc, ddataMap: ConfigData): Unit = {
     Util.logPayload(log, Some(message.payload))
@@ -63,10 +63,10 @@ class SoapActorPerRequest(
       sessionId = message.sessionId,
       testCaseId = message.testCaseId,
       re = Re(
-        componente = Componente.FESP.toString,
-        categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
-        sottoTipoEvento = SottoTipoEvento.REQ.toString,
-        esito = Some(EsitoRE.RICEVUTA.toString),
+        componente = Componente.WISP_SOAP_CONVERTER,
+        categoriaEvento = CategoriaEvento.INTERFACCIA,
+        sottoTipoEvento = SottoTipoEvento.REQ,
+        esito = Esito.RICEVUTA,
         sessionId = Some(message.sessionId),
         payload = Some(message.payload.getUtf8Bytes),
         insertedTimestamp = message.timestamp,
@@ -96,20 +96,20 @@ class SoapActorPerRequest(
             re = sres.re
               .map(
                 _.copy(
-                  componente = Componente.FESP.toString,
-                  categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
-                  sottoTipoEvento = SottoTipoEvento.RESP.toString,
-                  esito = Some(EsitoRE.INVIATA.toString),
+                  componente = Componente.WISP_SOAP_CONVERTER,
+                  categoriaEvento = CategoriaEvento.INTERFACCIA,
+                  sottoTipoEvento = SottoTipoEvento.RESP,
+                  esito = Esito.INVIATA,
                   payload = Some(sres.payload.getUtf8Bytes),
                   insertedTimestamp = now
                 )
               )
               .getOrElse(
                 Re(
-                  componente = Componente.FESP.toString,
-                  categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
-                  sottoTipoEvento = SottoTipoEvento.RESP.toString,
-                  esito = Some(EsitoRE.INVIATA.toString),
+                  componente = Componente.WISP_SOAP_CONVERTER,
+                  categoriaEvento = CategoriaEvento.INTERFACCIA,
+                  sottoTipoEvento = SottoTipoEvento.RESP,
+                  esito = Esito.INVIATA,
                   payload = Some(sres.payload.getUtf8Bytes),
                   insertedTimestamp = now,
                   sessionId = Some(sres.sessionId),
@@ -117,7 +117,7 @@ class SoapActorPerRequest(
                   erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
                 )
               ),
-            reExtra = Some(ReExtra(statusCode = Some(bundleResponse.statusCode), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
+            reExtra = Some(ReExtra(callType = Some(CallType.SERVER),statusCode = Some(bundleResponse.statusCode), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
           )
 
           Util.logPayload(log, Some(sres.payload))
@@ -200,15 +200,15 @@ class SoapActorPerRequest(
           sessionId = message.sessionId,
           testCaseId = message.testCaseId,
           re = Re(
-            componente = Componente.FESP.toString,
-            categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
-            sottoTipoEvento = SottoTipoEvento.RESP.toString,
-            esito = Some(EsitoRE.INVIATA_KO.toString),
+            componente = Componente.WISP_SOAP_CONVERTER,
+            categoriaEvento = CategoriaEvento.INTERFACCIA,
+            sottoTipoEvento = SottoTipoEvento.RESP,
+            esito = Esito.INVIATA_KO,
             sessionId = Some(message.sessionId),
             payload = Some(payload.getUtf8Bytes),
             insertedTimestamp = now
           ),
-          reExtra = Some(ReExtra(statusCode = Some(sre.statusCode), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
+          reExtra = Some(ReExtra(callType = Some(CallType.SERVER),statusCode = Some(sre.statusCode), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
         )
         actorProps.reEventFunc(reRequestResp, log, actorProps.ddataMap)
 
@@ -228,15 +228,15 @@ class SoapActorPerRequest(
           sessionId = message.sessionId,
           testCaseId = message.testCaseId,
           re = Re(
-            componente = Componente.FESP.toString,
-            categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
-            sottoTipoEvento = SottoTipoEvento.RESP.toString,
-            esito = Some(EsitoRE.INVIATA_KO.toString),
+            componente = Componente.WISP_SOAP_CONVERTER,
+            categoriaEvento = CategoriaEvento.INTERFACCIA,
+            sottoTipoEvento = SottoTipoEvento.RESP,
+            esito = Esito.INVIATA_KO,
             sessionId = Some(message.sessionId),
             payload = Some(payload.getUtf8Bytes),
             insertedTimestamp = now
           ),
-          reExtra = Some(ReExtra(statusCode = Some(StatusCodes.InternalServerError.intValue), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
+          reExtra = Some(ReExtra(callType = Some(CallType.SERVER),statusCode = Some(StatusCodes.InternalServerError.intValue), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
         )
         actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
         complete(createHttpResponse(StatusCodes.InternalServerError.intValue, payload, message.sessionId), Constant.KeyName.SOAP_INPUT)

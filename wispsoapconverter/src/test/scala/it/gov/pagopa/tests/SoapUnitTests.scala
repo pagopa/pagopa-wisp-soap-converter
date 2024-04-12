@@ -13,7 +13,7 @@ import org.mockito.MockitoSugar.mock
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.UUID
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Future, Promise}
@@ -43,7 +43,7 @@ class SoapUnitTests() extends BaseUnitTest {
             props)
         )
       val sessionid = UUID.randomUUID().toString
-      val req = SoapRouterRequest(sessionid, """{"aa":"bb"}""",LocalDateTime.now(),None,None,None,None,None,None,Some("NodoInviaRPT"))
+      val req = SoapRouterRequest(sessionid, """{"aa":"bb"}""",Instant.now(),None,None,None,None,None,None,Some("NodoInviaRPT"))
       soapActor ! req
       await(promise.future.mapTo[RouteResult.Complete].map(res => {
         log.info("completed")
@@ -68,7 +68,7 @@ class SoapUnitTests() extends BaseUnitTest {
       val ccp = s"${RandomStringUtils.randomNumeric(15)}"
       val sessionid = UUID.randomUUID().toString
       val payload = nodoInviaRPTPayload(iuv,ccp,false,stazione = None)
-      val req = SoapRouterRequest(sessionid, payload,LocalDateTime.now(),None,None,None,None,None,None,Some("nodoInviaRPT"))
+      val req = SoapRouterRequest(sessionid, payload,Instant.now(),None,None,None,None,None,None,Some("nodoInviaRPT"))
       soapActor ! req
       await(
         for{
@@ -98,7 +98,7 @@ class SoapUnitTests() extends BaseUnitTest {
       val ccp = s"${RandomStringUtils.randomNumeric(15)}"
       val sessionid = UUID.randomUUID().toString
       val payload = nodoInviaRPTPayload(iuv,ccp,false,stazione = None)
-      val req = SoapRouterRequest(sessionid, payload,LocalDateTime.now(),None,None,None,None,None,None,Some("nodoInviaRPT"))
+      val req = SoapRouterRequest(sessionid, payload,Instant.now(),None,None,None,None,None,None,Some("nodoInviaRPT"))
       soapActor ! req
       await(
         for{

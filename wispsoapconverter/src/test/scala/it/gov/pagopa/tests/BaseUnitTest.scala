@@ -3,8 +3,6 @@ package it.gov.pagopa.tests
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.event.Logging
 import akka.testkit.{ImplicitSender, TestKit}
-import com.azure.data.tables.TableClient
-import com.azure.storage.blob.{BlobClient, BlobContainerClient}
 import com.typesafe.config.ConfigFactory
 import it.gov.pagopa.ActorProps
 import it.gov.pagopa.actors.{NodoInviaCarrelloRPTActorPerRequest, NodoInviaRPTActorPerRequest}
@@ -12,7 +10,7 @@ import it.gov.pagopa.common.message._
 import it.gov.pagopa.common.repo.CosmosRepository
 import it.gov.pagopa.common.util.ConfigUtil.ConfigData
 import it.gov.pagopa.common.util._
-import it.gov.pagopa.common.util.azure.storage.StorageBuilder
+import it.gov.pagopa.common.util.azure.cosmos.CosmosBuilder
 import it.gov.pagopa.common.util.xml.XmlUtil
 import it.gov.pagopa.commonxml.XmlEnum
 import it.gov.pagopa.tests.testutil._
@@ -24,7 +22,7 @@ import org.scalatest.matchers.should
 import org.scalatest.wordspec.AnyWordSpecLike
 import scalaxbmodel.nodoperpa.{CP, NodoInviaCarrelloRPTRisposta, NodoInviaRPTRisposta}
 
-import java.time.LocalDateTime
+import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
@@ -65,7 +63,7 @@ abstract class BaseUnitTest()
           timeout=30
         }
         adapterEcommerce{
-          url="http://www.adapterEcommerce.pagopa.it"
+          url="http://www.adapterEcommerce.pagopa.it?sessionId="
         }
     """
       val system = ActorSystem("testSystem", ConfigFactory.parseString(config))
@@ -92,15 +90,15 @@ abstract class BaseUnitTest()
 //    })
 //  }
 
-  val storageBuilder = mock[StorageBuilder]
-  val tableClient = mock[TableClient]
-  val blobContainerClient = mock[BlobContainerClient]
-  val blobClient = mock[BlobClient]
-  when(blobContainerClient.getBlobClient(any())).thenReturn(blobClient)
-  when(storageBuilder.getClients(any())).thenReturn((tableClient,blobContainerClient))
-  when(storageBuilder.build()).thenCallRealMethod()
+  val storageBuilder = mock[CosmosBuilder]
+//  val tableClient = mock[TableClient]
+//  val blobContainerClient = mock[BlobContainerClient]
+//  val blobClient = mock[BlobClient]
+//  when(blobContainerClient.getBlobClient(any())).thenReturn(blobClient)
+//  when(storageBuilder.getClients(any())).thenReturn((tableClient,blobContainerClient))
+//  when(storageBuilder.build()).thenCallRealMethod()
 
-  val props = ActorProps(null, null, Map(), storageBuilder.build(), "", TestItems.ddataMap)
+  val props = ActorProps(null, null, Map(), (_,_,_)=>Future.successful(()), "", TestItems.ddataMap)
 
   val singletesttimeout: FiniteDuration = 1000.seconds
 
@@ -108,7 +106,7 @@ abstract class BaseUnitTest()
     SpecsUtils.loadTestXML(s"$testfile.xml")
   }
 
-  def genericPayload(primitiva: String, iuv: String, ccp: String, date: LocalDateTime) = {
+  def genericPayload(primitiva: String, iuv: String, ccp: String, date: Instant) = {
     val data = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val dataora = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
 

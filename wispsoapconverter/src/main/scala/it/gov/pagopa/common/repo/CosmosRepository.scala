@@ -8,10 +8,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CosmosRepository(config:Config, log: AppLogger)(implicit ec: ExecutionContext) {
 
-  lazy val cosmosEndpoint = config.getString("azure-cosmos.endpoint")
-  lazy val cosmosKey = config.getString("azure-cosmos.key")
-  lazy val cosmosDbName = config.getString("azure-cosmos.db-name")
-  lazy val cosmosTableName = config.getString("azure-cosmos.table-name")
+  lazy val cosmosEndpoint = config.getString("azure-cosmos-data.endpoint")
+  lazy val cosmosKey = config.getString("azure-cosmos-data.key")
+  lazy val cosmosDbName = config.getString("azure-cosmos-data.db-name")
+  lazy val cosmosTableName = config.getString("azure-cosmos-data.table-name")
   lazy val client = new CosmosClientBuilder().endpoint(cosmosEndpoint).key(cosmosKey).buildClient
 
 //  def query(query: SqlQuerySpec) = {

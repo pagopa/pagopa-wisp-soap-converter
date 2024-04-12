@@ -14,7 +14,7 @@ import it.gov.pagopa.tests.testutil.TestItems
 import scalaxbmodel.nodoperpa.{POValue, TipoElementoListaRPT}
 import scalaxbmodel.paginf.{CtDatiVersamentoRPT, CtRichiestaPagamentoTelematico, CtSoggettoPagatoreType, CtSoggettoVersante}
 
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.UUID
 import scala.util.Try
 import scala.xml.XML
@@ -35,16 +35,16 @@ class FakeInviaRPTActor(override val cosmosRepository:CosmosRepository,override 
     case ("ibanChecks",data:ConfigData,ct:CtDatiVersamentoRPT,idDominio:String)=>
       sender() ! this.ibanChecks(data,ct,idDominio)
     case ("errorRpt",sessionid:String)=>
-      req = SoapRequest(sessionid,"","","","",LocalDateTime.now(),null,false,None)
+      req = SoapRequest(sessionid,"","","","",Instant.now(),null,false,None)
       replyTo = sender()
       this.actorError(DigitPaErrorCodes.PPT_DOMINIO_SCONOSCIUTO)
     case ("recoverGenericError",sessionid:String) =>
-      req = SoapRequest(sessionid,"","","","",LocalDateTime.now(),null,false,None)
+      req = SoapRequest(sessionid,"","","","",Instant.now(),null,false,None)
       val replyto = sender()
       val x = this.recoverGenericError.apply(new IllegalArgumentException("test error"))
       x.map(s => replyto ! s)
     case ("recoverFuture",sessionid:String,th:Throwable) =>
-      req = SoapRequest(sessionid,"","","","",LocalDateTime.now(),null,false,None)
+      req = SoapRequest(sessionid,"","","","",Instant.now(),null,false,None)
       val replyto = sender()
       val x = this.recoverFuture.apply(th)
       x.map(s => replyto ! s)
@@ -595,7 +595,7 @@ class InviaRPTUnitTests() extends BaseUnitTest {
           assert(r.fault.isEmpty)
           assert(r.redirect.get == 1)
           assert(r.url.isDefined)
-          assert(r.url.get.contains(s"?idSession=${TestItems.testIntPA}_"))
+          assert(r.url.get.contains(s"?sessionId=${TestItems.testIntPA}_"))
         }
       )
     }
@@ -615,7 +615,7 @@ class InviaRPTUnitTests() extends BaseUnitTest {
           assert(r.fault.isEmpty)
           assert(r.redirect.get == 1)
           assert(r.url.isDefined)
-          assert(r.url.get.contains(s"?idSession=${TestItems.testIntPA}_"))
+          assert(r.url.get.contains(s"?sessionId=${TestItems.testIntPA}_"))
         }
       )
     }

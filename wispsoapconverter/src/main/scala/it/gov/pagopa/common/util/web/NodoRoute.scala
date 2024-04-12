@@ -13,7 +13,7 @@ import it.gov.pagopa.soapinput.actor.SoapActorPerRequest
 import it.gov.pagopa.soapinput.message.SoapRouterRequest
 import org.slf4j.MDC
 
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration._
@@ -99,7 +99,7 @@ case class NodoRoute(
               extractClientIP { remoteAddress =>
                   log.debug(s"Request headers:\n${req.headers.map(s => s"${s.name()} => ${s.value()}").mkString("\n")}")
                   optionalHeaderValueByName("SOAPAction") { soapActionHeader =>
-                    log.info(s"Ricevuta request [${soapActionHeader.getOrElse("No SOAPAction")}] @ ${LocalDateTime.now()}")
+                    log.info(s"Ricevuta request [${soapActionHeader.getOrElse("No SOAPAction")}] @ ${Instant.now()}")
                     optionalHeaderValueByName("testCaseId") { headerTestCaseId =>
                       extractRequestContext { ctx =>
                         entity(as[ByteString]) { bs =>

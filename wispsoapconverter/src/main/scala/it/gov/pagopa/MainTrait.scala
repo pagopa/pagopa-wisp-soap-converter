@@ -17,7 +17,7 @@ import it.gov.pagopa.common.repo.CosmosRepository
 import it.gov.pagopa.common.util.ConfigUtil.ConfigData
 import it.gov.pagopa.common.util._
 import it.gov.pagopa.common.util.azure.Appfunction.ReEventFunc
-import it.gov.pagopa.common.util.azure.storage.StorageBuilder
+import it.gov.pagopa.common.util.azure.cosmos.CosmosBuilder
 import it.gov.pagopa.common.util.web.NodoRoute
 import org.slf4j.MDC
 import scalaz.BuildInfo
@@ -38,7 +38,7 @@ trait MainTrait {
   def getActorSystem = _system
 
   def cosmosRepository = new CosmosRepository(_config, _log)(_ec)
-  def storageBuilder: StorageBuilder = new StorageBuilder()
+  def storageBuilder: CosmosBuilder = new CosmosBuilder()
 
   def main(args: Array[String]): Unit = {
     MDC.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)

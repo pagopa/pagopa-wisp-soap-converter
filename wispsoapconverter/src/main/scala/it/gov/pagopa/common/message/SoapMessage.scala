@@ -1,6 +1,6 @@
 package it.gov.pagopa.common.message
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 case class SoapRequest(
     override val sessionId: String,
@@ -8,7 +8,7 @@ case class SoapRequest(
     callRemoteAddress: String,
     primitive: String,
     sender: String,
-    timestamp: LocalDateTime,
+    timestamp: Instant,
     reExtra: ReExtra,
     idempotency: Boolean,
     override val testCaseId: Option[String] = None

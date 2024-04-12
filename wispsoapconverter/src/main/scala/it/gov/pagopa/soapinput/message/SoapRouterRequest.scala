@@ -2,12 +2,12 @@ package it.gov.pagopa.soapinput.message
 
 import it.gov.pagopa.common.message.BaseMessage
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 case class SoapRouterRequest(
     override val sessionId: String,
     payload: String,
-    timestamp: LocalDateTime,
+    timestamp: Instant,
     override val testCaseId: Option[String] = None,
     uri: Option[String] = None,
     headers: Option[Seq[(String, String)]] = None,

@@ -2,7 +2,6 @@ package it.gov.pagopa.actors
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import com.nimbusds.jose.util.StandardCharset
 import it.gov.pagopa.ActorProps
 import it.gov.pagopa.actors.flow.CarrelloFlow
 import it.gov.pagopa.actors.response.NodoInviaCarrelloRPTResponse
@@ -13,14 +12,16 @@ import it.gov.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import it.gov.pagopa.common.message._
 import it.gov.pagopa.common.repo.{CosmosPrimitive, CosmosRepository}
 import it.gov.pagopa.common.util._
+import it.gov.pagopa.common.util.azure.cosmos.{CategoriaEvento, Componente, Esito, SottoTipoEvento}
 import it.gov.pagopa.common.util.xml.XsdValid
 import it.gov.pagopa.commonxml.XmlEnum
 import it.gov.pagopa.exception.{CarrelloRptFaultBeanException, WorkflowExceptionErrorCodes}
 import org.slf4j.MDC
 import scalaxbmodel.nodoperpa.{IntestazioneCarrelloPPT, NodoInviaCarrelloRPT, NodoInviaCarrelloRPTRisposta}
 import scalaxbmodel.paginf.CtRichiestaPagamentoTelematico
+import sun.nio.cs.UTF_8
 
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.Base64
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
@@ -51,19 +52,19 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
   var rptKeys: Seq[RPTKey] = _
   var reRequest: ReRequest = _
   var re: Option[Re] = None
-  var insertTime: LocalDateTime = _
+  var insertTime: Instant = _
 
   override def actorError(dpe: DigitPaException): Unit = {
     actorError(replyTo, req, Option(idCanale), dpe, Option(idCarrello), Option(rptKeys), re)
   }
 
   def saveCarrello(
-      now: LocalDateTime,
+      now: Instant,
       intestazioneCarrelloPPT: IntestazioneCarrelloPPT,
   ): Future[Int] = {
     log.debug("Salvataggio messaggio Carrello")
     val id = RPTUtil.getUniqueKey(req,intestazioneCarrelloPPT)
-    val zipped = Util.zipContent(req.payload.getBytes(StandardCharset.UTF_8))
+    val zipped = Util.zipContent(req.payload)
     cosmosRepository.save(CosmosPrimitive(re.get.insertedTimestamp.toString.substring(0,10),id,actorClassId,Base64.getEncoder.encodeToString(zipped)))
   }
 
@@ -135,6 +136,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
                 ccp = Some(rpt.datiVersamento.codiceContestoPagamento),
                 idDominio = Some(rpt.dominio.identificativoDominio),
                 status = Some(StatoRPTEnum.RPT_PARCHEGGIATA_NODO.toString),
+                esito = Esito.CAMBIO_STATO,
                 insertedTimestamp = now
               )
               reEventFunc(reRequest.copy(re = reCambioStatorpt), log, ddataMap)
@@ -156,14 +158,14 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
 
     re = Some(
       Re(
-        componente = Componente.FESP.toString,
-        categoriaEvento = CategoriaEvento.INTERNO.toString,
+        componente = Componente.WISP_SOAP_CONVERTER,
+        categoriaEvento = CategoriaEvento.INTERNO,
         sessionId = Some(req.sessionId),
         sessionIdOriginal = Some(req.sessionId),
         payload = None,
-        esito = Some(EsitoRE.CAMBIO_STATO.toString),
+        esito = Esito.CAMBIO_STATO,
         tipoEvento = Some(actorClassId),
-        sottoTipoEvento = SottoTipoEvento.INTERN.toString,
+        sottoTipoEvento = SottoTipoEvento.INTERN,
         insertedTimestamp = soapRequest.timestamp,
         erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
         businessProcess = Some(actorClassId),
