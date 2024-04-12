@@ -7,6 +7,7 @@ import com.typesafe.config.Config
 import it.gov.pagopa.common.message.ReRequest
 import it.gov.pagopa.common.util.ConfigUtil.ConfigData
 import it.gov.pagopa.common.util._
+import it.gov.pagopa.common.util.azure.Appfunction
 import it.gov.pagopa.common.util.azure.Appfunction.{ReEventFunc, defaultOperation}
 
 import java.io.ByteArrayOutputStream
@@ -69,21 +70,23 @@ case class CosmosBuilder() {
   def reRequestToReEvent(request: ReRequest): ReEventEntity = {
     val compressedpayload = request.re.payload.map(compress)
     val base64payload = compressedpayload.map(cp=>Base64.getEncoder.encodeToString(cp))
+
+    val fault: Option[(String, Option[String], Option[String])] = request.re.payload.flatMap(p=>Appfunction.getFaultFromXml(new String(p, Constant.UTF_8)))
     ReEventEntity(
       request.re.uniqueId,
       request.re.insertedTimestamp.toString.substring(0,10),
+      null,
       request.sessionId,
-      "operationId",
       null,
       request.re.componente.toString,
       request.re.insertedTimestamp,
       request.re.categoriaEvento.toString,
       request.re.sottoTipoEvento.toString,
       request.reExtra.flatMap(_.callType).map(_.toString).getOrElse(null),
-      null,
-      null,
-      null,
-      null,
+      request.re.fruitore.getOrElse(null),
+      request.re.fruitoreDescr.getOrElse(null),
+      request.re.erogatore.getOrElse(null),
+      request.re.erogatoreDescr.getOrElse(null),
       request.re.esito.toString,
       request.reExtra.flatMap(_.httpMethod).getOrElse(null),
       request.reExtra.flatMap(_.uri).getOrElse(null),
@@ -94,10 +97,10 @@ case class CosmosBuilder() {
       base64payload.getOrElse(null), //comprimere
       base64payload.map(_.length).map(d=>new java.lang.Integer(d)).getOrElse(null),
       request.re.businessProcess.get,
-      null,
-      null,
-      null,
-      null,
+      if(fault.isDefined)"Failed" else "Success",
+      fault.map(_._1).getOrElse(null),
+      fault.flatMap(_._2).getOrElse(null),
+      fault.flatMap(_._3).getOrElse(null),
       request.re.idDominio.getOrElse(null),
       request.re.iuv.getOrElse(null),
       request.re.ccp.getOrElse(null),
@@ -113,7 +116,7 @@ case class CosmosBuilder() {
       request.re.noticeNumber.getOrElse(null),
       request.re.creditorReferenceId.getOrElse(null),
       request.re.paymentToken.getOrElse(null),
-      null,
+      request.sessionId,
       request.re.standIn.map(d=>new java.lang.Boolean(d)).getOrElse(null),
     )
   }
