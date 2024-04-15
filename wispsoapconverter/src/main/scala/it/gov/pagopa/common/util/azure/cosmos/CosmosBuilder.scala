@@ -39,7 +39,6 @@ case class CosmosBuilder() {
     val reJsonLog = Try(system.settings.config.getBoolean("reJsonLog")).getOrElse(false)
 
     (request: ReRequest, log: AppLogger, data: ConfigData) => {
-      val x = ""
       Future.sequence(
         Seq(
           Future(defaultOperation(request, log, reXmlLog, reJsonLog, data)),
