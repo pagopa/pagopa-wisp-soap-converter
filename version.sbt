@@ -1,1 +1,1 @@
-ThisBuild / version := "0.2.1-56-redirect_uri"
+ThisBuild / version := "0.2.1-58-allineamento_events"
