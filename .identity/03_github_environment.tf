@@ -24,7 +24,6 @@ locals {
     "CD_CLIENT_ID" : data.azurerm_user_assigned_identity.identity_cd.client_id,
     "TENANT_ID" : data.azurerm_client_config.current.tenant_id,
     "SUBSCRIPTION_ID" : data.azurerm_subscription.current.subscription_id,
-    "LIGHTBEND_KEY" : data.azurerm_key_vault_secret.key_vault_lightbend_key.value,
   }
   env_variables = {
     "CONTAINER_APP_ENVIRONMENT_NAME" : local.container_app_environment.name,
