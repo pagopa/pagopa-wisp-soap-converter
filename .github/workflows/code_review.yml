@@ -43,6 +43,8 @@ jobs:
           java-version: 17
           cache: sbt
       - name: Build and Test
+        env:
+          LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
         run: |
           sbt "project wispsoapconverter" \
           -Dsonar.organization="pagopa" \
