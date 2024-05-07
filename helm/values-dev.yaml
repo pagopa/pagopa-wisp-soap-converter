@@ -2,7 +2,7 @@ microservice-chart: &microservice-chart
   namespace: "nodo"
   image:
     repository: ghcr.io/pagopa/pagopa-wisp-soap-converter
-    tag: 0.2.1
+    tag: 0.2.1-58-allineamento_events
   canaryDelivery:
     create: false
 wispsoapconverter:
@@ -83,8 +83,9 @@ wispsoapconverter:
     AZURE_STORAGE_BLOB_NAME: "payloads"
     AZURE_STORAGE_TABLE_NAME: "events"
     AZURE_COSMOS_DB_NAME: "wispconverter"
-    AZURE_COSMOS_TABLE_NAME: "data"
-    ADAPTER_ECOMMERCE_URL: "http://adapterecommerce.pagopa.it"
+    AZURE_COSMOS_TABLE_NAME_DATA: "data"
+    AZURE_COSMOS_TABLE_NAME_EVENTS: "re"
+    ADAPTER_ECOMMERCE_URL: "https://dev.wisp2.pagopa.it/wisp-converter/redirect/api/v1/payments?sessionId="
     RE_XML_LOG_ACTIVE: "false"
     RE_JSON_LOG_ACTIVE: "true"
   secretProvider:

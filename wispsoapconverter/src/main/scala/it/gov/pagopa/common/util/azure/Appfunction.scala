@@ -1,13 +1,13 @@
 package it.gov.pagopa.common.util.azure
 
-import it.gov.pagopa.common.enums.EsitoRE
 import it.gov.pagopa.common.message._
 import it.gov.pagopa.common.util.ConfigUtil.ConfigData
+import it.gov.pagopa.common.util.azure.cosmos.{CategoriaEvento, Esito, SottoTipoEvento}
 import it.gov.pagopa.common.util.{AppLogger, Constant, Util}
 import org.slf4j.MDC
 import spray.json.JsString
 
-import java.time.LocalDateTime
+import java.time.{Instant, ZoneId}
 import java.time.format.DateTimeFormatter
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -15,9 +15,9 @@ import scala.util.Try
 object Appfunction {
 
   val sessionId = "session-id"
-  private val reFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+  private val reFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneId.systemDefault() );
 
-  def formatDate(date: LocalDateTime): String = {
+  def formatDate(date: Instant): String = {
     reFormat.format(date)
   }
   type ReEventFunc = (ReRequest, AppLogger, ConfigData) => Future[Unit]
@@ -93,23 +93,21 @@ object Appfunction {
 
   def fmtMessage(re: Re, reExtra: Option[ReExtra]): Try[String] = {
     Try({
-      if (re.categoriaEvento == CategoriaEvento.INTERFACCIA.toString) {
-        val mod = if (re.esito.isDefined) {
-          if ((re.esito.contains(EsitoRE.RICEVUTA.toString) || re.esito.contains(EsitoRE.RICEVUTA_KO.toString)) && re.sottoTipoEvento == SottoTipoEvento.REQ.toString) {
-            s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito.getOrElse("n.a")}] DETTAGLIO[Il nodo ha ricevuto un messaggio]"
-          } else if ((re.esito.contains(EsitoRE.INVIATA.toString) || re.esito.contains(EsitoRE.INVIATA_KO.toString)) && re.sottoTipoEvento == SottoTipoEvento.RESP.toString) {
-            s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito.getOrElse("n.a")}] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]"
-          } else if ((re.esito.contains(EsitoRE.INVIATA.toString) || re.esito.contains(EsitoRE.INVIATA_KO.toString)) && re.sottoTipoEvento == SottoTipoEvento.REQ.toString) {
-            s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito.getOrElse("n.a")}] DETTAGLIO[Il nodo ha inviato un messaggio]"
-          } else if ((re.esito.contains(EsitoRE.RICEVUTA.toString) || re.esito.contains(EsitoRE.RICEVUTA_KO.toString)) && re.sottoTipoEvento == SottoTipoEvento.RESP.toString) {
-            s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito.getOrElse("n.a")}] DETTAGLIO[Il nodo ha ricevuto la risposta del messaggio inviato]"
+      if (re.categoriaEvento == CategoriaEvento.INTERFACCIA) {
+        val mod = {
+          if ((re.esito == Esito.RICEVUTA || re.esito == Esito.RICEVUTA_KO) && re.sottoTipoEvento == SottoTipoEvento.REQ) {
+            s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito}] DETTAGLIO[Il nodo ha ricevuto un messaggio]"
+          } else if ((re.esito == Esito.INVIATA || re.esito == Esito.INVIATA_KO) && re.sottoTipoEvento == SottoTipoEvento.RESP) {
+            s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito}] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]"
+          } else if ((re.esito == Esito.INVIATA || re.esito == Esito.INVIATA_KO) && re.sottoTipoEvento == SottoTipoEvento.REQ) {
+            s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito}] DETTAGLIO[Il nodo ha inviato un messaggio]"
+          } else if ((re.esito == Esito.RICEVUTA || re.esito == Esito.RICEVUTA_KO) && re.sottoTipoEvento == SottoTipoEvento.RESP) {
+            s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito}] DETTAGLIO[Il nodo ha ricevuto la risposta del messaggio inviato]"
           } else {
-            s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito.getOrElse("n.a")}] DETTAGLIO[Tipo di REQ/RESP non identificata per sotto tipo evento non valido]"
+            s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito}] DETTAGLIO[Tipo di REQ/RESP non identificata per sotto tipo evento non valido]"
           }
-        } else {
-          s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[n.a] DETTAGLIO[Tipo di REQ/RESP non identificata per esito mancante]"
         }
-        val elapsed = if (re.sottoTipoEvento == SottoTipoEvento.RESP.toString) {
+        val elapsed = if (re.sottoTipoEvento == SottoTipoEvento.RESP) {
           s"${param(reExtra.flatMap(a => a.elapsed.map(_.toString)))}"
         } else {
           s"[${Constant.UNKNOWN}]"
@@ -125,7 +123,7 @@ object Appfunction {
         }))
         }${re.standIn.map(si => s"\nstandin: [$si]").getOrElse("")}""".stripMargin
       } else {
-        s"Re Request => TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] ESITO[${re.esito.getOrElse("ESITO non presente")}] STATO[${re.status.getOrElse("STATO non presente")}]"
+        s"Re Request => TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] ESITO[${re.esito}] STATO[${re.status.getOrElse("STATO non presente")}]"
       }
     })
   }
@@ -133,18 +131,14 @@ object Appfunction {
   def fmtMessageJson(re: Re, reExtra: Option[ReExtra], data: ConfigData): Try[String] = {
     Try({
       val nd = "nd"
-      val (isServerRequest, isServerResponse, caller, httpType, subject, subjectDescr) = if (re.categoriaEvento == CategoriaEvento.INTERFACCIA.toString) {
-        if (re.esito.isDefined) {
-          if ((re.esito.contains(EsitoRE.RICEVUTA.toString) || re.esito.contains(EsitoRE.RICEVUTA_KO.toString)) && re.sottoTipoEvento == SottoTipoEvento.REQ.toString) {
+      val (isServerRequest, isServerResponse, caller, httpType, subject, subjectDescr) = if (re.categoriaEvento == CategoriaEvento.INTERFACCIA) {
+          if ((re.esito == Esito.RICEVUTA || re.esito == Esito.RICEVUTA_KO) && re.sottoTipoEvento == SottoTipoEvento.REQ) {
             (true, false, Some(Constant.SERVER), Some(Constant.REQUEST), Some(re.fruitore.getOrElse(nd)), Some(re.fruitoreDescr.getOrElse(nd)))
-          } else if ((re.esito.contains(EsitoRE.INVIATA.toString) || re.esito.contains(EsitoRE.INVIATA_KO.toString)) && re.sottoTipoEvento == SottoTipoEvento.RESP.toString) {
+          } else if ((re.esito == Esito.INVIATA || re.esito == Esito.INVIATA_KO) && re.sottoTipoEvento == SottoTipoEvento.RESP) {
             (false, true, Some(Constant.SERVER), Some(Constant.RESPONSE), Some(re.fruitore.getOrElse(nd)), Some(re.fruitoreDescr.getOrElse(nd)))
           } else {
             (false, false, Some(nd), Some(nd), Some(nd), Some(nd))
           }
-        } else {
-          (false, false, Some(nd), Some(nd), Some(nd), Some(nd))
-        }
       } else {
         (false, false, None, None, None, None)
       }
@@ -169,8 +163,7 @@ object Appfunction {
       val soapAction = reExtra.flatMap(h => h.headers.find(_._1 == "SOAPAction").map(_._2))
       val businessProcess = re.businessProcess
       val tipoEvento = re.tipoEvento
-      val internalMessage = if (re.categoriaEvento == CategoriaEvento.INTERFACCIA.toString) {
-        if (re.esito.isDefined) {
+      val internalMessage = if (re.categoriaEvento == CategoriaEvento.INTERFACCIA) {
           if (isServerRequest) {
             s"${caller.getOrElse("")} --> ${httpType.getOrElse("")}: messaggio da [subject:${subject.getOrElse("")}]"
           } else if (isServerResponse) {
@@ -178,9 +171,6 @@ object Appfunction {
           }  else {
             "Tipo di REQ/RESP non identificata per sotto tipo evento non valido"
           }
-        } else {
-          "Tipo di REQ/RESP non identificata per esito mancante"
-        }
       } else {
         s"Cambio stato in [${re.status.getOrElse(nd)}]"
       }

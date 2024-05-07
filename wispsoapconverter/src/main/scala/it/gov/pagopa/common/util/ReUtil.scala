@@ -1,10 +1,10 @@
 package it.gov.pagopa.common.util
 
 import it.gov.pagopa.common.actor.NodoLogging
-import it.gov.pagopa.common.enums.EsitoRE
 import it.gov.pagopa.common.message._
 import it.gov.pagopa.common.util.ConfigUtil.ConfigData
 import it.gov.pagopa.common.util.azure.Appfunction.ReEventFunc
+import it.gov.pagopa.common.util.azure.cosmos.{CategoriaEvento, Esito, SottoTipoEvento}
 
 trait ReUtil { this: NodoLogging =>
 
@@ -17,9 +17,9 @@ trait ReUtil { this: NodoLogging =>
       re = re.copy(
         insertedTimestamp = message.timestamp,
         payload = Some(message.payload.getUtf8Bytes),
-        categoriaEvento = CategoriaEvento.INTERFACCIA.toString,
-        sottoTipoEvento = SottoTipoEvento.REQ.toString,
-        esito = Some(EsitoRE.RICEVUTA.toString),
+        categoriaEvento = CategoriaEvento.INTERFACCIA,
+        sottoTipoEvento = SottoTipoEvento.REQ,
+        esito = Esito.RICEVUTA,
         businessProcess = Some(message.primitive)
       ),
       reExtra = Some(reExtra)

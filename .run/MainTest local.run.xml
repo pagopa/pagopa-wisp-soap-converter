@@ -6,7 +6,7 @@
       <env name="INSTANCE" value="LOCAL" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="it.gov.pagopa.tests.mains.MainTest" />
-    <module name="wispsoapconverter" />
+    <module name="wisp-soap-converter.wispsoapconverter" />
     <shortenClasspath name="ARGS_FILE" />
     <option name="VM_PARAMETERS" value="-javaagent:./agent/cinnamon-agent-2.17.2.jar -Dconfig.app=$USER_HOME$/wispsoapconverter/config-app-local.conf" />
     <extension name="coverage">

@@ -135,6 +135,8 @@ jobs:
             type=ref,event=branch
             type=sha
       - name: Create Dockerfile
+        env:
+          LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
         run: |
           ./sbt -v docker:stage
       - name: Build and push

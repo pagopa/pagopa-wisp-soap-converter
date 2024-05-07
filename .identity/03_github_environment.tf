@@ -68,6 +68,12 @@ resource "github_actions_secret" "secret_sonar_token" {
   plaintext_value  = data.azurerm_key_vault_secret.key_vault_sonar.value
 }
 
+resource "github_actions_secret" "lightbend_key" {
+  repository       = local.github.repository
+  secret_name      = "LIGHTBEND_KEY"
+  plaintext_value  = data.azurerm_key_vault_secret.key_vault_lightbend_key.value
+}
+
 #tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
 resource "github_actions_secret" "secret_bot_token" {
 

@@ -1,15 +1,15 @@
 package it.gov.pagopa.common.message
 
 import it.gov.pagopa.common.util.azure.Appfunction
+import it.gov.pagopa.common.util.azure.cosmos.{CategoriaEvento, Componente, Esito, SottoTipoEvento}
 import net.openhft.hashing.LongHashFunction
 
-import java.time.LocalDateTime
-import scala.jdk.CollectionConverters._
+import java.time.Instant
 case class Re(
-    insertedTimestamp: LocalDateTime,
-    componente: String,
-    categoriaEvento: String,
-    sottoTipoEvento: String,
+    insertedTimestamp: Instant,
+    componente: Componente.Value,
+    categoriaEvento: CategoriaEvento.Value,
+    sottoTipoEvento: SottoTipoEvento.Value,
     idDominio: Option[String] = None,
     iuv: Option[String] = None,
     ccp: Option[String] = None,
@@ -21,7 +21,7 @@ case class Re(
     stazione: Option[String] = None,
     canale: Option[String] = None,
     parametriSpecificiInterfaccia: Option[String] = None,
-    esito: Option[String] = None,
+    esito: Esito.Value,
     sessionId: Option[String] = None,
     status: Option[String] = None,
     payload: Option[Array[Byte]] = None,
@@ -63,35 +63,35 @@ case class Re(
 
   }
 
-  def toProperties(): java.util.Map[java.lang.String, java.lang.Object] = {
-    Seq(
-      Some("inserted_timestamp" -> this.insertedTimestamp),
-      Some("componente" -> this.componente),
-      Some("categoria_evento" -> this.categoriaEvento),
-      Some("sotto_tipo_evento" -> this.sottoTipoEvento),
-      this.idDominio.map(v=>"id_dominio" -> v),
-      this.iuv.map(v=>"iuv" -> v),
-      this.ccp.map(v=>"ccp" -> v),
-      this.psp.map(v=>"psp" -> v),
-      this.tipoVersamento.map(v=>"tipo_versamento" -> v),
-      this.tipoEvento.map(v=>"tipo_evento" -> v),
-      this.fruitore.map(v=>"fruitore" -> v),
-      this.erogatore.map(v=>"erogatore" -> v),
-      this.stazione.map(v=>"stazione" -> v),
-      this.canale.map(v=>"canale" -> v),
-      this.parametriSpecificiInterfaccia.map(v=>"parametri_specifici_interfaccia" -> v),
-      this.esito.map(v=>"esito" -> v),
-      this.sessionId.map(v=>"session_id" -> v),
-      this.status.map(v=>"status" -> v),
-      this.info.map(v=>"info" -> v),
-      this.businessProcess.map(v=>"business_process" -> v),
-      this.fruitoreDescr.map(v=>"fruitore_descr" -> v),
-      this.erogatoreDescr.map(v=>"erogatore_descr" -> v),
-      this.pspDescr.map(v=>"psp_descr" -> v),
-      this.noticeNumber.map(v=>"notice_number" -> v),
-      this.creditorReferenceId.map(v=>"creditor_reference_id" -> v),
-      this.paymentToken.map(v=>"payment_token" -> v)
-  ).filter(s=>s.nonEmpty).flatten.toMap.asJava.asInstanceOf[java.util.Map[java.lang.String, java.lang.Object]]
-  }
+//  def toProperties(): java.util.Map[java.lang.String, java.lang.Object] = {
+//    Seq(
+//      Some("inserted_timestamp" -> this.insertedTimestamp),
+//      Some("componente" -> this.componente),
+//      Some("categoria_evento" -> this.categoriaEvento),
+//      Some("sotto_tipo_evento" -> this.sottoTipoEvento),
+//      this.idDominio.map(v=>"id_dominio" -> v),
+//      this.iuv.map(v=>"iuv" -> v),
+//      this.ccp.map(v=>"ccp" -> v),
+//      this.psp.map(v=>"psp" -> v),
+//      this.tipoVersamento.map(v=>"tipo_versamento" -> v),
+//      this.tipoEvento.map(v=>"tipo_evento" -> v),
+//      this.fruitore.map(v=>"fruitore" -> v),
+//      this.erogatore.map(v=>"erogatore" -> v),
+//      this.stazione.map(v=>"stazione" -> v),
+//      this.canale.map(v=>"canale" -> v),
+//      this.parametriSpecificiInterfaccia.map(v=>"parametri_specifici_interfaccia" -> v),
+//      this.esito.map(v=>"esito" -> v),
+//      this.sessionId.map(v=>"session_id" -> v),
+//      this.status.map(v=>"status" -> v),
+//      this.info.map(v=>"info" -> v),
+//      this.businessProcess.map(v=>"business_process" -> v),
+//      this.fruitoreDescr.map(v=>"fruitore_descr" -> v),
+//      this.erogatoreDescr.map(v=>"erogatore_descr" -> v),
+//      this.pspDescr.map(v=>"psp_descr" -> v),
+//      this.noticeNumber.map(v=>"notice_number" -> v),
+//      this.creditorReferenceId.map(v=>"creditor_reference_id" -> v),
+//      this.paymentToken.map(v=>"payment_token" -> v)
+//  ).filter(s=>s.nonEmpty).flatten.toMap.asJava.asInstanceOf[java.util.Map[java.lang.String, java.lang.Object]]
+//  }
 
 }

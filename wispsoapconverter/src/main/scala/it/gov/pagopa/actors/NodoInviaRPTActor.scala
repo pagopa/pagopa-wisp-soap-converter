@@ -2,7 +2,6 @@ package it.gov.pagopa.actors
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import com.nimbusds.jose.util.StandardCharset
 import it.gov.pagopa.ActorProps
 import it.gov.pagopa.actors.response.NodoInviaRPTResponse
 import it.gov.pagopa.common.actor.PerRequestActor
@@ -13,13 +12,14 @@ import it.gov.pagopa.common.message._
 import it.gov.pagopa.common.repo.{CosmosPrimitive, CosmosRepository}
 import it.gov.pagopa.common.rpt.split.RptFlow
 import it.gov.pagopa.common.util._
+import it.gov.pagopa.common.util.azure.cosmos.{CategoriaEvento, Componente, Esito, SottoTipoEvento}
 import it.gov.pagopa.config.Channel
 import it.gov.pagopa.exception.{RptFaultBeanException, WorkflowExceptionErrorCodes}
 import org.slf4j.MDC
 import scalaxbmodel.nodoperpa.{IntestazionePPT, NodoInviaRPTRisposta}
 import scalaxbmodel.paginf.CtRichiestaPagamentoTelematico
 
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.Base64
 import scala.concurrent.Future
 
@@ -29,7 +29,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorPr
   var replyTo: ActorRef = _
   var rptKey: RPTKey = _
   var reRequest: ReRequest = _
-  var insertTime: LocalDateTime = _
+  var insertTime: Instant = _
   var canale: Channel = _
 
   var re: Option[Re] = None
@@ -52,14 +52,14 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorPr
     replyTo = sender()
     re = Some(
       Re(
-        componente = Componente.FESP.toString,
-        categoriaEvento = CategoriaEvento.INTERNO.toString,
+        componente = Componente.WISP_SOAP_CONVERTER,
+        categoriaEvento = CategoriaEvento.INTERNO,
         sessionId = Some(req.sessionId),
         sessionIdOriginal = Some(req.sessionId),
         payload = None,
-        esito = Some(EsitoRE.CAMBIO_STATO.toString),
+        esito = Esito.CAMBIO_STATO,
         tipoEvento = Some(actorClassId),
-        sottoTipoEvento = SottoTipoEvento.INTERN.toString,
+        sottoTipoEvento = SottoTipoEvento.INTERN,
         insertedTimestamp = soapRequest.timestamp,
         erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
         businessProcess = Some(actorClassId),
@@ -212,14 +212,14 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorPr
   def saveData(intestazionePPT: IntestazionePPT, updateTokenItem: Boolean): Future[String] = {
     log.debug("Salvataggio messaggio RPT")
     val id = RPTUtil.getUniqueKey(req,intestazionePPT)
-    val zipped = Util.zipContent(req.payload.getBytes(StandardCharset.UTF_8))
+    val zipped = Util.zipContent(req.payload)
     cosmosRepository.save(CosmosPrimitive(re.get.insertedTimestamp.toString.substring(0,10),id,actorClassId,Base64.getEncoder.encodeToString(zipped)))
     Future.successful(id)
   }
 
-  def reCambioStato(stato: String, time: LocalDateTime, tipo: Option[String] = None): Unit = {
+  def reCambioStato(stato: String, time: Instant, tipo: Option[String] = None): Unit = {
     reEventFunc(
-      ReRequest(req.sessionId, req.testCaseId, re.get.copy(status = Some(s"${tipo.getOrElse("")}${stato}"), insertedTimestamp = time, esito = Some(EsitoRE.CAMBIO_STATO.toString)), None),
+      ReRequest(req.sessionId, req.testCaseId, re.get.copy(status = Some(s"${tipo.getOrElse("")}${stato}"), insertedTimestamp = time, esito = Esito.CAMBIO_STATO), None),
       log,
       ddataMap
     )

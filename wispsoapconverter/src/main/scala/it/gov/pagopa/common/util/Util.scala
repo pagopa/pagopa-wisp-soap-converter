@@ -6,7 +6,7 @@ import akka.routing.RoundRobinGroup
 
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
-import java.time.LocalDateTime
+import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Base64
 import java.util.zip.GZIPOutputStream
@@ -14,8 +14,8 @@ import scala.util.matching.Regex
 
 object Util {
 
-  def now(): LocalDateTime = {
-    LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
+  def now(): Instant = {
+    Instant.now().truncatedTo(ChronoUnit.MICROS)
   }
 
   def getNoticeNumberData(noticeNumber: String): (String, Option[Long], Option[Int], Option[Long]) = {
@@ -71,7 +71,7 @@ object Util {
   val SHA1Digest: MessageDigest = java.security.MessageDigest.getInstance("SHA-1")
   def sha1(name: String): String = Base64.getEncoder.encodeToString(SHA1Digest.digest(name.getBytes))
 
-  def zipContent(bytes: Array[Byte]) = {
+  def zipContent(bytes: Array[Byte]):Array[Byte] = {
     val bais = new ByteArrayOutputStream(bytes.length)
     val gzipOut = new GZIPOutputStream(bais)
     gzipOut.write(bytes)
@@ -79,6 +79,9 @@ object Util {
     val compressed = bais.toByteArray
     bais.close()
     compressed
+  }
+  def zipContent(string:String):Array[Byte]= {
+    zipContent(string.getBytes(Constant.UTF_8))
   }
 
 //  def unzipContent(compressed: Array[Byte]) = {

@@ -67,13 +67,12 @@ lazy val azureIdentity = "1.9.0"
 
 lazy val applicationinsightsagentName = "applicationinsights-agent"
 lazy val applicationinsightsagentVersion = "3.4.10"
-val lightbendKey = sys.env.getOrElse("LIGHTBEND_KEY","or3B1auQImlZDkYZz72Yk9XJ-iT8SIDBwsTEriVrqeymHNLc")
-val isJenkinsBuild  = sys.env.getOrElse("JENKINS_BUILD", "false").equalsIgnoreCase("true")
+val lightbendKey = sys.env("LIGHTBEND_KEY")
 
-val resolverName = if(isJenkinsBuild) { "Artifactory"} else {"lightbend-commercial-mvn"}
-val resolverAt = if(isJenkinsBuild) { "https://toolbox.sia.eu/artifactory/sbt-pagopa/"} else {s"https://repo.lightbend.com/pass/${lightbendKey}/commercial-releases"}
-val resolverIvyName = if(isJenkinsBuild) { "Artifactory-ivy" } else { "lightbend-commercial-ivy" }
-val resolverIvyURL = if (isJenkinsBuild) { "https://toolbox.sia.eu/artifactory/sbt-pagopa" } else {s"https://repo.lightbend.com/pass/${lightbendKey}/commercial-releases"}
+val resolverName = "lightbend-commercial-mvn"
+val resolverAt = s"https://repo.lightbend.com/pass/${lightbendKey}/commercial-releases"
+val resolverIvyName = "lightbend-commercial-ivy"
+val resolverIvyURL = s"https://repo.lightbend.com/pass/${lightbendKey}/commercial-releases"
 
 
 lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
@@ -315,10 +314,7 @@ lazy val `wispsoapconverter` = (project in file("wispsoapconverter"))
         "com.fasterxml.jackson.module" %% "jackson-module-scala" % jackson,
         "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jackson,
         "io.mola.galimatias" % "galimatias" % galimatias,
-        "com.azure" % "azure-storage-blob" % azureStorageBlob,
-        "com.azure" % "azure-data-tables" % azureStorageTable,
         "com.azure" % "azure-cosmos" % azureCosmos,
-        "com.azure" % "azure-identity" % azureIdentity,
         "com.typesafe.akka" %% "akka-testkit" % akka % Test,
         "org.scalatest" %% "scalatest" % scalatest % Test,
         "org.scalaj" %% "scalaj-http" % scalaj % Test,
