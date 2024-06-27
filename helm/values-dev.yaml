@@ -91,7 +91,7 @@ wispsoapconverter:
   secretProvider:
     create: true
     envSecrets:
-      APPLICATIONINSIGHTS_CONNECTION_STRING: "ai-d-connection-string"
+      APPLICATIONINSIGHTS_CONNECTION_STRING: "azure-insight-connection-string"
       API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
       AZURE_COSMOS_KEY: "cosmosdb-wisp-converter-account-key"
       AZURE_STORAGE_CONNECTION_STRING: "wisp-converter-re-sa-connection-string-key"
