@@ -17,9 +17,9 @@ trait ReUtil { this: NodoLogging =>
       re = re.copy(
         insertedTimestamp = message.timestamp,
         payload = Some(message.payload.getUtf8Bytes),
-        categoriaEvento = CategoriaEvento.INTERFACCIA,
+        categoriaEvento = CategoriaEvento.INTERFACE,
         sottoTipoEvento = SottoTipoEvento.REQ,
-        esito = Esito.RICEVUTA,
+        esito = Esito.RECEIVED,
         businessProcess = Some(message.primitive)
       ),
       reExtra = Some(reExtra)

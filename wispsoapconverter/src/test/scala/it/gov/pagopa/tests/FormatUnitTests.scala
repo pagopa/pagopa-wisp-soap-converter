@@ -27,9 +27,9 @@ class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
   "fmtMessage" should "ok" in {
     assert(Appfunction.fmtMessage(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACCIA,
+        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACE,
         SottoTipoEvento.REQ,
-        esito = Esito.RICEVUTA,
+        esito = Esito.RECEIVED,
         payload = Some(
           <xml><fault><faultCode>fCode</faultCode></fault><faultString>fString</faultString><description>fDescr</description></xml>.toString().getBytes
         )
@@ -44,9 +44,9 @@ class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessage(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACCIA,
+        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACE,
         SottoTipoEvento.RESP,
-        esito = Esito.INVIATA,
+        esito = Esito.SEND,
         payload = Some(
           <xml><fault><faultCode>fCode</faultCode></fault><faultString>fString</faultString><description>fDescr</description></xml>.toString().getBytes
         )
@@ -61,9 +61,9 @@ class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessage(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACCIA,
+        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACE,
         SottoTipoEvento.RESP,
-        esito = Esito.INVIATA,
+        esito = Esito.SEND,
         payload = Some(
           <xml>test</xml>.toString().getBytes
         )
@@ -78,9 +78,9 @@ class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessage(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACCIA,
+        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACE,
         SottoTipoEvento.REQ,
-        esito = Esito.RICEVUTA,
+        esito = Esito.RECEIVED,
         payload = Some(
           <xml>test</xml>.toString().getBytes
         )
@@ -95,9 +95,9 @@ class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessage(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERNO,
-        SottoTipoEvento.INTERN,
-        esito = Esito.CAMBIO_STATO,
+        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERNAL,
+        SottoTipoEvento.INTER,
+        esito = Esito.EXCECUTED_INTERNAL_STEP,
         payload = Some(
           <xml>test</xml>.toString().getBytes
         )
@@ -110,9 +110,9 @@ class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
   "fmtMessageJson" should "ok" in {
     assert(Appfunction.fmtMessageJson(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACCIA,
+        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACE,
         SottoTipoEvento.REQ,
-        esito = Esito.RICEVUTA,
+        esito = Esito.RECEIVED,
         payload = Some(
           <xml>
             <fault><faultCode>fCode</faultCode></fault>
@@ -126,9 +126,9 @@ class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessageJson(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACCIA,
+        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACE,
         SottoTipoEvento.RESP,
-        esito = Esito.INVIATA,
+        esito = Esito.SEND,
         payload = Some(
           <xml>
             <fault><faultCode>fCode</faultCode></fault>
@@ -142,9 +142,9 @@ class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessageJson(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACCIA,
+        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACE,
         SottoTipoEvento.RESP,
-        esito = Esito.INVIATA,
+        esito = Esito.SEND,
         payload = Some(
           <xml>test
           </xml>.toString().getBytes
@@ -155,9 +155,9 @@ class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessageJson(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACCIA,
+        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACE,
         SottoTipoEvento.REQ,
-        esito = Esito.RICEVUTA,
+        esito = Esito.RECEIVED,
         payload = Some(
           <xml>test
           </xml>.toString().getBytes
@@ -170,9 +170,9 @@ class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessageJson(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERNO,
-        SottoTipoEvento.INTERN,
-        esito = Esito.CAMBIO_STATO,
+        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERNAL,
+        SottoTipoEvento.INTER,
+        esito = Esito.EXCECUTED_INTERNAL_STEP,
         payload = Some(
           <xml>test
           </xml>.toString().getBytes

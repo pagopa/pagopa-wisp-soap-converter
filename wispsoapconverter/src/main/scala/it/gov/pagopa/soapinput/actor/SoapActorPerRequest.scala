@@ -64,9 +64,9 @@ class SoapActorPerRequest(
       testCaseId = message.testCaseId,
       re = Re(
         componente = Componente.WISP_SOAP_CONVERTER,
-        categoriaEvento = CategoriaEvento.INTERFACCIA,
+        categoriaEvento = CategoriaEvento.INTERFACE,
         sottoTipoEvento = SottoTipoEvento.REQ,
-        esito = Esito.RICEVUTA,
+        esito = Esito.RECEIVED,
         sessionId = Some(message.sessionId),
         payload = Some(message.payload.getUtf8Bytes),
         insertedTimestamp = message.timestamp,
@@ -97,9 +97,9 @@ class SoapActorPerRequest(
               .map(
                 _.copy(
                   componente = Componente.WISP_SOAP_CONVERTER,
-                  categoriaEvento = CategoriaEvento.INTERFACCIA,
+                  categoriaEvento = CategoriaEvento.INTERFACE,
                   sottoTipoEvento = SottoTipoEvento.RESP,
-                  esito = Esito.INVIATA,
+                  esito = Esito.SEND,
                   payload = Some(sres.payload.getUtf8Bytes),
                   insertedTimestamp = now
                 )
@@ -107,9 +107,9 @@ class SoapActorPerRequest(
               .getOrElse(
                 Re(
                   componente = Componente.WISP_SOAP_CONVERTER,
-                  categoriaEvento = CategoriaEvento.INTERFACCIA,
+                  categoriaEvento = CategoriaEvento.INTERFACE,
                   sottoTipoEvento = SottoTipoEvento.RESP,
-                  esito = Esito.INVIATA,
+                  esito = Esito.SEND,
                   payload = Some(sres.payload.getUtf8Bytes),
                   insertedTimestamp = now,
                   sessionId = Some(sres.sessionId),
@@ -201,9 +201,9 @@ class SoapActorPerRequest(
           testCaseId = message.testCaseId,
           re = Re(
             componente = Componente.WISP_SOAP_CONVERTER,
-            categoriaEvento = CategoriaEvento.INTERFACCIA,
+            categoriaEvento = CategoriaEvento.INTERFACE,
             sottoTipoEvento = SottoTipoEvento.RESP,
-            esito = Esito.INVIATA_KO,
+            esito = Esito.SEND_FAILURE,
             sessionId = Some(message.sessionId),
             payload = Some(payload.getUtf8Bytes),
             insertedTimestamp = now
@@ -229,9 +229,9 @@ class SoapActorPerRequest(
           testCaseId = message.testCaseId,
           re = Re(
             componente = Componente.WISP_SOAP_CONVERTER,
-            categoriaEvento = CategoriaEvento.INTERFACCIA,
+            categoriaEvento = CategoriaEvento.INTERFACE,
             sottoTipoEvento = SottoTipoEvento.RESP,
-            esito = Esito.INVIATA_KO,
+            esito = Esito.SEND_FAILURE,
             sessionId = Some(message.sessionId),
             payload = Some(payload.getUtf8Bytes),
             insertedTimestamp = now

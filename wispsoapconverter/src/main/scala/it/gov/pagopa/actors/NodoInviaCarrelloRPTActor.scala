@@ -136,7 +136,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
                 ccp = Some(rpt.datiVersamento.codiceContestoPagamento),
                 idDominio = Some(rpt.dominio.identificativoDominio),
                 status = Some(StatoRPTEnum.RPT_PARCHEGGIATA_NODO.toString),
-                esito = Esito.CAMBIO_STATO,
+                esito = Esito.EXCECUTED_INTERNAL_STEP,
                 insertedTimestamp = now
               )
               reEventFunc(reRequest.copy(re = reCambioStatorpt), log, ddataMap)
@@ -159,13 +159,13 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
     re = Some(
       Re(
         componente = Componente.WISP_SOAP_CONVERTER,
-        categoriaEvento = CategoriaEvento.INTERNO,
+        categoriaEvento = CategoriaEvento.INTERNAL,
         sessionId = Some(req.sessionId),
         sessionIdOriginal = Some(req.sessionId),
         payload = None,
-        esito = Esito.CAMBIO_STATO,
+        esito = Esito.EXCECUTED_INTERNAL_STEP,
         tipoEvento = Some(actorClassId),
-        sottoTipoEvento = SottoTipoEvento.INTERN,
+        sottoTipoEvento = SottoTipoEvento.INTER,
         insertedTimestamp = soapRequest.timestamp,
         erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
         businessProcess = Some(actorClassId),
@@ -185,6 +185,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
       _ = idCarrello = intestazioneCarrelloPPT.identificativoCarrello
       _ = re = re.map(r =>
         r.copy(
+          idCarrello = Some(idCarrello),
           psp = Some(nodoInviaCarrelloRPT.identificativoPSP),
           canale = Some(nodoInviaCarrelloRPT.identificativoCanale),
           fruitore = Some(intestazioneCarrelloPPT.identificativoStazioneIntermediarioPA),

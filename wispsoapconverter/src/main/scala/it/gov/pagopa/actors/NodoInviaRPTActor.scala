@@ -53,13 +53,13 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorPr
     re = Some(
       Re(
         componente = Componente.WISP_SOAP_CONVERTER,
-        categoriaEvento = CategoriaEvento.INTERNO,
+        categoriaEvento = CategoriaEvento.INTERNAL,
         sessionId = Some(req.sessionId),
         sessionIdOriginal = Some(req.sessionId),
         payload = None,
-        esito = Esito.CAMBIO_STATO,
+        esito = Esito.EXCECUTED_INTERNAL_STEP,
         tipoEvento = Some(actorClassId),
-        sottoTipoEvento = SottoTipoEvento.INTERN,
+        sottoTipoEvento = SottoTipoEvento.INTER,
         insertedTimestamp = soapRequest.timestamp,
         erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
         businessProcess = Some(actorClassId),
@@ -219,7 +219,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository:CosmosRepository,actorPr
 
   def reCambioStato(stato: String, time: Instant, tipo: Option[String] = None): Unit = {
     reEventFunc(
-      ReRequest(req.sessionId, req.testCaseId, re.get.copy(status = Some(s"${tipo.getOrElse("")}${stato}"), insertedTimestamp = time, esito = Esito.CAMBIO_STATO), None),
+      ReRequest(req.sessionId, req.testCaseId, re.get.copy(status = Some(s"${tipo.getOrElse("")}${stato}"), insertedTimestamp = time, esito = Esito.EXCECUTED_INTERNAL_STEP), None),
       log,
       ddataMap
     )
