@@ -2,8 +2,8 @@ apiVersion: v2
 name: wisp-soap-converter-chart
 description: Wisp Soap Conveter
 type: application
-version: 2.34.0
-appVersion: 0.2.3
+version: 2.35.0
+appVersion: 0.2.3-64-NOD-952_aggiornamento_dto
 dependencies:
   - name: microservice-chart
     version: 3.0.0
