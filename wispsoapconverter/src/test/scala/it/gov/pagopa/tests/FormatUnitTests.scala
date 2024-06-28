@@ -11,14 +11,14 @@ import org.scalatest.matchers.should
 
 import java.time.Instant
 
-class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
+class FormatUnitTests extends AnyFlatSpec with should.Matchers {
 
   val log = mock[AppLogger]
 
   "formatHeaders" should "ok" in {
     val x = Appfunction.formatHeaders(
       Some(Seq(
-        "h1"->"h_1"
+        "h1" -> "h_1"
       ))
     )
     assert(x == "h1=h_1")
@@ -27,41 +27,51 @@ class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
   "fmtMessage" should "ok" in {
     assert(Appfunction.fmtMessage(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACE,
+        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
         SottoTipoEvento.REQ,
         esito = Esito.RECEIVED,
         payload = Some(
-          <xml><fault><faultCode>fCode</faultCode></fault><faultString>fString</faultString><description>fDescr</description></xml>.toString().getBytes
+          <xml>
+            <fault>
+              <faultCode>fCode</faultCode>
+            </fault> <faultString>fString</faultString> <description>fDescr</description>
+          </xml>.toString().getBytes
         )
       ),
       Some(ReExtra())
-    ).get == """Re Request => TIPO_EVENTO[REQ/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[RICEVUTA] DETTAGLIO[Il nodo ha ricevuto un messaggio]
-                          |httpUri: [UNKNOWN]
-                          |httpHeaders: [UNKNOWN]
-                          |httpStatusCode: [UNKNOWN]
-                          |elapsed: [UNKNOWN]
-                          |payload: [<xml><fault><faultCode>fCode</faultCode></fault><faultString>fString</faultString><description>fDescr</description></xml>]""".stripMargin)
+    ).get ==
+      """Re Request => TIPO_EVENTO[REQ/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[RICEVUTA] DETTAGLIO[Il nodo ha ricevuto un messaggio]
+        |httpUri: [UNKNOWN]
+        |httpHeaders: [UNKNOWN]
+        |httpStatusCode: [UNKNOWN]
+        |elapsed: [UNKNOWN]
+        |payload: [<xml><fault><faultCode>fCode</faultCode></fault><faultString>fString</faultString><description>fDescr</description></xml>]""".stripMargin)
 
     assert(Appfunction.fmtMessage(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACE,
+        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
         SottoTipoEvento.RESP,
         esito = Esito.SEND,
         payload = Some(
-          <xml><fault><faultCode>fCode</faultCode></fault><faultString>fString</faultString><description>fDescr</description></xml>.toString().getBytes
+          <xml>
+            <fault>
+              <faultCode>fCode</faultCode>
+            </fault> <faultString>fString</faultString> <description>fDescr</description>
+          </xml>.toString().getBytes
         )
       ),
       Some(ReExtra())
-    ).get == """Re Request => TIPO_EVENTO[RESP/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[INVIATA] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]
-                          |httpUri: [UNKNOWN]
-                          |httpHeaders: [UNKNOWN]
-                          |httpStatusCode: [UNKNOWN]
-                          |elapsed: [UNKNOWN]
-                          |payload: [<xml><fault><faultCode>fCode</faultCode></fault><faultString>fString</faultString><description>fDescr</description></xml>]""".stripMargin)
+    ).get ==
+      """Re Request => TIPO_EVENTO[RESP/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[INVIATA] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]
+        |httpUri: [UNKNOWN]
+        |httpHeaders: [UNKNOWN]
+        |httpStatusCode: [UNKNOWN]
+        |elapsed: [UNKNOWN]
+        |payload: [<xml><fault><faultCode>fCode</faultCode></fault><faultString>fString</faultString><description>fDescr</description></xml>]""".stripMargin)
 
     assert(Appfunction.fmtMessage(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACE,
+        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
         SottoTipoEvento.RESP,
         esito = Esito.SEND,
         payload = Some(
@@ -69,16 +79,17 @@ class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
         )
       ),
       Some(ReExtra())
-    ).get == """Re Request => TIPO_EVENTO[RESP/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[INVIATA] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]
-                          |httpUri: [UNKNOWN]
-                          |httpHeaders: [UNKNOWN]
-                          |httpStatusCode: [UNKNOWN]
-                          |elapsed: [UNKNOWN]
-                          |payload: [<xml>test</xml>]""".stripMargin)
+    ).get ==
+      """Re Request => TIPO_EVENTO[RESP/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[INVIATA] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]
+        |httpUri: [UNKNOWN]
+        |httpHeaders: [UNKNOWN]
+        |httpStatusCode: [UNKNOWN]
+        |elapsed: [UNKNOWN]
+        |payload: [<xml>test</xml>]""".stripMargin)
 
     assert(Appfunction.fmtMessage(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACE,
+        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
         SottoTipoEvento.REQ,
         esito = Esito.RECEIVED,
         payload = Some(
@@ -86,17 +97,18 @@ class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
         )
       ),
       Some(ReExtra())
-    ).get == """Re Request => TIPO_EVENTO[REQ/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[RICEVUTA] DETTAGLIO[Il nodo ha ricevuto un messaggio]
-                          |httpUri: [UNKNOWN]
-                          |httpHeaders: [UNKNOWN]
-                          |httpStatusCode: [UNKNOWN]
-                          |elapsed: [UNKNOWN]
-                          |payload: [<xml>test</xml>]""".stripMargin)
+    ).get ==
+      """Re Request => TIPO_EVENTO[REQ/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[RICEVUTA] DETTAGLIO[Il nodo ha ricevuto un messaggio]
+        |httpUri: [UNKNOWN]
+        |httpHeaders: [UNKNOWN]
+        |httpStatusCode: [UNKNOWN]
+        |elapsed: [UNKNOWN]
+        |payload: [<xml>test</xml>]""".stripMargin)
 
     assert(Appfunction.fmtMessage(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERNAL,
-        SottoTipoEvento.INTER,
+        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERNAL,
+        SottoTipoEvento.INTERN,
         esito = Esito.EXCECUTED_INTERNAL_STEP,
         payload = Some(
           <xml>test</xml>.toString().getBytes
@@ -110,39 +122,43 @@ class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
   "fmtMessageJson" should "ok" in {
     assert(Appfunction.fmtMessageJson(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACE,
+        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
         SottoTipoEvento.REQ,
         esito = Esito.RECEIVED,
         payload = Some(
           <xml>
-            <fault><faultCode>fCode</faultCode></fault>
+            <fault>
+              <faultCode>fCode</faultCode>
+            </fault>
             <faultString>fString</faultString>
             <description>fDescr</description>
           </xml>.toString().getBytes
         )
       ),
-      Some(ReExtra()),TestItems.ddataMap
+      Some(ReExtra()), TestItems.ddataMap
     ).get == """{"internalMessage":"SERVER --> REQUEST: messaggio da [subject:nd]","categoriaEvento":"INTERFACCIA","caller":"SERVER","httpType":"REQUEST","esito":"KO","faultCode":"fCode","subject":"nd","subjectDescr":"nd"}""")
 
     assert(Appfunction.fmtMessageJson(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACE,
+        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
         SottoTipoEvento.RESP,
         esito = Esito.SEND,
         payload = Some(
           <xml>
-            <fault><faultCode>fCode</faultCode></fault>
+            <fault>
+              <faultCode>fCode</faultCode>
+            </fault>
             <faultString>fString</faultString>
             <description>fDescr</description>
           </xml>.toString().getBytes
         )
       ),
-      Some(ReExtra()),TestItems.ddataMap
+      Some(ReExtra()), TestItems.ddataMap
     ).get == """{"internalMessage":"SERVER --> RESPONSE: risposta a [subject:nd] [esito:KO] [faultCode:fCode]","categoriaEvento":"INTERFACCIA","caller":"SERVER","httpType":"RESPONSE","esito":"KO","faultCode":"fCode","subject":"nd","subjectDescr":"nd"}""")
 
     assert(Appfunction.fmtMessageJson(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACE,
+        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
         SottoTipoEvento.RESP,
         esito = Esito.SEND,
         payload = Some(
@@ -150,12 +166,12 @@ class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
           </xml>.toString().getBytes
         )
       ),
-      Some(ReExtra()),TestItems.ddataMap
+      Some(ReExtra()), TestItems.ddataMap
     ).get == """{"internalMessage":"SERVER --> RESPONSE: risposta a [subject:nd] [esito:OK]","categoriaEvento":"INTERFACCIA","caller":"SERVER","httpType":"RESPONSE","esito":"OK","subject":"nd","subjectDescr":"nd"}""")
 
     assert(Appfunction.fmtMessageJson(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERFACE,
+        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
         SottoTipoEvento.REQ,
         esito = Esito.RECEIVED,
         payload = Some(
@@ -163,22 +179,21 @@ class FormatUnitTests  extends AnyFlatSpec with should.Matchers {
           </xml>.toString().getBytes
         )
       ),
-      Some(ReExtra()),TestItems.ddataMap
+      Some(ReExtra()), TestItems.ddataMap
     ).get == """{"internalMessage":"SERVER --> REQUEST: messaggio da [subject:nd]","categoriaEvento":"INTERFACCIA","caller":"SERVER","httpType":"REQUEST","esito":"OK","subject":"nd","subjectDescr":"nd"}""")
-
 
 
     assert(Appfunction.fmtMessageJson(
       Re(
-        Instant.now(),Componente.WISP_SOAP_CONVERTER,CategoriaEvento.INTERNAL,
-        SottoTipoEvento.INTER,
+        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERNAL,
+        SottoTipoEvento.INTERN,
         esito = Esito.EXCECUTED_INTERNAL_STEP,
         payload = Some(
           <xml>test
           </xml>.toString().getBytes
         )
       ),
-      Some(ReExtra()),TestItems.ddataMap
+      Some(ReExtra()), TestItems.ddataMap
     ).get == """{"internalMessage":"Cambio stato in [nd]","categoriaEvento":"INTERNO","esito":"OK"}""")
 
   }
