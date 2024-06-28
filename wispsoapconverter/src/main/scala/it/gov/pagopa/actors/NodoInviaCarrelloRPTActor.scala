@@ -25,28 +25,55 @@ import java.time.Instant
 import java.util.Base64
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
-case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository,actorProps: ActorProps) extends PerRequestActor with NodoInviaCarrelloRPTResponse with CarrelloFlow with ReUtil {
 
-  var req: SoapRequest = _
-  var replyTo: ActorRef = _
+case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepository, actorProps: ActorProps) extends PerRequestActor with NodoInviaCarrelloRPTResponse with CarrelloFlow with ReUtil {
 
   val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
   val inputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_input").toBoolean
   val outputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean
-
   val idCanaleAgid: String = DDataChecks.getConfigurationKeys(ddataMap, "idCanaleAGID")
   val idPspAgid: String = DDataChecks.getConfigurationKeys(ddataMap, "idPspAGID")
   val idIntPspAgid: String = DDataChecks.getConfigurationKeys(ddataMap, "intPspAGID")
-
   val uriAdapterEcommerce: String = context.system.settings.config.getString("adapterEcommerce.url")
-
   val maxNumRptInCart: Int =
     DDataChecks.getConfigurationKeys(ddataMap, "inviaCarrelloRpt.maxNumRptInCart", "rpt-invia").toInt
   val maxNumRptInCartMulti: Int =
     DDataChecks.getConfigurationKeys(ddataMap, "inviaCarrelloRpt.maxNumRptInCartMultibeneficiario").toInt
   val maxVersamentiInSecondRptMulti: Int =
     DDataChecks.getConfigurationKeys(ddataMap, "inviaCarrelloRpt.maxVersamentiInSecondRptMultibeneficiario").toInt
+  val recoverGenericError: PartialFunction[Throwable, Future[SoapResponse]] = {
+    case originalException: Throwable =>
+      log.debug(s"Errore generico durante InviaCarrelloRPT, message: [${originalException.getMessage}]")
+      val cfb = CarrelloRptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, originalException), idCanale = None)
+      Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
+  }
+  val recoverPipeline: PartialFunction[Throwable, Future[SoapResponse]] = {
+    case cfb: CarrelloRptFaultBeanException =>
+      if (cfb.workflowErrorCode.isDefined && cfb.idCarrello.isDefined && cfb.rptKeys.isDefined) {
+        cfb.workflowErrorCode.get match {
+          case WorkflowExceptionErrorCodes.CARRELLO_ERRORE_SEMANTICO | WorkflowExceptionErrorCodes.RPT_ERRORE_SEMANTICO =>
+            (for {
+              _ <- Future.successful(())
+              now = Util.now()
+              reCambioStato = re.get.copy(status = Some(StatoCarrelloEnum.CART_RIFIUTATO_NODO.toString), insertedTimestamp = now)
+              _ = reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
+              res = errorHandler(req.sessionId, req.testCaseId, cfb, re)
+            } yield res) recoverWith recoverGenericError
 
+          case _ =>
+            val cfb = CarrelloRptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR), idCanale = None)
+            Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
+        }
+      } else {
+        Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
+      }
+    case e: Throwable =>
+      log.warn(e, e.getMessage)
+      val cfb = CarrelloRptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), idCanale = None)
+      Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
+  }
+  var req: SoapRequest = _
+  var replyTo: ActorRef = _
   var idCanale: String = _
   var idCarrello: String = _
   var rptKeys: Seq[RPTKey] = _
@@ -58,14 +85,73 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
     actorError(replyTo, req, Option(idCanale), dpe, Option(idCarrello), Option(rptKeys), re)
   }
 
-  def saveCarrello(
-      now: Instant,
-      intestazioneCarrelloPPT: IntestazioneCarrelloPPT,
-  ): Future[Int] = {
-    log.debug("Salvataggio messaggio Carrello")
-    val id = RPTUtil.getUniqueKey(req,intestazioneCarrelloPPT)
-    val zipped = Util.zipContent(req.payload)
-    cosmosRepository.save(CosmosPrimitive(re.get.insertedTimestamp.toString.substring(0,10),id,actorClassId,Base64.getEncoder.encodeToString(zipped)))
+  override def receive: Receive = {
+    case soapRequest: SoapRequest =>
+      req = soapRequest
+      replyTo = sender()
+
+      re = Some(
+        Re(
+          componente = Componente.WISP_SOAP_CONVERTER,
+          categoriaEvento = CategoriaEvento.INTERNAL,
+          sessionId = Some(req.sessionId),
+          sessionIdOriginal = Some(req.sessionId),
+          payload = None,
+          esito = Esito.EXCECUTED_INTERNAL_STEP,
+          tipoEvento = Some(actorClassId),
+          sottoTipoEvento = SottoTipoEvento.INTERN,
+          insertedTimestamp = soapRequest.timestamp,
+          erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+          businessProcess = Some(actorClassId),
+          erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+        )
+      )
+      reRequest = ReRequest(req.sessionId, req.testCaseId, re.get, None)
+
+      MDC.put(Constant.MDCKey.ORIGINAL_SESSION_ID, req.sessionId)
+
+      val pipeline = for {
+        _ <- Future.successful(())
+
+        _ = log.info(LogConstant.logSintattico(actorClassId))
+        _ = log.debug("Check sintattici input")
+        (intestazioneCarrelloPPT, nodoInviaCarrelloRPT) <- Future.fromTry(parseCarrello(soapRequest.payload, inputXsdValid))
+        _ = idCarrello = intestazioneCarrelloPPT.identificativoCarrello
+        _ = re = re.map(r =>
+          r.copy(
+            idCarrello = Some(idCarrello),
+            psp = Some(nodoInviaCarrelloRPT.identificativoPSP),
+            canale = Some(nodoInviaCarrelloRPT.identificativoCanale),
+            fruitore = Some(intestazioneCarrelloPPT.identificativoStazioneIntermediarioPA),
+            fruitoreDescr = Some(intestazioneCarrelloPPT.identificativoStazioneIntermediarioPA),
+            stazione = Some(intestazioneCarrelloPPT.identificativoStazioneIntermediarioPA)
+          )
+        )
+        _ = MDC.put(Constant.MDCKey.ID_CARRELLO, intestazioneCarrelloPPT.identificativoCarrello)
+        _ = log.debug("Check sintattici input rpts")
+        _ = rptKeys = nodoInviaCarrelloRPT.listaRPT.elementoListaRPT.map(e => RPTKey(e.identificativoDominio, e.identificativoUnivocoVersamento, e.codiceContestoPagamento))
+
+        rpts <- Future.fromTry(
+          parseRpts(nodoInviaCarrelloRPT.identificativoCanale, inputXsdValid, nodoInviaCarrelloRPT.listaRPT.elementoListaRPT, intestazioneCarrelloPPT.identificativoCarrello, rptKeys, checkUTF8)
+        )
+        _ = log.debug("Salvataggio stato log CARRELLO_RICEVUTA_NODO/RPT_RICEVUTA_NODO")
+
+        now = Util.now()
+        reCambioStato = re.get.copy(status = Some(StatoCarrelloEnum.CART_RICEVUTO_NODO.toString), insertedTimestamp = now)
+        _ = reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
+        _ = log.info(LogConstant.logSemantico(actorClassId))
+        soapResponse <- manageCarrello(nodoInviaCarrelloRPT, intestazioneCarrelloPPT, rpts)
+
+      } yield soapResponse
+
+      pipeline
+        .recoverWith(recoverPipeline)
+        .map(sr => {
+          traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
+          log.info(LogConstant.logEnd(actorClassId))
+          replyTo ! sr
+          complete()
+        })
   }
 
   def manageCarrello(nodoInviaCarrelloRPT: NodoInviaCarrelloRPT, intestazioneCarrelloPPT: IntestazioneCarrelloPPT, rpts: Seq[CtRichiestaPagamentoTelematico]): Future[SoapResponse] = {
@@ -107,12 +193,12 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
 
           _ = log.debug("Salvataggio carrello")
           _ = insertTime = Util.now()
-          _ <- saveCarrello(insertTime,intestazioneCarrelloPPT)
+          _ <- saveCarrello(insertTime, intestazioneCarrelloPPT)
           now = Util.now()
-          _ ={
+          _ = {
             val reCambioStato = re.get.copy(status = Some(StatoCarrelloEnum.CART_ACCETTATO_NODO.toString), insertedTimestamp = now)
             reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
-            rpts.map(rpt=>{
+            rpts.map(rpt => {
               val reCambioStatorpt = re.get.copy(
                 iuv = Some(rpt.datiVersamento.identificativoUnivocoVersamento),
                 ccp = Some(rpt.datiVersamento.codiceContestoPagamento),
@@ -126,23 +212,23 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
           ctRPT = rpts.head
           _ = log.debug("Check email")
           _ <- Future.fromTry(checkEmail(ctRPT))
-          _ = if(isAGID){
+          _ = if (isAGID) {
             val now = Util.now()
             val reCambioStato = re.get.copy(status = Some(StatoCarrelloEnum.CART_PARCHEGGIATO_NODO.toString), insertedTimestamp = now)
             reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
-            rpts.map(rpt=>{
+            rpts.map(rpt => {
               val reCambioStatorpt = re.get.copy(
                 iuv = Some(rpt.datiVersamento.identificativoUnivocoVersamento),
                 ccp = Some(rpt.datiVersamento.codiceContestoPagamento),
                 idDominio = Some(rpt.dominio.identificativoDominio),
                 status = Some(StatoRPTEnum.RPT_PARCHEGGIATA_NODO.toString),
-                esito = Esito.CAMBIO_STATO,
+                esito = Esito.EXCECUTED_INTERNAL_STEP,
                 insertedTimestamp = now
               )
               reEventFunc(reRequest.copy(re = reCambioStatorpt), log, ddataMap)
             })
           }
-          url = RPTUtil.getAdapterEcommerceUri(uriAdapterEcommerce,req,intestazioneCarrelloPPT)
+          url = RPTUtil.getAdapterEcommerceUri(uriAdapterEcommerce, req, intestazioneCarrelloPPT)
           (payloadNodoInviaCarrelloRPTRisposta, nodoInviaCarrelloRPTRisposta) <- Future.fromTry(
             createNodoInviaCarrelloRPTRisposta(Some(url), esitoResponse = true, nodoInviaCarrelloRPT.identificativoCanale, None)
           )
@@ -152,111 +238,22 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository:CosmosRepository
     } yield SoapResponse(req.sessionId, payloadNodoInviaCarrelloRPTRisposta, StatusCodes.OK.intValue, re, req.testCaseId)
   }
 
-  override def receive: Receive = { case soapRequest: SoapRequest =>
-    req = soapRequest
-    replyTo = sender()
-
-    re = Some(
-      Re(
-        componente = Componente.WISP_SOAP_CONVERTER,
-        categoriaEvento = CategoriaEvento.INTERNO,
-        sessionId = Some(req.sessionId),
-        sessionIdOriginal = Some(req.sessionId),
-        payload = None,
-        esito = Esito.CAMBIO_STATO,
-        tipoEvento = Some(actorClassId),
-        sottoTipoEvento = SottoTipoEvento.INTERN,
-        insertedTimestamp = soapRequest.timestamp,
-        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-        businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
-      )
-    )
-    reRequest = ReRequest(req.sessionId, req.testCaseId, re.get, None)
-
-    MDC.put(Constant.MDCKey.ORIGINAL_SESSION_ID, req.sessionId)
-
-    val pipeline = for {
-      _ <- Future.successful(())
-
-      _ = log.info(LogConstant.logSintattico(actorClassId))
-      _ = log.debug("Check sintattici input")
-      (intestazioneCarrelloPPT, nodoInviaCarrelloRPT) <- Future.fromTry(parseCarrello(soapRequest.payload, inputXsdValid))
-      _ = idCarrello = intestazioneCarrelloPPT.identificativoCarrello
-      _ = re = re.map(r =>
-        r.copy(
-          psp = Some(nodoInviaCarrelloRPT.identificativoPSP),
-          canale = Some(nodoInviaCarrelloRPT.identificativoCanale),
-          fruitore = Some(intestazioneCarrelloPPT.identificativoStazioneIntermediarioPA),
-          fruitoreDescr = Some(intestazioneCarrelloPPT.identificativoStazioneIntermediarioPA),
-          stazione = Some(intestazioneCarrelloPPT.identificativoStazioneIntermediarioPA)
-        )
-      )
-      _ = MDC.put(Constant.MDCKey.ID_CARRELLO, intestazioneCarrelloPPT.identificativoCarrello)
-      _ = log.debug("Check sintattici input rpts")
-      _ = rptKeys = nodoInviaCarrelloRPT.listaRPT.elementoListaRPT.map(e => RPTKey(e.identificativoDominio, e.identificativoUnivocoVersamento, e.codiceContestoPagamento))
-
-      rpts <- Future.fromTry(
-        parseRpts(nodoInviaCarrelloRPT.identificativoCanale, inputXsdValid, nodoInviaCarrelloRPT.listaRPT.elementoListaRPT, intestazioneCarrelloPPT.identificativoCarrello, rptKeys, checkUTF8)
-      )
-      _ = log.debug("Salvataggio stato log CARRELLO_RICEVUTA_NODO/RPT_RICEVUTA_NODO")
-
-      now = Util.now()
-      reCambioStato = re.get.copy(status = Some(StatoCarrelloEnum.CART_RICEVUTO_NODO.toString), insertedTimestamp = now)
-      _ = reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
-      _ = log.info(LogConstant.logSemantico(actorClassId))
-      soapResponse <- manageCarrello(nodoInviaCarrelloRPT, intestazioneCarrelloPPT, rpts)
-
-    } yield soapResponse
-
-    pipeline
-      .recoverWith(recoverPipeline)
-      .map(sr => {
-        traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
-        log.info(LogConstant.logEnd(actorClassId))
-        replyTo ! sr
-        complete()
-      })
-  }
-
-  val recoverGenericError: PartialFunction[Throwable, Future[SoapResponse]] = { case originalException: Throwable =>
-    log.debug(s"Errore generico durante InviaCarrelloRPT, message: [${originalException.getMessage}]")
-    val cfb = CarrelloRptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, originalException), idCanale = None)
-    Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
-  }
-
-  val recoverPipeline: PartialFunction[Throwable, Future[SoapResponse]] = {
-    case cfb: CarrelloRptFaultBeanException =>
-      if (cfb.workflowErrorCode.isDefined && cfb.idCarrello.isDefined && cfb.rptKeys.isDefined) {
-        cfb.workflowErrorCode.get match {
-          case WorkflowExceptionErrorCodes.CARRELLO_ERRORE_SEMANTICO | WorkflowExceptionErrorCodes.RPT_ERRORE_SEMANTICO =>
-            (for {
-              _ <- Future.successful(())
-              now = Util.now()
-              reCambioStato = re.get.copy(status = Some(StatoCarrelloEnum.CART_RIFIUTATO_NODO.toString), insertedTimestamp = now)
-              _ = reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
-              res = errorHandler(req.sessionId, req.testCaseId, cfb, re)
-            } yield res) recoverWith recoverGenericError
-
-          case _ =>
-            val cfb = CarrelloRptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR), idCanale = None)
-            Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
-        }
-      } else {
-        Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
-      }
-    case e: Throwable =>
-      log.warn(e, e.getMessage)
-      val cfb = CarrelloRptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), idCanale = None)
-      Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
+  def saveCarrello(
+                    now: Instant,
+                    intestazioneCarrelloPPT: IntestazioneCarrelloPPT,
+                  ): Future[Int] = {
+    log.debug("Salvataggio messaggio Carrello")
+    val id = RPTUtil.getUniqueKey(req, intestazioneCarrelloPPT)
+    val zipped = Util.zipContent(req.payload)
+    cosmosRepository.save(CosmosPrimitive(re.get.insertedTimestamp.toString.substring(0, 10), id, actorClassId, Base64.getEncoder.encodeToString(zipped)))
   }
 
   def createNodoInviaCarrelloRPTRisposta(
-      url: Option[String],
-      esitoResponse: Boolean,
-      idCanale: String,
-      carrelloRptFaultBeanException: Option[CarrelloRptFaultBeanException]
-  ): Try[(String, NodoInviaCarrelloRPTRisposta)] = {
+                                          url: Option[String],
+                                          esitoResponse: Boolean,
+                                          idCanale: String,
+                                          carrelloRptFaultBeanException: Option[CarrelloRptFaultBeanException]
+                                        ): Try[(String, NodoInviaCarrelloRPTRisposta)] = {
     val esitoComplessivoOperazione = if (esitoResponse) Constant.OK else Constant.KO
     val urlChecked = if (esitoResponse) url else None
     val inviaCarrelloRPTRisposta =

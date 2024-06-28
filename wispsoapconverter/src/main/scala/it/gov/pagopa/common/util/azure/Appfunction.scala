@@ -93,15 +93,15 @@ object Appfunction {
 
   def fmtMessage(re: Re, reExtra: Option[ReExtra]): Try[String] = {
     Try({
-      if (re.categoriaEvento == CategoriaEvento.INTERFACCIA) {
+      if (re.categoriaEvento == CategoriaEvento.INTERFACE) {
         val mod = {
-          if ((re.esito == Esito.RICEVUTA || re.esito == Esito.RICEVUTA_KO) && re.sottoTipoEvento == SottoTipoEvento.REQ) {
+          if ((re.esito == Esito.RECEIVED || re.esito == Esito.RECEIVED_FAILURE) && re.sottoTipoEvento == SottoTipoEvento.REQ) {
             s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito}] DETTAGLIO[Il nodo ha ricevuto un messaggio]"
-          } else if ((re.esito == Esito.INVIATA || re.esito == Esito.INVIATA_KO) && re.sottoTipoEvento == SottoTipoEvento.RESP) {
+          } else if ((re.esito == Esito.SEND || re.esito == Esito.SEND_FAILURE) && re.sottoTipoEvento == SottoTipoEvento.RESP) {
             s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito}] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]"
-          } else if ((re.esito == Esito.INVIATA || re.esito == Esito.INVIATA_KO) && re.sottoTipoEvento == SottoTipoEvento.REQ) {
+          } else if ((re.esito == Esito.SEND || re.esito == Esito.SEND_FAILURE) && re.sottoTipoEvento == SottoTipoEvento.REQ) {
             s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito}] DETTAGLIO[Il nodo ha inviato un messaggio]"
-          } else if ((re.esito == Esito.RICEVUTA || re.esito == Esito.RICEVUTA_KO) && re.sottoTipoEvento == SottoTipoEvento.RESP) {
+          } else if ((re.esito == Esito.RECEIVED || re.esito == Esito.RECEIVED_FAILURE) && re.sottoTipoEvento == SottoTipoEvento.RESP) {
             s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito}] DETTAGLIO[Il nodo ha ricevuto la risposta del messaggio inviato]"
           } else {
             s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito}] DETTAGLIO[Tipo di REQ/RESP non identificata per sotto tipo evento non valido]"
@@ -131,10 +131,10 @@ object Appfunction {
   def fmtMessageJson(re: Re, reExtra: Option[ReExtra], data: ConfigData): Try[String] = {
     Try({
       val nd = "nd"
-      val (isServerRequest, isServerResponse, caller, httpType, subject, subjectDescr) = if (re.categoriaEvento == CategoriaEvento.INTERFACCIA) {
-          if ((re.esito == Esito.RICEVUTA || re.esito == Esito.RICEVUTA_KO) && re.sottoTipoEvento == SottoTipoEvento.REQ) {
+      val (isServerRequest, isServerResponse, caller, httpType, subject, subjectDescr) = if (re.categoriaEvento == CategoriaEvento.INTERFACE) {
+          if ((re.esito == Esito.RECEIVED || re.esito == Esito.RECEIVED_FAILURE) && re.sottoTipoEvento == SottoTipoEvento.REQ) {
             (true, false, Some(Constant.SERVER), Some(Constant.REQUEST), Some(re.fruitore.getOrElse(nd)), Some(re.fruitoreDescr.getOrElse(nd)))
-          } else if ((re.esito == Esito.INVIATA || re.esito == Esito.INVIATA_KO) && re.sottoTipoEvento == SottoTipoEvento.RESP) {
+          } else if ((re.esito == Esito.SEND || re.esito == Esito.SEND_FAILURE) && re.sottoTipoEvento == SottoTipoEvento.RESP) {
             (false, true, Some(Constant.SERVER), Some(Constant.RESPONSE), Some(re.fruitore.getOrElse(nd)), Some(re.fruitoreDescr.getOrElse(nd)))
           } else {
             (false, false, Some(nd), Some(nd), Some(nd), Some(nd))
@@ -163,7 +163,7 @@ object Appfunction {
       val soapAction = reExtra.flatMap(h => h.headers.find(_._1 == "SOAPAction").map(_._2))
       val businessProcess = re.businessProcess
       val tipoEvento = re.tipoEvento
-      val internalMessage = if (re.categoriaEvento == CategoriaEvento.INTERFACCIA) {
+      val internalMessage = if (re.categoriaEvento == CategoriaEvento.INTERFACE) {
           if (isServerRequest) {
             s"${caller.getOrElse("")} --> ${httpType.getOrElse("")}: messaggio da [subject:${subject.getOrElse("")}]"
           } else if (isServerResponse) {

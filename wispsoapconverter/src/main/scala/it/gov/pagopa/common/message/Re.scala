@@ -10,6 +10,7 @@ case class Re(
     componente: Componente.Value,
     categoriaEvento: CategoriaEvento.Value,
     sottoTipoEvento: SottoTipoEvento.Value,
+    idCarrello: Option[String] = None,
     idDominio: Option[String] = None,
     iuv: Option[String] = None,
     ccp: Option[String] = None,
