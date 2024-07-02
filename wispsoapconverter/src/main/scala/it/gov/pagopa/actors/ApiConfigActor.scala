@@ -8,9 +8,12 @@ import it.gov.pagopa.common.util.ConfigUtil
 
 import java.util.UUID
 import scala.concurrent.duration._
-case class GetCache(override val sessionId: String, cacheId: String) extends BaseMessage
-case class CheckCache(override val sessionId: String) extends BaseMessage
-final case class ApiConfigActor(cosmosRepository: CosmosRepository,actorProps: ActorProps) extends BaseActor {
+
+case class GetCache(override val sessionId: Option[String], cacheId: String) extends BaseMessage
+
+case class CheckCache(override val sessionId: Option[String]) extends BaseMessage
+
+final case class ApiConfigActor(cosmosRepository: CosmosRepository, actorProps: ActorProps) extends BaseActor {
 
   implicit val system = context.system
 
