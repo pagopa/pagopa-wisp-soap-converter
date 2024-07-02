@@ -66,7 +66,7 @@ case class CosmosBuilder() {
       request.re.uniqueId,
       request.re.insertedTimestamp.toString.substring(0, 10),
       null,
-      request.sessionId,
+      request.sessionId.orNull,
       null,
       request.re.componente.toString,
       request.re.insertedTimestamp,
