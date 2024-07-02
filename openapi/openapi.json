@@ -4,7 +4,7 @@
     "title": "Wisp soap converter",
     "description": "Wisp soap converter",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.2.6-74-PAGOPA-1894"
+    "version": "0.2.6-75-PAGOPA-1894"
   },
   "servers": [
     {
