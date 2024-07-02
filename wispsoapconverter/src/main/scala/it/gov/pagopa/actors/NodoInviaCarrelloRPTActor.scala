@@ -19,7 +19,6 @@ import it.gov.pagopa.exception.{CarrelloRptFaultBeanException, WorkflowException
 import org.slf4j.MDC
 import scalaxbmodel.nodoperpa.{IntestazioneCarrelloPPT, NodoInviaCarrelloRPT, NodoInviaCarrelloRPTRisposta}
 import scalaxbmodel.paginf.CtRichiestaPagamentoTelematico
-import sun.nio.cs.UTF_8
 
 import java.time.Instant
 import java.util.Base64
@@ -94,7 +93,8 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
         Re(
           componente = Componente.WISP_SOAP_CONVERTER,
           categoriaEvento = CategoriaEvento.INTERNAL,
-          sessionId = Some(req.sessionId),
+          sessionId = None,
+          sessionIdUuid = Some(req.sessionId),
           sessionIdOriginal = Some(req.sessionId),
           payload = None,
           esito = Esito.EXCECUTED_INTERNAL_STEP,
@@ -106,7 +106,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
           erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
         )
       )
-      reRequest = ReRequest(req.sessionId, req.testCaseId, re.get, None)
+      reRequest = ReRequest(null, req.testCaseId, re.get, None)
 
       MDC.put(Constant.MDCKey.ORIGINAL_SESSION_ID, req.sessionId)
 
@@ -119,6 +119,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
         _ = idCarrello = intestazioneCarrelloPPT.identificativoCarrello
         _ = re = re.map(r =>
           r.copy(
+            sessionId = Some(RPTUtil.getUniqueKey(req, intestazioneCarrelloPPT)),
             idCarrello = Some(idCarrello),
             psp = Some(nodoInviaCarrelloRPT.identificativoPSP),
             canale = Some(nodoInviaCarrelloRPT.identificativoCanale),
