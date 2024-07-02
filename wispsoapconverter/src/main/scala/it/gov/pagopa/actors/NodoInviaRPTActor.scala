@@ -92,7 +92,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
         Re(
           componente = Componente.WISP_SOAP_CONVERTER,
           categoriaEvento = CategoriaEvento.INTERNAL,
-          flowId = Some(req.sessionId),
+          sessionIdUuid = Some(req.sessionId),
           sessionIdOriginal = Some(req.sessionId),
           payload = None,
           esito = Esito.EXCECUTED_INTERNAL_STEP,
@@ -125,8 +125,8 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
 
         _ = re = re.map(r =>
           r.copy(
-            sessionId = Some(RPTUtil.getUniqueKey(req, intestazionePPT))
-              psp = Some(nodoInviaRPT.identificativoPSP),
+            sessionId = Some(RPTUtil.getUniqueKey(req, intestazionePPT)),
+            psp = Some(nodoInviaRPT.identificativoPSP),
             canale = Some(nodoInviaRPT.identificativoCanale),
             fruitore = Some(intestazionePPT.identificativoStazioneIntermediarioPA),
             fruitoreDescr = Some(intestazionePPT.identificativoStazioneIntermediarioPA),
@@ -224,7 +224,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
 
   def reCambioStato(stato: String, time: Instant, tipo: Option[String] = None): Unit = {
     reEventFunc(
-      ReRequest(req.sessionId, req.testCaseId, re.get.copy(status = Some(s"${tipo.getOrElse("")}${stato}"), insertedTimestamp = time, esito = Esito.EXCECUTED_INTERNAL_STEP), None),
+      ReRequest(Some(req.sessionId), req.testCaseId, re.get.copy(status = Some(s"${tipo.getOrElse("")}${stato}"), insertedTimestamp = time, esito = Esito.EXCECUTED_INTERNAL_STEP), None),
       log,
       ddataMap
     )

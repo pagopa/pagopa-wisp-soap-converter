@@ -57,7 +57,7 @@ case class ReEventEntity(
                           operationErrorDetail: String,
                           operationErrorCode: String,
                           primitive: String,
-                          flowId: String,
+                          sessionIdUuid: String,
                           sessionId: String,
                           cartId: String,
                           iuv: String,
@@ -122,7 +122,7 @@ case class ReEventEntity(
 
   def getSessionId: String = sessionId
 
-  def getFlowId: String = flowId
+  def getSessionIdUuid: String = sessionIdUuid
 
   def getCartId: String = cartId
 

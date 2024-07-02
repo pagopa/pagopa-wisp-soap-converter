@@ -106,7 +106,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
           erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
         )
       )
-      reRequest = ReRequest(req.sessionId, req.testCaseId, re.get, None)
+      reRequest = ReRequest(Some(req.sessionId), req.testCaseId, re.get, None)
 
       MDC.put(Constant.MDCKey.ORIGINAL_SESSION_ID, req.sessionId)
 
