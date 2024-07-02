@@ -92,7 +92,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
         Re(
           componente = Componente.WISP_SOAP_CONVERTER,
           categoriaEvento = CategoriaEvento.INTERNAL,
-          sessionId = Some(req.sessionId),
+          flowId = Some(req.sessionId),
           sessionIdOriginal = Some(req.sessionId),
           payload = None,
           esito = Esito.EXCECUTED_INTERNAL_STEP,
@@ -104,7 +104,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
           erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
         )
       )
-      reRequest = ReRequest(req.sessionId, req.testCaseId, re.get, None)
+      reRequest = ReRequest(None, req.testCaseId, re.get, None)
       MDC.put(Constant.MDCKey.ORIGINAL_SESSION_ID, req.sessionId)
 
       val pipeline = for {
@@ -125,7 +125,8 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
 
         _ = re = re.map(r =>
           r.copy(
-            psp = Some(nodoInviaRPT.identificativoPSP),
+            sessionId = Some(RPTUtil.getUniqueKey(req, intestazionePPT))
+              psp = Some(nodoInviaRPT.identificativoPSP),
             canale = Some(nodoInviaRPT.identificativoCanale),
             fruitore = Some(intestazionePPT.identificativoStazioneIntermediarioPA),
             fruitoreDescr = Some(intestazionePPT.identificativoStazioneIntermediarioPA),
