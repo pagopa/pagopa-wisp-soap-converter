@@ -26,12 +26,12 @@ import scala.util.{Failure, Success, Try}
 import scala.xml.NodeSeq
 
 class SoapActorPerRequest(
-    override val requestContext: RequestContext,
-    override val donePromise: Promise[RouteResult],
-    allRouters: Map[String, ActorRef],
-    actorProps: ActorProps
-) extends FuturePerRequestActor
-    with ReUtil {
+                           override val requestContext: RequestContext,
+                           override val donePromise: Promise[RouteResult],
+                           allRouters: Map[String, ActorRef],
+                           actorProps: ActorProps
+                         ) extends FuturePerRequestActor
+  with ReUtil {
 
   var message: SoapRouterRequest = _
   var bundleResponse: SoapResponse = _
@@ -54,30 +54,6 @@ class SoapActorPerRequest(
     )
   }
 
-  def reExtra(message: SoapRouterRequest): ReExtra =
-    ReExtra(callType = Some(CallType.SERVER),uri = message.uri, headers = message.headers.getOrElse(Nil), httpMethod = Some(HttpMethods.POST.toString()), callRemoteAddress = message.callRemoteAddress, soapProtocol = true)
-
-  def traceRequest(message: SoapRouterRequest, reEventFunc: ReEventFunc, ddataMap: ConfigData): Unit = {
-    Util.logPayload(log, Some(message.payload))
-    val reRequestReq = ReRequest(
-      sessionId = message.sessionId,
-      testCaseId = message.testCaseId,
-      re = Re(
-        componente = Componente.WISP_SOAP_CONVERTER,
-        categoriaEvento = CategoriaEvento.INTERFACE,
-        sottoTipoEvento = SottoTipoEvento.REQ,
-        esito = Esito.RECEIVED,
-        sessionId = Some(message.sessionId),
-        payload = Some(message.payload.getUtf8Bytes),
-        insertedTimestamp = message.timestamp,
-        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
-      ),
-      reExtra = Some(reExtra(message))
-    )
-    reEventFunc(reRequestReq, log, ddataMap)
-  }
-
   override def receive: Receive = {
     case srr: SoapRouterRequest =>
       log.debug("RECEIVE SoapRouterRequest")
@@ -86,45 +62,48 @@ class SoapActorPerRequest(
 
     case sres: SoapResponse =>
       log.debug("RECEIVE SoapResponse")
-          //risposta dal bundle positiva o negativa
-          bundleResponse = sres
+      //risposta dal bundle positiva o negativa
+      bundleResponse = sres
 
-          val now = Util.now()
-          val reRequest = ReRequest(
-            sessionId = sres.sessionId,
-            testCaseId = sres.testCaseId,
-            re = sres.re
-              .map(
-                _.copy(
-                  componente = Componente.WISP_SOAP_CONVERTER,
-                  categoriaEvento = CategoriaEvento.INTERFACE,
-                  sottoTipoEvento = SottoTipoEvento.RESP,
-                  esito = Esito.SEND,
-                  payload = Some(sres.payload.getUtf8Bytes),
-                  insertedTimestamp = now
-                )
-              )
-              .getOrElse(
-                Re(
-                  componente = Componente.WISP_SOAP_CONVERTER,
-                  categoriaEvento = CategoriaEvento.INTERFACE,
-                  sottoTipoEvento = SottoTipoEvento.RESP,
-                  esito = Esito.SEND,
-                  payload = Some(sres.payload.getUtf8Bytes),
-                  insertedTimestamp = now,
-                  sessionId = Some(sres.sessionId),
-                  erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-                  erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
-                )
-              ),
-            reExtra = Some(ReExtra(callType = Some(CallType.SERVER),statusCode = Some(bundleResponse.statusCode), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
+      val now = Util.now()
+      val reRequest = ReRequest(
+        sessionId = Some(sres.sessionId),
+        testCaseId = sres.testCaseId,
+        re = sres.re
+          .map(
+            _.copy(
+              componente = Componente.WISP_SOAP_CONVERTER,
+              categoriaEvento = CategoriaEvento.INTERFACE,
+              sottoTipoEvento = SottoTipoEvento.RESP,
+              esito = Esito.SEND,
+              payload = Some(sres.payload.getUtf8Bytes),
+              insertedTimestamp = now
+            )
           )
+          .getOrElse(
+            Re(
+              componente = Componente.WISP_SOAP_CONVERTER,
+              categoriaEvento = CategoriaEvento.INTERFACE,
+              sottoTipoEvento = SottoTipoEvento.RESP,
+              esito = Esito.SEND,
+              payload = Some(sres.payload.getUtf8Bytes),
+              insertedTimestamp = now,
+              sessionId = Some(sres.sessionId),
+              erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+              erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+            )
+          ),
+        reExtra = Some(ReExtra(callType = Some(CallType.SERVER), statusCode = Some(bundleResponse.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS)), soapProtocol = true))
+      )
 
-          Util.logPayload(log, Some(sres.payload))
-          log.info(LogConstant.callBundle(Constant.KeyName.RE_FEEDER, isInput = false))
-          actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
-          complete(createHttpResponse(StatusCode.int2StatusCode(bundleResponse.statusCode), bundleResponse.payload, sres.sessionId), Constant.KeyName.SOAP_INPUT)
+      Util.logPayload(log, Some(sres.payload))
+      log.info(LogConstant.callBundle(Constant.KeyName.RE_FEEDER, isInput = false))
+      actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
+      complete(createHttpResponse(StatusCode.int2StatusCode(bundleResponse.statusCode), bundleResponse.payload, sres.sessionId), Constant.KeyName.SOAP_INPUT)
   }
+
+  def reExtra(message: SoapRouterRequest): ReExtra =
+    ReExtra(callType = Some(CallType.SERVER), uri = message.uri, headers = message.headers.getOrElse(Nil), httpMethod = Some(HttpMethods.POST.toString()), callRemoteAddress = message.callRemoteAddress, soapProtocol = true)
 
   def sendToBundle(message: SoapRouterRequest): Try[Unit] = {
     val xmlStreamExc = ("Errore richiesta non leggibile", "soap:Client", "XML_STREAM_EXC")
@@ -158,21 +137,21 @@ class SoapActorPerRequest(
       sender: String = extractSender(xml, xpath._1).getOrElse("n/d")
       routername = Util.getActorRouterName(primitiva, Some(sender))
       router: ActorRef =
-          allRouters.get(routername) match {
-            case Some(routerObj) =>
-              log.debug(s"ROUTER for [$primitiva - $sender] FOUND [${routerObj.path}]")
-              routerObj
+        allRouters.get(routername) match {
+          case Some(routerObj) =>
+            log.debug(s"ROUTER for [$primitiva - $sender] FOUND [${routerObj.path}]")
+            routerObj
 
-            case None =>
-              allRouters.get(BootstrapUtil.actorRouter(primitiva)) match {
-                case Some(defaultRouter) =>
-                  log.debug(s"ROUTER for [$primitiva - DEFAULT] FOUND [${defaultRouter.path}]")
-                  defaultRouter
-                case None =>
-                  log.error(s"ROUTER for [$primitiva] not found")
-                  val dpe = exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR)
-                  throw dpe
-              }
+          case None =>
+            allRouters.get(BootstrapUtil.actorRouter(primitiva)) match {
+              case Some(defaultRouter) =>
+                log.debug(s"ROUTER for [$primitiva - DEFAULT] FOUND [${defaultRouter.path}]")
+                defaultRouter
+              case None =>
+                log.error(s"ROUTER for [$primitiva] not found")
+                val dpe = exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR)
+                throw dpe
+            }
         }
       soapRequest = SoapRequest(
         message.sessionId,
@@ -181,7 +160,7 @@ class SoapActorPerRequest(
         primitiva,
         sender,
         message.timestamp,
-        reExtra(message),false,
+        reExtra(message), false,
         message.testCaseId
       )
     } yield (router, soapRequest)) map { case (router, soapRequest) =>
@@ -197,7 +176,7 @@ class SoapActorPerRequest(
 
         val now = Util.now()
         val reRequestResp = ReRequest(
-          sessionId = message.sessionId,
+          sessionId = Some(message.sessionId),
           testCaseId = message.testCaseId,
           re = Re(
             componente = Componente.WISP_SOAP_CONVERTER,
@@ -208,7 +187,7 @@ class SoapActorPerRequest(
             payload = Some(payload.getUtf8Bytes),
             insertedTimestamp = now
           ),
-          reExtra = Some(ReExtra(callType = Some(CallType.SERVER),statusCode = Some(sre.statusCode), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
+          reExtra = Some(ReExtra(callType = Some(CallType.SERVER), statusCode = Some(sre.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS)), soapProtocol = true))
         )
         actorProps.reEventFunc(reRequestResp, log, actorProps.ddataMap)
 
@@ -217,7 +196,7 @@ class SoapActorPerRequest(
       case e: Throwable =>
         log.error(e, "General Error Throwable")
 
-        traceRequest(message,actorProps.reEventFunc, actorProps.ddataMap)
+        traceRequest(message, actorProps.reEventFunc, actorProps.ddataMap)
 
         val dpe = exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR)
         val payload = Util.faultXmlResponse(dpe.faultCode, dpe.faultString, Some(dpe.message))
@@ -225,7 +204,7 @@ class SoapActorPerRequest(
 
         val now = Util.now()
         val reRequest = ReRequest(
-          sessionId = message.sessionId,
+          sessionId = Some(message.sessionId),
           testCaseId = message.testCaseId,
           re = Re(
             componente = Componente.WISP_SOAP_CONVERTER,
@@ -236,11 +215,32 @@ class SoapActorPerRequest(
             payload = Some(payload.getUtf8Bytes),
             insertedTimestamp = now
           ),
-          reExtra = Some(ReExtra(callType = Some(CallType.SERVER),statusCode = Some(StatusCodes.InternalServerError.intValue), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
+          reExtra = Some(ReExtra(callType = Some(CallType.SERVER), statusCode = Some(StatusCodes.InternalServerError.intValue), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS)), soapProtocol = true))
         )
         actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
         complete(createHttpResponse(StatusCodes.InternalServerError.intValue, payload, message.sessionId), Constant.KeyName.SOAP_INPUT)
     }
+  }
+
+  def traceRequest(message: SoapRouterRequest, reEventFunc: ReEventFunc, ddataMap: ConfigData): Unit = {
+    Util.logPayload(log, Some(message.payload))
+    val reRequestReq = ReRequest(
+      sessionId = Some(message.sessionId),
+      testCaseId = message.testCaseId,
+      re = Re(
+        componente = Componente.WISP_SOAP_CONVERTER,
+        categoriaEvento = CategoriaEvento.INTERFACE,
+        sottoTipoEvento = SottoTipoEvento.REQ,
+        esito = Esito.RECEIVED,
+        sessionId = Some(message.sessionId),
+        payload = Some(message.payload.getUtf8Bytes),
+        insertedTimestamp = message.timestamp,
+        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+      ),
+      reExtra = Some(reExtra(message))
+    )
+    reEventFunc(reRequestReq, log, ddataMap)
   }
 
   private def extractSender(xml: NodeSeq, path: String): Try[String] = {
