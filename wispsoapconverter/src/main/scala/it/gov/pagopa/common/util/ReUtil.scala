@@ -5,8 +5,10 @@ import it.gov.pagopa.common.message._
 import it.gov.pagopa.common.util.ConfigUtil.ConfigData
 import it.gov.pagopa.common.util.azure.Appfunction.ReEventFunc
 import it.gov.pagopa.common.util.azure.cosmos.{CategoriaEvento, Esito, SottoTipoEvento}
+import org.slf4j.MDC
 
-trait ReUtil { this: NodoLogging =>
+trait ReUtil {
+  this: NodoLogging =>
 
   def traceInterfaceRequest(message: SoapRequest, re: Re, reExtra: ReExtra, reEventFunc: ReEventFunc, ddataMap: ConfigData): Unit = {
     import StringUtils.Utf8String
@@ -15,6 +17,7 @@ trait ReUtil { this: NodoLogging =>
       sessionId = message.sessionId,
       testCaseId = message.testCaseId,
       re = re.copy(
+        sessionId = Some(MDC.get(Constant.MDCKey.SESSION_ID)),
         insertedTimestamp = message.timestamp,
         payload = Some(message.payload.getUtf8Bytes),
         categoriaEvento = CategoriaEvento.INTERFACE,

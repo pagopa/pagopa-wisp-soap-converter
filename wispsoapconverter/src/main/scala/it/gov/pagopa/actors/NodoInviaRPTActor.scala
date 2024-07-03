@@ -88,11 +88,15 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
     case soapRequest: SoapRequest =>
       req = soapRequest
       replyTo = sender()
+
+      // parachute session id, will be replaced lately when the sessionId will be generated
+      MDC.put(Constant.MDCKey.SESSION_ID, req.sessionId)
+
       re = Some(
         Re(
           componente = Componente.WISP_SOAP_CONVERTER,
           categoriaEvento = CategoriaEvento.INTERNAL,
-          sessionId = Some(req.sessionId),
+          sessionId = None,
           sessionIdOriginal = Some(req.sessionId),
           payload = None,
           esito = Esito.EXCECUTED_INTERNAL_STEP,
@@ -104,7 +108,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
           erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
         )
       )
-      reRequest = ReRequest(req.sessionId, req.testCaseId, re.get, None)
+      reRequest = ReRequest(null, req.testCaseId, re.get, None)
       MDC.put(Constant.MDCKey.ORIGINAL_SESSION_ID, req.sessionId)
 
       val pipeline = for {
@@ -116,6 +120,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
         _ = log.debug("Input parserizzato correttamente")
         _ = rptKey = RPTKey(intestazionePPT.identificativoDominio, intestazionePPT.identificativoUnivocoVersamento, intestazionePPT.codiceContestoPagamento)
 
+        _ = MDC.put(Constant.MDCKey.SESSION_ID, RPTUtil.getUniqueKey(req, intestazionePPT));
         _ = MDC.put(Constant.MDCKey.ID_DOMINIO, rptKey.idDominio)
         _ = MDC.put(Constant.MDCKey.IUV, rptKey.iuv)
         _ = MDC.put(Constant.MDCKey.CCP, rptKey.ccp)
@@ -125,6 +130,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
 
         _ = re = re.map(r =>
           r.copy(
+            sessionId = Some(MDC.get(Constant.MDCKey.SESSION_ID)),
             psp = Some(nodoInviaRPT.identificativoPSP),
             canale = Some(nodoInviaRPT.identificativoCanale),
             fruitore = Some(intestazionePPT.identificativoStazioneIntermediarioPA),
