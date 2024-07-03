@@ -9,6 +9,7 @@ import it.gov.pagopa.common.util.ConfigUtil.ConfigData
 import it.gov.pagopa.common.util._
 import it.gov.pagopa.common.util.azure.Appfunction
 import it.gov.pagopa.common.util.azure.Appfunction.{ReEventFunc, defaultOperation}
+import org.slf4j.MDC
 
 import java.io.ByteArrayOutputStream
 import java.util.Base64
@@ -88,8 +89,7 @@ case class CosmosBuilder() {
       fault.flatMap(_._2).orNull,
       fault.flatMap(_._3).orNull,
       request.re.tipoEvento.orNull,
-      request.re.sessionId.orNull,
-      request.re.sessionIdOriginal.orNull,
+      MDC.get(Constant.MDCKey.SESSION_ID),
       request.re.idCarrello.orNull,
       request.re.iuv.orNull,
       request.re.noticeNumber.orNull,
