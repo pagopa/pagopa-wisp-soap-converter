@@ -43,34 +43,34 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
               _ <- Future.successful(())
               _ = reCambioStato(StatoRPTEnum.RPT_RIFIUTATA_NODO.toString, now)
               resItems = errorHandler(cfb)
-              res = SoapResponse(req.sessionId, resItems._1, StatusCodes.OK.intValue, re, req.testCaseId)
+              res = SoapResponse(MDC.get(Constant.MDCKey.SESSION_ID), resItems._1, StatusCodes.OK.intValue, re, req.testCaseId)
             } yield res) recoverWith recoverGenericError
           case a =>
             log.warn(s"workflow error code non gestito [${a.toString}]")
             val cfb = RptFaultBeanException(exception.DigitPaException(s"workflow error code non gestito [${a.toString}]", DigitPaErrorCodes.PPT_SYSTEM_ERROR))
             val resItems = errorHandler(cfb)
-            Future.successful(SoapResponse(req.sessionId, resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
+            Future.successful(SoapResponse(MDC.get(Constant.MDCKey.SESSION_ID), resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
         }
       } else {
         val resItems = errorHandler(cfb)
-        Future.successful(SoapResponse(req.sessionId, resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
+        Future.successful(SoapResponse(MDC.get(Constant.MDCKey.SESSION_ID), resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
       }
     case dpaex: DigitPaException =>
       log.warn(s"Errore generico durante $actorClassId, message: [${dpaex.getMessage}]")
       val resItems = errorHandler(RptFaultBeanException(dpaex))
-      Future.successful(SoapResponse(req.sessionId, resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
+      Future.successful(SoapResponse(MDC.get(Constant.MDCKey.SESSION_ID), resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
     case cause: Throwable =>
       log.warn(cause, s"Errore generico durante $actorClassId, message: [${cause.getMessage}]")
       val cfb = RptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, cause))
       val resItems = errorHandler(cfb)
-      Future.successful(SoapResponse(req.sessionId, resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
+      Future.successful(SoapResponse(MDC.get(Constant.MDCKey.SESSION_ID), resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
   }
   val recoverGenericError: PartialFunction[Throwable, Future[SoapResponse]] = {
     case originalException: Throwable =>
       log.debug(s"Errore generico durante $actorClassId, message: [${originalException.getMessage}]")
       val cfb = RptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, originalException))
       val resItems = errorHandler(cfb)
-      Future.successful(SoapResponse(req.sessionId, resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
+      Future.successful(SoapResponse(MDC.get(Constant.MDCKey.SESSION_ID), resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
   }
   var req: SoapRequest = _
   var replyTo: ActorRef = _
@@ -88,12 +88,15 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
     case soapRequest: SoapRequest =>
       req = soapRequest
       replyTo = sender()
+
+      // parachute session id, will be replaced lately when the sessionId will be generated
+      MDC.put(Constant.MDCKey.SESSION_ID, req.sessionId)
+
       re = Some(
         Re(
           componente = Componente.WISP_SOAP_CONVERTER,
           categoriaEvento = CategoriaEvento.INTERNAL,
           sessionId = None,
-          sessionIdUuid = Some(req.sessionId),
           sessionIdOriginal = Some(req.sessionId),
           payload = None,
           esito = Esito.EXCECUTED_INTERNAL_STEP,
@@ -117,6 +120,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
         _ = log.debug("Input parserizzato correttamente")
         _ = rptKey = RPTKey(intestazionePPT.identificativoDominio, intestazionePPT.identificativoUnivocoVersamento, intestazionePPT.codiceContestoPagamento)
 
+        _ = MDC.put(Constant.MDCKey.SESSION_ID, RPTUtil.getUniqueKey(req, intestazionePPT));
         _ = MDC.put(Constant.MDCKey.ID_DOMINIO, rptKey.idDominio)
         _ = MDC.put(Constant.MDCKey.IUV, rptKey.iuv)
         _ = MDC.put(Constant.MDCKey.CCP, rptKey.ccp)
@@ -126,7 +130,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
 
         _ = re = re.map(r =>
           r.copy(
-            sessionId = Some(RPTUtil.getUniqueKey(req, intestazionePPT)),
+            sessionId = Some(MDC.get(Constant.MDCKey.SESSION_ID)),
             psp = Some(nodoInviaRPT.identificativoPSP),
             canale = Some(nodoInviaRPT.identificativoCanale),
             fruitore = Some(intestazionePPT.identificativoStazioneIntermediarioPA),
@@ -178,7 +182,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
 
         (payloadNodoInviaRPTRisposta, _) <- manageNormal(intestazionePPT, modelloUno, isAGID)
 
-      } yield SoapResponse(soapRequest.sessionId, payloadNodoInviaRPTRisposta, StatusCodes.OK.intValue, re, soapRequest.testCaseId)
+      } yield SoapResponse(MDC.get(Constant.MDCKey.SESSION_ID), payloadNodoInviaRPTRisposta, StatusCodes.OK.intValue, re, soapRequest.testCaseId)
 
       pipeline
         .recoverWith(recoverFuture)
@@ -225,7 +229,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
 
   def reCambioStato(stato: String, time: Instant, tipo: Option[String] = None): Unit = {
     reEventFunc(
-      ReRequest(req.sessionId, req.testCaseId, re.get.copy(status = Some(s"${tipo.getOrElse("")}${stato}"), insertedTimestamp = time, esito = Esito.EXCECUTED_INTERNAL_STEP), None),
+      ReRequest(MDC.get(Constant.MDCKey.SESSION_ID), req.testCaseId, re.get.copy(status = Some(s"${tipo.getOrElse("")}${stato}"), insertedTimestamp = time, esito = Esito.EXCECUTED_INTERNAL_STEP), None),
       log,
       ddataMap
     )

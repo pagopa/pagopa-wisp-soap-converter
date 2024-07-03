@@ -88,7 +88,6 @@ case class CosmosBuilder() {
       fault.flatMap(_._2).orNull,
       fault.flatMap(_._3).orNull,
       request.re.tipoEvento.orNull,
-      request.re.sessionId.orNull,
       request.re.sessionIdOriginal.orNull,
       request.re.idCarrello.orNull,
       request.re.iuv.orNull,
