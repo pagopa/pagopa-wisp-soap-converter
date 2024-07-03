@@ -25,6 +25,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
   }
 
   "fmtMessage" should "ok" in {
+
     assert(Appfunction.fmtMessage(
       Re(
         Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
@@ -35,12 +36,12 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
             <fault>
               <faultCode>fCode</faultCode>
             </fault> <faultString>fString</faultString> <description>fDescr</description>
-          </xml>.toString().getBytes
+          </xml>.toString().replaceAll("[\\s\\n\\t]+", "").getBytes
         )
       ),
       Some(ReExtra())
     ).get ==
-      """Re Request => TIPO_EVENTO[REQ/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[RICEVUTA] DETTAGLIO[Il nodo ha ricevuto un messaggio]
+      """Re Request => TIPO_EVENTO[REQ/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[RECEIVED] DETTAGLIO[Il nodo ha ricevuto un messaggio]
         |httpUri: [UNKNOWN]
         |httpHeaders: [UNKNOWN]
         |httpStatusCode: [UNKNOWN]
@@ -57,12 +58,12 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
             <fault>
               <faultCode>fCode</faultCode>
             </fault> <faultString>fString</faultString> <description>fDescr</description>
-          </xml>.toString().getBytes
+          </xml>.toString().replaceAll("[\\s\\n\\t]+", "").getBytes
         )
       ),
       Some(ReExtra())
     ).get ==
-      """Re Request => TIPO_EVENTO[RESP/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[INVIATA] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]
+      """Re Request => TIPO_EVENTO[RESP/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[SEND] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]
         |httpUri: [UNKNOWN]
         |httpHeaders: [UNKNOWN]
         |httpStatusCode: [UNKNOWN]
@@ -80,7 +81,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
       ),
       Some(ReExtra())
     ).get ==
-      """Re Request => TIPO_EVENTO[RESP/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[INVIATA] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]
+      """Re Request => TIPO_EVENTO[RESP/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[SEND] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]
         |httpUri: [UNKNOWN]
         |httpHeaders: [UNKNOWN]
         |httpStatusCode: [UNKNOWN]
@@ -98,7 +99,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
       ),
       Some(ReExtra())
     ).get ==
-      """Re Request => TIPO_EVENTO[REQ/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[RICEVUTA] DETTAGLIO[Il nodo ha ricevuto un messaggio]
+      """Re Request => TIPO_EVENTO[REQ/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[RECEIVED] DETTAGLIO[Il nodo ha ricevuto un messaggio]
         |httpUri: [UNKNOWN]
         |httpHeaders: [UNKNOWN]
         |httpStatusCode: [UNKNOWN]
@@ -115,7 +116,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
         )
       ),
       Some(ReExtra())
-    ).get == """Re Request => TIPO_EVENTO[INTERN/n.a] ESITO[CAMBIO_STATO] STATO[STATO non presente]""")
+    ).get == """Re Request => TIPO_EVENTO[INTERN/n.a] ESITO[EXCECUTED_INTERNAL_STEP] STATO[STATO non presente]""")
 
   }
 
@@ -136,7 +137,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
         )
       ),
       Some(ReExtra()), TestItems.ddataMap
-    ).get == """{"internalMessage":"SERVER --> REQUEST: messaggio da [subject:nd]","categoriaEvento":"INTERFACCIA","caller":"SERVER","httpType":"REQUEST","esito":"KO","faultCode":"fCode","subject":"nd","subjectDescr":"nd"}""")
+    ).get == """{"internalMessage":"SERVER --> REQUEST: messaggio da [subject:nd]","categoriaEvento":"INTERFACE","caller":"SERVER","httpType":"REQUEST","esito":"KO","faultCode":"fCode","subject":"nd","subjectDescr":"nd"}""")
 
     assert(Appfunction.fmtMessageJson(
       Re(
@@ -154,7 +155,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
         )
       ),
       Some(ReExtra()), TestItems.ddataMap
-    ).get == """{"internalMessage":"SERVER --> RESPONSE: risposta a [subject:nd] [esito:KO] [faultCode:fCode]","categoriaEvento":"INTERFACCIA","caller":"SERVER","httpType":"RESPONSE","esito":"KO","faultCode":"fCode","subject":"nd","subjectDescr":"nd"}""")
+    ).get == """{"internalMessage":"SERVER --> RESPONSE: risposta a [subject:nd] [esito:KO] [faultCode:fCode]","categoriaEvento":"INTERFACE","caller":"SERVER","httpType":"RESPONSE","esito":"KO","faultCode":"fCode","subject":"nd","subjectDescr":"nd"}""")
 
     assert(Appfunction.fmtMessageJson(
       Re(
@@ -167,7 +168,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
         )
       ),
       Some(ReExtra()), TestItems.ddataMap
-    ).get == """{"internalMessage":"SERVER --> RESPONSE: risposta a [subject:nd] [esito:OK]","categoriaEvento":"INTERFACCIA","caller":"SERVER","httpType":"RESPONSE","esito":"OK","subject":"nd","subjectDescr":"nd"}""")
+    ).get == """{"internalMessage":"SERVER --> RESPONSE: risposta a [subject:nd] [esito:OK]","categoriaEvento":"INTERFACE","caller":"SERVER","httpType":"RESPONSE","esito":"OK","subject":"nd","subjectDescr":"nd"}""")
 
     assert(Appfunction.fmtMessageJson(
       Re(
@@ -180,7 +181,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
         )
       ),
       Some(ReExtra()), TestItems.ddataMap
-    ).get == """{"internalMessage":"SERVER --> REQUEST: messaggio da [subject:nd]","categoriaEvento":"INTERFACCIA","caller":"SERVER","httpType":"REQUEST","esito":"OK","subject":"nd","subjectDescr":"nd"}""")
+    ).get == """{"internalMessage":"SERVER --> REQUEST: messaggio da [subject:nd]","categoriaEvento":"INTERFACE","caller":"SERVER","httpType":"REQUEST","esito":"OK","subject":"nd","subjectDescr":"nd"}""")
 
 
     assert(Appfunction.fmtMessageJson(
@@ -194,7 +195,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
         )
       ),
       Some(ReExtra()), TestItems.ddataMap
-    ).get == """{"internalMessage":"Cambio stato in [nd]","categoriaEvento":"INTERNO","esito":"OK"}""")
+    ).get == """{"internalMessage":"Cambio stato in [nd]","categoriaEvento":"INTERNAL","esito":"OK"}""")
 
   }
 

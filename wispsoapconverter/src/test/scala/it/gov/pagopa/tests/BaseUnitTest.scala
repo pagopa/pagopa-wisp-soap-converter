@@ -63,7 +63,7 @@ abstract class BaseUnitTest()
           timeout=30
         }
         adapterEcommerce{
-          url="http://www.adapterEcommerce.pagopa.it?sessionId="
+          url="http://www.adapterEcommerce.pagopa.it?sessionId=REPLACE&idSession=REPLACE"
         }
     """
       val system = ActorSystem("testSystem", ConfigFactory.parseString(config))
