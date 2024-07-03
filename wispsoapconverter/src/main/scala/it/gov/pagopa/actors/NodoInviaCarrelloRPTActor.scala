@@ -44,7 +44,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
     case originalException: Throwable =>
       log.debug(s"Errore generico durante InviaCarrelloRPT, message: [${originalException.getMessage}]")
       val cfb = CarrelloRptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, originalException), idCanale = None)
-      Future.successful(errorHandler(MDC.get(Constant.MDCKey.SESSION_ID), req.testCaseId, cfb, re))
+      Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
   }
   val recoverPipeline: PartialFunction[Throwable, Future[SoapResponse]] = {
     case cfb: CarrelloRptFaultBeanException =>
@@ -56,20 +56,20 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
               now = Util.now()
               reCambioStato = re.get.copy(status = Some(StatoCarrelloEnum.CART_RIFIUTATO_NODO.toString), insertedTimestamp = now)
               _ = reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
-              res = errorHandler(MDC.get(Constant.MDCKey.SESSION_ID), req.testCaseId, cfb, re)
+              res = errorHandler(req.sessionId, req.testCaseId, cfb, re)
             } yield res) recoverWith recoverGenericError
 
           case _ =>
             val cfb = CarrelloRptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR), idCanale = None)
-            Future.successful(errorHandler(MDC.get(Constant.MDCKey.SESSION_ID), req.testCaseId, cfb, re))
+            Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
         }
       } else {
-        Future.successful(errorHandler(MDC.get(Constant.MDCKey.SESSION_ID), req.testCaseId, cfb, re))
+        Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
       }
     case e: Throwable =>
       log.warn(e, e.getMessage)
       val cfb = CarrelloRptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), idCanale = None)
-      Future.successful(errorHandler(MDC.get(Constant.MDCKey.SESSION_ID), req.testCaseId, cfb, re))
+      Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
   }
   var req: SoapRequest = _
   var replyTo: ActorRef = _
@@ -89,14 +89,12 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
       req = soapRequest
       replyTo = sender()
 
-      // parachute session id, will be replaced lately when the sessionId will be generated
-      MDC.put(Constant.MDCKey.SESSION_ID, req.sessionId)
-
       re = Some(
         Re(
           componente = Componente.WISP_SOAP_CONVERTER,
           categoriaEvento = CategoriaEvento.INTERNAL,
           sessionId = None,
+          sessionIdUuid = Some(req.sessionId),
           sessionIdOriginal = Some(req.sessionId),
           payload = None,
           esito = Esito.EXCECUTED_INTERNAL_STEP,
@@ -119,10 +117,9 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
         _ = log.debug("Check sintattici input")
         (intestazioneCarrelloPPT, nodoInviaCarrelloRPT) <- Future.fromTry(parseCarrello(soapRequest.payload, inputXsdValid))
         _ = idCarrello = intestazioneCarrelloPPT.identificativoCarrello
-        _ = MDC.put(Constant.MDCKey.SESSION_ID, RPTUtil.getUniqueKey(req, intestazioneCarrelloPPT))
         _ = re = re.map(r =>
           r.copy(
-            sessionId = Some(MDC.get(Constant.MDCKey.SESSION_ID)),
+            sessionId = Some(RPTUtil.getUniqueKey(req, intestazioneCarrelloPPT)),
             idCarrello = Some(idCarrello),
             psp = Some(nodoInviaCarrelloRPT.identificativoPSP),
             canale = Some(nodoInviaCarrelloRPT.identificativoCanale),
@@ -239,7 +236,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
 
         } yield (payloadNodoInviaCarrelloRPTRisposta, nodoInviaCarrelloRPTRisposta)
       }
-    } yield SoapResponse(MDC.get(Constant.MDCKey.SESSION_ID), payloadNodoInviaCarrelloRPTRisposta, StatusCodes.OK.intValue, re, req.testCaseId)
+    } yield SoapResponse(req.sessionId, payloadNodoInviaCarrelloRPTRisposta, StatusCodes.OK.intValue, re, req.testCaseId)
   }
 
   def saveCarrello(

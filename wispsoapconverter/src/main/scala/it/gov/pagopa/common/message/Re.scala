@@ -25,6 +25,7 @@ case class Re(
                parametriSpecificiInterfaccia: Option[String] = None,
                esito: Esito.Value,
                sessionId: Option[String] = None,
+               sessionIdUuid: Option[String] = None,
                status: Option[String] = None,
                payload: Option[Array[Byte]] = None,
                info: Option[String] = None,

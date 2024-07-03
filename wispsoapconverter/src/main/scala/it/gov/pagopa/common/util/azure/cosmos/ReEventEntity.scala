@@ -58,6 +58,7 @@ case class ReEventEntity(
                           operationErrorCode: String,
                           primitive: String,
                           sessionId: String,
+                          sessionIdUuid: String,
                           cartId: String,
                           iuv: String,
                           noticeNumber: String,
@@ -120,6 +121,8 @@ case class ReEventEntity(
   def getPrimitive: String = primitive
 
   def getSessionId: String = sessionId
+
+  def getSessionIdUuid: String = sessionIdUuid
 
   def getCartId: String = cartId
 
