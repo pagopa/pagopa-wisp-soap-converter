@@ -20,66 +20,67 @@ import scala.util.Try
 import scala.xml.XML
 
 //@org.scalatest.Ignore
-class FakeInviaRPTActor(override val cosmosRepository:CosmosRepository,override val actorProps: ActorProps) extends NodoInviaRPTActorPerRequest(cosmosRepository,actorProps)  {
+class FakeInviaRPTActor(override val cosmosRepository: CosmosRepository, override val actorProps: ActorProps) extends NodoInviaRPTActorPerRequest(cosmosRepository, actorProps) {
   override def receive: Receive = {
-    case ("checkEmail",ctRPT: CtRichiestaPagamentoTelematico)=>
+    case ("checkEmail", ctRPT: CtRichiestaPagamentoTelematico) =>
       sender() ! this.checkEmail(ctRPT)
-    case ("checkCanaleModello",data:ConfigData,idCanale: String)=>
-      sender() ! this.checkCanaleModello(data,idCanale)
-    case ("checkRptNumbers",maxNumRptInCart: Int, rpts: Seq[TipoElementoListaRPT])=>
-      sender() ! this.checkRptNumbers(maxNumRptInCart,rpts)
-    case ("checkDuplicatoNelloStessoCarrello",rpts: Seq[TipoElementoListaRPT])=>
+    case ("checkCanaleModello", data: ConfigData, idCanale: String) =>
+      sender() ! this.checkCanaleModello(data, idCanale)
+    case ("checkRptNumbers", maxNumRptInCart: Int, rpts: Seq[TipoElementoListaRPT]) =>
+      sender() ! this.checkRptNumbers(maxNumRptInCart, rpts)
+    case ("checkDuplicatoNelloStessoCarrello", rpts: Seq[TipoElementoListaRPT]) =>
       sender() ! this.checkDuplicatoNelloStessoCarrello(rpts)
-    case ("codiceVersantePagatoreNonCoerente",rpts: Seq[TipoElementoListaRPT])=>
+    case ("codiceVersantePagatoreNonCoerente", rpts: Seq[TipoElementoListaRPT]) =>
       sender() ! this.codiceVersantePagatoreNonCoerente(rpts)
-    case ("ibanChecks",data:ConfigData,ct:CtDatiVersamentoRPT,idDominio:String)=>
-      sender() ! this.ibanChecks(data,ct,idDominio)
-    case ("errorRpt",sessionid:String)=>
-      req = SoapRequest(sessionid,"","","","",Instant.now(),null,false,None)
+    case ("ibanChecks", data: ConfigData, ct: CtDatiVersamentoRPT, idDominio: String) =>
+      sender() ! this.ibanChecks(data, ct, idDominio)
+    case ("errorRpt", sessionid: String) =>
+      req = SoapRequest(sessionid, "", "", "", "", Instant.now(), null, false, None)
       replyTo = sender()
       this.actorError(DigitPaErrorCodes.PPT_DOMINIO_SCONOSCIUTO)
-    case ("recoverGenericError",sessionid:String) =>
-      req = SoapRequest(sessionid,"","","","",Instant.now(),null,false,None)
+    case ("recoverGenericError", sessionid: String) =>
+      req = SoapRequest(sessionid, "", "", "", "", Instant.now(), null, false, None)
       val replyto = sender()
       val x = this.recoverGenericError.apply(new IllegalArgumentException("test error"))
       x.map(s => replyto ! s)
-    case ("recoverFuture",sessionid:String,th:Throwable) =>
-      req = SoapRequest(sessionid,"","","","",Instant.now(),null,false,None)
+    case ("recoverFuture", sessionid: String, th: Throwable) =>
+      req = SoapRequest(sessionid, "", "", "", "", Instant.now(), null, false, None)
       val replyto = sender()
       val x = this.recoverFuture.apply(th)
       x.map(s => replyto ! s)
   }
 }
+
 class InviaRPTUnitTests() extends BaseUnitTest {
 
-  val fakeInviaRPTActor=system.actorOf(Props.create(classOf[FakeInviaRPTActor],cosmosRepository,props),"fakeInviaRPTActor")
+  val fakeInviaRPTActor = system.actorOf(Props.create(classOf[FakeInviaRPTActor], cosmosRepository, props), "fakeInviaRPTActor")
 
   "FakeInviaRPTActor" must {
     "recoverGenericError" in {
       val sessionid = UUID.randomUUID().toString
-      val res = askActorType(fakeInviaRPTActor, ("recoverGenericError",sessionid)).asInstanceOf[SoapResponse]
+      val res = askActorType(fakeInviaRPTActor, ("recoverGenericError", sessionid)).asInstanceOf[SoapResponse]
       assert(res.sessionId == sessionid)
       assert(res.payload.contains(DigitPaErrorCodes.PPT_SYSTEM_ERROR.toString))
     }
     "recoverFuture IllegalArgumentException" in {
       val sessionid = UUID.randomUUID().toString
-      val res = askActorType(fakeInviaRPTActor, ("recoverFuture",sessionid,new IllegalArgumentException("test error"))).asInstanceOf[SoapResponse]
+      val res = askActorType(fakeInviaRPTActor, ("recoverFuture", sessionid, new IllegalArgumentException("test error"))).asInstanceOf[SoapResponse]
       assert(res.sessionId == sessionid)
       assert(res.payload.contains(DigitPaErrorCodes.PPT_SYSTEM_ERROR.toString))
     }
     "recoverFuture DigitPaException" in {
       val sessionid = UUID.randomUUID().toString
-      val res = askActorType(fakeInviaRPTActor, ("recoverFuture",sessionid,DigitPaException(DigitPaErrorCodes.PPT_DOMINIO_SCONOSCIUTO))).asInstanceOf[SoapResponse]
+      val res = askActorType(fakeInviaRPTActor, ("recoverFuture", sessionid, DigitPaException(DigitPaErrorCodes.PPT_DOMINIO_SCONOSCIUTO))).asInstanceOf[SoapResponse]
       assert(res.sessionId == sessionid)
       assert(res.payload.contains(DigitPaErrorCodes.PPT_DOMINIO_SCONOSCIUTO.toString))
     }
     "recoverFuture RptFaultBeanException" in {
       val sessionid = UUID.randomUUID().toString
-      val res = askActorType(fakeInviaRPTActor, ("recoverFuture",sessionid,
+      val res = askActorType(fakeInviaRPTActor, ("recoverFuture", sessionid,
         RptFaultBeanException(
           DigitPaErrorCodes.PPT_DOMINIO_SCONOSCIUTO,
           workflowErrorCode = Some(WorkflowExceptionErrorCodes.RPT_ERRORE_INVIO_CD),
-          rptKey = Some(RPTKey("","",""))
+          rptKey = Some(RPTKey("", "", ""))
         ))).asInstanceOf[SoapResponse]
       assert(res.sessionId == sessionid)
       assert(res.payload.contains(DigitPaErrorCodes.PPT_SYSTEM_ERROR.toString))
@@ -201,21 +202,21 @@ class InviaRPTUnitTests() extends BaseUnitTest {
         }
       )
     }
-//    "PPT_SINTASSI_XSD" in {
-//      val iuv = s"${RandomStringUtils.randomNumeric(15)}"
-//      val ccp = s"${RandomStringUtils.randomNumeric(15)}"
-//      nodoInviaRpt(
-//        iuv,
-//        ccp,
-//        stationPwd = Some("passwordWrong"),
-//        responseAssert = (r) => {
-//          assert(r.esito == "KO", "outcome in res")
-//          assert(r.fault.nonEmpty)
-//          assert(r.fault.get.faultCode.equals(DigitPaErrorCodes.PPT_SINTASSI_XSD.faultCode))
-//          assert(r.fault.get.faultString.equals(DigitPaErrorCodes.PPT_SINTASSI_XSD.faultString))
-//        }
-//      )
-//    }
+    //    "PPT_SINTASSI_XSD" in {
+    //      val iuv = s"${RandomStringUtils.randomNumeric(15)}"
+    //      val ccp = s"${RandomStringUtils.randomNumeric(15)}"
+    //      nodoInviaRpt(
+    //        iuv,
+    //        ccp,
+    //        stationPwd = Some("passwordWrong"),
+    //        responseAssert = (r) => {
+    //          assert(r.esito == "KO", "outcome in res")
+    //          assert(r.fault.nonEmpty)
+    //          assert(r.fault.get.faultCode.equals(DigitPaErrorCodes.PPT_SINTASSI_XSD.faultCode))
+    //          assert(r.fault.get.faultString.equals(DigitPaErrorCodes.PPT_SINTASSI_XSD.faultString))
+    //        }
+    //      )
+    //    }
     "checkTipoVersamentoDatiVersamento" in {
       val iuv = s"${RandomStringUtils.randomNumeric(15)}"
       val ccp = s"${RandomStringUtils.randomNumeric(15)}"
@@ -268,7 +269,7 @@ class InviaRPTUnitTests() extends BaseUnitTest {
         iuv,
         ccp,
         versamenti = 2,
-        importiVersamenti = Seq(BigDecimal.apply(10),BigDecimal.apply(1)),
+        importiVersamenti = Seq(BigDecimal.apply(10), BigDecimal.apply(1)),
         responseAssert = (r) => {
           assert(r.fault.isDefined)
           assert(r.fault.get.faultCode == "PPT_SEMANTICA")
@@ -282,7 +283,7 @@ class InviaRPTUnitTests() extends BaseUnitTest {
       nodoInviaRpt(
         iuv,
         ccp,
-        dataEsecuzionePagamento= "2017-09-05",
+        dataEsecuzionePagamento = "2017-09-05",
         dataOraMessaggioRichiesta = "2017-09-06",
         responseAssert = (r) => {
           assert(r.fault.isDefined)
@@ -297,7 +298,7 @@ class InviaRPTUnitTests() extends BaseUnitTest {
       nodoInviaRpt(
         iuv,
         ccp,
-        dataEsecuzionePagamento= "2018-09-05",
+        dataEsecuzionePagamento = "2018-09-05",
         dataOraMessaggioRichiesta = "2017-09-06",
         responseAssert = (r) => {
           assert(r.fault.isDefined)
@@ -312,8 +313,8 @@ class InviaRPTUnitTests() extends BaseUnitTest {
       nodoInviaRpt(
         iuv,
         ccp,
-        bollo=true,
-        psp=Some(TestItems.PSP_NO_BOLLO),
+        bollo = true,
+        psp = Some(TestItems.PSP_NO_BOLLO),
         responseAssert = (r) => {
           assert(r.fault.isDefined)
           assert(r.fault.get.faultCode == "PPT_CANALE_SERVIZIO_NONATTIVO")
@@ -327,8 +328,8 @@ class InviaRPTUnitTests() extends BaseUnitTest {
       nodoInviaRpt(
         iuv,
         ccp,
-        psp=Some(TestItems.PSP),
-        tipoVersamento=Some("PO"),
+        psp = Some(TestItems.PSP),
+        tipoVersamento = Some("PO"),
         responseAssert = (r) => {
           assert(r.fault.isDefined)
           assert(r.fault.get.faultCode == "PPT_SEMANTICA")
@@ -343,7 +344,7 @@ class InviaRPTUnitTests() extends BaseUnitTest {
       nodoInviaRpt(
         iuv,
         ccp,
-        canale=Some(TestItems.canaleImmediatoNoPlugin),
+        canale = Some(TestItems.canaleImmediatoNoPlugin),
         responseAssert = (r) => {
           assert(r.fault.isDefined)
           assert(r.fault.get.faultCode == "PPT_SYSTEM_ERROR")
@@ -358,10 +359,10 @@ class InviaRPTUnitTests() extends BaseUnitTest {
       nodoInviaRpt(
         iuv,
         ccp,
-        canale=Some(TestItems.canaleImmediato),
-        modifyData = (data)=>{
+        canale = Some(TestItems.canaleImmediato),
+        modifyData = (data) => {
           val ch = data.channels(TestItems.canaleImmediato)
-          data.copy(channels = data.channels + (TestItems.canaleImmediato->ch.copy(redirect = ch.redirect.copy(protocol = None))))
+          data.copy(channels = data.channels + (TestItems.canaleImmediato -> ch.copy(redirect = ch.redirect.copy(protocol = None))))
         },
         responseAssert = (r) => {
           assert(r.fault.isDefined)
@@ -376,10 +377,10 @@ class InviaRPTUnitTests() extends BaseUnitTest {
       nodoInviaRpt(
         iuv,
         ccp,
-        canale=Some(TestItems.canaleImmediato),
-        modifyData = (data)=>{
+        canale = Some(TestItems.canaleImmediato),
+        modifyData = (data) => {
           val ch = data.channels(TestItems.canaleImmediato)
-          data.copy(channels = data.channels + (TestItems.canaleImmediato->ch.copy(redirect = ch.redirect.copy(protocol = Some("FTP")))))
+          data.copy(channels = data.channels + (TestItems.canaleImmediato -> ch.copy(redirect = ch.redirect.copy(protocol = Some("FTP")))))
         },
         responseAssert = (r) => {
           assert(r.fault.isDefined)
@@ -394,10 +395,10 @@ class InviaRPTUnitTests() extends BaseUnitTest {
       nodoInviaRpt(
         iuv,
         ccp,
-        canale=Some(TestItems.canaleImmediato),
-        modifyData = (data)=>{
+        canale = Some(TestItems.canaleImmediato),
+        modifyData = (data) => {
           val ch = data.channels(TestItems.canaleImmediato)
-          data.copy(channels = data.channels + (TestItems.canaleImmediato->ch.copy(redirect = ch.redirect.copy(ip = None))))
+          data.copy(channels = data.channels + (TestItems.canaleImmediato -> ch.copy(redirect = ch.redirect.copy(ip = None))))
         },
         responseAssert = (r) => {
           assert(r.fault.isDefined)
@@ -412,10 +413,10 @@ class InviaRPTUnitTests() extends BaseUnitTest {
       nodoInviaRpt(
         iuv,
         ccp,
-        canale=Some(TestItems.canaleImmediato),
-        modifyData = (data)=>{
+        canale = Some(TestItems.canaleImmediato),
+        modifyData = (data) => {
           val ch = data.channels(TestItems.canaleImmediato)
-          data.copy(channels = data.channels + (TestItems.canaleImmediato->ch.copy(redirect = ch.redirect.copy(port = None))))
+          data.copy(channels = data.channels + (TestItems.canaleImmediato -> ch.copy(redirect = ch.redirect.copy(port = None))))
         },
         responseAssert = (r) => {
           assert(r.fault.isDefined)
@@ -430,10 +431,10 @@ class InviaRPTUnitTests() extends BaseUnitTest {
       nodoInviaRpt(
         iuv,
         ccp,
-        canale=Some(TestItems.canaleImmediato),
-        modifyData = (data)=>{
+        canale = Some(TestItems.canaleImmediato),
+        modifyData = (data) => {
           val ch = data.channels(TestItems.canaleImmediato)
-          data.copy(channels = data.channels + (TestItems.canaleImmediato->ch.copy(redirect = ch.redirect.copy(path = None))))
+          data.copy(channels = data.channels + (TestItems.canaleImmediato -> ch.copy(redirect = ch.redirect.copy(path = None))))
         },
         responseAssert = (r) => {
           assert(r.fault.isDefined)
@@ -444,68 +445,68 @@ class InviaRPTUnitTests() extends BaseUnitTest {
     }
     "CommonRptCheck checkEmail" in {
       val rpt = new CtRichiestaPagamentoTelematico(
-        null,null,null,null,null,Some(
-          new CtSoggettoVersante(null,null,null,null,null,null,null,null,Some("versante@gmail.com"))
-        ),null,null,null
+        null, null, null, null, null, Some(
+          new CtSoggettoVersante(null, null, null, null, null, null, null, null, Some("versante@gmail.com"))
+        ), null, null, null
       )
-      val res = askActorType(fakeInviaRPTActor,("checkEmail",rpt)).asInstanceOf[Try[String]]
+      val res = askActorType(fakeInviaRPTActor, ("checkEmail", rpt)).asInstanceOf[Try[String]]
       assert(res.isSuccess)
       assert(res.get == "versante@gmail.com")
     }
     "CommonRptCheck checkEmail 2" in {
       val rpt = new CtRichiestaPagamentoTelematico(
-        null,null,null,null,null,Some(
-          new CtSoggettoVersante(null,null,null,null,null,null,null,null,None)
+        null, null, null, null, null, Some(
+          new CtSoggettoVersante(null, null, null, null, null, null, null, null, None)
         ),
-        new CtSoggettoPagatoreType(null,null,null,null,null,null,null,null,Some("pagatore@gmail.com"))
-        ,null,null
+        new CtSoggettoPagatoreType(null, null, null, null, null, null, null, null, Some("pagatore@gmail.com"))
+        , null, null
       )
-      val res = askActorType(fakeInviaRPTActor,("checkEmail",rpt)).asInstanceOf[Try[String]]
+      val res = askActorType(fakeInviaRPTActor, ("checkEmail", rpt)).asInstanceOf[Try[String]]
       assert(res.isSuccess)
       assert(res.get == "pagatore@gmail.com")
     }
 
     "CommonRptCheck checkCanaleModello" in {
-      val res = askActorType(fakeInviaRPTActor,("checkCanaleModello",TestItems.ddataMap,TestItems.canale)).asInstanceOf[Try[Boolean]]
+      val res = askActorType(fakeInviaRPTActor, ("checkCanaleModello", TestItems.ddataMap, TestItems.canale)).asInstanceOf[Try[Boolean]]
       assert(res.isFailure)
     }
     "CommonRptCheck checkRptNumbers" in {
-      val res = askActorType(fakeInviaRPTActor,("checkRptNumbers",1,Seq(null,null))).asInstanceOf[Try[Boolean]]
+      val res = askActorType(fakeInviaRPTActor, ("checkRptNumbers", 1, Seq(null, null))).asInstanceOf[Try[Boolean]]
       assert(res.isFailure)
     }
     "CommonRptCheck checkRptNumbers2" in {
-      val res = askActorType(fakeInviaRPTActor,("checkRptNumbers",1,Seq())).asInstanceOf[Try[Boolean]]
+      val res = askActorType(fakeInviaRPTActor, ("checkRptNumbers", 1, Seq())).asInstanceOf[Try[Boolean]]
       assert(res.isFailure)
     }
     "CommonRptCheck checkDuplicatoNelloStessoCarrello" in {
       val lista = Seq(
-        new TipoElementoListaRPT("1","2","3",None,null),
-        new TipoElementoListaRPT("1","2","3",None,null)
+        new TipoElementoListaRPT("1", "2", "3", None, null),
+        new TipoElementoListaRPT("1", "2", "3", None, null)
       )
-      val res = askActorType(fakeInviaRPTActor,("checkDuplicatoNelloStessoCarrello",lista)).asInstanceOf[Try[Boolean]]
+      val res = askActorType(fakeInviaRPTActor, ("checkDuplicatoNelloStessoCarrello", lista)).asInstanceOf[Try[Boolean]]
       assert(res.isFailure)
       assert(res.failed.get.asInstanceOf[DigitPaException].code == DigitPaErrorCodes.PPT_SEMANTICA)
       assert(res.failed.get.asInstanceOf[DigitPaException].message == "Rpt duplicata nello stesso carrello")
     }
     "CommonRptCheck codiceVersantePagatoreNonCoerente" in {
       val rpt1 = payload("/requests/rpt")
-        .replace("{dataOraMessaggioRichiesta}","2020-10-10")
-        .replace("{dataEsecuzionePagamento}","2020-10-10")
-        .replace("{amount}","10.00")
-        .replace("{tipoVersamento}","PO")
-        .replace("{versamenti}","")
+        .replace("{dataOraMessaggioRichiesta}", "2020-10-10")
+        .replace("{dataEsecuzionePagamento}", "2020-10-10")
+        .replace("{amount}", "10.00")
+        .replace("{tipoVersamento}", "PO")
+        .replace("{versamenti}", "")
       val rpt2 = payload("/requests/rpt")
-        .replace("{dataOraMessaggioRichiesta}","2020-10-10")
-        .replace("{dataEsecuzionePagamento}","2020-10-10")
-        .replace("{amount}","10.00")
-        .replace("{tipoVersamento}","PO")
-        .replace("{versamenti}","")
-        .replace("TTTTTT11T11T123T","aaa")
+        .replace("{dataOraMessaggioRichiesta}", "2020-10-10")
+        .replace("{dataEsecuzionePagamento}", "2020-10-10")
+        .replace("{amount}", "10.00")
+        .replace("{tipoVersamento}", "PO")
+        .replace("{versamenti}", "")
+        .replace("TTTTTT11T11T123T", "aaa")
       val lista = Seq(
-        new TipoElementoListaRPT("1","2","3",None,XmlUtil.StringBase64Binary.encodeBase64(rpt1.getBytes)),
-        new TipoElementoListaRPT("1","2","3",None,XmlUtil.StringBase64Binary.encodeBase64(rpt2.getBytes))
+        new TipoElementoListaRPT("1", "2", "3", None, XmlUtil.StringBase64Binary.encodeBase64(rpt1.getBytes)),
+        new TipoElementoListaRPT("1", "2", "3", None, XmlUtil.StringBase64Binary.encodeBase64(rpt2.getBytes))
       )
-      val res = askActorType(fakeInviaRPTActor,("codiceVersantePagatoreNonCoerente",lista)).asInstanceOf[Try[Boolean]]
+      val res = askActorType(fakeInviaRPTActor, ("codiceVersantePagatoreNonCoerente", lista)).asInstanceOf[Try[Boolean]]
       assert(res.isFailure)
       assert(res.failed.get.asInstanceOf[DigitPaException].code == DigitPaErrorCodes.PPT_SEMANTICA)
       assert(res.failed.get.asInstanceOf[DigitPaException].message == "codice pagatore non coerente")
@@ -513,29 +514,29 @@ class InviaRPTUnitTests() extends BaseUnitTest {
     "ValidateRPT ibanChecks" in {
 
       val rpt1 = payload("/requests/rptBollo")
-        .replace("{dataOraMessaggioRichiesta}","2020-10-10")
-        .replace("{dataEsecuzionePagamento}","2020-10-10")
-        .replace("{amount}","10.00")
-        .replace("{tipoVersamento}","PO")
+        .replace("{dataOraMessaggioRichiesta}", "2020-10-10")
+        .replace("{dataEsecuzionePagamento}", "2020-10-10")
+        .replace("{amount}", "10.00")
+        .replace("{tipoVersamento}", "PO")
         .replace("{amountBollo}", "0.01")
         .replace("{amountVersamento1}", "0.01")
         .replace("{amount}", "0.01")
       val rpt = scalaxb.fromXML[CtRichiestaPagamentoTelematico](XML.loadString(rpt1))
-      val res = askActorType(fakeInviaRPTActor,("ibanChecks",TestItems.ddataMap,rpt.datiVersamento,TestItems.PA)).asInstanceOf[Try[Boolean]]
+      val res = askActorType(fakeInviaRPTActor, ("ibanChecks", TestItems.ddataMap, rpt.datiVersamento, TestItems.PA)).asInstanceOf[Try[Boolean]]
       assert(res.isSuccess)
     }
     "ValidateRPT ibanChecks 2" in {
 
       val rpt1 = payload("/requests/rptBollo")
-        .replace("{dataOraMessaggioRichiesta}","2020-10-10")
-        .replace("{dataEsecuzionePagamento}","2020-10-10")
-        .replace("{amount}","10.00")
-        .replace("{tipoVersamento}","PO")
+        .replace("{dataOraMessaggioRichiesta}", "2020-10-10")
+        .replace("{dataEsecuzionePagamento}", "2020-10-10")
+        .replace("{amount}", "10.00")
+        .replace("{tipoVersamento}", "PO")
         .replace("{amountBollo}", "0.01")
         .replace("{amountVersamento1}", "0.01")
         .replaceAll("<datiMarcaBolloDigitale>[\\s\\S]*</datiMarcaBolloDigitale>", "")
       val rpt = scalaxb.fromXML[CtRichiestaPagamentoTelematico](XML.loadString(rpt1))
-      val res = askActorType(fakeInviaRPTActor,("ibanChecks",TestItems.ddataMap,rpt.datiVersamento,TestItems.PA)).asInstanceOf[Try[Boolean]]
+      val res = askActorType(fakeInviaRPTActor, ("ibanChecks", TestItems.ddataMap, rpt.datiVersamento, TestItems.PA)).asInstanceOf[Try[Boolean]]
       assert(res.isFailure)
       assert(res.failed.get.asInstanceOf[DigitPaException].code == DigitPaErrorCodes.PPT_SEMANTICA)
       assert(res.failed.get.asInstanceOf[DigitPaException].message == "IBAN accredito o marca da bollo non presenti")
@@ -543,15 +544,15 @@ class InviaRPTUnitTests() extends BaseUnitTest {
     "ValidateRPT ibanChecks 3" in {
 
       val rpt1 = payload("/requests/rptBollo")
-        .replace("{dataOraMessaggioRichiesta}","2020-10-10")
-        .replace("{dataEsecuzionePagamento}","2020-10-10")
-        .replace("{amount}","10.00")
-        .replace("{tipoVersamento}","PO")
+        .replace("{dataOraMessaggioRichiesta}", "2020-10-10")
+        .replace("{dataEsecuzionePagamento}", "2020-10-10")
+        .replace("{amount}", "10.00")
+        .replace("{tipoVersamento}", "PO")
         .replace("{amountBollo}", "0.01")
         .replace("{amountVersamento1}", "0.01")
         .replaceAll("<datiSpecificiRiscossione>9/tipodovuto_6</datiSpecificiRiscossione>[\\s\\S]", "<datiSpecificiRiscossione>9/tipodovuto_6</datiSpecificiRiscossione><datiMarcaBolloDigitale>\n                <tipoBollo>01</tipoBollo>\n                <hashDocumento>YWVvbGlhbQ==</hashDocumento>\n                <provinciaResidenza>MI</provinciaResidenza>\n            </datiMarcaBolloDigitale>")
       val rpt = scalaxb.fromXML[CtRichiestaPagamentoTelematico](XML.loadString(rpt1))
-      val res = askActorType(fakeInviaRPTActor,("ibanChecks",TestItems.ddataMap,rpt.datiVersamento,TestItems.PA)).asInstanceOf[Try[Boolean]]
+      val res = askActorType(fakeInviaRPTActor, ("ibanChecks", TestItems.ddataMap, rpt.datiVersamento, TestItems.PA)).asInstanceOf[Try[Boolean]]
       assert(res.isFailure)
       assert(res.failed.get.asInstanceOf[DigitPaException].code == DigitPaErrorCodes.PPT_SEMANTICA)
       assert(res.failed.get.asInstanceOf[DigitPaException].message == "La presenza di una marca da bollo digitale comporta la non valorizzazione dell'elemento ibanAccredito, iban: [IT96R0123454321000000012345]")
@@ -559,7 +560,7 @@ class InviaRPTUnitTests() extends BaseUnitTest {
 
     "rpt actor error" in {
       val sessionid = UUID.randomUUID().toString
-      val res = askActorType(fakeInviaRPTActor,("errorRpt",sessionid)).asInstanceOf[SoapResponse]
+      val res = askActorType(fakeInviaRPTActor, ("errorRpt", sessionid)).asInstanceOf[SoapResponse]
       assert(res.sessionId == sessionid)
       assert(res.payload.contains(DigitPaErrorCodes.PPT_DOMINIO_SCONOSCIUTO.toString))
     }
@@ -595,7 +596,7 @@ class InviaRPTUnitTests() extends BaseUnitTest {
           assert(r.fault.isEmpty)
           assert(r.redirect.get == 1)
           assert(r.url.isDefined)
-          assert(r.url.get.contains(s"?sessionId=${TestItems.testIntPA}_"))
+          assert(r.url.get.contains(s"?idSession=${TestItems.testIntPA}_"))
         }
       )
     }
@@ -615,7 +616,7 @@ class InviaRPTUnitTests() extends BaseUnitTest {
           assert(r.fault.isEmpty)
           assert(r.redirect.get == 1)
           assert(r.url.isDefined)
-          assert(r.url.get.contains(s"?sessionId=${TestItems.testIntPA}_"))
+          assert(r.url.get.contains(s"?idSession=${TestItems.testIntPA}_"))
         }
       )
     }

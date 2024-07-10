@@ -32,11 +32,11 @@ import scala.util.Try
 
 //@org.scalatest.Ignore
 abstract class BaseUnitTest()
-    extends TestKit({
-      val mockServer = ClientAndServer.startClientAndServer()
+  extends TestKit({
+    val mockServer = ClientAndServer.startClientAndServer()
 
-      val config =
-        s"""
+    val config =
+      s"""
         azurestorage-dispatcher {
             type = Dispatcher
             executor = "thread-pool-executor"
@@ -63,17 +63,17 @@ abstract class BaseUnitTest()
           timeout=30
         }
         adapterEcommerce{
-          url="http://www.adapterEcommerce.pagopa.it?sessionId=REPLACE&idSession=REPLACE"
+          url="http://www.adapterEcommerce.pagopa.it?idSession=REPLACE"
         }
     """
-      val system = ActorSystem("testSystem", ConfigFactory.parseString(config))
-      system.registerOnTermination(() => {
-        mockServer.stop()
-      })
-      system.registerExtension(MockserverExtension)
-      MockserverExtension(system).set(mockServer)
-      system
+    val system = ActorSystem("testSystem", ConfigFactory.parseString(config))
+    system.registerOnTermination(() => {
+      mockServer.stop()
     })
+    system.registerExtension(MockserverExtension)
+    MockserverExtension(system).set(mockServer)
+    system
+  })
     with AnyWordSpecLike
     with ImplicitSender
     with should.Matchers {
@@ -84,27 +84,23 @@ abstract class BaseUnitTest()
   val cosmosRepository = mock[CosmosRepository]
   when(cosmosRepository.save(any())).thenReturn(Future(200))
 
-//  val reFunction = (request: ReRequest, log: AppLogger) => {
-//    Future({
-//      log.info(request.toString)
-//    })
-//  }
+  //  val reFunction = (request: ReRequest, log: AppLogger) => {
+  //    Future({
+  //      log.info(request.toString)
+  //    })
+  //  }
 
   val storageBuilder = mock[CosmosBuilder]
-//  val tableClient = mock[TableClient]
-//  val blobContainerClient = mock[BlobContainerClient]
-//  val blobClient = mock[BlobClient]
-//  when(blobContainerClient.getBlobClient(any())).thenReturn(blobClient)
-//  when(storageBuilder.getClients(any())).thenReturn((tableClient,blobContainerClient))
-//  when(storageBuilder.build()).thenCallRealMethod()
+  //  val tableClient = mock[TableClient]
+  //  val blobContainerClient = mock[BlobContainerClient]
+  //  val blobClient = mock[BlobClient]
+  //  when(blobContainerClient.getBlobClient(any())).thenReturn(blobClient)
+  //  when(storageBuilder.getClients(any())).thenReturn((tableClient,blobContainerClient))
+  //  when(storageBuilder.build()).thenCallRealMethod()
 
-  val props = ActorProps(null, null, Map(), (_,_,_)=>Future.successful(()), "", TestItems.ddataMap)
+  val props = ActorProps(null, null, Map(), (_, _, _) => Future.successful(()), "", TestItems.ddataMap)
 
   val singletesttimeout: FiniteDuration = 1000.seconds
-
-  def payload(testfile: String): String = {
-    SpecsUtils.loadTestXML(s"$testfile.xml")
-  }
 
   def genericPayload(primitiva: String, iuv: String, ccp: String, date: Instant) = {
     val data = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -147,125 +143,30 @@ abstract class BaseUnitTest()
       .replace("{ccp}", ccp)
   }
 
-  def nodoInviaRPTPayload(iuv: String,
-                          ccp: String,
-                          bollo: Boolean,
-                          amount: BigDecimal = BigDecimal(10),
-                          canale: Option[String] = None,
-                          stazione: Option[String],
-                          psp: Option[String] = None,
-                          pa: Option[String] = None,
-                          brokerPa: Option[String] = None,
-                          brokerPsp: Option[String] = None,
-                          stationPwd: Option[String] = None,
-                          tipoVersamento: Option[String] = None,
-                          iuvRpt: Option[String] = None,
-                          ccpRpt: Option[String] = None,
-                          ibanAddebito :Option[String] = None,
-                          versamenti:Int = 1,
-                          importiVersamenti:Seq[BigDecimal] = Seq(),
-                          dataEsecuzionePagamento:String = "2017-09-06",
-                          dataOraMessaggioRichiesta:String = "2017-09-06"
-                         ) = {
-    val rpt = (if (bollo) {
-                 payload("/requests/rptBollo")
-                   .replace("{amountBollo}", "0.01")
-                   .replace("{amountVersamento1}", (amount -0.01).setScale(2).toString())
-                   .replace("{amount}", (amount).setScale(2).toString())
-               } else {
-                  val vamount = amount/versamenti
-                 payload("/requests/rpt").replace("{versamenti}",(1 to versamenti).map(v=>{
-                   val importoversamento = Try(importiVersamenti(v)).getOrElse(vamount)
-                   <datiSingoloVersamento>
-                     <importoSingoloVersamento>{importoversamento.setScale(2).toString()}</importoSingoloVersamento>
-                     <ibanAccredito>IT96R0123454321000000012345</ibanAccredito>
-                     <causaleVersamento>Pagamento di prova {v}</causaleVersamento>
-                     <datiSpecificiRiscossione>9/tipodovuto_7</datiSpecificiRiscossione>
-                   </datiSingoloVersamento>.toString()
-                 }).mkString("\n"))
-               })
-      .replace("{pa}", pa.getOrElse(TestItems.PA))
-      .replace("{iuv}", iuvRpt.getOrElse(iuv))
-      .replace("{ccp}", ccpRpt.getOrElse(ccp))
-      .replace("{tipoVersamento}", tipoVersamento.getOrElse(CP.toString))
-      .replace("{amount}", amount.setScale(2).toString())
-      .replace("{dataEsecuzionePagamento}", dataEsecuzionePagamento)
-      .replace("{dataOraMessaggioRichiesta}", dataOraMessaggioRichiesta)
-
-    payload("/requests/nodoInviaRPT")
-      .replace("{psp}", psp.getOrElse(TestItems.PSP))
-      .replace("{brokerPsp}", brokerPsp.getOrElse(TestItems.intPSP))
-      .replace("{channel}", canale.getOrElse(TestItems.canale))
-      .replace("{pa}", pa.getOrElse(TestItems.PA))
-      .replace("{brokerPa}", brokerPa.getOrElse(TestItems.testIntPA))
-      .replace("{station}", stazione.getOrElse(TestItems.stazione))
-      .replace("{stationPwd}", stationPwd.getOrElse(TestItems.stazionePwd))
-      .replace("{iuv}", iuv)
-      .replace("{ccp}", ccp)
-      .replace("{rpt}", XmlUtil.StringBase64Binary.encodeBase64ToString(rpt.getBytes))
-  }
-
-  def nodoInviaCarrelloRptPayload(
-      idCarrello: String,
-      rpts: Seq[(RPTKey,String)],
-      multibeneficiario: Boolean = false,
-      brokerPa: String = TestItems.testIntPA,
-      station: String = TestItems.stazioneOld,
-      stationPassword: String = TestItems.stazionePwd,
-      psp: String = TestItems.PSP,
-      brokerPsp: String = TestItems.intPSP,
-      channel: String = TestItems.canaleDifferito,
-      amount:BigDecimal=BigDecimal.apply(10)
-  ) = {
-    val rptsCarrello = rpts.map(r => {
-      val rr = payload("/requests/rpt").replace("{pa}", r._1.idDominio).replace("{iuv}", r._1.iuv).replace("{ccp}", r._1.ccp)
-        .replace("{tipoVersamento}", "PO")
-        .replace("{dataEsecuzionePagamento}", r._2)
-        .replace("{dataOraMessaggioRichiesta}", r._2).replace("{versamenti}",
-          <datiSingoloVersamento>
-            <importoSingoloVersamento>{amount.setScale(2).toString()}</importoSingoloVersamento>
-            <ibanAccredito>IT96R0123454321000000012345</ibanAccredito>
-            <causaleVersamento>Pagamento di prova</causaleVersamento>
-            <datiSpecificiRiscossione>9/tipodovuto_7</datiSpecificiRiscossione>
-          </datiSingoloVersamento>.toString()
-        )
-        .replace("{amount}",amount.setScale(2).toString())
-      s"""<elementoListaRPT>
-        <identificativoDominio>${r._1.idDominio}</identificativoDominio>
-        <identificativoUnivocoVersamento>${r._1.iuv}</identificativoUnivocoVersamento>
-        <codiceContestoPagamento>${r._1.ccp}</codiceContestoPagamento>
-        <tipoFirma/>
-        <rpt>${XmlUtil.StringBase64Binary.encodeBase64ToString(rr.getBytes)}</rpt>
-      </elementoListaRPT>"""
-    })
-    payload("/requests/nodoInviaCarrelloRPT")
-      .replace("{idCarrello}", idCarrello)
-      .replace("{psp}", psp)
-      .replace("{brokerPsp}", brokerPsp)
-      .replace("{channel}", channel)
-      .replace("{stationPwd}", stationPassword)
-      .replace("{elementiRpt}", rptsCarrello.mkString("\n"))
-      .replace("{brokerPa}", brokerPa)
-      .replace("{station}", station)
-      .replace("{multi}", if (multibeneficiario) "<multiBeneficiario>true</multiBeneficiario>" else "")
-  }
-
   def nodoInviaCarrelloRptParcheggioPayload(
-      idCarrello: String,
-      rpts: Seq[RPTKey],
-      multibeneficiario: Boolean = false,
-      brokerPa: String = TestItems.testIntPA,
-      station: String = TestItems.stazioneOld,
-      stationPassword: String = TestItems.stazionePwd
-  ) = {
+                                             idCarrello: String,
+                                             rpts: Seq[RPTKey],
+                                             multibeneficiario: Boolean = false,
+                                             brokerPa: String = TestItems.testIntPA,
+                                             station: String = TestItems.stazioneOld,
+                                             stationPassword: String = TestItems.stazionePwd
+                                           ) = {
     val rptsCarrello = rpts.map(r => {
       val rr = payload("/requests/rpt").replace("{pa}", r.idDominio).replace("{iuv}", r.iuv).replace("{ccp}", r.ccp).replace("{amount}", "0.10")
       <elementoListaRPT>
-        <identificativoDominio>{r.idDominio}</identificativoDominio>
-        <identificativoUnivocoVersamento>{r.iuv}</identificativoUnivocoVersamento>
-        <codiceContestoPagamento>{r.ccp}</codiceContestoPagamento>
+        <identificativoDominio>
+          {r.idDominio}
+        </identificativoDominio>
+        <identificativoUnivocoVersamento>
+          {r.iuv}
+        </identificativoUnivocoVersamento>
+        <codiceContestoPagamento>
+          {r.ccp}
+        </codiceContestoPagamento>
         <tipoFirma/>
-        <rpt>{XmlUtil.StringBase64Binary.encodeBase64ToString(rr.getBytes)}</rpt>
+        <rpt>
+          {XmlUtil.StringBase64Binary.encodeBase64ToString(rr.getBytes)}
+        </rpt>
       </elementoListaRPT>
     })
     payload("/requests/nodoInviaCarrelloRPT")
@@ -280,7 +181,30 @@ abstract class BaseUnitTest()
       .replace("{multi}", if (multibeneficiario) "<multiBeneficiario>true</multiBeneficiario>" else "")
   }
 
-  def nodoInviaRPTParcheggioPayload(iuv: String, ccp: String, amount: BigDecimal = BigDecimal(10), station: String = TestItems.stazione,bollo:Boolean = false) = {
+  def nodoInviaRptParcheggio(
+                              iuv: String,
+                              ccp: String,
+                              testCase: Option[String] = None,
+                              station: Option[String] = None,
+                              responseAssert: NodoInviaRPTRisposta => Assertion = (_) => assert(true),
+                              bollo: Boolean = false
+                            ): Future[(NodoInviaRPTRisposta, String)] = {
+    val p = Promise[Boolean]()
+    val idSessione = UUID.randomUUID().toString
+    val nodoInviaRPT =
+      system.actorOf(Props.create(classOf[NodoInviaRPTActorPerRequestTest], p, cosmosRepository, props.copy(actorClassId = "nodoInviaRPT")), s"nodoInviaRPT${Util.now()}")
+    val resinviarpt = askActor(
+      nodoInviaRPT,
+      SoapRequest(idSessione, nodoInviaRPTParcheggioPayload(iuv, ccp, station = station.getOrElse(TestItems.stazione), bollo = bollo), TestItems.testPDD, "nodoInviaRPT", "", Util.now(), ReExtra(), false, testCase)
+    )
+    assert(resinviarpt.payload.nonEmpty)
+    val inviaRes: Try[NodoInviaRPTRisposta] = XmlEnum.str2nodoInviaRPTResponse_nodoperpa(resinviarpt.payload)
+    assert(inviaRes.isSuccess)
+    responseAssert(inviaRes.get)
+    p.future.map(_ => inviaRes.get -> idSessione)
+  }
+
+  def nodoInviaRPTParcheggioPayload(iuv: String, ccp: String, amount: BigDecimal = BigDecimal(10), station: String = TestItems.stazione, bollo: Boolean = false) = {
     val rpt = (if (bollo) {
       payload("/requests/rptBollo")
         .replace("{amountBollo}", "0.01")
@@ -304,46 +228,9 @@ abstract class BaseUnitTest()
       .replace("{rpt}", XmlUtil.StringBase64Binary.encodeBase64ToString(rpt.getBytes))
   }
 
-  def nodoInviaRPTParcheggioMod3Payload(iuv: String, ccp: String, amount: BigDecimal = BigDecimal(10)) = {
-    val rpt =
-      payload("/requests/rpt").replace("{pa}", TestItems.PA).replace("{iuv}", iuv).replace("{ccp}", ccp).replace("{amount}", amount.setScale(2).toString())
-    payload("/requests/nodoInviaRPT")
-      .replace("{psp}", TestItems.PSPMod3New)
-      .replace("{brokerPsp}", TestItems.intPSPMod3New)
-      .replace("{channel}", TestItems.canaleMod3new)
-      .replace("{channelPwd}", TestItems.canalePwd)
-      .replace("{pa}", TestItems.PA)
-      .replace("{brokerPa}", TestItems.testIntPA)
-      .replace("{station}", TestItems.stazione)
-      .replace("{stationPwd}", TestItems.stazionePwd)
-      .replace("{iuv}", iuv)
-      .replace("{ccp}", ccp)
-      .replace("{rpt}", XmlUtil.StringBase64Binary.encodeBase64ToString(rpt.getBytes))
-  }
-
-
-
-  def nodoInviaRptParcheggio(
-      iuv: String,
-      ccp: String,
-      testCase: Option[String] = None,
-      station: Option[String] = None,
-      responseAssert: NodoInviaRPTRisposta => Assertion = (_) => assert(true),
-      bollo: Boolean = false
-  ): Future[(NodoInviaRPTRisposta, String)] = {
-    val p = Promise[Boolean]()
-    val idSessione = UUID.randomUUID().toString
-    val nodoInviaRPT =
-      system.actorOf(Props.create(classOf[NodoInviaRPTActorPerRequestTest], p, cosmosRepository, props.copy(actorClassId = "nodoInviaRPT")), s"nodoInviaRPT${Util.now()}")
-    val resinviarpt = askActor(
-      nodoInviaRPT,
-      SoapRequest(idSessione, nodoInviaRPTParcheggioPayload(iuv, ccp, station = station.getOrElse(TestItems.stazione),bollo = bollo), TestItems.testPDD, "nodoInviaRPT", "", Util.now(), ReExtra(), false, testCase)
-    )
-    assert(resinviarpt.payload.nonEmpty)
-    val inviaRes: Try[NodoInviaRPTRisposta] = XmlEnum.str2nodoInviaRPTResponse_nodoperpa(resinviarpt.payload)
-    assert(inviaRes.isSuccess)
-    responseAssert(inviaRes.get)
-    p.future.map(_ => inviaRes.get -> idSessione)
+  def askActor(actor: ActorRef, soapRequest: SoapRequest) = {
+    import akka.pattern.ask
+    Await.result(actor.ask(soapRequest)(singletesttimeout).mapTo[SoapResponse], Duration.Inf)
   }
 
   def nodoInviaRptParcheggioMod3(iuv: String, ccp: String, testCase: Option[String] = None, responseAssert: NodoInviaRPTRisposta => Assertion = (_) => assert(true)): NodoInviaRPTRisposta = {
@@ -378,33 +265,54 @@ abstract class BaseUnitTest()
   def nodoInviaRptParcheggioMod3NoWait(iuv: String, ccp: String, testCase: Option[String] = None, actorRef: ActorRef = testActor): Unit = {
     val nodoInviaRPT =
       system.actorOf(Props.create(classOf[NodoInviaRPTActorPerRequest], cosmosRepository, props.copy(actorClassId = "nodoInviaRPT")), s"nodoInviaRPT${Util.now()}")
-    nodoInviaRPT tell (SoapRequest(UUID.randomUUID().toString, nodoInviaRPTParcheggioMod3Payload(iuv, ccp), TestItems.testPDD, "nodoInviaRPT", "", Util.now(), ReExtra(), false, testCase), actorRef)
+    nodoInviaRPT tell(SoapRequest(UUID.randomUUID().toString, nodoInviaRPTParcheggioMod3Payload(iuv, ccp), TestItems.testPDD, "nodoInviaRPT", "", Util.now(), ReExtra(), false, testCase), actorRef)
+  }
+
+  def nodoInviaRPTParcheggioMod3Payload(iuv: String, ccp: String, amount: BigDecimal = BigDecimal(10)) = {
+    val rpt =
+      payload("/requests/rpt").replace("{pa}", TestItems.PA).replace("{iuv}", iuv).replace("{ccp}", ccp).replace("{amount}", amount.setScale(2).toString())
+    payload("/requests/nodoInviaRPT")
+      .replace("{psp}", TestItems.PSPMod3New)
+      .replace("{brokerPsp}", TestItems.intPSPMod3New)
+      .replace("{channel}", TestItems.canaleMod3new)
+      .replace("{channelPwd}", TestItems.canalePwd)
+      .replace("{pa}", TestItems.PA)
+      .replace("{brokerPa}", TestItems.testIntPA)
+      .replace("{station}", TestItems.stazione)
+      .replace("{stationPwd}", TestItems.stazionePwd)
+      .replace("{iuv}", iuv)
+      .replace("{ccp}", ccp)
+      .replace("{rpt}", XmlUtil.StringBase64Binary.encodeBase64ToString(rpt.getBytes))
+  }
+
+  def payload(testfile: String): String = {
+    SpecsUtils.loadTestXML(s"$testfile.xml")
   }
 
   def nodoInviaRpt(
-      iuv: String,
-      ccp: String,
-      bollo: Boolean = false,
-      amount: BigDecimal = BigDecimal(10),
-      versamenti :Int =  1,
-      importiVersamenti:Seq[BigDecimal] = Seq(),
-      canale: Option[String] = None,
-      stazione: Option[String] = None,
-      psp: Option[String] = None,
-      pa: Option[String] = None,
-      brokerPa: Option[String] = None,
-      brokerPsp: Option[String] = None,
-      stationPwd: Option[String] = None,
-      tipoVersamento: Option[String] = None,
-      iuvRpt: Option[String] = None,
-      ccpRpt: Option[String] = None,
-      testCase: Option[String] = None,
-      ibanAddebito :Option[String] = None,
-      dataEsecuzionePagamento:String = "2017-09-06",
-      dataOraMessaggioRichiesta:String = "2017-09-06",
-      modifyData:(ConfigData)=>ConfigData = data=>data,
-      responseAssert: NodoInviaRPTRisposta => Assertion = (_) => assert(true)
-  ): (NodoInviaRPTRisposta, String) = {
+                    iuv: String,
+                    ccp: String,
+                    bollo: Boolean = false,
+                    amount: BigDecimal = BigDecimal(10),
+                    versamenti: Int = 1,
+                    importiVersamenti: Seq[BigDecimal] = Seq(),
+                    canale: Option[String] = None,
+                    stazione: Option[String] = None,
+                    psp: Option[String] = None,
+                    pa: Option[String] = None,
+                    brokerPa: Option[String] = None,
+                    brokerPsp: Option[String] = None,
+                    stationPwd: Option[String] = None,
+                    tipoVersamento: Option[String] = None,
+                    iuvRpt: Option[String] = None,
+                    ccpRpt: Option[String] = None,
+                    testCase: Option[String] = None,
+                    ibanAddebito: Option[String] = None,
+                    dataEsecuzionePagamento: String = "2017-09-06",
+                    dataOraMessaggioRichiesta: String = "2017-09-06",
+                    modifyData: (ConfigData) => ConfigData = data => data,
+                    responseAssert: NodoInviaRPTRisposta => Assertion = (_) => assert(true)
+                  ): (NodoInviaRPTRisposta, String) = {
     val nodoInviaRPT =
       system.actorOf(Props.create(classOf[NodoInviaRPTActorPerRequest], cosmosRepository, props.copy(
         actorClassId = "nodoInviaRPT",
@@ -415,7 +323,7 @@ abstract class BaseUnitTest()
     val soapres = askActor(
       nodoInviaRPT,
       SoapRequest(sessionid, nodoInviaRPTPayload(
-        iuv, ccp, bollo, amount = amount, canale = canale, stazione = stazione, psp = psp, pa = pa, brokerPa = brokerPa, brokerPsp = brokerPsp, stationPwd = stationPwd, tipoVersamento = tipoVersamento, iuvRpt=iuvRpt, ccpRpt=ccpRpt,versamenti= versamenti,importiVersamenti=importiVersamenti,ibanAddebito=ibanAddebito,dataEsecuzionePagamento=dataEsecuzionePagamento,dataOraMessaggioRichiesta = dataOraMessaggioRichiesta),
+        iuv, ccp, bollo, amount = amount, canale = canale, stazione = stazione, psp = psp, pa = pa, brokerPa = brokerPa, brokerPsp = brokerPsp, stationPwd = stationPwd, tipoVersamento = tipoVersamento, iuvRpt = iuvRpt, ccpRpt = ccpRpt, versamenti = versamenti, importiVersamenti = importiVersamenti, ibanAddebito = ibanAddebito, dataEsecuzionePagamento = dataEsecuzionePagamento, dataOraMessaggioRichiesta = dataOraMessaggioRichiesta),
         TestItems.testPDD, "nodoInviaRPT", "", Util.now(), ReExtra(), idempotency = false, testCase)
     )
     assert(soapres.payload.nonEmpty)
@@ -425,17 +333,79 @@ abstract class BaseUnitTest()
     inviaRes.get -> sessionid
   }
 
+  def nodoInviaRPTPayload(iuv: String,
+                          ccp: String,
+                          bollo: Boolean,
+                          amount: BigDecimal = BigDecimal(10),
+                          canale: Option[String] = None,
+                          stazione: Option[String],
+                          psp: Option[String] = None,
+                          pa: Option[String] = None,
+                          brokerPa: Option[String] = None,
+                          brokerPsp: Option[String] = None,
+                          stationPwd: Option[String] = None,
+                          tipoVersamento: Option[String] = None,
+                          iuvRpt: Option[String] = None,
+                          ccpRpt: Option[String] = None,
+                          ibanAddebito: Option[String] = None,
+                          versamenti: Int = 1,
+                          importiVersamenti: Seq[BigDecimal] = Seq(),
+                          dataEsecuzionePagamento: String = "2017-09-06",
+                          dataOraMessaggioRichiesta: String = "2017-09-06"
+                         ) = {
+    val rpt = (if (bollo) {
+      payload("/requests/rptBollo")
+        .replace("{amountBollo}", "0.01")
+        .replace("{amountVersamento1}", (amount - 0.01).setScale(2).toString())
+        .replace("{amount}", (amount).setScale(2).toString())
+    } else {
+      val vamount = amount / versamenti
+      payload("/requests/rpt").replace("{versamenti}", (1 to versamenti).map(v => {
+        val importoversamento = Try(importiVersamenti(v)).getOrElse(vamount)
+        <datiSingoloVersamento>
+          <importoSingoloVersamento>
+            {importoversamento.setScale(2).toString()}
+          </importoSingoloVersamento>
+          <ibanAccredito>IT96R0123454321000000012345</ibanAccredito>
+          <causaleVersamento>Pagamento di prova
+            {v}
+          </causaleVersamento>
+          <datiSpecificiRiscossione>9/tipodovuto_7</datiSpecificiRiscossione>
+        </datiSingoloVersamento>.toString()
+      }).mkString("\n"))
+    })
+      .replace("{pa}", pa.getOrElse(TestItems.PA))
+      .replace("{iuv}", iuvRpt.getOrElse(iuv))
+      .replace("{ccp}", ccpRpt.getOrElse(ccp))
+      .replace("{tipoVersamento}", tipoVersamento.getOrElse(CP.toString))
+      .replace("{amount}", amount.setScale(2).toString())
+      .replace("{dataEsecuzionePagamento}", dataEsecuzionePagamento)
+      .replace("{dataOraMessaggioRichiesta}", dataOraMessaggioRichiesta)
+
+    payload("/requests/nodoInviaRPT")
+      .replace("{psp}", psp.getOrElse(TestItems.PSP))
+      .replace("{brokerPsp}", brokerPsp.getOrElse(TestItems.intPSP))
+      .replace("{channel}", canale.getOrElse(TestItems.canale))
+      .replace("{pa}", pa.getOrElse(TestItems.PA))
+      .replace("{brokerPa}", brokerPa.getOrElse(TestItems.testIntPA))
+      .replace("{station}", stazione.getOrElse(TestItems.stazione))
+      .replace("{stationPwd}", stationPwd.getOrElse(TestItems.stazionePwd))
+      .replace("{iuv}", iuv)
+      .replace("{ccp}", ccp)
+      .replace("{rpt}", XmlUtil.StringBase64Binary.encodeBase64ToString(rpt.getBytes))
+  }
+
   def nodoInviaCarrelloRpt(
-      idCarrello: String,
-      rpts: Seq[(RPTKey,String)],
-      psp: String = TestItems.PSP,
-      brokerPsp:String = TestItems.intPSP,
-      channel: String = TestItems.canaleDifferito,
-      station: String = TestItems.stazioneOld,
-      testCase: Option[String] = None,
-      multibeneficiario: Boolean = false,
-      responseAssert: NodoInviaCarrelloRPTRisposta => Assertion = (_) => assert(true)
-  ): (NodoInviaCarrelloRPTRisposta, String) = {
+                            idCarrello: String,
+                            rpts: Seq[(RPTKey, String)],
+                            psp: String = TestItems.PSP,
+                            brokerPsp: String = TestItems.intPSP,
+                            channel: String = TestItems.canaleDifferito,
+                            station: String = TestItems.stazioneOld,
+                            testCase: Option[String] = None,
+                            multibeneficiario: Boolean = false,
+                            responseAssert: NodoInviaCarrelloRPTRisposta => Assertion = (_) => assert(true)
+                          ): (NodoInviaCarrelloRPTRisposta, String) = {
     val nodoInviaCarrelloRpt =
       system.actorOf(Props.create(classOf[NodoInviaCarrelloRPTActorPerRequest], cosmosRepository, props.copy(actorClassId = "nodoInviaCarrelloRpt")), s"nodoInviaCarrelloRpt${Util.now()}")
 
@@ -444,10 +414,10 @@ abstract class BaseUnitTest()
       askActor(nodoInviaCarrelloRpt, SoapRequest(sessionid, nodoInviaCarrelloRptPayload(
         idCarrello,
         rpts,
-        psp=psp,
+        psp = psp,
         brokerPsp = brokerPsp,
         station = station,
-        channel=channel,
+        channel = channel,
         multibeneficiario = multibeneficiario
       ), TestItems.testPDD, "nodoInviaCarrelloRpt", "", Util.now(), ReExtra(), false, testCase))
     assert(soapres.payload.nonEmpty)
@@ -457,23 +427,61 @@ abstract class BaseUnitTest()
     inviaRes.get -> sessionid
   }
 
-
-
-
+  def nodoInviaCarrelloRptPayload(
+                                   idCarrello: String,
+                                   rpts: Seq[(RPTKey, String)],
+                                   multibeneficiario: Boolean = false,
+                                   brokerPa: String = TestItems.testIntPA,
+                                   station: String = TestItems.stazioneOld,
+                                   stationPassword: String = TestItems.stazionePwd,
+                                   psp: String = TestItems.PSP,
+                                   brokerPsp: String = TestItems.intPSP,
+                                   channel: String = TestItems.canaleDifferito,
+                                   amount: BigDecimal = BigDecimal.apply(10)
+                                 ) = {
+    val rptsCarrello = rpts.map(r => {
+      val rr = payload("/requests/rpt").replace("{pa}", r._1.idDominio).replace("{iuv}", r._1.iuv).replace("{ccp}", r._1.ccp)
+        .replace("{tipoVersamento}", "PO")
+        .replace("{dataEsecuzionePagamento}", r._2)
+        .replace("{dataOraMessaggioRichiesta}", r._2).replace("{versamenti}",
+          <datiSingoloVersamento>
+            <importoSingoloVersamento>
+              {amount.setScale(2).toString()}
+            </importoSingoloVersamento>
+            <ibanAccredito>IT96R0123454321000000012345</ibanAccredito>
+            <causaleVersamento>Pagamento di prova</causaleVersamento>
+            <datiSpecificiRiscossione>9/tipodovuto_7</datiSpecificiRiscossione>
+          </datiSingoloVersamento>.toString()
+        )
+        .replace("{amount}", amount.setScale(2).toString())
+      s"""<elementoListaRPT>
+        <identificativoDominio>${r._1.idDominio}</identificativoDominio>
+        <identificativoUnivocoVersamento>${r._1.iuv}</identificativoUnivocoVersamento>
+        <codiceContestoPagamento>${r._1.ccp}</codiceContestoPagamento>
+        <tipoFirma/>
+        <rpt>${XmlUtil.StringBase64Binary.encodeBase64ToString(rr.getBytes)}</rpt>
+      </elementoListaRPT>"""
+    })
+    payload("/requests/nodoInviaCarrelloRPT")
+      .replace("{idCarrello}", idCarrello)
+      .replace("{psp}", psp)
+      .replace("{brokerPsp}", brokerPsp)
+      .replace("{channel}", channel)
+      .replace("{stationPwd}", stationPassword)
+      .replace("{elementiRpt}", rptsCarrello.mkString("\n"))
+      .replace("{brokerPa}", brokerPa)
+      .replace("{station}", station)
+      .replace("{multi}", if (multibeneficiario) "<multiBeneficiario>true</multiBeneficiario>" else "")
+  }
 
   def await[T](f: Future[T]): T = {
     Await.result(f, Duration.Inf)
   }
 
-  def askActor(actor: ActorRef, soapRequest: SoapRequest) = {
-    import akka.pattern.ask
-    Await.result(actor.ask(soapRequest)(singletesttimeout).mapTo[SoapResponse], Duration.Inf)
-  }
   def askActorType(actor: ActorRef, body: AnyRef) = {
     import akka.pattern.ask
     Await.result(actor.ask(body)(singletesttimeout), Duration.Inf)
   }
-
 
 
 }
