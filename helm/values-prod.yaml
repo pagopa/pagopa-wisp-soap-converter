@@ -140,6 +140,4 @@ wispsoapconverter:
     create: true
     host: "weuprod.nodo.internal.platform.pagopa.it"
     path: /wisp-soap-converter(/|$)(.*)
-    annotations:
-      nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
-    proxyBodySize: 100m
+    annotations: {nginx.ingress.kubernetes.io/proxy-read-timeout: '130'}
