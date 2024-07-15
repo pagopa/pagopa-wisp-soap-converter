@@ -35,12 +35,10 @@ wispsoapconverter:
       cpu: "1000m"
   autoscaling:
     enable: true
+    minReplica: 1
+    maxReplica: 10
     triggers:
       - type: cpu
-        metricType: Utilization
-        metadata:
-          value: "70"
-      - type: memory
         metricType: Utilization
         metadata:
           value: "80"
