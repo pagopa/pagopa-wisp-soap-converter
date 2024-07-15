@@ -29,10 +29,10 @@ wispsoapconverter:
   resources:
     requests:
       memory: "512M"
-      cpu: "512m"
+      cpu: "200m"
     limits:
       memory: "2Gi"
-      cpu: "1024m"
+      cpu: "1000m"
   autoscaling:
     enable: true
     triggers:
