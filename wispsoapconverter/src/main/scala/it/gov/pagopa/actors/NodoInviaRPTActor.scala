@@ -99,7 +99,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
           sessionId = None,
           sessionIdOriginal = Some(req.sessionId),
           payload = None,
-          esito = Esito.EXCECUTED_INTERNAL_STEP,
+          esito = Esito.EXECUTED_INTERNAL_STEP,
           tipoEvento = Some(actorClassId),
           sottoTipoEvento = SottoTipoEvento.INTERN,
           insertedTimestamp = soapRequest.timestamp,
@@ -229,7 +229,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
 
   def reCambioStato(stato: String, time: Instant, tipo: Option[String] = None): Unit = {
     reEventFunc(
-      ReRequest(req.sessionId, req.testCaseId, re.get.copy(status = Some(s"${tipo.getOrElse("")}${stato}"), insertedTimestamp = time, esito = Esito.EXCECUTED_INTERNAL_STEP), None),
+      ReRequest(req.sessionId, req.testCaseId, re.get.copy(status = Some(s"${tipo.getOrElse("")}${stato}"), insertedTimestamp = time, esito = Esito.EXECUTED_INTERNAL_STEP), None),
       log,
       ddataMap
     )

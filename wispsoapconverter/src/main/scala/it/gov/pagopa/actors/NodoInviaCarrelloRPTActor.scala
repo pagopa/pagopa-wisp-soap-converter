@@ -99,7 +99,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
           sessionId = None,
           sessionIdOriginal = Some(req.sessionId),
           payload = None,
-          esito = Esito.EXCECUTED_INTERNAL_STEP,
+          esito = Esito.EXECUTED_INTERNAL_STEP,
           tipoEvento = Some(actorClassId),
           sottoTipoEvento = SottoTipoEvento.INTERN,
           insertedTimestamp = soapRequest.timestamp,
@@ -226,7 +226,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
                 ccp = Some(rpt.datiVersamento.codiceContestoPagamento),
                 idDominio = Some(rpt.dominio.identificativoDominio),
                 status = Some(StatoRPTEnum.RPT_PARCHEGGIATA_NODO.toString),
-                esito = Esito.EXCECUTED_INTERNAL_STEP,
+                esito = Esito.EXECUTED_INTERNAL_STEP,
                 insertedTimestamp = now
               )
               reEventFunc(reRequest.copy(re = reCambioStatorpt), log, ddataMap)
