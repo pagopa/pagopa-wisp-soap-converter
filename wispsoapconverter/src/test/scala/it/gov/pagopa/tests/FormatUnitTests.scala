@@ -110,13 +110,13 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
       Re(
         Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERNAL,
         SottoTipoEvento.INTERN,
-        esito = Esito.EXCECUTED_INTERNAL_STEP,
+        esito = Esito.EXECUTED_INTERNAL_STEP,
         payload = Some(
           <xml>test</xml>.toString().getBytes
         )
       ),
       Some(ReExtra())
-    ).get == """Re Request => TIPO_EVENTO[INTERN/n.a] ESITO[EXCECUTED_INTERNAL_STEP] STATO[STATO non presente]""")
+    ).get == """Re Request => TIPO_EVENTO[INTERN/n.a] ESITO[EXECUTED_INTERNAL_STEP] STATO[STATO non presente]""")
 
   }
 
@@ -188,7 +188,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
       Re(
         Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERNAL,
         SottoTipoEvento.INTERN,
-        esito = Esito.EXCECUTED_INTERNAL_STEP,
+        esito = Esito.EXECUTED_INTERNAL_STEP,
         payload = Some(
           <xml>test
           </xml>.toString().getBytes

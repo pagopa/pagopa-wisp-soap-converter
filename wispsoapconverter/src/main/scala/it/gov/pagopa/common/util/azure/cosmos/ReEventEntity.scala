@@ -28,7 +28,7 @@ object Esito extends Enumeration {
   val RECEIVED = Value
   val RECEIVED_FAILURE = Value
   val NEVER_RECEIVED = Value
-  val EXCECUTED_INTERNAL_STEP = Value
+  val EXECUTED_INTERNAL_STEP = Value
 }
 
 case class ReEventEntity(
