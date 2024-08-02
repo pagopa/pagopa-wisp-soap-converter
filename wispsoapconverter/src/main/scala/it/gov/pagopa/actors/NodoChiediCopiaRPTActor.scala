@@ -116,61 +116,34 @@ case class NodoChiediCopiaRPTActorPerRequest(cosmosRepository: CosmosRepository,
 
         _ = log.info(LogConstant.logSintattico(actorClassId))
         _ = log.debug("Check sintattici input req")
-        (intestazionePPT, nodoChiediCopiaRPT) <- Future.fromTry(parseInput(soapRequest.payload, inputXsdValid))
+        (nodoChiediCopiaRT) <- Future.fromTry(parseInput(soapRequest.payload, inputXsdValid))
         _ = log.debug("Input parserizzato correttamente")
-        _ = rptKey = RPTKey(intestazionePPT.identificativoDominio, intestazionePPT.identificativoUnivocoVersamento, intestazionePPT.codiceContestoPagamento)
-
         _ = MDC.put(Constant.MDCKey.SESSION_ID, RPTUtil.getUniqueKey(req, intestazionePPT));
-        _ = MDC.put(Constant.MDCKey.ID_DOMINIO, rptKey.idDominio)
-        _ = MDC.put(Constant.MDCKey.IUV, rptKey.iuv)
-        _ = MDC.put(Constant.MDCKey.CCP, rptKey.ccp)
+        _ = MDC.put(Constant.MDCKey.ID_DOMINIO, nodoChiediCopiaRT.identificativoDominio)
+        _ = MDC.put(Constant.MDCKey.INTERMEDIARIO, nodoChiediCopiaRT.identificativoIntermediarioPA)
+        _ = MDC.put(Constant.MDCKey.STAZIONE, nodoChiediCopiaRT.identificativoStazioneIntermediarioPA)
+        _ = MDC.put(Constant.MDCKey.IUV, nodoChiediCopiaRT.identificativoUnivocoVersamento)
+        _ = MDC.put(Constant.MDCKey.CCP, nodoChiediCopiaRT.codiceContestoPagamento)
         _ = log.debug("Parserizzazione RPT")
-        (ctRPT: CtRichiestaPagamentoTelematico, _) <- Future.fromTry(parseRpt(nodoChiediCopiaRPT.rpt, inputXsdValid, checkUTF8))
+        (ctRPT: CtRichiestaPagamentoTelematico, _) <- Future.fromTry(parseRpt(nodoChiediCopiaRT.rpt, inputXsdValid, checkUTF8))
         _ = log.debug("RPT parserizzato correttamente")
 
         _ = re = re.map(r =>
           r.copy(
             sessionId = Some(MDC.get(Constant.MDCKey.SESSION_ID)),
-            psp = Some(nodoChiediCopiaRPT.identificativoPSP),
-            canale = Some(nodoChiediCopiaRPT.identificativoCanale),
-            fruitore = Some(intestazionePPT.identificativoStazioneIntermediarioPA),
-            fruitoreDescr = Some(intestazionePPT.identificativoStazioneIntermediarioPA),
-            idDominio = Some(intestazionePPT.identificativoDominio),
-            ccp = Some(intestazionePPT.codiceContestoPagamento),
-            iuv = Some(intestazionePPT.identificativoUnivocoVersamento),
-            stazione = Some(intestazionePPT.identificativoStazioneIntermediarioPA),
-            tipoVersamento = Some(ctRPT.datiVersamento.tipoVersamento.toString)
+            fruitore = Some(nodoChiediCopiaRT.identificativoStazioneIntermediarioPA),
+            fruitoreDescr = Some(nodoChiediCopiaRT.identificativoStazioneIntermediarioPA),
+            idDominio = Some(nodoChiediCopiaRT.identificativoDominio),
+            ccp = Some(nodoChiediCopiaRT.codiceContestoPagamento),
+            iuv = Some(nodoChiediCopiaRT.identificativoUnivocoVersamento),
+            stazione = Some(nodoChiediCopiaRT.identificativoStazioneIntermediarioPA),
           )
         )
 
         _ = reCambioStato(StatoRPTEnum.RPT_RICEVUTA_NODO.toString, Util.now())
 
-        _ = log.debug("Validazione input")
-        _ = log.info(LogConstant.logSemantico(actorClassId))
-        idCanale = nodoChiediCopiaRPT.identificativoCanale
-        isAGID =
-          idCanale == idCanaleAgid && nodoChiediCopiaRPT.identificativoPSP == idPspAgid && nodoChiediCopiaRPT.identificativoIntermediarioPSP == idIntPspAgid
-        // nel flusso nmu possono arrivare rpt simili appIo, cioè che presentano PO come metodo pagamento
-        // flusso nmu non ha il bollo digitale
-        isAppIO = isAGID && ctRPT.datiVersamento.tipoVersamento == scalaxbmodel.paginf.POValue
-        pspOpt <-
-          if (isAppIO) {
-            Future.fromTry(DDataChecks.checkPsp(log, ddataMap, nodoChiediCopiaRPT.identificativoPSP).map(p => Some(p)))
-          } else {
-            Future.fromTry(validateInput(ddataMap, rptKey, nodoChiediCopiaRPT, intestazionePPT, ctRPT))
-          }
-        psp = pspOpt.get
-        _ = canale = ddataMap.channels(idCanale)
-        isBolloEnabled = psp.digitalStamp && canale.digitalStamp
-
-        _ = log.debug("Validazione RPT")
-        _ <- Future.fromTry(validateRpt(ddataMap, rptKey, nodoChiediCopiaRPT, intestazionePPT, ctRPT, isBolloEnabled))
-        _ = log.debug("Controllo semantico Email RPT")
-        _ <- Future.fromTry(checkEmail(ctRPT))
-        _ = log.debug("Check semantici")
-
         _ = log.debug("Recupero parametri per request")
-        idStazione = intestazionePPT.identificativoStazioneIntermediarioPA
+        idStazione = nodoChiediCopiaRT.identificativoStazioneIntermediarioPA
         stazione = DDataChecks.getStation(ddataMap, idStazione)
 
         modelloPagamento: String = canale.paymentModel
