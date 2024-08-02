@@ -16,7 +16,7 @@ import scala.util.{Failure, Try}
 
 trait NodoChiediCopiaRPTResponse { this: NodoLogging =>
 
-  final val NODO_CHIEDI_COPIA_RPT_RISPOSTA = "nodoInviaRPTRisposta"
+  final val NODO_CHIEDI_COPIA_RPT_RISPOSTA = "nodoChiediCopiaRPTRisposta"
 
   def actorError(replyTo: ActorRef, req: SoapRequest, dpe: DigitPaException, re: Option[Re]): Unit = {
     MDC.put(Constant.MDCKey.SESSION_ID, req.sessionId)
