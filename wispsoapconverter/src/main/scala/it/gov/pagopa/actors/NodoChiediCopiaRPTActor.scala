@@ -3,7 +3,7 @@ package it.gov.pagopa.actors
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
 import it.gov.pagopa.ActorProps
-import it.gov.pagopa.actors.response.NodoInviaRPTResponse
+import it.gov.pagopa.actors.response.NodoChiediCopiaRPTResponse
 import it.gov.pagopa.common.actor.PerRequestActor
 import it.gov.pagopa.common.enums._
 import it.gov.pagopa.common.exception
@@ -16,7 +16,7 @@ import it.gov.pagopa.common.util.azure.cosmos.{CategoriaEvento, Componente, Esit
 import it.gov.pagopa.config.Channel
 import it.gov.pagopa.exception.{RptFaultBeanException, WorkflowExceptionErrorCodes}
 import org.slf4j.MDC
-import scalaxbmodel.nodoperpa.{IntestazionePPT, NodoInviaRPTRisposta}
+import scalaxbmodel.nodoperpa.{IntestazionePPT, NodoChiediCopiaRTRisposta}
 import scalaxbmodel.paginf.CtRichiestaPagamentoTelematico
 
 import java.time.Instant
@@ -116,7 +116,7 @@ case class NodoChiediCopiaRPTActorPerRequest(cosmosRepository: CosmosRepository,
 
         _ = log.info(LogConstant.logSintattico(actorClassId))
         _ = log.debug("Check sintattici input req")
-        (intestazionePPT, nodoInviaRPT) <- Future.fromTry(parseInput(soapRequest.payload, inputXsdValid))
+        (intestazionePPT, nodoChiediCopiaRPT) <- Future.fromTry(parseInput(soapRequest.payload, inputXsdValid))
         _ = log.debug("Input parserizzato correttamente")
         _ = rptKey = RPTKey(intestazionePPT.identificativoDominio, intestazionePPT.identificativoUnivocoVersamento, intestazionePPT.codiceContestoPagamento)
 
@@ -125,14 +125,14 @@ case class NodoChiediCopiaRPTActorPerRequest(cosmosRepository: CosmosRepository,
         _ = MDC.put(Constant.MDCKey.IUV, rptKey.iuv)
         _ = MDC.put(Constant.MDCKey.CCP, rptKey.ccp)
         _ = log.debug("Parserizzazione RPT")
-        (ctRPT: CtRichiestaPagamentoTelematico, _) <- Future.fromTry(parseRpt(nodoInviaRPT.rpt, inputXsdValid, checkUTF8))
+        (ctRPT: CtRichiestaPagamentoTelematico, _) <- Future.fromTry(parseRpt(nodoChiediCopiaRPT.rpt, inputXsdValid, checkUTF8))
         _ = log.debug("RPT parserizzato correttamente")
 
         _ = re = re.map(r =>
           r.copy(
             sessionId = Some(MDC.get(Constant.MDCKey.SESSION_ID)),
-            psp = Some(nodoInviaRPT.identificativoPSP),
-            canale = Some(nodoInviaRPT.identificativoCanale),
+            psp = Some(nodoChiediCopiaRPT.identificativoPSP),
+            canale = Some(nodoChiediCopiaRPT.identificativoCanale),
             fruitore = Some(intestazionePPT.identificativoStazioneIntermediarioPA),
             fruitoreDescr = Some(intestazionePPT.identificativoStazioneIntermediarioPA),
             idDominio = Some(intestazionePPT.identificativoDominio),
@@ -147,24 +147,24 @@ case class NodoChiediCopiaRPTActorPerRequest(cosmosRepository: CosmosRepository,
 
         _ = log.debug("Validazione input")
         _ = log.info(LogConstant.logSemantico(actorClassId))
-        idCanale = nodoInviaRPT.identificativoCanale
+        idCanale = nodoChiediCopiaRPT.identificativoCanale
         isAGID =
-          idCanale == idCanaleAgid && nodoInviaRPT.identificativoPSP == idPspAgid && nodoInviaRPT.identificativoIntermediarioPSP == idIntPspAgid
+          idCanale == idCanaleAgid && nodoChiediCopiaRPT.identificativoPSP == idPspAgid && nodoChiediCopiaRPT.identificativoIntermediarioPSP == idIntPspAgid
         // nel flusso nmu possono arrivare rpt simili appIo, cioè che presentano PO come metodo pagamento
         // flusso nmu non ha il bollo digitale
         isAppIO = isAGID && ctRPT.datiVersamento.tipoVersamento == scalaxbmodel.paginf.POValue
         pspOpt <-
           if (isAppIO) {
-            Future.fromTry(DDataChecks.checkPsp(log, ddataMap, nodoInviaRPT.identificativoPSP).map(p => Some(p)))
+            Future.fromTry(DDataChecks.checkPsp(log, ddataMap, nodoChiediCopiaRPT.identificativoPSP).map(p => Some(p)))
           } else {
-            Future.fromTry(validateInput(ddataMap, rptKey, nodoInviaRPT, intestazionePPT, ctRPT))
+            Future.fromTry(validateInput(ddataMap, rptKey, nodoChiediCopiaRPT, intestazionePPT, ctRPT))
           }
         psp = pspOpt.get
         _ = canale = ddataMap.channels(idCanale)
         isBolloEnabled = psp.digitalStamp && canale.digitalStamp
 
         _ = log.debug("Validazione RPT")
-        _ <- Future.fromTry(validateRpt(ddataMap, rptKey, nodoInviaRPT, intestazionePPT, ctRPT, isBolloEnabled))
+        _ <- Future.fromTry(validateRpt(ddataMap, rptKey, nodoChiediCopiaRPT, intestazionePPT, ctRPT, isBolloEnabled))
         _ = log.debug("Controllo semantico Email RPT")
         _ <- Future.fromTry(checkEmail(ctRPT))
         _ = log.debug("Check semantici")
@@ -180,9 +180,9 @@ case class NodoChiediCopiaRPTActorPerRequest(cosmosRepository: CosmosRepository,
 
         _ = re = re.map(r => r.copy(pspDescr = psp.description, fruitoreDescr = Some(stazione.stationCode)))
 
-        (payloadNodoInviaRPTRisposta, _) <- manageNormal(intestazionePPT, modelloUno, isAGID)
+        (payloadNodoChiediCopiaRPTRisposta, _) <- manageNormal(intestazionePPT, modelloUno, isAGID)
 
-      } yield SoapResponse(soapRequest.sessionId, payloadNodoInviaRPTRisposta, StatusCodes.OK.intValue, re, soapRequest.testCaseId)
+      } yield SoapResponse(soapRequest.sessionId, payloadNodoChiediCopiaRPTRisposta, StatusCodes.OK.intValue, re, soapRequest.testCaseId)
 
       pipeline
         .recoverWith(recoverFuture)
@@ -198,7 +198,7 @@ case class NodoChiediCopiaRPTActorPerRequest(cosmosRepository: CosmosRepository,
                             intestazionePPT: IntestazionePPT,
                             modelloUno: Boolean,
                             isAGID: Boolean
-                          ): Future[(String, NodoInviaRPTRisposta)] = {
+                          ): Future[(String, NodoChiediCopiaRPTRisposta)] = {
     for {
       _ <- Future.successful(())
       _ = log.debug("Salvataggio messaggio su Cosmos")
@@ -211,12 +211,12 @@ case class NodoChiediCopiaRPTActorPerRequest(cosmosRepository: CosmosRepository,
       }
 
       _ = log.debug("Costruzione msg input resp")
-      _ = log.info(LogConstant.logGeneraPayload("nodoInviaRPTRisposta"))
+      _ = log.info(LogConstant.logGeneraPayload("nodoChiediCopiaRPTRisposta"))
       url = RPTUtil.getAdapterEcommerceUri(uriAdapterEcommerce, req, intestazionePPT)
-      (payloadNodoInviaRPTRisposta, nodoInviaRPTRisposta) <- Future.fromTry(
-        createNodoInviaRPTRisposta(outputXsdValid, Some(url), if (modelloUno) Some(1) else Some(0), esitoResponse = true, None)
+      (payloadNodoChiediCopiaRPTRisposta, nodoChiediCopiaRPTRisposta) <- Future.fromTry(
+        createNodoChiediCopiaRPTRisposta(outputXsdValid, Some(url), if (modelloUno) Some(1) else Some(0), esitoResponse = true, None)
       )
-    } yield (payloadNodoInviaRPTRisposta, nodoInviaRPTRisposta)
+    } yield (payloadNodoChiediCopiaRPTRisposta, nodoChiediCopiaRPTRisposta)
   }
 
   def saveData(intestazionePPT: IntestazionePPT, updateTokenItem: Boolean): Future[String] = {
