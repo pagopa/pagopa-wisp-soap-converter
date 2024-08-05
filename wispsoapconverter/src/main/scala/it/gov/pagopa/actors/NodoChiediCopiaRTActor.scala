@@ -23,6 +23,17 @@ import java.time.Instant
 import java.util.Base64
 import scala.concurrent.Future
 
-case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, actorProps: ActorProps) extends PerRequestActor with NodoInviaRPTResponse with RptFlow with ReUtil {
+case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, actorProps: ActorProps) extends PerRequestActor {
+  var req: SoapRequest = _
+  var replyTo: ActorRef = _
+  override def receive: Receive = {
+    case soapRequest: SoapRequest =>
+      req = soapRequest
+      log.info(req.primitive)
+      replyTo = sender()
+  }
 
+  override def actorError(e: DigitPaException): Unit = {
+    log.error(e, "Error in NodoChiediCopiaRTActorPerRequest")
+  }
 }
