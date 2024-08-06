@@ -26,7 +26,7 @@ case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, 
   override def receive: Receive = {
     case soapRequest: SoapRequest =>
       req = soapRequest
-      log.info(req.primitive)
+      log.info("NodoChiediCopiaRT received - ")
       replyTo = sender()
   }
 
