@@ -23,8 +23,8 @@ case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, 
   var replyTo: ActorRef = _
   var re: Option[Re] = None
 
-  val inputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_input").toBoolean
-  val outputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean
+  val inputXsdValid: Boolean = true
+  val outputXsdValid: Boolean = true
 
   override def receive: Receive = {
     case soapRequest: SoapRequest =>
