@@ -23,18 +23,6 @@ class CosmosRepository(config:Config, log: AppLogger)(implicit ec: ExecutionCont
 //    container.queryItems(query, new CosmosQueryRequestOptions, classOf[PositiveBizEvent])
 //  }
 
-  def read(key: String, table: String): Future[Option[CosmosPrimitive]] = {
-    Future {
-      val container = client.getDatabase(cosmosDbName).getContainer(table)
-      val itemResponse = container.readItem(key, new PartitionKey(key), classOf[CosmosPrimitive])
-      Option(itemResponse.getItem)
-    }.recover {
-      case ex: Exception =>
-        log.error(s"Error reading item with key $key from CosmosDB: ${ex.getMessage}")
-        None
-    }
-  }
-
   def getRtByKey(key: String): Future[Option[RtEntity]] = {
     Future {
       val container = client.getDatabase(cosmosDbName).getContainer("receipts-rt")

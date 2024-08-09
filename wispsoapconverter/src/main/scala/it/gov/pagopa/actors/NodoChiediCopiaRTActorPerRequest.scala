@@ -9,9 +9,11 @@ import it.gov.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import it.gov.pagopa.common.message._
 import it.gov.pagopa.common.repo.CosmosRepository
 import it.gov.pagopa.common.util.Util.decodeAndDecompressGZIP
-import it.gov.pagopa.common.util.{DDataChecks, FaultId}
+import it.gov.pagopa.common.util.azure.cosmos.{CategoriaEvento, Componente, Esito, SottoTipoEvento}
+import it.gov.pagopa.common.util.{Constant, DDataChecks, FaultId, LogConstant}
 import it.gov.pagopa.common.util.xml.{XmlUtil, XsdValid}
 import it.gov.pagopa.commonxml.XmlEnum
+import org.slf4j.MDC
 import scalaxb.Base64Binary
 import scalaxbmodel.nodoperpa.{FaultBean, NodoChiediCopiaRT, NodoChiediCopiaRTRisposta}
 
@@ -28,11 +30,29 @@ case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, 
 
   override def receive: Receive = {
     case soapRequest: SoapRequest =>
-      log.info("NodoChiediCopiaRT received - " + soapRequest.payload)
+      log.info("NodoChiediCopiaRT received")
       req = soapRequest
       replyTo = sender()
 
+      re = Some(
+        Re(
+          componente = Componente.WISP_SOAP_CONVERTER,
+          categoriaEvento = CategoriaEvento.INTERNAL,
+          sessionId = None,
+          sessionIdOriginal = Some(req.sessionId),
+          payload = None,
+          esito = Esito.EXECUTED_INTERNAL_STEP,
+          tipoEvento = Some(actorClassId),
+          sottoTipoEvento = SottoTipoEvento.INTERN,
+          insertedTimestamp = soapRequest.timestamp,
+          erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+          businessProcess = Some(actorClassId),
+          erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+        )
+      )
+
       // Attempt to parse the input
+      log.info(LogConstant.logSintattico(actorClassId))
       val nodoChiediCopiaRTResult = parseInput(req.payload)
 
       nodoChiediCopiaRTResult match {
@@ -40,10 +60,14 @@ case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, 
           // Extract values from parsed input
           val ccp = nodoChiediCopiaRT.codiceContestoPagamento
           val iuv = nodoChiediCopiaRT.identificativoUnivocoVersamento
-          val id = nodoChiediCopiaRT.identificativoDominio
+          val idDominio = nodoChiediCopiaRT.identificativoDominio
+
+          MDC.put(Constant.MDCKey.ID_DOMINIO, idDominio)
+          MDC.put(Constant.MDCKey.IUV, iuv)
+          MDC.put(Constant.MDCKey.CCP, ccp)
 
           // Concatenate values and get rtKey
-          val rtKey = s"${ccp}_${iuv}_${id}"
+          val rtKey = s"${ccp}_${iuv}_${idDominio}"
           log.info(s"Get RT for the key: $rtKey")
 
           // Fetch the RT using the key
@@ -92,7 +116,7 @@ case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, 
     // Query cosmos repository by RT key
     cosmosRepository.getRtByKey(rtKey).flatMap {
       case Some(rtEntity) =>
-        log.info(s"Found entity: $rtEntity")
+        log.info(s"Found entity: ${rtEntity.id}")
 
         rtEntity.rt match {
           case Some(rt) =>
