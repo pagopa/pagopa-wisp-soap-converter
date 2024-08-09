@@ -85,6 +85,7 @@ wispsoapconverter:
     AZURE_COSMOS_DB_NAME: "wispconverter"
     AZURE_COSMOS_TABLE_NAME_DATA: "data"
     AZURE_COSMOS_TABLE_NAME_EVENTS: "re"
+    AZURE_COSMOS_TABLE_NAME_RECEIPTS_RT: "receipts-rt"
     ADAPTER_ECOMMERCE_URL: "https://uat.wisp2.pagopa.it/wisp-converter/redirect/api/v1/payments?idSession=REPLACE"
     RE_XML_LOG_ACTIVE: "false"
     RE_JSON_LOG_ACTIVE: "true"

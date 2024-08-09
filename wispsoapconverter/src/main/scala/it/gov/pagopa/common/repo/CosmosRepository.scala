@@ -15,6 +15,7 @@ class CosmosRepository(config:Config, log: AppLogger)(implicit ec: ExecutionCont
   lazy val cosmosKey = config.getString("azure-cosmos-data.key")
   lazy val cosmosDbName = config.getString("azure-cosmos-data.db-name")
   lazy val cosmosTableName = config.getString("azure-cosmos-data.table-name")
+  lazy val cosmosTableNameReceipts = config.getString("azure-cosmos-receipts-rt.table-name")
   lazy val client = new CosmosClientBuilder().endpoint(cosmosEndpoint).key(cosmosKey).buildClient
 
 //  def query(query: SqlQuerySpec) = {
@@ -25,7 +26,7 @@ class CosmosRepository(config:Config, log: AppLogger)(implicit ec: ExecutionCont
 
   def getRtByKey(key: String): Future[Option[RtEntity]] = {
     Future {
-      val container = client.getDatabase(cosmosDbName).getContainer("receipts-rt")
+      val container = client.getDatabase(cosmosDbName).getContainer(cosmosTableNameReceipts)
       val response = container.readItem(key, new PartitionKey(key), classOf[String])
 
       if (response.getStatusCode == 200) {
