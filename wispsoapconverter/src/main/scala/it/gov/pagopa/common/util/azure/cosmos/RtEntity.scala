@@ -8,9 +8,9 @@ case class RtEntity(
                      idDominio: String,
                      iuv: String,
                      ccp: String,
-                     receiptType: String,
-                     rt: String,
-                     rtTimestamp: Long
+                     receiptType: Option[String],
+                     rt: Option[String],
+                     rtTimestamp: Option[Long]
                    )
 
 object RtEntity {
