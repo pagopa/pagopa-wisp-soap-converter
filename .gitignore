@@ -24,3 +24,5 @@ lightbend.sbt
 
 .scannerwork
 .terraform
+
+*local.conf

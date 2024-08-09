@@ -4,12 +4,12 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.model.{ContentType => _}
 import akka.routing.RoundRobinGroup
 
-import java.io.ByteArrayOutputStream
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.security.MessageDigest
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Base64
-import java.util.zip.GZIPOutputStream
+import java.util.zip.{GZIPInputStream, GZIPOutputStream}
 import scala.util.matching.Regex
 
 object Util {
@@ -84,14 +84,19 @@ object Util {
     zipContent(string.getBytes(Constant.UTF_8))
   }
 
+  def decodeAndDecompressGZIP(base64EncodedGzip: String): Array[Byte] = {
+    // Decode the Base64 encoded string
+    val decodedBytes = Base64.getDecoder.decode(base64EncodedGzip)
+
+    // Decompress the GZIP compressed bytes
+    val inputStream = new GZIPInputStream(new ByteArrayInputStream(decodedBytes))
+    scala.io.Source.fromInputStream(inputStream).mkString.getBytes
+  }
+
 //  def unzipContent(compressed: Array[Byte]) = {
 //    Try {
 //      val bais = new ByteArrayInputStream(compressed)
 //      new GZIPInputStream(bais).readAllBytes()
 //    }
 //  }
-
-
-
-
 }

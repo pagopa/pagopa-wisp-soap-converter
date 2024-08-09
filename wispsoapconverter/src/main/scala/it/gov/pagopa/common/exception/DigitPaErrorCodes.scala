@@ -26,6 +26,8 @@ object DigitPaErrorCodes extends Enumeration {
     PPT_STAZIONE_INT_PA_DISABILITATA,
     PPT_IBAN_NON_CENSITO,
     PPT_MULTI_BENEFICIARIO,
+    PPT_RT_NONDISPONIBILE,
+    PPT_RT_SCONOSCIUTA,
     PPT_SOAPACTION_ERRATA = Value
 
   //noinspection ScalaStyle
@@ -54,6 +56,8 @@ object DigitPaErrorCodes extends Enumeration {
     case PPT_MULTI_BENEFICIARIO => "La chiamata non è compatibile con il nuovo modello PSP."
     case PPT_IBAN_NON_CENSITO => "Il codice IBAN indicato dal EC non è presente nella lista degli IBAN comunicati al sistema pagoPA."
     case PPT_SOAPACTION_ERRATA => "SOAPAction errata."
+    case PPT_RT_NONDISPONIBILE => "RT non ancora pronta."
+    case PPT_RT_SCONOSCIUTA => "RT sconosciuta."
     case _ => "Errore generico."
   }
 

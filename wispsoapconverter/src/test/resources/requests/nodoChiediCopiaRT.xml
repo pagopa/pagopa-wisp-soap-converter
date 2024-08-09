@@ -1,0 +1,14 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <ns4:nodoChiediCopiaRT xmlns:ns2="http://schemas.xmlsoap.org/soap/envelope/"
+                               xmlns:ns3="http://ws.pagamenti.telematici.gov/ppthead"
+                               xmlns:ns4="http://ws.pagamenti.telematici.gov/">
+            <identificativoIntermediarioPA>{brokerPa}</identificativoIntermediarioPA>
+            <identificativoStazioneIntermediarioPA>{station}</identificativoStazioneIntermediarioPA>
+            <password>{stationPwd}</password>
+            <identificativoDominio>{pa}</identificativoDominio>
+            <identificativoUnivocoVersamento>{iuv}</identificativoUnivocoVersamento>
+            <codiceContestoPagamento>{ccp}</codiceContestoPagamento>
+        </ns4:nodoChiediCopiaRT>
+    </soap:Body>
+</soap:Envelope>
