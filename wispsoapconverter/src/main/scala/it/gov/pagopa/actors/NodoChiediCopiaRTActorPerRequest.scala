@@ -67,7 +67,7 @@ case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, 
           MDC.put(Constant.MDCKey.CCP, ccp)
 
           // Concatenate values and get rtKey
-          val rtKey = s"${ccp}_${iuv}_${idDominio}"
+          val rtKey = s"${idDominio}_${ccp}_${iuv}"
           log.info(s"Get RT for the key: $rtKey")
 
           // Fetch the RT using the key
@@ -151,7 +151,9 @@ case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, 
       payload <- XmlEnum.nodoChiediCopiaRTRisposta2Str_nodoperpa(res)
       _ <- XsdValid.checkOnly(payload, XmlEnum.NODO_CHIEDI_COPIA_RT_RISPOSTA_NODOPERPA, outputXsdValid)
     } yield payload) recoverWith { case e =>
-      Failure(exception.DigitPaException("Error while creating the response", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e))
+      val ex = exception.DigitPaException("Error while creating the response", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e)
+      log.error(ex, "Failed to validate output payload")
+      Failure(ex)
     }
   }
 
