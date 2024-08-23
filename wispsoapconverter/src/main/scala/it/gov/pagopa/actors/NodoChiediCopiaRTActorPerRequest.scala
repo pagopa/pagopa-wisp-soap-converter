@@ -67,7 +67,7 @@ case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, 
           MDC.put(Constant.MDCKey.CCP, ccp)
 
           // Concatenate values and get rtKey
-          val rtKey = s"${idDominio}_${ccp}_${iuv}"
+          val rtKey = s"${idDominio}_${iuv}_${ccp}"
           log.info(s"Get RT for the key: $rtKey")
 
           // Fetch the RT using the key

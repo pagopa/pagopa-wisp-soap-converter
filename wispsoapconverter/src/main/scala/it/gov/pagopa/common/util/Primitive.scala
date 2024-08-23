@@ -10,7 +10,7 @@ object Primitive {
   val soap: Map[String, (String, Boolean => Class[_ <: PerRequestActor])] = Map(
     "nodoInviaRPT" -> ("Body/_/identificativoIntermediarioPA", _ => classOf[NodoInviaRPTActorPerRequest]),
     "nodoInviaCarrelloRPT" -> ("Header/_/identificativoStazioneIntermediarioPA", _ => classOf[NodoInviaCarrelloRPTActorPerRequest]),
-    "nodoChiediCopiaRT" -> ("Header/_/identificativoStazioneIntermediarioPA", _ => classOf[NodoChiediCopiaRTActorPerRequest])
+    "nodoChiediCopiaRT" -> ("Body/_/identificativoStazioneIntermediarioPA", _ => classOf[NodoChiediCopiaRTActorPerRequest])
   )
 
   val allPrimitives = Primitive.soap
