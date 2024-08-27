@@ -66,8 +66,11 @@ case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, 
           MDC.put(Constant.MDCKey.IUV, iuv)
           MDC.put(Constant.MDCKey.CCP, ccp)
 
-          // Concatenate values and get rtKey
-          val rtKey = s"${idDominio}_${iuv}_${ccp}"
+          // Concatenate values and get rtKeyRaw (may have invalid characters)
+          val rtKeyRaw = s"${idDominio}_${iuv}_${ccp}"
+          // Remove illegal characters and get rtKey: ['/', '\', '#'] are illegals character for the cosmos entity id
+          val rtKey = rtKeyRaw.replaceAll("[/\\\\#]", "")
+
           log.info(s"Get RT for the key: $rtKey")
 
           // Fetch the RT using the key
