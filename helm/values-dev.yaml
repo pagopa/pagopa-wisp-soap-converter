@@ -2,7 +2,7 @@ microservice-chart: &microservice-chart
   namespace: "nodo"
   image:
     repository: ghcr.io/pagopa/pagopa-wisp-soap-converter
-    tag: 0.2.14
+    tag: 0.2.14-119-PAGOPA-fix-entity-rtKey
   canaryDelivery:
     create: false
 wispsoapconverter:
