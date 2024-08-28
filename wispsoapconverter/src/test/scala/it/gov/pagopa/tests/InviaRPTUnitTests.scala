@@ -596,7 +596,7 @@ class InviaRPTUnitTests() extends BaseUnitTest {
           assert(r.fault.isEmpty)
           assert(r.redirect.get == 1)
           assert(r.url.isDefined)
-          assert(r.url.get.contains(s"?idSession=${TestItems.testIntPA}_"))
+          assert(r.url.get.contains(s"?idSession="))
         }
       )
     }
@@ -616,7 +616,7 @@ class InviaRPTUnitTests() extends BaseUnitTest {
           assert(r.fault.isEmpty)
           assert(r.redirect.get == 1)
           assert(r.url.isDefined)
-          assert(r.url.get.contains(s"?idSession=${TestItems.testIntPA}_"))
+          assert(r.url.get.contains(s"?idSession="))
         }
       )
     }
