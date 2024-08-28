@@ -21,10 +21,10 @@ object RPTUtil {
   }
 
   def getUniqueKey(req:SoapRequest, int:IntestazioneCarrelloPPT) = {
-    s"${int.identificativoIntermediarioPA}_${req.sessionId}"
+    s"${req.sessionId}"
   }
   def getUniqueKey(req:SoapRequest, int:IntestazionePPT) = {
-    s"${int.identificativoIntermediarioPA}_${req.sessionId}"
+    s"${req.sessionId}"
   }
 
   def getRptByBase64Binary(rptEncoded: Base64Binary): Try[CtRichiestaPagamentoTelematico] = {
