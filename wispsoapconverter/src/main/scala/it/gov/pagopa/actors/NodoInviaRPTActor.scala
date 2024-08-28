@@ -120,7 +120,6 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
         _ = log.debug("Input parserizzato correttamente")
         _ = rptKey = RPTKey(intestazionePPT.identificativoDominio, intestazionePPT.identificativoUnivocoVersamento, intestazionePPT.codiceContestoPagamento)
 
-        _ = MDC.put(Constant.MDCKey.SESSION_ID, RPTUtil.getUniqueKey(req, intestazionePPT));
         _ = MDC.put(Constant.MDCKey.ID_DOMINIO, rptKey.idDominio)
         _ = MDC.put(Constant.MDCKey.IUV, rptKey.iuv)
         _ = MDC.put(Constant.MDCKey.CCP, rptKey.ccp)
@@ -212,7 +211,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
 
       _ = log.debug("Costruzione msg input resp")
       _ = log.info(LogConstant.logGeneraPayload("nodoInviaRPTRisposta"))
-      url = RPTUtil.getAdapterEcommerceUri(uriAdapterEcommerce, req, intestazionePPT)
+      url = RPTUtil.getAdapterEcommerceUri(uriAdapterEcommerce, req)
       (payloadNodoInviaRPTRisposta, nodoInviaRPTRisposta) <- Future.fromTry(
         createNodoInviaRPTRisposta(outputXsdValid, Some(url), if (modelloUno) Some(1) else Some(0), esitoResponse = true, None)
       )
@@ -221,7 +220,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
 
   def saveData(intestazionePPT: IntestazionePPT, updateTokenItem: Boolean): Future[String] = {
     log.debug("Salvataggio messaggio RPT")
-    val id = RPTUtil.getUniqueKey(req, intestazionePPT)
+    val id = req.sessionId
     val zipped = Util.zipContent(req.payload)
     cosmosRepository.save(CosmosPrimitive(re.get.insertedTimestamp.toString.substring(0, 10), id, actorClassId, Base64.getEncoder.encodeToString(zipped)))
     Future.successful(id)

@@ -119,7 +119,6 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
         _ = log.debug("Check sintattici input")
         (intestazioneCarrelloPPT, nodoInviaCarrelloRPT) <- Future.fromTry(parseCarrello(soapRequest.payload, inputXsdValid))
         _ = idCarrello = intestazioneCarrelloPPT.identificativoCarrello
-        _ = MDC.put(Constant.MDCKey.SESSION_ID, RPTUtil.getUniqueKey(req, intestazioneCarrelloPPT))
         _ = re = re.map(r =>
           r.copy(
             sessionId = Some(MDC.get(Constant.MDCKey.SESSION_ID)),
@@ -232,7 +231,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
               reEventFunc(reRequest.copy(re = reCambioStatorpt), log, ddataMap)
             })
           }
-          url = RPTUtil.getAdapterEcommerceUri(uriAdapterEcommerce, req, intestazioneCarrelloPPT)
+          url = RPTUtil.getAdapterEcommerceUri(uriAdapterEcommerce, req)
           (payloadNodoInviaCarrelloRPTRisposta, nodoInviaCarrelloRPTRisposta) <- Future.fromTry(
             createNodoInviaCarrelloRPTRisposta(Some(url), esitoResponse = true, nodoInviaCarrelloRPT.identificativoCanale, None)
           )
@@ -247,7 +246,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
                     intestazioneCarrelloPPT: IntestazioneCarrelloPPT,
                   ): Future[Int] = {
     log.debug("Salvataggio messaggio Carrello")
-    val id = RPTUtil.getUniqueKey(req, intestazioneCarrelloPPT)
+    val id = req.sessionId
     val zipped = Util.zipContent(req.payload)
     cosmosRepository.save(CosmosPrimitive(re.get.insertedTimestamp.toString.substring(0, 10), id, actorClassId, Base64.getEncoder.encodeToString(zipped)))
   }

@@ -11,21 +11,21 @@ import scala.xml.XML
 
 object RPTUtil {
 
-  def getAdapterEcommerceUri(uri: String, req:SoapRequest, int:IntestazioneCarrelloPPT): String = {
+//  def getAdapterEcommerceUri(uri: String, req:SoapRequest, int:IntestazioneCarrelloPPT): String = {
+////    s"${uri}${getUniqueKey(req, int)}"
+//    uri.replaceAll("REPLACE", getUniqueKey(req, int))
+//  }
+  def getAdapterEcommerceUri(uri: String, req:SoapRequest): String = {
 //    s"${uri}${getUniqueKey(req, int)}"
-    uri.replaceAll("REPLACE", getUniqueKey(req, int))
-  }
-  def getAdapterEcommerceUri(uri: String, req:SoapRequest, int:IntestazionePPT): String = {
-//    s"${uri}${getUniqueKey(req, int)}"
-    uri.replaceAll("REPLACE", getUniqueKey(req, int))
+    uri.replaceAll("REPLACE", req.sessionId)
   }
 
-  def getUniqueKey(req:SoapRequest, int:IntestazioneCarrelloPPT) = {
-    s"${req.sessionId}"
-  }
-  def getUniqueKey(req:SoapRequest, int:IntestazionePPT) = {
-    s"${req.sessionId}"
-  }
+//  def getUniqueKey(req:SoapRequest, int:IntestazioneCarrelloPPT) = {
+//    s"${req.sessionId}"
+//  }
+//  def getUniqueKey(req:SoapRequest, int:IntestazionePPT) = {
+//    s"${req.sessionId}"
+//  }
 
   def getRptByBase64Binary(rptEncoded: Base64Binary): Try[CtRichiestaPagamentoTelematico] = {
     Success(scalaxb.fromXML[CtRichiestaPagamentoTelematico](XML.loadString(StringBase64Binary.decodeBase64(rptEncoded))))
