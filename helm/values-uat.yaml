@@ -34,6 +34,8 @@ wispsoapconverter:
       memory: "2Gi"
       cpu: "1024m"
   autoscaling:
+    minReplica: 1
+    maxReplica: 10
     enable: true
     triggers:
       - type: cpu
