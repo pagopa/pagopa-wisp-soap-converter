@@ -78,7 +78,7 @@ wispsoapconverter:
     JAVA_OPTS: >-
       -Dlogback.configurationFile=/mnt/file-config/logback.xml -Dconfig.app=/mnt/file-config/config-app.conf -Duser.language=it  -Duser.country=IT -Duser.timezone=Europe/Rome -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=3000 -Dcom.sun.management.jmxremote.rmi.port=3000 -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
     INSTANCE: DEV
-    API_CONFIG_CACHE_URL: "https://api.dev.platform.pagopa.it/api-config-cache/o/v1/cache"
+    API_CONFIG_CACHE_URL: "https://api.dev.platform.pagopa.it/api-config-cache/p/v1/cache"
     AZURE_COSMOS_ENDPOINT: "https://pagopa-d-weu-nodo-wispconv-cosmos-account.documents.azure.com:443/"
     AZURE_STORAGE_BLOB_NAME: "payloads"
     AZURE_STORAGE_TABLE_NAME: "events"
