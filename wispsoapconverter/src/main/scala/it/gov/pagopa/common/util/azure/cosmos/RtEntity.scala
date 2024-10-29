@@ -5,7 +5,7 @@ import play.api.libs.json._
 case class RtEntity(
                      id: String,
                      partitionKey: String,
-                     idDominio: String,
+                     domainId: String,
                      iuv: String,
                      ccp: String,
                      receiptType: Option[String],
