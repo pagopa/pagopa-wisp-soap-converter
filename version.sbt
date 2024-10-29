@@ -1,1 +1,1 @@
-ThisBuild / version := "0.2.16-139-PAGOPA-2323"
+ThisBuild / version := "0.2.17"
