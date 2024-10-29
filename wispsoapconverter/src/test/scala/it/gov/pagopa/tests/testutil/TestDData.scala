@@ -30,7 +30,7 @@ object TestDData {
     true,
     2,
     false,
-    false
+    Some(false)
   )
   val basePA = CreditorInstitution(TestItems.PA, true, Some("pa DEV ragsoc"), Some("pa DEV descr"), None, true, false, false)
   val basePSP = PaymentServiceProvider(TestItems.PSP, true, Some("CFpspTest"), Some("Test-PSP"), Some("ABIAA"), Some("bic"), Some("Test"), true, false, Some("tax"), Some("vat"))
@@ -51,7 +51,7 @@ object TestDData {
     Timeouts(10,10,10),
     true,
     1,
-    false
+    Some(false)
   )
 
   val ddataMap: ConfigData = {
