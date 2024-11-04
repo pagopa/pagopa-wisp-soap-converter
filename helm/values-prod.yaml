@@ -35,13 +35,17 @@ wispsoapconverter:
       cpu: "1000m"
   autoscaling:
     enable: true
-    minReplica: 1
+    minReplica: 2
     maxReplica: 10
     triggers:
       - type: cpu
         metricType: Utilization
         metadata:
           value: "80"
+      - type: memory
+        metricType: Utilization
+        metadata:
+          value: "200"
     advanced:
       horizontalPodAutoscalerConfig:
         behavior:
@@ -114,6 +118,15 @@ wispsoapconverter:
                 operator: In
                 values:
                   - user
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/instance: wispsoapconverter
+            namespaces: [ "nodo" ]
+            topologyKey: topology.kubernetes.io/zone
   serviceMonitor:
     create: true
     endpoints:
