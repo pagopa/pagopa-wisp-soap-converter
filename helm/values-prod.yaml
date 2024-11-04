@@ -42,6 +42,10 @@ wispsoapconverter:
         metricType: Utilization
         metadata:
           value: "80"
+      - type: memory
+        metricType: Utilization
+        metadata:
+          value: "200"
     advanced:
       horizontalPodAutoscalerConfig:
         behavior:
