@@ -2,7 +2,7 @@ microservice-chart: &microservice-chart
   namespace: "nodo"
   image:
     repository: ghcr.io/pagopa/pagopa-wisp-soap-converter
-    tag: 0.2.18
+    tag: 0.2.19
   canaryDelivery:
     create: false
 wispsoapconverter:
@@ -125,7 +125,7 @@ wispsoapconverter:
             labelSelector:
               matchLabels:
                 app.kubernetes.io/instance: wispsoapconverter
-            namespaces: [ "nodo" ]
+            namespaces: ["nodo"]
             topologyKey: topology.kubernetes.io/zone
   serviceMonitor:
     create: true
