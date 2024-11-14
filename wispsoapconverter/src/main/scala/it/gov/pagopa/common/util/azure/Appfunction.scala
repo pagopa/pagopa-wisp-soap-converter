@@ -83,7 +83,7 @@ object Appfunction {
       if (re.eventCategory == EventCategory.INTERFACE) {
         s"""Re Request =>
            |httpUri: ${param(reExtra.flatMap(a => a.uri))}
-           |httpHeaders: ${param(reExtra.map(a => formatHeaders(Some(a.headers))))}
+           |httpHeaders: ${param(reExtra.map(a => formatHeaders(Some(a.requestHeaders))))}
            |httpStatusCode: ${param(reExtra.flatMap(a => a.statusCode.map(_.toString)))}
            |payload: ${
           param(re.requestPayload.map(as => {
@@ -138,7 +138,7 @@ object Appfunction {
         s" [esito:KO]${faultCode.map(v => s" [faultCode:$v]").getOrElse("")}${faultString.map(v => s" [faultString:$v]").getOrElse("")}${faultDescription.map(v => s" [faultDescription:$v]").getOrElse("")}"
       }
       val elapsed = reExtra.flatMap(_.elapsed)
-      val soapAction = reExtra.flatMap(h => h.headers.find(_._1 == "SOAPAction").map(_._2))
+      val soapAction = reExtra.flatMap(h => h.requestHeaders.find(_._1 == "SOAPAction").map(_._2))
       val businessProcess = re.businessProcess
       val internalMessage = if (re.eventCategory == EventCategory.INTERFACE) {
         if (isServerRequest) {

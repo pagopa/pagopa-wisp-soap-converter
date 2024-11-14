@@ -12,7 +12,7 @@ import it.gov.pagopa.common.message._
 import it.gov.pagopa.common.repo.{CosmosPrimitive, CosmosRepository}
 import it.gov.pagopa.common.rpt.split.RptFlow
 import it.gov.pagopa.common.util._
-import it.gov.pagopa.common.util.azure.cosmos.EventCategory
+import it.gov.pagopa.common.util.azure.cosmos.{Esito, EventCategory}
 import it.gov.pagopa.config.Channel
 import it.gov.pagopa.exception.{RptFaultBeanException, WorkflowExceptionErrorCodes}
 import org.slf4j.MDC
@@ -34,6 +34,8 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
   val uriAdapterEcommerce: String = context.system.settings.config.getString("adapterEcommerce.url")
   val recoverFuture: PartialFunction[Throwable, Future[SoapResponse]] = {
     case cfb: RptFaultBeanException =>
+      MDC.put(Constant.MDCKey.PROCESS_OUTCOME, Esito.ERROR.toString)
+      MDC.put(Constant.MDCKey.ERROR_LINE, cfb.digitPaException.getMessage)
       log.warn(s"Errore generico durante $actorClassId, message: [${cfb.getMessage}]")
       if (cfb.workflowErrorCode.isDefined && cfb.rptKey.isDefined) {
         cfb.workflowErrorCode.get match {
@@ -56,11 +58,19 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
         Future.successful(SoapResponse(req.sessionId, resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
       }
     case dpaex: DigitPaException =>
+      MDC.put(Constant.MDCKey.PROCESS_OUTCOME, Esito.ERROR.toString)
+      MDC.put(Constant.MDCKey.ERROR_LINE, dpaex.getMessage)
       log.warn(s"Errore generico durante $actorClassId, message: [${dpaex.getMessage}]")
+      if (dpaex.code.equals(DigitPaErrorCodes.PPT_SINTASSI_EXTRAXSD) || dpaex.code.equals(DigitPaErrorCodes.PPT_SINTASSI_XSD)) {
+        val reCambioStato = re.get.copy(status = Some(WorkflowStatus.SYNTAX_CHECK_FAILED.toString), insertedTimestamp = Util.now())
+        reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
+      }
       val resItems = errorHandler(RptFaultBeanException(dpaex))
       Future.successful(SoapResponse(req.sessionId, resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
     case cause: Throwable =>
       log.warn(cause, s"Errore generico durante $actorClassId, message: [${cause.getMessage}]")
+      MDC.put(Constant.MDCKey.PROCESS_OUTCOME, Esito.ERROR.toString)
+      MDC.put(Constant.MDCKey.ERROR_LINE, cause.getMessage)
       val cfb = RptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, cause))
       val resItems = errorHandler(cfb)
       Future.successful(SoapResponse(req.sessionId, resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
@@ -172,10 +182,10 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
 
       pipeline
         .recoverWith(recoverFuture)
-        .map(sr2 => {
-          traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
+        .map(soapResponse => {
+          traceWebserviceInvocation(soapRequest, soapResponse, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
           log.info(LogConstant.logEnd(actorClassId))
-          replyTo ! sr2
+          replyTo ! soapResponse
           complete()
         })
   }

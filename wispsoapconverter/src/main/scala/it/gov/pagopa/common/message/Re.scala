@@ -1,7 +1,7 @@
 package it.gov.pagopa.common.message
 
 import it.gov.pagopa.common.util.azure.Appfunction
-import it.gov.pagopa.common.util.azure.cosmos.{Esito, EventCategory}
+import it.gov.pagopa.common.util.azure.cosmos.EventCategory
 import net.openhft.hashing.LongHashFunction
 
 import java.time.Instant
@@ -16,12 +16,13 @@ case class Re(
                psp: Option[String] = None,
                station: Option[String] = None,
                channel: Option[String] = None,
-               outcome: Option[Esito.Value] = None,
+               outcome: Option[String] = None,
                sessionId: Option[String] = None,
                status: Option[String] = None,
                requestPayload: Option[Array[Byte]] = None,
                responsePayload: Option[Array[Byte]] = None,
                info: Option[String] = None,
+               errorLine: Option[String] = None,
                businessProcess: Option[String] = None,
                noticeNumber: Option[String] = None,
                paymentToken: Option[String] = None

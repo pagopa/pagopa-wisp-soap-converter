@@ -29,6 +29,7 @@ case class ReEventEntity(
                           responsePayload: String,
                           businessProcess: String,
                           operationErrorCode: String,
+                          operationErrorLine: String,
                           operationErrorDetail: String,
                           sessionId: String,
                           cartId: String,
@@ -49,7 +50,11 @@ case class ReEventEntity(
 
   def getInsertedTimestamp: Instant = insertedTimestamp
 
-  def getCategory: String = eventCategory
+  def getBusinessProcess: String = businessProcess
+
+  def getEventCategory: String = eventCategory
+
+  def getStatus: String = status
 
   def getOutcome: String = outcome
 
@@ -57,23 +62,23 @@ case class ReEventEntity(
 
   def getHttpUri: String = httpUri
 
-  def getRequestHeaders: String = requestHeaders
-
-  def getResponseHeaders: String = responseHeaders
-
   def getHttpStatusCode: Integer = httpStatusCode
 
   def getExecutionTimeMs: java.lang.Long = executionTimeMs
+
+  def getRequestHeaders: String = requestHeaders
+
+  def getResponseHeaders: String = responseHeaders
 
   def getRequestPayload: String = requestPayload
 
   def getResponsePayload: String = responsePayload
 
-  def getBusinessProcess: String = businessProcess
+  def getOperationErrorCode: String = operationErrorCode
+
+  def getOperationErrorLine: String = operationErrorLine
 
   def getOperationErrorDetail: String = operationErrorDetail
-
-  def getOperationErrorCode: String = operationErrorCode
 
   def getSessionId: String = sessionId
 
@@ -93,7 +98,7 @@ case class ReEventEntity(
 
   def getChannel: String = channel
 
-  def getStatus: String = status
+  def getPaymentToken: String = null
 
   def getInfo: String = info
 }

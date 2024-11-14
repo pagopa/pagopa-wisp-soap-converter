@@ -12,7 +12,7 @@ import it.gov.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import it.gov.pagopa.common.message._
 import it.gov.pagopa.common.repo.{CosmosPrimitive, CosmosRepository}
 import it.gov.pagopa.common.util._
-import it.gov.pagopa.common.util.azure.cosmos.EventCategory
+import it.gov.pagopa.common.util.azure.cosmos.{Esito, EventCategory}
 import it.gov.pagopa.common.util.xml.XsdValid
 import it.gov.pagopa.commonxml.XmlEnum
 import it.gov.pagopa.exception.{CarrelloRptFaultBeanException, WorkflowExceptionErrorCodes}
@@ -48,6 +48,9 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
   }
   val recoverPipeline: PartialFunction[Throwable, Future[SoapResponse]] = {
     case cfb: CarrelloRptFaultBeanException =>
+      MDC.put(Constant.MDCKey.PROCESS_OUTCOME, Esito.ERROR.toString)
+      MDC.put(Constant.MDCKey.ERROR_LINE, cfb.digitPaException.getMessage)
+      val exceptionCode = cfb.digitPaException.code
       if (cfb.workflowErrorCode.isDefined && cfb.idCarrello.isDefined && cfb.rptKeys.isDefined) {
         cfb.workflowErrorCode.get match {
           case WorkflowExceptionErrorCodes.CARRELLO_ERRORE_SEMANTICO | WorkflowExceptionErrorCodes.RPT_ERRORE_SEMANTICO =>
@@ -60,14 +63,24 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
             } yield res) recoverWith recoverGenericError
 
           case _ =>
+            if (exceptionCode.equals(DigitPaErrorCodes.PPT_SINTASSI_EXTRAXSD) || exceptionCode.equals(DigitPaErrorCodes.PPT_SINTASSI_XSD)) {
+              val reCambioStato = re.get.copy(status = Some(WorkflowStatus.SYNTAX_CHECK_FAILED.toString), insertedTimestamp = Util.now())
+              reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
+            }
             val cfb = CarrelloRptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR), idCanale = None)
             Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
         }
       } else {
+        if (exceptionCode.equals(DigitPaErrorCodes.PPT_SINTASSI_EXTRAXSD) || exceptionCode.equals(DigitPaErrorCodes.PPT_SINTASSI_XSD)) {
+          val reCambioStato = re.get.copy(status = Some(WorkflowStatus.SYNTAX_CHECK_FAILED.toString), insertedTimestamp = Util.now())
+          reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
+        }
         Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
       }
     case e: Throwable =>
       log.warn(e, e.getMessage)
+      MDC.put(Constant.MDCKey.PROCESS_OUTCOME, Esito.ERROR.toString)
+      MDC.put(Constant.MDCKey.ERROR_LINE, e.getMessage)
       val cfb = CarrelloRptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), idCanale = None)
       Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
   }
@@ -94,8 +107,8 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
 
       re = Some(
         Re(
+          sessionId = Some(MDC.get(Constant.MDCKey.SESSION_ID)),
           eventCategory = EventCategory.INTERNAL,
-          sessionId = None,
           requestPayload = None,
           insertedTimestamp = soapRequest.timestamp,
           businessProcess = Some(actorClassId),
@@ -112,7 +125,6 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
         _ = idCarrello = intestazioneCarrelloPPT.identificativoCarrello
         _ = re = re.map(r =>
           r.copy(
-            sessionId = Some(MDC.get(Constant.MDCKey.SESSION_ID)),
             cartId = Some(idCarrello),
             psp = Some(nodoInviaCarrelloRPT.identificativoPSP),
             channel = Some(nodoInviaCarrelloRPT.identificativoCanale),
@@ -138,10 +150,10 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
 
       pipeline
         .recoverWith(recoverPipeline)
-        .map(sr => {
-          traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
+        .map(soapResponse => {
+          traceWebserviceInvocation(soapRequest, soapResponse, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
           log.info(LogConstant.logEnd(actorClassId))
-          replyTo ! sr
+          replyTo ! soapResponse
           complete()
         })
   }

@@ -59,8 +59,11 @@ case class CosmosBuilder() {
   }
 
   def reRequestToReEvent(request: ReRequest): ReEventEntity = {
-    val compressedpayload = request.re.requestPayload.map(compress)
-    val base64payload = compressedpayload.map(cp => Base64.getEncoder.encodeToString(cp))
+    val compressedRequestPayload = request.re.requestPayload.map(compress)
+    val base64RequestPayload = compressedRequestPayload.map(cp => Base64.getEncoder.encodeToString(cp))
+
+    val compressedResponsePayload = request.re.responsePayload.map(compress)
+    val base64ResponsePayload = compressedResponsePayload.map(cp => Base64.getEncoder.encodeToString(cp))
 
     val fault: Option[(String, Option[String], Option[String])] = request.re.requestPayload.flatMap(p => Appfunction.getFaultFromXml(new String(p, Constant.UTF_8)))
     ReEventEntity(
@@ -70,17 +73,18 @@ case class CosmosBuilder() {
       insertedTimestamp = request.re.insertedTimestamp,
       eventCategory = request.re.eventCategory.toString,
       status = request.re.status.orNull,
-      outcome = request.re.outcome.toString,
+      outcome = request.re.outcome.orNull,
       httpMethod = request.reExtra.flatMap(_.httpMethod).orNull,
       httpUri = request.reExtra.flatMap(_.uri).orNull,
       httpStatusCode = request.reExtra.flatMap(_.statusCode).map(d => new java.lang.Integer(d)).orNull,
       executionTimeMs = request.reExtra.flatMap(_.elapsed).map(d => new java.lang.Long(d)).orNull,
-      requestHeaders = request.reExtra.map(_.headers.mkString(",")).orNull,
-      responseHeaders = ???,
-      requestPayload = base64payload.orNull,
-      responsePayload = ???,
+      requestHeaders = request.reExtra.map(_.requestHeaders.mkString(",")).orNull,
+      responseHeaders = request.reExtra.map(_.responseHeaders.mkString(",")).orNull,
+      requestPayload = base64RequestPayload.orNull,
+      responsePayload = base64ResponsePayload.orNull,
       businessProcess = request.re.businessProcess.get,
       operationErrorCode = fault.flatMap(_._3).orNull,
+      operationErrorLine = request.re.errorLine.orNull,
       operationErrorDetail = fault.flatMap(_._2).orNull,
       sessionId = MDC.get(Constant.MDCKey.SESSION_ID),
       cartId = request.re.cartId.orNull,

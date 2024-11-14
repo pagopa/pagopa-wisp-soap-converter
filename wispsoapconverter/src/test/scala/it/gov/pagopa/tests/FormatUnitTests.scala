@@ -29,7 +29,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
     assert(Appfunction.fmtMessage(
       Re(
         Instant.now(), EventCategory.INTERFACE,
-        outcome = Some(Esito.OK),
+        outcome = Some(Esito.OK.toString),
         requestPayload = Some(
           <xml>
             <fault>
@@ -50,7 +50,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
     assert(Appfunction.fmtMessage(
       Re(
         Instant.now(), EventCategory.INTERFACE,
-        outcome = Some(Esito.OK),
+        outcome = Some(Esito.OK.toString),
         requestPayload = Some(
           <xml>
             <fault>
@@ -71,7 +71,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
     assert(Appfunction.fmtMessage(
       Re(
         Instant.now(), EventCategory.INTERFACE,
-        outcome = Some(Esito.OK),
+        outcome = Some(Esito.OK.toString),
         requestPayload = Some(
           <xml>test</xml>.toString().getBytes
         )
@@ -88,7 +88,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
     assert(Appfunction.fmtMessage(
       Re(
         Instant.now(), EventCategory.INTERFACE,
-        outcome = Some(Esito.OK),
+        outcome = Some(Esito.OK.toString),
         requestPayload = Some(
           <xml>test</xml>.toString().getBytes
         )
@@ -118,7 +118,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
     assert(Appfunction.fmtMessageJson(
       Re(
         Instant.now(), EventCategory.INTERFACE,
-        outcome = Some(Esito.OK),
+        outcome = Some(Esito.OK.toString),
         requestPayload = Some(
           <xml>
             <fault>
@@ -135,7 +135,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
     assert(Appfunction.fmtMessageJson(
       Re(
         Instant.now(), EventCategory.INTERFACE,
-        outcome = Some(Esito.OK),
+        outcome = Some(Esito.OK.toString),
         requestPayload = Some(
           <xml>
             <fault>
@@ -152,7 +152,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
     assert(Appfunction.fmtMessageJson(
       Re(
         Instant.now(), EventCategory.INTERFACE,
-        outcome = Some(Esito.OK),
+        outcome = Some(Esito.OK.toString),
         requestPayload = Some(
           <xml>test
           </xml>.toString().getBytes
@@ -164,7 +164,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
     assert(Appfunction.fmtMessageJson(
       Re(
         Instant.now(), EventCategory.INTERFACE,
-        outcome = Some(Esito.OK),
+        outcome = Some(Esito.OK.toString),
         requestPayload = Some(
           <xml>test
           </xml>.toString().getBytes
