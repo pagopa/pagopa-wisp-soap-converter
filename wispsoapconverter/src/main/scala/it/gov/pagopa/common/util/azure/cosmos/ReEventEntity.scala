@@ -16,6 +16,7 @@ case class ReEventEntity(
                           partitionKey: String,
                           operationId: String,
                           insertedTimestamp: Instant,
+                          businessProcess: String,
                           eventCategory: String,
                           status: String,
                           outcome: String,
@@ -27,7 +28,6 @@ case class ReEventEntity(
                           responseHeaders: String,
                           requestPayload: String,
                           responsePayload: String,
-                          businessProcess: String,
                           operationErrorCode: String,
                           operationErrorLine: String,
                           operationErrorDetail: String,
@@ -40,6 +40,7 @@ case class ReEventEntity(
                           psp: String,
                           station: String,
                           channel: String,
+                          paymentToken: String = null,
                           info: String,
                         ) {
   def getId: String = id
@@ -98,7 +99,7 @@ case class ReEventEntity(
 
   def getChannel: String = channel
 
-  def getPaymentToken: String = null
+  def getPaymentToken: String = paymentToken
 
   def getInfo: String = info
 }
