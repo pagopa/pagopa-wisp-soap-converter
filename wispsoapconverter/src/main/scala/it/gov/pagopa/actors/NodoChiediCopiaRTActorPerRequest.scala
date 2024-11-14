@@ -9,9 +9,8 @@ import it.gov.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import it.gov.pagopa.common.message._
 import it.gov.pagopa.common.repo.CosmosRepository
 import it.gov.pagopa.common.util.Util.decodeAndDecompressGZIP
-import it.gov.pagopa.common.util.azure.cosmos.{CategoriaEvento, Componente, Esito, SottoTipoEvento}
-import it.gov.pagopa.common.util.{Constant, DDataChecks, FaultId, LogConstant}
 import it.gov.pagopa.common.util.xml.{XmlUtil, XsdValid}
+import it.gov.pagopa.common.util.{Constant, FaultId, LogConstant}
 import it.gov.pagopa.commonxml.XmlEnum
 import org.slf4j.MDC
 import scalaxb.Base64Binary
@@ -21,38 +20,19 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, actorProps: ActorProps) extends PerRequestActor {
-  var req: SoapRequest = _
-  var replyTo: ActorRef = _
-  var re: Option[Re] = None
-
   val inputXsdValid: Boolean = true
   val outputXsdValid: Boolean = true
+  var req: SoapRequest = _
+  var replyTo: ActorRef = _
 
   override def receive: Receive = {
     case soapRequest: SoapRequest =>
-      log.info("NodoChiediCopiaRT received")
+      log.debug("NodoChiediCopiaRT received")
       req = soapRequest
       replyTo = sender()
 
-      re = Some(
-        Re(
-          componente = Componente.WISP_SOAP_CONVERTER,
-          categoriaEvento = CategoriaEvento.INTERNAL,
-          sessionId = None,
-          sessionIdOriginal = Some(req.sessionId),
-          payload = None,
-          esito = Esito.EXECUTED_INTERNAL_STEP,
-          tipoEvento = Some(actorClassId),
-          sottoTipoEvento = SottoTipoEvento.INTERN,
-          insertedTimestamp = soapRequest.timestamp,
-          erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-          businessProcess = Some(actorClassId),
-          erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
-        )
-      )
-
       // Attempt to parse the input
-      log.info(LogConstant.logSintattico(actorClassId))
+      log.debug(LogConstant.logSintattico(actorClassId))
       val nodoChiediCopiaRTResult = parseInput(req.payload)
 
       nodoChiediCopiaRTResult match {
@@ -71,19 +51,19 @@ case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, 
           // Remove illegal characters and get rtKey: ['/', '\', '#'] are illegals character for the cosmos entity id
           val rtKey = rtKeyRaw.replaceAll("[/\\\\#]", "")
 
-          log.info(s"Get RT for the key: $rtKey")
+          log.debug(s"Get RT for the key: $rtKey")
 
           // Fetch the RT using the key
           fetchRT(rtKey).onComplete {
             case Success((Some(encodedXmlContent), Some(tipoFirma))) =>
-              log.info(s"Successfully fetched and encoded RT")
+              log.debug(s"Successfully fetched and encoded RT")
               val ccrtr = generateChiediCopiaRTRisposta(Some(encodedXmlContent), Some(tipoFirma))
               val payload = makeResponseAndValid(ccrtr, outputXsdValid).get
-              replyTo ! SoapResponse(req.sessionId, payload, StatusCodes.OK.intValue, re, req.testCaseId, None)
+              replyTo ! SoapResponse(req.sessionId, payload, StatusCodes.OK.intValue, Option.empty, req.testCaseId, None)
 
             case Failure(exception) =>
               log.error(exception, "Failed to fetch RT")
-              val soap = makeFailureResponse(req.sessionId, req.testCaseId, exception, FaultId.NODO_DEI_PAGAMENTI_SPC, outputXsdValid, re)
+              val soap = makeFailureResponse(req.sessionId, req.testCaseId, exception, FaultId.NODO_DEI_PAGAMENTI_SPC, outputXsdValid, Option.empty)
               replyTo ! soap
           }
 
@@ -91,7 +71,7 @@ case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, 
           // Handle the exception by logging and sending an error response
           log.error(exception, "Failed to parse input payload")
           actorError(exception.asInstanceOf[DigitPaException])
-          val soap = makeFailureResponse(req.sessionId, req.testCaseId, exception, FaultId.NODO_DEI_PAGAMENTI_SPC, outputXsdValid, re)
+          val soap = makeFailureResponse(req.sessionId, req.testCaseId, exception, FaultId.NODO_DEI_PAGAMENTI_SPC, outputXsdValid, Option.empty)
           replyTo ! soap
           complete()
       }
@@ -119,7 +99,7 @@ case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, 
     // Query cosmos repository by RT key
     cosmosRepository.getRtByKey(rtKey).flatMap {
       case Some(rtEntity) =>
-        log.info(s"Found entity: ${rtEntity.id}")
+        log.debug(s"Found entity: ${rtEntity.id}")
 
         rtEntity.rt match {
           case Some(rt) =>
@@ -137,13 +117,13 @@ case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, 
             }
 
           case None =>
-            log.info("RPT exists but RT in unknown")
+            log.error("RPT exists but RT in unknown")
             val digit = exception.DigitPaException("RT non disponibile, riprovare in un secondo momento", DigitPaErrorCodes.PPT_RT_NONDISPONIBILE)
             Future.failed(digit)
         }
 
       case None =>
-        log.info("RPT doesn't exist: no item found with the given key")
+        log.error("RPT doesn't exist: no item found with the given key")
         val digit = exception.DigitPaException(DigitPaErrorCodes.PPT_RT_SCONOSCIUTA)
         Future.failed(digit)
     }
@@ -163,7 +143,7 @@ case class NodoChiediCopiaRTActorPerRequest(cosmosRepository: CosmosRepository, 
   def makeFailureResponse(sessionId: String, tcid: Option[String], ex: Throwable, failureId: String, outputXsdValid: Boolean, re: Option[Re]): SoapResponse = {
     val dpe = ex match {
       case x: DigitPaException => x
-      case x: Throwable        => exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, x)
+      case x: Throwable => exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, x)
     }
     val result = NodoChiediCopiaRTRisposta(Option(FaultBean(dpe.faultCode, dpe.faultString, failureId, Some(ex.getMessage))), None)
     makeResponseAndValid(result, outputXsdValid) match {

@@ -3,7 +3,7 @@ package it.gov.pagopa.tests
 import it.gov.pagopa.common.message.{Re, ReExtra}
 import it.gov.pagopa.common.util.AppLogger
 import it.gov.pagopa.common.util.azure.Appfunction
-import it.gov.pagopa.common.util.azure.cosmos.{CategoriaEvento, Componente, Esito, SottoTipoEvento}
+import it.gov.pagopa.common.util.azure.cosmos.{Esito, EventCategory}
 import it.gov.pagopa.tests.testutil.TestItems
 import org.mockito.MockitoSugar.mock
 import org.scalatest.flatspec.AnyFlatSpec
@@ -28,10 +28,9 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessage(
       Re(
-        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
-        SottoTipoEvento.REQ,
-        esito = Esito.RECEIVED,
-        payload = Some(
+        Instant.now(), EventCategory.INTERFACE,
+        outcome = Some(Esito.OK),
+        requestPayload = Some(
           <xml>
             <fault>
               <faultCode>fCode</faultCode>
@@ -41,7 +40,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
       ),
       Some(ReExtra())
     ).get ==
-      """Re Request => TIPO_EVENTO[REQ/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[RECEIVED] DETTAGLIO[Il nodo ha ricevuto un messaggio]
+      """Re Request => TIPO_EVENTO[REQ/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[OK] DETTAGLIO[Il nodo ha ricevuto un messaggio]
         |httpUri: [UNKNOWN]
         |httpHeaders: [UNKNOWN]
         |httpStatusCode: [UNKNOWN]
@@ -50,10 +49,9 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessage(
       Re(
-        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
-        SottoTipoEvento.RESP,
-        esito = Esito.SEND,
-        payload = Some(
+        Instant.now(), EventCategory.INTERFACE,
+        outcome = Some(Esito.OK),
+        requestPayload = Some(
           <xml>
             <fault>
               <faultCode>fCode</faultCode>
@@ -63,7 +61,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
       ),
       Some(ReExtra())
     ).get ==
-      """Re Request => TIPO_EVENTO[RESP/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[SEND] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]
+      """Re Request => TIPO_EVENTO[RESP/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[OK] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]
         |httpUri: [UNKNOWN]
         |httpHeaders: [UNKNOWN]
         |httpStatusCode: [UNKNOWN]
@@ -72,16 +70,15 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessage(
       Re(
-        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
-        SottoTipoEvento.RESP,
-        esito = Esito.SEND,
-        payload = Some(
+        Instant.now(), EventCategory.INTERFACE,
+        outcome = Some(Esito.OK),
+        requestPayload = Some(
           <xml>test</xml>.toString().getBytes
         )
       ),
       Some(ReExtra())
     ).get ==
-      """Re Request => TIPO_EVENTO[RESP/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[SEND] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]
+      """Re Request => TIPO_EVENTO[RESP/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[OK] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]
         |httpUri: [UNKNOWN]
         |httpHeaders: [UNKNOWN]
         |httpStatusCode: [UNKNOWN]
@@ -90,16 +87,15 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessage(
       Re(
-        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
-        SottoTipoEvento.REQ,
-        esito = Esito.RECEIVED,
-        payload = Some(
+        Instant.now(), EventCategory.INTERFACE,
+        outcome = Some(Esito.OK),
+        requestPayload = Some(
           <xml>test</xml>.toString().getBytes
         )
       ),
       Some(ReExtra())
     ).get ==
-      """Re Request => TIPO_EVENTO[REQ/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[RECEIVED] DETTAGLIO[Il nodo ha ricevuto un messaggio]
+      """Re Request => TIPO_EVENTO[REQ/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[OK] DETTAGLIO[Il nodo ha ricevuto un messaggio]
         |httpUri: [UNKNOWN]
         |httpHeaders: [UNKNOWN]
         |httpStatusCode: [UNKNOWN]
@@ -108,25 +104,22 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessage(
       Re(
-        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERNAL,
-        SottoTipoEvento.INTERN,
-        esito = Esito.EXECUTED_INTERNAL_STEP,
-        payload = Some(
+        Instant.now(), EventCategory.INTERNAL,
+        requestPayload = Some(
           <xml>test</xml>.toString().getBytes
         )
       ),
       Some(ReExtra())
-    ).get == """Re Request => TIPO_EVENTO[INTERN/n.a] ESITO[EXECUTED_INTERNAL_STEP] STATO[STATO non presente]""")
+    ).get == """Re Request => TIPO_EVENTO[INTERN/n.a] ESITO[n/a] STATO[STATO non presente]""")
 
   }
 
   "fmtMessageJson" should "ok" in {
     assert(Appfunction.fmtMessageJson(
       Re(
-        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
-        SottoTipoEvento.REQ,
-        esito = Esito.RECEIVED,
-        payload = Some(
+        Instant.now(), EventCategory.INTERFACE,
+        outcome = Some(Esito.OK),
+        requestPayload = Some(
           <xml>
             <fault>
               <faultCode>fCode</faultCode>
@@ -141,10 +134,9 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessageJson(
       Re(
-        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
-        SottoTipoEvento.RESP,
-        esito = Esito.SEND,
-        payload = Some(
+        Instant.now(), EventCategory.INTERFACE,
+        outcome = Some(Esito.OK),
+        requestPayload = Some(
           <xml>
             <fault>
               <faultCode>fCode</faultCode>
@@ -159,10 +151,9 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessageJson(
       Re(
-        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
-        SottoTipoEvento.RESP,
-        esito = Esito.SEND,
-        payload = Some(
+        Instant.now(), EventCategory.INTERFACE,
+        outcome = Some(Esito.OK),
+        requestPayload = Some(
           <xml>test
           </xml>.toString().getBytes
         )
@@ -172,10 +163,9 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessageJson(
       Re(
-        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERFACE,
-        SottoTipoEvento.REQ,
-        esito = Esito.RECEIVED,
-        payload = Some(
+        Instant.now(), EventCategory.INTERFACE,
+        outcome = Some(Esito.OK),
+        requestPayload = Some(
           <xml>test
           </xml>.toString().getBytes
         )
@@ -186,10 +176,8 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
 
     assert(Appfunction.fmtMessageJson(
       Re(
-        Instant.now(), Componente.WISP_SOAP_CONVERTER, CategoriaEvento.INTERNAL,
-        SottoTipoEvento.INTERN,
-        esito = Esito.EXECUTED_INTERNAL_STEP,
-        payload = Some(
+        Instant.now(), EventCategory.INTERNAL,
+        requestPayload = Some(
           <xml>test
           </xml>.toString().getBytes
         )

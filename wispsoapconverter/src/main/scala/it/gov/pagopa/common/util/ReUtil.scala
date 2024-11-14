@@ -4,7 +4,7 @@ import it.gov.pagopa.common.actor.NodoLogging
 import it.gov.pagopa.common.message._
 import it.gov.pagopa.common.util.ConfigUtil.ConfigData
 import it.gov.pagopa.common.util.azure.Appfunction.ReEventFunc
-import it.gov.pagopa.common.util.azure.cosmos.{CategoriaEvento, Esito, SottoTipoEvento}
+import it.gov.pagopa.common.util.azure.cosmos.{Esito, EventCategory}
 import org.slf4j.MDC
 
 trait ReUtil {
@@ -19,10 +19,10 @@ trait ReUtil {
       re = re.copy(
         sessionId = Some(MDC.get(Constant.MDCKey.SESSION_ID)),
         insertedTimestamp = message.timestamp,
-        payload = Some(message.payload.getUtf8Bytes),
-        categoriaEvento = CategoriaEvento.INTERFACE,
-        sottoTipoEvento = SottoTipoEvento.REQ,
-        esito = Esito.RECEIVED,
+        requestPayload = Some(message.payload.getUtf8Bytes),
+        responsePayload = None,
+        eventCategory = EventCategory.INTERFACE,
+        outcome = Some(Esito.OK),
         businessProcess = Some(message.primitive)
       ),
       reExtra = Some(reExtra)
