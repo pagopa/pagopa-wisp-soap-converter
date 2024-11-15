@@ -213,19 +213,6 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
           ctRPT = rpts.head
           _ = log.debug("Check email")
           _ <- Future.fromTry(checkEmail(ctRPT))
-          _ = if (isAGID) {
-            val now = Util.now()
-            rpts.map(rpt => {
-              val reCambioStatorpt = re.get.copy(
-                iuv = Some(rpt.datiVersamento.identificativoUnivocoVersamento),
-                ccp = Some(rpt.datiVersamento.codiceContestoPagamento),
-                domainId = Some(rpt.dominio.identificativoDominio),
-                status = Some(WorkflowStatus.RPT_STORED.toString),
-                insertedTimestamp = now
-              )
-              reEventFunc(reRequest.copy(re = reCambioStatorpt), log, ddataMap)
-            })
-          }
           url = RPTUtil.getAdapterEcommerceUri(uriAdapterEcommerce, req)
           (payloadNodoInviaCarrelloRPTRisposta, nodoInviaCarrelloRPTRisposta) <- Future.fromTry(
             createNodoInviaCarrelloRPTRisposta(Some(url), esitoResponse = true, nodoInviaCarrelloRPT.identificativoCanale, None)

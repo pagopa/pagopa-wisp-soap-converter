@@ -202,8 +202,6 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
       _ <- saveData(intestazionePPT, updateTokenItem = false)
       _ = if (isAGID) {
         reCambioStato(WorkflowStatus.SEMANTIC_CHECK_PASSED.toString, Util.now())
-      } else {
-        reCambioStato(WorkflowStatus.RPT_STORED.toString, Util.now())
       }
 
       _ = log.debug("Costruzione msg input resp")
