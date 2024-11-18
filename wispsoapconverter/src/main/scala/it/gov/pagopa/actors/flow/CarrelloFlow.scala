@@ -16,7 +16,8 @@ import scalaxbmodel.paginf.CtRichiestaPagamentoTelematico
 import scala.collection.mutable.{Map => MutMap}
 import scala.util.{Failure, Success, Try}
 
-trait CarrelloFlow extends CommonRptCheck with ValidateRpt with ReUtil { this: PerRequestActor =>
+trait CarrelloFlow extends CommonRptCheck with ValidateRpt with ReUtil {
+  this: PerRequestActor =>
 
   def parseCarrello(payload: String, inputXsdValid: Boolean): Try[(IntestazioneCarrelloPPT, NodoInviaCarrelloRPT)] = {
     (for {
@@ -30,16 +31,16 @@ trait CarrelloFlow extends CommonRptCheck with ValidateRpt with ReUtil { this: P
   }
 
   def validCarrello(
-      ddataMap: ConfigData,
-      maxNumRptInCart: Int,
-      rptKeys: Seq[RPTKey],
-      intestazioneCarrelloPPT: IntestazioneCarrelloPPT,
-      nodoInviaCarrelloRPT: NodoInviaCarrelloRPT,
-      multibeneficiario: Boolean,
-      idCanaleAgid: String,
-      idPspAgid: String,
-      idIntPspAgid: String
-  ): Try[(BrokerCreditorInstitution, Station)] = {
+                     ddataMap: ConfigData,
+                     maxNumRptInCart: Int,
+                     rptKeys: Seq[RPTKey],
+                     intestazioneCarrelloPPT: IntestazioneCarrelloPPT,
+                     nodoInviaCarrelloRPT: NodoInviaCarrelloRPT,
+                     multibeneficiario: Boolean,
+                     idCanaleAgid: String,
+                     idPspAgid: String,
+                     idIntPspAgid: String
+                   ): Try[(BrokerCreditorInstitution, Station)] = {
     val check = for {
       _ <- Success(())
       _ <- DDataChecks.checkPspIntermediarioPspCanale(
@@ -165,14 +166,14 @@ trait CarrelloFlow extends CommonRptCheck with ValidateRpt with ReUtil { this: P
   }
 
   def validRpts(
-      ddataMap: ConfigData,
-      idCarrello: String,
-      rptKeys: Seq[RPTKey],
-      nodoInviaCarrelloRPT: NodoInviaCarrelloRPT,
-      intestazioneCarrelloPPT: IntestazioneCarrelloPPT,
-      isBolloEnabled: Boolean,
-      maxVersamentiInSecondRpt: Int
-  ): Try[Boolean] = {
+                 ddataMap: ConfigData,
+                 idCarrello: String,
+                 rptKeys: Seq[RPTKey],
+                 nodoInviaCarrelloRPT: NodoInviaCarrelloRPT,
+                 intestazioneCarrelloPPT: IntestazioneCarrelloPPT,
+                 isBolloEnabled: Boolean,
+                 maxVersamentiInSecondRpt: Int
+               ): Try[Boolean] = {
 
     val errorMap: MutMap[Int, RptFaultBeanException] = MutMap.empty
 
@@ -194,65 +195,65 @@ trait CarrelloFlow extends CommonRptCheck with ValidateRpt with ReUtil { this: P
             val idDominioMulti = intestazioneCarrelloPPT.identificativoCarrello.substring(0, 11)
 
             (if (index == 0) {
-               for {
-                 _ <- DDataChecks.checkPaIntermediarioPaStazioneMultibeneficiario(
-                   log,
-                   ddataMap,
-                   rpt.dominio.identificativoDominio,
-                   intestazioneCarrelloPPT.identificativoIntermediarioPA,
-                   intestazioneCarrelloPPT.identificativoStazioneIntermediarioPA
-                 )
-                 //L’idCarrello  deve essere composto nella seguente forma: <idDominio(11)><numeroAvviso(18)><-><Progressivo(5)>
-                 _ <-
-                   if (idDominioMulti != rpt.dominio.identificativoDominio) {
-                     Failure(exception.DigitPaException("L’idCarrello deve contenere idDominio e corrispondere al dominio della prima rpt", DigitPaErrorCodes.PPT_MULTI_BENEFICIARIO))
-                   } else {
-                     Success(())
-                   }
+              for {
+                _ <- DDataChecks.checkPaIntermediarioPaStazioneMultibeneficiario(
+                  log,
+                  ddataMap,
+                  rpt.dominio.identificativoDominio,
+                  intestazioneCarrelloPPT.identificativoIntermediarioPA,
+                  intestazioneCarrelloPPT.identificativoStazioneIntermediarioPA
+                )
+                //L’idCarrello  deve essere composto nella seguente forma: <idDominio(11)><numeroAvviso(18)><-><Progressivo(5)>
+                _ <-
+                  if (idDominioMulti != rpt.dominio.identificativoDominio) {
+                    Failure(exception.DigitPaException("L’idCarrello deve contenere idDominio e corrispondere al dominio della prima rpt", DigitPaErrorCodes.PPT_MULTI_BENEFICIARIO))
+                  } else {
+                    Success(())
+                  }
 
-               } yield ()
+              } yield ()
 
-             } else {
-               for {
-                 _ <- DDataChecks.checkPA(log, ddataMap, rpt.dominio.identificativoDominio)
+            } else {
+              for {
+                _ <- DDataChecks.checkPA(log, ddataMap, rpt.dominio.identificativoDominio)
 
-                 //La seconda RPT contiene solo 1 versamento
-                 _ <-
-                   if (rpt.datiVersamento.datiSingoloVersamento.size == maxVersamentiInSecondRpt) {
-                     Success(())
-                   } else {
-                     Failure(exception.DigitPaException(s"La seconda RPT non contiene solo $maxVersamentiInSecondRpt versamento", DigitPaErrorCodes.PPT_MULTI_BENEFICIARIO))
-                   }
-                 //Lo stesso Ente deve essere presente con una sola RPT
-                 _ <-
-                   if (rpt.dominio.identificativoDominio != primarpt.dominio.identificativoDominio) {
-                     Success(())
-                   } else {
-                     Failure(exception.DigitPaException("Lo stesso Ente deve essere presente con una sola RPT", DigitPaErrorCodes.PPT_MULTI_BENEFICIARIO))
-                   }
-                 //Lo IUV è identico per ogni RPT
-                 _ <-
-                   if (rpt.datiVersamento.identificativoUnivocoVersamento == primarpt.datiVersamento.identificativoUnivocoVersamento) {
-                     Success(())
-                   } else {
-                     Failure(exception.DigitPaException("Lo IUV non è identico per ogni RPT", DigitPaErrorCodes.PPT_MULTI_BENEFICIARIO))
-                   }
-                 //Il dato dataEsecuzionePagamento è il medesimo per tutte le RPT
-                 _ <-
-                   if (rpt.datiVersamento.dataEsecuzionePagamento == primarpt.datiVersamento.dataEsecuzionePagamento) {
-                     Success(())
-                   } else {
-                     Failure(exception.DigitPaException("Il dato dataEsecuzionePagamento non è il medesimo per tutte le RPT", DigitPaErrorCodes.PPT_MULTI_BENEFICIARIO))
-                   }
-                 //Il carrello deve avere massimo 5 versamenti totali ( tra le RPT )
-                 _ <-
-                   if (rpt.datiVersamento.datiSingoloVersamento.size + primarpt.datiVersamento.datiSingoloVersamento.size > 5) {
-                     Failure(exception.DigitPaException("Il carrello deve avere massimo 5 versamenti totali", DigitPaErrorCodes.PPT_MULTI_BENEFICIARIO))
-                   } else {
-                     Success(())
-                   }
-               } yield ()
-             }).flatMap(_ => {
+                //La seconda RPT contiene solo 1 versamento
+                _ <-
+                  if (rpt.datiVersamento.datiSingoloVersamento.size == maxVersamentiInSecondRpt) {
+                    Success(())
+                  } else {
+                    Failure(exception.DigitPaException(s"La seconda RPT non contiene solo $maxVersamentiInSecondRpt versamento", DigitPaErrorCodes.PPT_MULTI_BENEFICIARIO))
+                  }
+                //Lo stesso Ente deve essere presente con una sola RPT
+                _ <-
+                  if (rpt.dominio.identificativoDominio != primarpt.dominio.identificativoDominio) {
+                    Success(())
+                  } else {
+                    Failure(exception.DigitPaException("Lo stesso Ente deve essere presente con una sola RPT", DigitPaErrorCodes.PPT_MULTI_BENEFICIARIO))
+                  }
+                //Lo IUV è identico per ogni RPT
+                _ <-
+                  if (rpt.datiVersamento.identificativoUnivocoVersamento == primarpt.datiVersamento.identificativoUnivocoVersamento) {
+                    Success(())
+                  } else {
+                    Failure(exception.DigitPaException("Lo IUV non è identico per ogni RPT", DigitPaErrorCodes.PPT_MULTI_BENEFICIARIO))
+                  }
+                //Il dato dataEsecuzionePagamento è il medesimo per tutte le RPT
+                _ <-
+                  if (rpt.datiVersamento.dataEsecuzionePagamento == primarpt.datiVersamento.dataEsecuzionePagamento) {
+                    Success(())
+                  } else {
+                    Failure(exception.DigitPaException("Il dato dataEsecuzionePagamento non è il medesimo per tutte le RPT", DigitPaErrorCodes.PPT_MULTI_BENEFICIARIO))
+                  }
+                //Il carrello deve avere massimo 5 versamenti totali ( tra le RPT )
+                _ <-
+                  if (rpt.datiVersamento.datiSingoloVersamento.size + primarpt.datiVersamento.datiSingoloVersamento.size > 5) {
+                    Failure(exception.DigitPaException("Il carrello deve avere massimo 5 versamenti totali", DigitPaErrorCodes.PPT_MULTI_BENEFICIARIO))
+                  } else {
+                    Success(())
+                  }
+              } yield ()
+            }).flatMap(_ => {
               for {
                 //Il CCP delle RPT devono contenere l’idCarrello
                 _ <-

@@ -12,7 +12,7 @@ import it.gov.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import it.gov.pagopa.common.message._
 import it.gov.pagopa.common.repo.{CosmosPrimitive, CosmosRepository}
 import it.gov.pagopa.common.util._
-import it.gov.pagopa.common.util.azure.cosmos.{CategoriaEvento, Componente, Esito, SottoTipoEvento}
+import it.gov.pagopa.common.util.azure.cosmos.{Esito, EventCategory}
 import it.gov.pagopa.common.util.xml.XsdValid
 import it.gov.pagopa.commonxml.XmlEnum
 import it.gov.pagopa.exception.{CarrelloRptFaultBeanException, WorkflowExceptionErrorCodes}
@@ -48,26 +48,39 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
   }
   val recoverPipeline: PartialFunction[Throwable, Future[SoapResponse]] = {
     case cfb: CarrelloRptFaultBeanException =>
+      MDC.put(Constant.MDCKey.PROCESS_OUTCOME, Esito.ERROR.toString)
+      MDC.put(Constant.MDCKey.ERROR_LINE, cfb.digitPaException.getMessage)
+      val exceptionCode = cfb.digitPaException.code
       if (cfb.workflowErrorCode.isDefined && cfb.idCarrello.isDefined && cfb.rptKeys.isDefined) {
         cfb.workflowErrorCode.get match {
           case WorkflowExceptionErrorCodes.CARRELLO_ERRORE_SEMANTICO | WorkflowExceptionErrorCodes.RPT_ERRORE_SEMANTICO =>
             (for {
               _ <- Future.successful(())
               now = Util.now()
-              reCambioStato = re.get.copy(status = Some(StatoCarrelloEnum.CART_RIFIUTATO_NODO.toString), insertedTimestamp = now)
+              reCambioStato = re.get.copy(status = Some(WorkflowStatus.SEMANTIC_CHECK_FAILED.toString), insertedTimestamp = now)
               _ = reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
               res = errorHandler(req.sessionId, req.testCaseId, cfb, re)
             } yield res) recoverWith recoverGenericError
 
           case _ =>
+            if (exceptionCode.equals(DigitPaErrorCodes.PPT_SINTASSI_EXTRAXSD) || exceptionCode.equals(DigitPaErrorCodes.PPT_SINTASSI_XSD)) {
+              val reCambioStato = re.get.copy(status = Some(WorkflowStatus.SYNTAX_CHECK_FAILED.toString), insertedTimestamp = Util.now())
+              reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
+            }
             val cfb = CarrelloRptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR), idCanale = None)
             Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
         }
       } else {
+        if (exceptionCode.equals(DigitPaErrorCodes.PPT_SINTASSI_EXTRAXSD) || exceptionCode.equals(DigitPaErrorCodes.PPT_SINTASSI_XSD)) {
+          val reCambioStato = re.get.copy(status = Some(WorkflowStatus.SYNTAX_CHECK_FAILED.toString), insertedTimestamp = Util.now())
+          reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
+        }
         Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
       }
     case e: Throwable =>
       log.warn(e, e.getMessage)
+      MDC.put(Constant.MDCKey.PROCESS_OUTCOME, Esito.ERROR.toString)
+      MDC.put(Constant.MDCKey.ERROR_LINE, e.getMessage)
       val cfb = CarrelloRptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), idCanale = None)
       Future.successful(errorHandler(req.sessionId, req.testCaseId, cfb, re))
   }
@@ -94,23 +107,14 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
 
       re = Some(
         Re(
-          componente = Componente.WISP_SOAP_CONVERTER,
-          categoriaEvento = CategoriaEvento.INTERNAL,
-          sessionId = None,
-          sessionIdOriginal = Some(req.sessionId),
-          payload = None,
-          esito = Esito.EXECUTED_INTERNAL_STEP,
-          tipoEvento = Some(actorClassId),
-          sottoTipoEvento = SottoTipoEvento.INTERN,
+          sessionId = Some(MDC.get(Constant.MDCKey.SESSION_ID)),
+          eventCategory = EventCategory.INTERNAL,
+          requestPayload = None,
           insertedTimestamp = soapRequest.timestamp,
-          erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
           businessProcess = Some(actorClassId),
-          erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
         )
       )
       reRequest = ReRequest(null, req.testCaseId, re.get, None)
-
-      MDC.put(Constant.MDCKey.ORIGINAL_SESSION_ID, req.sessionId)
 
       val pipeline = for {
         _ <- Future.successful(())
@@ -121,13 +125,10 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
         _ = idCarrello = intestazioneCarrelloPPT.identificativoCarrello
         _ = re = re.map(r =>
           r.copy(
-            sessionId = Some(MDC.get(Constant.MDCKey.SESSION_ID)),
-            idCarrello = Some(idCarrello),
+            cartId = Some(idCarrello),
             psp = Some(nodoInviaCarrelloRPT.identificativoPSP),
-            canale = Some(nodoInviaCarrelloRPT.identificativoCanale),
-            fruitore = Some(intestazioneCarrelloPPT.identificativoStazioneIntermediarioPA),
-            fruitoreDescr = Some(intestazioneCarrelloPPT.identificativoStazioneIntermediarioPA),
-            stazione = Some(intestazioneCarrelloPPT.identificativoStazioneIntermediarioPA)
+            channel = Some(nodoInviaCarrelloRPT.identificativoCanale),
+            station = Some(intestazioneCarrelloPPT.identificativoStazioneIntermediarioPA)
           )
         )
         _ = MDC.put(Constant.MDCKey.ID_CARRELLO, intestazioneCarrelloPPT.identificativoCarrello)
@@ -140,7 +141,7 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
         _ = log.debug("Salvataggio stato log CARRELLO_RICEVUTA_NODO/RPT_RICEVUTA_NODO")
 
         now = Util.now()
-        reCambioStato = re.get.copy(status = Some(StatoCarrelloEnum.CART_RICEVUTO_NODO.toString), insertedTimestamp = now)
+        reCambioStato = re.get.copy(status = Some(WorkflowStatus.SYNTAX_CHECK_PASSED.toString), insertedTimestamp = now)
         _ = reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
         _ = log.info(LogConstant.logSemantico(actorClassId))
         soapResponse <- manageCarrello(nodoInviaCarrelloRPT, intestazioneCarrelloPPT, rpts)
@@ -149,10 +150,10 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
 
       pipeline
         .recoverWith(recoverPipeline)
-        .map(sr => {
-          traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
+        .map(soapResponse => {
+          traceWebserviceInvocation(soapRequest, soapResponse, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
           log.info(LogConstant.logEnd(actorClassId))
-          replyTo ! sr
+          replyTo ! soapResponse
           complete()
         })
   }
@@ -183,7 +184,6 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
         }
 
       psp <- Future.fromTry(DDataChecks.checkPsp(log, ddataMap, nodoInviaCarrelloRPT.identificativoPSP))
-      _ = re = re.map(r => r.copy(pspDescr = psp.description))
       canale = ddataMap.channels(idCanale)
       isBolloEnabled = psp.digitalStamp && canale.digitalStamp
 
@@ -199,14 +199,12 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
           _ <- saveCarrello(insertTime, intestazioneCarrelloPPT)
           now = Util.now()
           _ = {
-            val reCambioStato = re.get.copy(status = Some(StatoCarrelloEnum.CART_ACCETTATO_NODO.toString), insertedTimestamp = now)
-            reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
             rpts.map(rpt => {
               val reCambioStatorpt = re.get.copy(
                 iuv = Some(rpt.datiVersamento.identificativoUnivocoVersamento),
                 ccp = Some(rpt.datiVersamento.codiceContestoPagamento),
-                idDominio = Some(rpt.dominio.identificativoDominio),
-                status = Some(StatoRPTEnum.RPT_ACCETTATA_NODO.toString),
+                domainId = Some(rpt.dominio.identificativoDominio),
+                status = Some(WorkflowStatus.SEMANTIC_CHECK_PASSED.toString),
                 insertedTimestamp = now
               )
               reEventFunc(reRequest.copy(re = reCambioStatorpt), log, ddataMap)
@@ -215,22 +213,6 @@ case class NodoInviaCarrelloRPTActorPerRequest(cosmosRepository: CosmosRepositor
           ctRPT = rpts.head
           _ = log.debug("Check email")
           _ <- Future.fromTry(checkEmail(ctRPT))
-          _ = if (isAGID) {
-            val now = Util.now()
-            val reCambioStato = re.get.copy(status = Some(StatoCarrelloEnum.CART_PARCHEGGIATO_NODO.toString), insertedTimestamp = now)
-            reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
-            rpts.map(rpt => {
-              val reCambioStatorpt = re.get.copy(
-                iuv = Some(rpt.datiVersamento.identificativoUnivocoVersamento),
-                ccp = Some(rpt.datiVersamento.codiceContestoPagamento),
-                idDominio = Some(rpt.dominio.identificativoDominio),
-                status = Some(StatoRPTEnum.RPT_PARCHEGGIATA_NODO.toString),
-                esito = Esito.EXECUTED_INTERNAL_STEP,
-                insertedTimestamp = now
-              )
-              reEventFunc(reRequest.copy(re = reCambioStatorpt), log, ddataMap)
-            })
-          }
           url = RPTUtil.getAdapterEcommerceUri(uriAdapterEcommerce, req)
           (payloadNodoInviaCarrelloRPTRisposta, nodoInviaCarrelloRPTRisposta) <- Future.fromTry(
             createNodoInviaCarrelloRPTRisposta(Some(url), esitoResponse = true, nodoInviaCarrelloRPT.identificativoCanale, None)

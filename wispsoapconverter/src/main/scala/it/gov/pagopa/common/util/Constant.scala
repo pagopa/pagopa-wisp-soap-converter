@@ -31,7 +31,8 @@ object Constant {
 
   object MDCKey {
     val SESSION_ID = "sessionId"
-    val ORIGINAL_SESSION_ID = "originalSessionId"
+    val PROCESS_OUTCOME = "processOutcome"
+    val ERROR_LINE = "errorLine"
     val ACTOR_CLASS_ID = "actorClassId"
     val ID_CARRELLO = "idCarrello"
     val IUV = "iuv"

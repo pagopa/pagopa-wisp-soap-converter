@@ -59,47 +59,43 @@ case class CosmosBuilder() {
   }
 
   def reRequestToReEvent(request: ReRequest): ReEventEntity = {
-    val compressedpayload = request.re.payload.map(compress)
-    val base64payload = compressedpayload.map(cp => Base64.getEncoder.encodeToString(cp))
+    val compressedRequestPayload = request.re.requestPayload.map(compress)
+    val base64RequestPayload = compressedRequestPayload.map(cp => Base64.getEncoder.encodeToString(cp))
 
-    val fault: Option[(String, Option[String], Option[String])] = request.re.payload.flatMap(p => Appfunction.getFaultFromXml(new String(p, Constant.UTF_8)))
+    val compressedResponsePayload = request.re.responsePayload.map(compress)
+    val base64ResponsePayload = compressedResponsePayload.map(cp => Base64.getEncoder.encodeToString(cp))
+
+    val fault: Option[(String, Option[String], Option[String])] = request.re.requestPayload.flatMap(p => Appfunction.getFaultFromXml(new String(p, Constant.UTF_8)))
     ReEventEntity(
-      request.re.uniqueId,
-      request.re.insertedTimestamp.toString.substring(0, 10),
-      null,
-      request.sessionId,
-      null,
-      request.re.componente.toString,
-      request.re.insertedTimestamp,
-      request.re.categoriaEvento.toString,
-      request.re.sottoTipoEvento.toString,
-      request.reExtra.flatMap(_.callType).map(_.toString).orNull,
-      request.re.esito.toString,
-      request.reExtra.flatMap(_.httpMethod).orNull,
-      request.reExtra.flatMap(_.uri).orNull,
-      request.reExtra.map(_.headers.mkString(",")).orNull,
-      request.reExtra.flatMap(_.callRemoteAddress).orNull,
-      request.reExtra.flatMap(_.statusCode).map(d => new java.lang.Integer(d)).orNull,
-      request.reExtra.flatMap(_.elapsed).map(d => new java.lang.Long(d)).orNull,
-      base64payload.orNull, //comprimere
-      base64payload.map(_.length).map(d => new java.lang.Integer(d)).orNull,
-      request.re.businessProcess.get,
-      if (fault.isDefined) "Failed" else "Success",
-      fault.map(_._1).orNull,
-      fault.flatMap(_._2).orNull,
-      fault.flatMap(_._3).orNull,
-      request.re.tipoEvento.orNull,
-      MDC.get(Constant.MDCKey.SESSION_ID),
-      request.re.idCarrello.orNull,
-      request.re.iuv.orNull,
-      request.re.noticeNumber.orNull,
-      request.re.idDominio.orNull,
-      request.re.ccp.orNull,
-      request.re.psp.orNull,
-      request.re.stazione.orNull,
-      request.re.canale.orNull,
-      request.re.status.orNull,
-      request.re.info.orNull
+      id = request.re.uniqueId,
+      partitionKey = request.re.insertedTimestamp.toString.substring(0, 10),
+      operationId = request.sessionId,
+      insertedTimestamp = request.re.insertedTimestamp,
+      eventCategory = request.re.eventCategory.toString,
+      status = request.re.status.orNull,
+      outcome = request.re.outcome.orNull,
+      httpMethod = request.reExtra.flatMap(_.httpMethod).orNull,
+      httpUri = request.reExtra.flatMap(_.uri).orNull,
+      httpStatusCode = request.reExtra.flatMap(_.statusCode).map(d => new java.lang.Integer(d)).orNull,
+      executionTimeMs = request.reExtra.flatMap(_.elapsed).map(d => new java.lang.Long(d)).orNull,
+      requestHeaders = request.reExtra.map(_.requestHeaders.mkString(",")).orNull,
+      responseHeaders = request.reExtra.map(_.responseHeaders.mkString(",")).orNull,
+      requestPayload = base64RequestPayload.orNull,
+      responsePayload = base64ResponsePayload.orNull,
+      businessProcess = request.re.businessProcess.get,
+      operationErrorCode = fault.flatMap(_._3).orNull,
+      operationErrorLine = request.re.errorLine.orNull,
+      operationErrorDetail = fault.flatMap(_._2).orNull,
+      sessionId = MDC.get(Constant.MDCKey.SESSION_ID),
+      cartId = request.re.cartId.orNull,
+      iuv = request.re.iuv.orNull,
+      noticeNumber = request.re.noticeNumber.orNull,
+      domainId = request.re.domainId.orNull,
+      ccp = request.re.ccp.orNull,
+      psp = request.re.psp.orNull,
+      station = request.re.station.orNull,
+      channel = request.re.channel.orNull,
+      info = request.re.info.orNull
     )
   }
 

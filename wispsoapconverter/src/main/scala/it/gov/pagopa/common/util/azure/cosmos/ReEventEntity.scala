@@ -2,61 +2,35 @@ package it.gov.pagopa.common.util.azure.cosmos
 
 import java.time.Instant
 
-object Componente extends Enumeration {
-  val WISP_SOAP_CONVERTER = Value
-}
-
-object CategoriaEvento extends Enumeration {
+object EventCategory extends Enumeration {
   val INTERFACE = Value
   val INTERNAL = Value
 }
 
-object SottoTipoEvento extends Enumeration {
-  val REQ = Value
-  val RESP = Value
-  val INTERN = Value
-}
-
-object CallType extends Enumeration {
-  val SERVER = Value
-  val CLIENT = Value
-}
-
 object Esito extends Enumeration {
-  val SEND = Value
-  val SEND_FAILURE = Value
-  val RECEIVED = Value
-  val RECEIVED_FAILURE = Value
-  val NEVER_RECEIVED = Value
-  val EXECUTED_INTERNAL_STEP = Value
+  val OK, ERROR = Value
 }
 
 case class ReEventEntity(
                           id: String,
                           partitionKey: String,
-                          requestId: String,
                           operationId: String,
-                          clientOperationId: String,
-                          component: String,
                           insertedTimestamp: Instant,
+                          businessProcess: String,
                           eventCategory: String,
-                          eventSubcategory: String,
-                          callType: String,
+                          status: String,
                           outcome: String,
                           httpMethod: String,
                           httpUri: String,
-                          httpHeaders: String,
-                          httpCallRemoteAddress: String,
                           httpStatusCode: Integer,
                           executionTimeMs: java.lang.Long,
-                          compressedPayload: String,
-                          compressedPayloadLength: Integer,
-                          businessProcess: String,
-                          operationStatus: String,
-                          operationErrorTitle: String,
-                          operationErrorDetail: String,
+                          requestHeaders: String,
+                          responseHeaders: String,
+                          requestPayload: String,
+                          responsePayload: String,
                           operationErrorCode: String,
-                          primitive: String,
+                          operationErrorLine: String,
+                          operationErrorDetail: String,
                           sessionId: String,
                           cartId: String,
                           iuv: String,
@@ -66,28 +40,22 @@ case class ReEventEntity(
                           psp: String,
                           station: String,
                           channel: String,
-                          status: String,
+                          paymentToken: String = null,
                           info: String,
                         ) {
   def getId: String = id
 
   def getPartitionKey: String = partitionKey
 
-  def getRequestId: String = requestId
-
   def getOperationId: String = operationId
-
-  def getClientOperationId: String = clientOperationId
-
-  def getComponent: String = component
 
   def getInsertedTimestamp: Instant = insertedTimestamp
 
+  def getBusinessProcess: String = businessProcess
+
   def getEventCategory: String = eventCategory
 
-  def getEventSubcategory: String = eventSubcategory
-
-  def getCallType: String = callType
+  def getStatus: String = status
 
   def getOutcome: String = outcome
 
@@ -95,29 +63,23 @@ case class ReEventEntity(
 
   def getHttpUri: String = httpUri
 
-  def getHttpHeaders: String = httpHeaders
-
-  def getHttpCallRemoteAddress: String = httpCallRemoteAddress
-
   def getHttpStatusCode: Integer = httpStatusCode
 
   def getExecutionTimeMs: java.lang.Long = executionTimeMs
 
-  def getCompressedPayload: String = compressedPayload
+  def getRequestHeaders: String = requestHeaders
 
-  def getCompressedPayloadLength: Integer = compressedPayloadLength
+  def getResponseHeaders: String = responseHeaders
 
-  def getBusinessProcess: String = businessProcess
+  def getRequestPayload: String = requestPayload
 
-  def getOperationStatus: String = operationStatus
-
-  def getOperationErrorTitle: String = operationErrorTitle
-
-  def getOperationErrorDetail: String = operationErrorDetail
+  def getResponsePayload: String = responsePayload
 
   def getOperationErrorCode: String = operationErrorCode
 
-  def getPrimitive: String = primitive
+  def getOperationErrorLine: String = operationErrorLine
+
+  def getOperationErrorDetail: String = operationErrorDetail
 
   def getSessionId: String = sessionId
 
@@ -137,7 +99,7 @@ case class ReEventEntity(
 
   def getChannel: String = channel
 
-  def getStatus: String = status
+  def getPaymentToken: String = paymentToken
 
   def getInfo: String = info
 }

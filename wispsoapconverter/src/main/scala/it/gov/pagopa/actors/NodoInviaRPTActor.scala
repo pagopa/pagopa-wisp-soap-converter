@@ -12,7 +12,7 @@ import it.gov.pagopa.common.message._
 import it.gov.pagopa.common.repo.{CosmosPrimitive, CosmosRepository}
 import it.gov.pagopa.common.rpt.split.RptFlow
 import it.gov.pagopa.common.util._
-import it.gov.pagopa.common.util.azure.cosmos.{CategoriaEvento, Componente, Esito, SottoTipoEvento}
+import it.gov.pagopa.common.util.azure.cosmos.{Esito, EventCategory}
 import it.gov.pagopa.config.Channel
 import it.gov.pagopa.exception.{RptFaultBeanException, WorkflowExceptionErrorCodes}
 import org.slf4j.MDC
@@ -34,6 +34,8 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
   val uriAdapterEcommerce: String = context.system.settings.config.getString("adapterEcommerce.url")
   val recoverFuture: PartialFunction[Throwable, Future[SoapResponse]] = {
     case cfb: RptFaultBeanException =>
+      MDC.put(Constant.MDCKey.PROCESS_OUTCOME, Esito.ERROR.toString)
+      MDC.put(Constant.MDCKey.ERROR_LINE, cfb.digitPaException.getMessage)
       log.warn(s"Errore generico durante $actorClassId, message: [${cfb.getMessage}]")
       if (cfb.workflowErrorCode.isDefined && cfb.rptKey.isDefined) {
         cfb.workflowErrorCode.get match {
@@ -41,7 +43,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
             val now = Util.now()
             (for {
               _ <- Future.successful(())
-              _ = reCambioStato(StatoRPTEnum.RPT_RIFIUTATA_NODO.toString, now)
+              _ = reCambioStato(WorkflowStatus.SEMANTIC_CHECK_FAILED.toString, now)
               resItems = errorHandler(cfb)
               res = SoapResponse(req.sessionId, resItems._1, StatusCodes.OK.intValue, re, req.testCaseId)
             } yield res) recoverWith recoverGenericError
@@ -56,11 +58,19 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
         Future.successful(SoapResponse(req.sessionId, resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
       }
     case dpaex: DigitPaException =>
+      MDC.put(Constant.MDCKey.PROCESS_OUTCOME, Esito.ERROR.toString)
+      MDC.put(Constant.MDCKey.ERROR_LINE, dpaex.getMessage)
       log.warn(s"Errore generico durante $actorClassId, message: [${dpaex.getMessage}]")
+      if (dpaex.code.equals(DigitPaErrorCodes.PPT_SINTASSI_EXTRAXSD) || dpaex.code.equals(DigitPaErrorCodes.PPT_SINTASSI_XSD)) {
+        val reCambioStato = re.get.copy(status = Some(WorkflowStatus.SYNTAX_CHECK_FAILED.toString), insertedTimestamp = Util.now())
+        reEventFunc(reRequest.copy(re = reCambioStato), log, ddataMap)
+      }
       val resItems = errorHandler(RptFaultBeanException(dpaex))
       Future.successful(SoapResponse(req.sessionId, resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
     case cause: Throwable =>
       log.warn(cause, s"Errore generico durante $actorClassId, message: [${cause.getMessage}]")
+      MDC.put(Constant.MDCKey.PROCESS_OUTCOME, Esito.ERROR.toString)
+      MDC.put(Constant.MDCKey.ERROR_LINE, cause.getMessage)
       val cfb = RptFaultBeanException(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, cause))
       val resItems = errorHandler(cfb)
       Future.successful(SoapResponse(req.sessionId, resItems._1, StatusCodes.OK.intValue, re, req.testCaseId))
@@ -94,22 +104,14 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
 
       re = Some(
         Re(
-          componente = Componente.WISP_SOAP_CONVERTER,
-          categoriaEvento = CategoriaEvento.INTERNAL,
+          eventCategory = EventCategory.INTERNAL,
           sessionId = None,
-          sessionIdOriginal = Some(req.sessionId),
-          payload = None,
-          esito = Esito.EXECUTED_INTERNAL_STEP,
-          tipoEvento = Some(actorClassId),
-          sottoTipoEvento = SottoTipoEvento.INTERN,
+          requestPayload = None,
           insertedTimestamp = soapRequest.timestamp,
-          erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
-          businessProcess = Some(actorClassId),
-          erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+          businessProcess = Some(actorClassId)
         )
       )
       reRequest = ReRequest(null, req.testCaseId, re.get, None)
-      MDC.put(Constant.MDCKey.ORIGINAL_SESSION_ID, req.sessionId)
 
       val pipeline = for {
         _ <- Future.successful(())
@@ -131,18 +133,15 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
           r.copy(
             sessionId = Some(MDC.get(Constant.MDCKey.SESSION_ID)),
             psp = Some(nodoInviaRPT.identificativoPSP),
-            canale = Some(nodoInviaRPT.identificativoCanale),
-            fruitore = Some(intestazionePPT.identificativoStazioneIntermediarioPA),
-            fruitoreDescr = Some(intestazionePPT.identificativoStazioneIntermediarioPA),
-            idDominio = Some(intestazionePPT.identificativoDominio),
+            channel = Some(nodoInviaRPT.identificativoCanale),
+            domainId = Some(intestazionePPT.identificativoDominio),
             ccp = Some(intestazionePPT.codiceContestoPagamento),
             iuv = Some(intestazionePPT.identificativoUnivocoVersamento),
-            stazione = Some(intestazionePPT.identificativoStazioneIntermediarioPA),
-            tipoVersamento = Some(ctRPT.datiVersamento.tipoVersamento.toString)
+            station = Some(intestazionePPT.identificativoStazioneIntermediarioPA)
           )
         )
 
-        _ = reCambioStato(StatoRPTEnum.RPT_RICEVUTA_NODO.toString, Util.now())
+        _ = reCambioStato(WorkflowStatus.SYNTAX_CHECK_PASSED.toString, Util.now())
 
         _ = log.debug("Validazione input")
         _ = log.info(LogConstant.logSemantico(actorClassId))
@@ -177,18 +176,16 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
         modelloUno =
           modelloPagamento == ModelloPagamento.IMMEDIATO.toString || modelloPagamento == ModelloPagamento.IMMEDIATO_MULTIBENEFICIARIO.toString
 
-        _ = re = re.map(r => r.copy(pspDescr = psp.description, fruitoreDescr = Some(stazione.stationCode)))
-
         (payloadNodoInviaRPTRisposta, _) <- manageNormal(intestazionePPT, modelloUno, isAGID)
 
       } yield SoapResponse(soapRequest.sessionId, payloadNodoInviaRPTRisposta, StatusCodes.OK.intValue, re, soapRequest.testCaseId)
 
       pipeline
         .recoverWith(recoverFuture)
-        .map(sr2 => {
-          traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
+        .map(soapResponse => {
+          traceWebserviceInvocation(soapRequest, soapResponse, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
           log.info(LogConstant.logEnd(actorClassId))
-          replyTo ! sr2
+          replyTo ! soapResponse
           complete()
         })
   }
@@ -204,9 +201,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
       _ = insertTime = Util.now()
       _ <- saveData(intestazionePPT, updateTokenItem = false)
       _ = if (isAGID) {
-        reCambioStato(StatoRPTEnum.RPT_ACCETTATA_NODO.toString, Util.now())
-      } else {
-        reCambioStato(StatoRPTEnum.RPT_PARCHEGGIATA_NODO.toString, Util.now())
+        reCambioStato(WorkflowStatus.SEMANTIC_CHECK_PASSED.toString, Util.now())
       }
 
       _ = log.debug("Costruzione msg input resp")
@@ -228,7 +223,7 @@ case class NodoInviaRPTActorPerRequest(cosmosRepository: CosmosRepository, actor
 
   def reCambioStato(stato: String, time: Instant, tipo: Option[String] = None): Unit = {
     reEventFunc(
-      ReRequest(req.sessionId, req.testCaseId, re.get.copy(status = Some(s"${tipo.getOrElse("")}${stato}"), insertedTimestamp = time, esito = Esito.EXECUTED_INTERNAL_STEP), None),
+      ReRequest(req.sessionId, req.testCaseId, re.get.copy(status = Some(s"${tipo.getOrElse("")}${stato}"), insertedTimestamp = time), None),
       log,
       ddataMap
     )

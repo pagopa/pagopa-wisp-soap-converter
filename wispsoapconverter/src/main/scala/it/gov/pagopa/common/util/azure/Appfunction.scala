@@ -2,25 +2,24 @@ package it.gov.pagopa.common.util.azure
 
 import it.gov.pagopa.common.message._
 import it.gov.pagopa.common.util.ConfigUtil.ConfigData
-import it.gov.pagopa.common.util.azure.cosmos.{CategoriaEvento, Esito, SottoTipoEvento}
+import it.gov.pagopa.common.util.azure.cosmos.EventCategory
 import it.gov.pagopa.common.util.{AppLogger, Constant, Util}
 import org.slf4j.MDC
 import spray.json.JsString
 
-import java.time.{Instant, ZoneId}
 import java.time.format.DateTimeFormatter
+import java.time.{Instant, ZoneId}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 object Appfunction {
 
-  val sessionId = "session-id"
-  private val reFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneId.systemDefault() );
-
-  def formatDate(date: Instant): String = {
-    reFormat.format(date)
-  }
   type ReEventFunc = (ReRequest, AppLogger, ConfigData) => Future[Unit]
+  val sessionId = "session-id"
+  val regFault = "<fault>[\\s\\S]*?<faultCode>([\\s\\S]*?)</faultCode>[\\s\\S]*?</fault>".r
+  val regFaultString = "<faultString>([\\s\\S]*?)</faultString>".r
+  val regDesc = "<description>([\\s\\S]*?)</description>".r
+  private val reFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
 
   def defaultOperation(request: ReRequest, log: AppLogger, reXmlLog: Boolean, reJsonLog: Boolean, data: ConfigData)(implicit ec: ExecutionContext): Unit = {
     MDC.put(Constant.MDCKey.DATA_ORA_EVENTO, Appfunction.formatDate(request.re.insertedTimestamp))
@@ -75,6 +74,28 @@ object Appfunction {
     }
   }
 
+  def formatDate(date: Instant): String = {
+    reFormat.format(date)
+  }
+
+  def fmtMessage(re: Re, reExtra: Option[ReExtra]): Try[String] = {
+    Try({
+      if (re.eventCategory == EventCategory.INTERFACE) {
+        s"""Re Request =>
+           |httpUri: ${param(reExtra.flatMap(a => a.uri))}
+           |httpHeaders: ${param(reExtra.map(a => formatHeaders(Some(a.requestHeaders))))}
+           |httpStatusCode: ${param(reExtra.flatMap(a => a.statusCode.map(_.toString)))}
+           |payload: ${
+          param(re.requestPayload.map(as => {
+            Util.obfuscate(new String(as))
+          }))
+        }""".stripMargin
+      } else {
+        s"Re Request => ESITO[${re.outcome}] STATO[${re.status.getOrElse("STATO non presente")}]"
+      }
+    })
+  }
+
   def formatHeaders(headersOpt: Option[Seq[(String, String)]]): String = {
     headersOpt
       .map(d => {
@@ -91,60 +112,17 @@ object Appfunction {
     s"[${s.getOrElse(Constant.UNKNOWN)}]"
   }
 
-  def fmtMessage(re: Re, reExtra: Option[ReExtra]): Try[String] = {
-    Try({
-      if (re.categoriaEvento == CategoriaEvento.INTERFACE) {
-        val mod = {
-          if ((re.esito == Esito.RECEIVED || re.esito == Esito.RECEIVED_FAILURE) && re.sottoTipoEvento == SottoTipoEvento.REQ) {
-            s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito}] DETTAGLIO[Il nodo ha ricevuto un messaggio]"
-          } else if ((re.esito == Esito.SEND || re.esito == Esito.SEND_FAILURE) && re.sottoTipoEvento == SottoTipoEvento.RESP) {
-            s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito}] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]"
-          } else if ((re.esito == Esito.SEND || re.esito == Esito.SEND_FAILURE) && re.sottoTipoEvento == SottoTipoEvento.REQ) {
-            s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito}] DETTAGLIO[Il nodo ha inviato un messaggio]"
-          } else if ((re.esito == Esito.RECEIVED || re.esito == Esito.RECEIVED_FAILURE) && re.sottoTipoEvento == SottoTipoEvento.RESP) {
-            s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito}] DETTAGLIO[Il nodo ha ricevuto la risposta del messaggio inviato]"
-          } else {
-            s"TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] FRUITORE[${re.fruitore.getOrElse("n.a")}] EROGATORE[${re.erogatore.getOrElse("n.a")}] ESITO[${re.esito}] DETTAGLIO[Tipo di REQ/RESP non identificata per sotto tipo evento non valido]"
-          }
-        }
-        val elapsed = if (re.sottoTipoEvento == SottoTipoEvento.RESP) {
-          s"${param(reExtra.flatMap(a => a.elapsed.map(_.toString)))}"
-        } else {
-          s"[${Constant.UNKNOWN}]"
-        }
-        s"""Re Request => $mod
-        |httpUri: ${param(reExtra.flatMap(a => a.uri))}
-        |httpHeaders: ${param(reExtra.map(a => formatHeaders(Some(a.headers))))}
-        |httpStatusCode: ${param(reExtra.flatMap(a => a.statusCode.map(_.toString)))}
-        |elapsed: $elapsed
-        |payload: ${
-        param(re.payload.map(as => {
-          Util.obfuscate(new String(as))
-        }))
-        }${re.standIn.map(si => s"\nstandin: [$si]").getOrElse("")}""".stripMargin
-      } else {
-        s"Re Request => TIPO_EVENTO[${re.sottoTipoEvento}/${re.tipoEvento.getOrElse("n.a")}] ESITO[${re.esito}] STATO[${re.status.getOrElse("STATO non presente")}]"
-      }
-    })
-  }
-
   def fmtMessageJson(re: Re, reExtra: Option[ReExtra], data: ConfigData): Try[String] = {
     Try({
       val nd = "nd"
-      val (isServerRequest, isServerResponse, caller, httpType, subject, subjectDescr) = if (re.categoriaEvento == CategoriaEvento.INTERFACE) {
-          if ((re.esito == Esito.RECEIVED || re.esito == Esito.RECEIVED_FAILURE) && re.sottoTipoEvento == SottoTipoEvento.REQ) {
-            (true, false, Some(Constant.SERVER), Some(Constant.REQUEST), Some(re.fruitore.getOrElse(nd)), Some(re.fruitoreDescr.getOrElse(nd)))
-          } else if ((re.esito == Esito.SEND || re.esito == Esito.SEND_FAILURE) && re.sottoTipoEvento == SottoTipoEvento.RESP) {
-            (false, true, Some(Constant.SERVER), Some(Constant.RESPONSE), Some(re.fruitore.getOrElse(nd)), Some(re.fruitoreDescr.getOrElse(nd)))
-          } else {
-            (false, false, Some(nd), Some(nd), Some(nd), Some(nd))
-          }
+      val (isServerRequest, isServerResponse, caller, httpType, subject, subjectDescr) = if (re.eventCategory == EventCategory.INTERFACE) {
+        (false, false, Some(nd), Some(nd), Some(nd), Some(nd))
       } else {
         (false, false, None, None, None, None)
       }
-      val categoriaEvento = re.categoriaEvento
+      val categoriaEvento = re.eventCategory
       val statusCode = reExtra.flatMap(_.statusCode)
-      val payload = re.payload.map(v => new String(v, Constant.UTF_8))
+      val payload = re.requestPayload.map(v => new String(v, Constant.UTF_8))
       val (isSuccess, faultCode, faultString, faultDescription) = {
         val fault = payload.flatMap(v => getFaultFromXml(v))
         fault match {
@@ -160,24 +138,22 @@ object Appfunction {
         s" [esito:KO]${faultCode.map(v => s" [faultCode:$v]").getOrElse("")}${faultString.map(v => s" [faultString:$v]").getOrElse("")}${faultDescription.map(v => s" [faultDescription:$v]").getOrElse("")}"
       }
       val elapsed = reExtra.flatMap(_.elapsed)
-      val soapAction = reExtra.flatMap(h => h.headers.find(_._1 == "SOAPAction").map(_._2))
+      val soapAction = reExtra.flatMap(h => h.requestHeaders.find(_._1 == "SOAPAction").map(_._2))
       val businessProcess = re.businessProcess
-      val tipoEvento = re.tipoEvento
-      val internalMessage = if (re.categoriaEvento == CategoriaEvento.INTERFACE) {
-          if (isServerRequest) {
-            s"${caller.getOrElse("")} --> ${httpType.getOrElse("")}: messaggio da [subject:${subject.getOrElse("")}]"
-          } else if (isServerResponse) {
-            s"${caller.getOrElse("")} --> ${httpType.getOrElse("")}: risposta a [subject:${subject.getOrElse("")}]${elapsed.map(v => s" [elapsed:${v}ms]").getOrElse("")}${statusCode.map(v => s" [statusCode:$v]").getOrElse("")}$esitoComplex"
-          }  else {
-            "Tipo di REQ/RESP non identificata per sotto tipo evento non valido"
-          }
+      val internalMessage = if (re.eventCategory == EventCategory.INTERFACE) {
+        if (isServerRequest) {
+          s"${caller.getOrElse("")} --> ${httpType.getOrElse("")}: messaggio da [subject:${subject.getOrElse("")}]"
+        } else if (isServerResponse) {
+          s"${caller.getOrElse("")} --> ${httpType.getOrElse("")}: risposta a [subject:${subject.getOrElse("")}]${elapsed.map(v => s" [elapsed:${v}ms]").getOrElse("")}${statusCode.map(v => s" [statusCode:$v]").getOrElse("")}$esitoComplex"
+        } else {
+          "Tipo di REQ/RESP non identificata per sotto tipo evento non valido"
+        }
       } else {
         s"Cambio stato in [${re.status.getOrElse(nd)}]"
       }
 
       val psp = re.psp
-      val pspDescr = re.pspDescr
-      val idDominio = re.idDominio
+      val idDominio = re.domainId
       val pa = idDominio.flatMap(v => data.creditorInstitutions.get(v).map(_.description))
 
       val stringBuilder = new StringBuilder("{")
@@ -197,21 +173,15 @@ object Appfunction {
       faultString.foreach(v => stringBuilder.append(s""","faultString":${JsString(v)}"""))
       faultDescription.foreach(v => stringBuilder.append(s""","faultDescription":${JsString(v)}"""))
       businessProcess.foreach(v => stringBuilder.append(s""","businessProcess":"$v""""))
-      tipoEvento.foreach(v => stringBuilder.append(s""","tipoEvento":"$v""""))
       subject.foreach(v => stringBuilder.append(s""","subject":"$v""""))
       subjectDescr.foreach(v => stringBuilder.append(s""","subjectDescr":"$v""""))
       psp.foreach(v => stringBuilder.append(s""","psp":"$v""""))
-      pspDescr.foreach(v => stringBuilder.append(s""","pspDescr":"$v""""))
       idDominio.foreach(v => stringBuilder.append(s""","idDominio":"$v""""))
       pa.map(v => stringBuilder.append(s""","paDescr":"$v""""))
       stringBuilder.append("}")
       stringBuilder.toString()
     })
   }
-
-  val regFault = "<fault>[\\s\\S]*?<faultCode>([\\s\\S]*?)</faultCode>[\\s\\S]*?</fault>".r
-  val regFaultString = "<faultString>([\\s\\S]*?)</faultString>".r
-  val regDesc = "<description>([\\s\\S]*?)</description>".r
 
   def getFaultFromXml(xml: String) = {
     regFault.findFirstMatchIn(xml).flatMap(s => {
