@@ -1,6 +1,6 @@
 package it.gov.pagopa.common.repo
 
-import com.azure.cosmos.{CosmosClientBuilder, CosmosException}
+import com.azure.cosmos.{ConsistencyLevel, CosmosClientBuilder, CosmosException}
 import com.azure.cosmos.models.PartitionKey
 import com.typesafe.config.Config
 import it.gov.pagopa.common.util._
@@ -14,9 +14,10 @@ class CosmosRepository(config:Config, log: AppLogger)(implicit ec: ExecutionCont
   lazy val cosmosEndpoint = config.getString("azure-cosmos-data.endpoint")
   lazy val cosmosKey = config.getString("azure-cosmos-data.key")
   lazy val cosmosDbName = config.getString("azure-cosmos-data.db-name")
+  lazy val cosmosConsistencyLevel = ConsistencyLevel.valueOf(config.getString("azure-cosmos-data.consistency-level"))
   lazy val cosmosTableName = config.getString("azure-cosmos-data.table-name")
   lazy val cosmosTableNameReceipts = config.getString("azure-cosmos-receipts-rt.table-name")
-  lazy val client = new CosmosClientBuilder().endpoint(cosmosEndpoint).key(cosmosKey).buildClient
+  lazy val client = new CosmosClientBuilder().endpoint(cosmosEndpoint).key(cosmosKey).consistencyLevel(cosmosConsistencyLevel).buildClient
 
 //  def query(query: SqlQuerySpec) = {
 //    log.info("executing query:" + query.getQueryText)
@@ -26,7 +27,7 @@ class CosmosRepository(config:Config, log: AppLogger)(implicit ec: ExecutionCont
 
   def getRtByKey(key: String): Future[Option[RtEntity]] = {
     Future {
-      val container = client.getDatabase(cosmosDbName).getContainer(cosmosTableNameReceipts)
+      val container = client.getDatabase(cosmosDbName).getContainer(cosmosTableNameReceipts).
       val response = container.readItem(key, new PartitionKey(key), classOf[String])
 
       if (response.getStatusCode == 200) {
