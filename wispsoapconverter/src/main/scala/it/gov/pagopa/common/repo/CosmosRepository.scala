@@ -27,7 +27,7 @@ class CosmosRepository(config:Config, log: AppLogger)(implicit ec: ExecutionCont
 
   def getRtByKey(key: String): Future[Option[RtEntity]] = {
     Future {
-      val container = client.getDatabase(cosmosDbName).getContainer(cosmosTableNameReceipts).
+      val container = client.getDatabase(cosmosDbName).getContainer(cosmosTableNameReceipts)
       val response = container.readItem(key, new PartitionKey(key), classOf[String])
 
       if (response.getStatusCode == 200) {
