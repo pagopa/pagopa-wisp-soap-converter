@@ -1,1 +1,1 @@
-ThisBuild / version := "0.3.1"
+ThisBuild / version := "0.3.1-178-update-cache-openapi"

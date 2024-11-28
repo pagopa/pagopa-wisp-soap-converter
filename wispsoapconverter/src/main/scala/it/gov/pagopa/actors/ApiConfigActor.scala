@@ -20,7 +20,7 @@ final case class ApiConfigActor(cosmosRepository: CosmosRepository,actorProps: A
 
   override def receive: Receive = {
     case CheckCache(sid) =>
-      log.debug("checking api-config cache")
+      log.debug("checking api-config cache. last id: " + actorProps.ddataMap.version)
       (for {
         lastCacheId <- ConfigUtil.getConfigVersion()
         _ =
@@ -39,7 +39,7 @@ final case class ApiConfigActor(cosmosRepository: CosmosRepository,actorProps: A
       (for {
         cacheData <- ConfigUtil.getConfigHttp()
         _ = actorProps.ddataMap = cacheData
-        _ = log.info(s"Cache $cacheId aquired")
+        _ = log.info(s"Cache $cacheId acquired")
       } yield ())
         .recover({ case e =>
           log.error(e, s"GetCache $cacheId error")

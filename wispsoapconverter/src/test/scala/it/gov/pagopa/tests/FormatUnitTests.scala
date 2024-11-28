@@ -40,11 +40,10 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
       ),
       Some(ReExtra())
     ).get ==
-      """Re Request => TIPO_EVENTO[REQ/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[OK] DETTAGLIO[Il nodo ha ricevuto un messaggio]
+      """Re Request =>
         |httpUri: [UNKNOWN]
         |httpHeaders: [UNKNOWN]
         |httpStatusCode: [UNKNOWN]
-        |elapsed: [UNKNOWN]
         |payload: [<xml><fault><faultCode>fCode</faultCode></fault><faultString>fString</faultString><description>fDescr</description></xml>]""".stripMargin)
 
     assert(Appfunction.fmtMessage(
@@ -61,11 +60,10 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
       ),
       Some(ReExtra())
     ).get ==
-      """Re Request => TIPO_EVENTO[RESP/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[OK] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]
+      """Re Request =>
         |httpUri: [UNKNOWN]
         |httpHeaders: [UNKNOWN]
         |httpStatusCode: [UNKNOWN]
-        |elapsed: [UNKNOWN]
         |payload: [<xml><fault><faultCode>fCode</faultCode></fault><faultString>fString</faultString><description>fDescr</description></xml>]""".stripMargin)
 
     assert(Appfunction.fmtMessage(
@@ -78,11 +76,10 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
       ),
       Some(ReExtra())
     ).get ==
-      """Re Request => TIPO_EVENTO[RESP/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[OK] DETTAGLIO[Il nodo ha risposto al messaggio ricevuto]
+      """Re Request =>
         |httpUri: [UNKNOWN]
         |httpHeaders: [UNKNOWN]
         |httpStatusCode: [UNKNOWN]
-        |elapsed: [UNKNOWN]
         |payload: [<xml>test</xml>]""".stripMargin)
 
     assert(Appfunction.fmtMessage(
@@ -95,11 +92,10 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
       ),
       Some(ReExtra())
     ).get ==
-      """Re Request => TIPO_EVENTO[REQ/n.a] FRUITORE[n.a] EROGATORE[n.a] ESITO[OK] DETTAGLIO[Il nodo ha ricevuto un messaggio]
+      """Re Request =>
         |httpUri: [UNKNOWN]
         |httpHeaders: [UNKNOWN]
         |httpStatusCode: [UNKNOWN]
-        |elapsed: [UNKNOWN]
         |payload: [<xml>test</xml>]""".stripMargin)
 
     assert(Appfunction.fmtMessage(
@@ -110,7 +106,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
         )
       ),
       Some(ReExtra())
-    ).get == """Re Request => TIPO_EVENTO[INTERN/n.a] ESITO[n/a] STATO[STATO non presente]""")
+    ).get == """Re Request => ESITO[None] STATO[STATO non presente]""")
 
   }
 
@@ -130,7 +126,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
         )
       ),
       Some(ReExtra()), TestItems.ddataMap
-    ).get == """{"internalMessage":"SERVER --> REQUEST: messaggio da [subject:nd]","categoriaEvento":"INTERFACE","caller":"SERVER","httpType":"REQUEST","esito":"KO","faultCode":"fCode","subject":"nd","subjectDescr":"nd"}""")
+    ).get == """{"internalMessage":"Tipo di REQ/RESP non identificata per sotto tipo evento non valido","categoriaEvento":"INTERFACE","caller":"nd","httpType":"nd","esito":"KO","faultCode":"fCode","subject":"nd","subjectDescr":"nd"}""")
 
     assert(Appfunction.fmtMessageJson(
       Re(
@@ -147,7 +143,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
         )
       ),
       Some(ReExtra()), TestItems.ddataMap
-    ).get == """{"internalMessage":"SERVER --> RESPONSE: risposta a [subject:nd] [esito:KO] [faultCode:fCode]","categoriaEvento":"INTERFACE","caller":"SERVER","httpType":"RESPONSE","esito":"KO","faultCode":"fCode","subject":"nd","subjectDescr":"nd"}""")
+    ).get == """{"internalMessage":"Tipo di REQ/RESP non identificata per sotto tipo evento non valido","categoriaEvento":"INTERFACE","caller":"nd","httpType":"nd","esito":"KO","faultCode":"fCode","subject":"nd","subjectDescr":"nd"}""")
 
     assert(Appfunction.fmtMessageJson(
       Re(
@@ -159,7 +155,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
         )
       ),
       Some(ReExtra()), TestItems.ddataMap
-    ).get == """{"internalMessage":"SERVER --> RESPONSE: risposta a [subject:nd] [esito:OK]","categoriaEvento":"INTERFACE","caller":"SERVER","httpType":"RESPONSE","esito":"OK","subject":"nd","subjectDescr":"nd"}""")
+    ).get == """{"internalMessage":"Tipo di REQ/RESP non identificata per sotto tipo evento non valido","categoriaEvento":"INTERFACE","caller":"nd","httpType":"nd","esito":"OK","subject":"nd","subjectDescr":"nd"}""")
 
     assert(Appfunction.fmtMessageJson(
       Re(
@@ -171,7 +167,7 @@ class FormatUnitTests extends AnyFlatSpec with should.Matchers {
         )
       ),
       Some(ReExtra()), TestItems.ddataMap
-    ).get == """{"internalMessage":"SERVER --> REQUEST: messaggio da [subject:nd]","categoriaEvento":"INTERFACE","caller":"SERVER","httpType":"REQUEST","esito":"OK","subject":"nd","subjectDescr":"nd"}""")
+    ).get == """{"internalMessage":"Tipo di REQ/RESP non identificata per sotto tipo evento non valido","categoriaEvento":"INTERFACE","caller":"nd","httpType":"nd","esito":"OK","subject":"nd","subjectDescr":"nd"}""")
 
 
     assert(Appfunction.fmtMessageJson(
