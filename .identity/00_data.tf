@@ -37,13 +37,13 @@ data "azurerm_key_vault_secret" "key_vault_sonar" {
 }
 
 data "azurerm_key_vault_secret" "key_vault_lightbend_key" {
-  name         = "lightbend-key"
+  name         = "pagopa-lightbend-key"
   key_vault_id = data.azurerm_key_vault.domain_key_vault.id
 }
 
-data "azurerm_key_vault_secret" "key_vault_bot_token" {
-  name         = "bot-token-github"
-  key_vault_id = data.azurerm_key_vault.key_vault.id
+data "azurerm_key_vault_secret" "key_vault_bot_cd_token" {
+  name         = "pagopa-platform-domain-github-bot-cd-pat"
+  key_vault_id = data.azurerm_key_vault.domain_key_vault.id
 }
 
 data "azurerm_key_vault_secret" "key_vault_slack_webhook_url" {

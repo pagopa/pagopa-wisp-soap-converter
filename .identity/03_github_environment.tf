@@ -79,7 +79,7 @@ resource "github_actions_secret" "secret_bot_token" {
 
   repository       = local.github.repository
   secret_name      = "BOT_TOKEN_GITHUB"
-  plaintext_value  = data.azurerm_key_vault_secret.key_vault_bot_token.value
+  plaintext_value  = data.azurerm_key_vault_secret.key_vault_bot_cd_token.value
 }
 
 ############
