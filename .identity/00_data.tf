@@ -37,7 +37,7 @@ data "azurerm_key_vault_secret" "key_vault_sonar" {
 }
 
 data "azurerm_key_vault_secret" "key_vault_lightbend_key" {
-  name         = "pagopa-lightbend-key"
+  name         = "lightbend-key"
   key_vault_id = data.azurerm_key_vault.domain_key_vault.id
 }
 
