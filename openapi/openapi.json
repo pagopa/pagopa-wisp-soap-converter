@@ -4,7 +4,7 @@
     "title": "Wisp soap converter",
     "description": "Wisp soap converter",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.3.2"
+    "version": "0.3.2-190-update-cache-openapi"
   },
   "servers": [
     {
