@@ -28,7 +28,7 @@ wispsoapconverter:
     create: true
   resources:
     requests:
-      memory: "512M"
+      memory: "1792Mi"
       cpu: "200m"
     limits:
       memory: "2Gi"
@@ -45,7 +45,7 @@ wispsoapconverter:
       - type: memory
         metricType: Utilization
         metadata:
-          value: "200"
+          value: "100"
     advanced:
       horizontalPodAutoscalerConfig:
         behavior:
