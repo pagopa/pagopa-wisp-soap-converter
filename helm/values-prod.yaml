@@ -2,7 +2,7 @@ microservice-chart: &microservice-chart
   namespace: "nodo"
   image:
     repository: ghcr.io/pagopa/pagopa-wisp-soap-converter
-    tag: 0.3.1
+    tag: 0.3.1-184-PAGOPA-2414
   canaryDelivery:
     create: false
 wispsoapconverter:
@@ -28,7 +28,7 @@ wispsoapconverter:
     create: true
   resources:
     requests:
-      memory: "512M"
+      memory: "1792Mi"
       cpu: "200m"
     limits:
       memory: "2Gi"
@@ -45,7 +45,7 @@ wispsoapconverter:
       - type: memory
         metricType: Utilization
         metadata:
-          value: "200"
+          value: "100"
     advanced:
       horizontalPodAutoscalerConfig:
         behavior:
