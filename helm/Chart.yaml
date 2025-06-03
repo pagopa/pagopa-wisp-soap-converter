@@ -6,6 +6,6 @@ version: 2.89.0
 appVersion: 0.3.3
 dependencies:
   - name: microservice-chart
-    version: 3.0.0
+    version: 7.5.0
     repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
     alias: wispsoapconverter

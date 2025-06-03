@@ -11,6 +11,7 @@ wispsoapconverter:
   fullnameOverride: ""
   terminationGracePeriodSeconds: 140
   livenessProbe:
+    handlerType: httpGet
     httpGet:
       path: /alive
       port: 8558
@@ -18,6 +19,7 @@ wispsoapconverter:
     failureThreshold: 10
     periodSeconds: 5
   readinessProbe:
+    handlerType: httpGet
     httpGet:
       path: /ready
       port: 8558
@@ -26,6 +28,16 @@ wispsoapconverter:
     periodSeconds: 5
   tmpVolumeMount:
     create: true
+  serviceAccount:
+    name: "nodo-workload-identity"
+  azure:
+    workloadIdentityClientId: <workload-identity-client-id-set-automatically-by-gha>
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: false
+    capabilities:
+      drop:
+        - all
   resources:
     requests:
       memory: "512M"
