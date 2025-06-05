@@ -4,7 +4,7 @@ microservice-chart: &microservice-chart
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-wisp-soap-converter
-    tag: 0.3.3
+    tag: 0.3.3-194-PIDM-492-workload-identity-helm-7
   terminationGracePeriodSeconds: 140
   livenessProbe:
     handlerType: httpGet
@@ -50,7 +50,7 @@ microservice-chart: &microservice-chart
     create: true
     host: "weuprod.nodo.internal.platform.pagopa.it"
     path: /wisp-soap-converter/(.*)
-    annotations: { nginx.ingress.kubernetes.io/proxy-read-timeout: '130' }
+    annotations: {nginx.ingress.kubernetes.io/proxy-read-timeout: '130'}
   tmpVolumeMount:
     create: true
   serviceAccount:
