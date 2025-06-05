@@ -1,14 +1,10 @@
 microservice-chart: &microservice-chart
   namespace: "nodo"
+  nameOverride: ""
+  fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-wisp-soap-converter
     tag: 0.3.3
-  canaryDelivery:
-    create: false
-wispsoapconverter:
-  !!merge <<: *microservice-chart
-  nameOverride: ""
-  fullnameOverride: ""
   terminationGracePeriodSeconds: 140
   livenessProbe:
     handlerType: httpGet
@@ -26,6 +22,37 @@ wispsoapconverter:
     initialDelaySeconds: 60
     failureThreshold: 10
     periodSeconds: 5
+  deployment:
+    create: true
+    replicas: 1
+  serviceMonitor:
+    create: true
+    endpoints:
+      - interval: 10s #micrometer
+        targetPort: 9092
+        path: /
+      - interval: 10s #cinnamon
+        targetPort: 9091
+        path: /metrics
+  ports:
+    - 8080 #http
+    - 8558 #akka-management
+    - 9091 #cinnamon
+    - 9092 #micrometer
+    - 3000 #jmx debug port
+  service:
+    type: ClusterIP
+    ports:
+      - 8080 #http
+      - 9091 #cinnamon
+      - 9092 #micrometer
+  ingress:
+    create: true
+    host: "weuuat.nodo.internal.uat.platform.pagopa.it"
+    path: /wisp-soap-converter(/|$)(.*)
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
+    proxyBodySize: 100m
   tmpVolumeMount:
     create: true
   serviceAccount:
@@ -47,6 +74,8 @@ wispsoapconverter:
       cpu: "1024m"
   autoscaling:
     enable: true
+    minReplica: 1
+    maxReplica: 1
     triggers:
       - type: cpu
         metricType: Utilization
@@ -101,16 +130,6 @@ wispsoapconverter:
     ADAPTER_ECOMMERCE_URL: "https://uat.wisp2.pagopa.it/wisp-converter/redirect/api/v1/payments?idSession=REPLACE"
     RE_XML_LOG_ACTIVE: "false"
     RE_JSON_LOG_ACTIVE: "true"
-  secretProvider:
-    create: true
-    envSecrets:
-      APPLICATIONINSIGHTS_CONNECTION_STRING: "azure-insight-connection-string"
-      API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
-      AZURE_COSMOS_KEY: "cosmosdb-wisp-converter-account-key"
-      AZURE_STORAGE_CONNECTION_STRING: "wisp-converter-re-sa-connection-string-key"
-    keyvault:
-      name: "pagopa-u-nodo-kv"
-      tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
   envFieldRef:
     MANAGEMENT_HTTP_HOST: "status.podIP"
     SERVICE_HTTP_HOST: "status.podIP"
@@ -119,6 +138,14 @@ wispsoapconverter:
     CINNAMON_HOST: "metadata.name"
     APP_VERSION: "metadata.labels['app.kubernetes.io/version']"
     APP_NAME: "metadata.labels['app.kubernetes.io/name']"
+  envSecret:
+    APPLICATIONINSIGHTS_CONNECTION_STRING: "azure-insight-connection-string"
+    API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
+    AZURE_COSMOS_KEY: "cosmosdb-wisp-converter-account-key"
+    AZURE_STORAGE_CONNECTION_STRING: "wisp-converter-re-sa-connection-string-key"
+  keyvault:
+    name: "pagopa-u-nodo-kv"
+    tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
@@ -128,31 +155,5 @@ wispsoapconverter:
                 operator: In
                 values:
                   - user
-  serviceMonitor:
-    create: true
-    endpoints:
-      - interval: 10s #micrometer
-        targetPort: 9092
-        path: /
-      - interval: 10s #cinnamon
-        targetPort: 9091
-        path: /metrics
-  ports:
-    - 8080 #http
-    - 8558 #akka-management
-    - 9091 #cinnamon
-    - 9092 #micrometer
-    - 3000 #jmx debug port
-  service:
-    type: ClusterIP
-    ports:
-      - 8080 #http
-      - 9091 #cinnamon
-      - 9092 #micrometer
-  ingress:
-    create: true
-    host: "weuuat.nodo.internal.uat.platform.pagopa.it"
-    path: /wisp-soap-converter(/|$)(.*)
-    annotations:
-      nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
-    proxyBodySize: 100m
+  canaryDelivery:
+    create: false
