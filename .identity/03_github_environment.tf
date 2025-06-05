@@ -31,9 +31,10 @@ locals {
     "CLUSTER_NAME" : local.aks_cluster.name,
     "CLUSTER_RESOURCE_GROUP" : local.aks_cluster.resource_group_name,
     "NAMESPACE" : local.domain,
-    "WORKLOAD_IDENTITY_ID": data.azurerm_user_assigned_identity.workload_identity_clientid.client_id
+    "WORKLOAD_IDENTITY_ID" : data.azurerm_user_assigned_identity.workload_identity_clientid.client_id
   }
   repo_secrets = {
+    "DEPLOY_SLACK_WEBHOOK_URL" : data.azurerm_key_vault_secret.key_vault_deploy_slack_webhook_url.value
   }
 }
 
@@ -61,26 +62,36 @@ resource "github_actions_environment_variable" "github_environment_runner_variab
   value         = each.value
 }
 
+#############################
+# Secrets of the Repository #
+#############################
+
+resource "github_actions_secret" "repo_secrets" {
+  for_each        = local.repo_secrets
+  repository      = local.github.repository
+  secret_name     = each.key
+  plaintext_value = each.value
+}
 
 #tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
 resource "github_actions_secret" "secret_sonar_token" {
-  repository       = local.github.repository
-  secret_name      = "SONAR_TOKEN"
-  plaintext_value  = data.azurerm_key_vault_secret.key_vault_sonar.value
+  repository      = local.github.repository
+  secret_name     = "SONAR_TOKEN"
+  plaintext_value = data.azurerm_key_vault_secret.key_vault_sonar.value
 }
 
 resource "github_actions_secret" "lightbend_key" {
-  repository       = local.github.repository
-  secret_name      = "LIGHTBEND_KEY"
-  plaintext_value  = data.azurerm_key_vault_secret.key_vault_lightbend_key.value
+  repository      = local.github.repository
+  secret_name     = "LIGHTBEND_KEY"
+  plaintext_value = data.azurerm_key_vault_secret.key_vault_lightbend_key.value
 }
 
 #tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
 resource "github_actions_secret" "secret_bot_token" {
 
-  repository       = local.github.repository
-  secret_name      = "BOT_TOKEN_GITHUB"
-  plaintext_value  = data.azurerm_key_vault_secret.key_vault_bot_cd_token.value
+  repository      = local.github.repository
+  secret_name     = "BOT_TOKEN_GITHUB"
+  plaintext_value = data.azurerm_key_vault_secret.key_vault_bot_cd_token.value
 }
 
 ############
