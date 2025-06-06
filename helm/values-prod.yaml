@@ -4,7 +4,7 @@ microservice-chart: &microservice-chart
   fullnameOverride: "wisp-soap-converter"
   image:
     repository: ghcr.io/pagopa/pagopa-wisp-soap-converter
-    tag: 0.3.3-197-PIDM-492-workload-identity-helm-7
+    tag: 0.3.3-201-PIDM-492-workload-identity-helm-7
   terminationGracePeriodSeconds: 140
   livenessProbe:
     handlerType: httpGet

@@ -4,7 +4,7 @@
     "title": "Wisp soap converter",
     "description": "Wisp soap converter",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.3.3-197-PIDM-492-workload-identity-helm-7"
+    "version": "0.3.3-201-PIDM-492-workload-identity-helm-7"
   },
   "servers": [
     {
