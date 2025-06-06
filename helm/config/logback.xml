@@ -4,9 +4,6 @@
     <conversionRule conversionWord="bundleVersion"
                     converterClass="it.gov.pagopa.common.util.log.BundleVersionConverter" />
 
-    <!--
-    <property name="CONSOLE_COLOR_LOG_PATTERN" value="%cyan(%d) %highlight(%-5level) %green([%X{sessionId}]) %green([%logger]) - %msg %magenta([%X{akkaSource}]%n)"/>
-    -->
     <property name="CONSOLE_PATTERN" value="%d %-5level [sid:%X{sessionId}] [can:%X{idCanale}] [sta:%X{idStazione}] [%logger] - %msg [%X{akkaSource}]%n"/>
 
 
@@ -42,11 +39,6 @@
                 </nestedField>
             </providers>
         </encoder>
-
-<!--        <encoder>-->
-<!--            <pattern>${CONSOLE_PATTERN}</pattern>-->
-<!--            <charset>utf8</charset>-->
-<!--        </encoder>-->
 
     </appender>
 
