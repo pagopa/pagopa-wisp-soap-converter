@@ -50,9 +50,8 @@ microservice-chart:
     create: true
     host: "weudev.nodo.internal.dev.platform.pagopa.it"
     path: /wisp-soapconverter/(.*)
-    annotations:
-      nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
-    proxyBodySize: 100m
+    annotations: {nginx.ingress.kubernetes.io/proxy-read-timeout: '130'}
+    # proxyBodySize: 100m
   tmpVolumeMount:
     create: true
   serviceAccount:
@@ -71,7 +70,7 @@ microservice-chart:
       cpu: "512m"
     limits:
       memory: "2Gi"
-      cpu: "1024m"
+      cpu: "900m"
   autoscaling:
     enable: true
     minReplica: 1
