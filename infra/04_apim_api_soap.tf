@@ -47,6 +47,6 @@ resource "azurerm_api_management_api_policy" "apim_wisp_soap_converter_policy" {
   api_management_name = local.apim.name
   resource_group_name = local.apim.rg
   xml_content = templatefile("./api/wispsoapconverter/nodoPerPa/v1/_base_policy.xml.tpl",{
-    hostname = format("%s/%s/%s", local.wispsoapconverter_locals.hostname, "wisp-soap-converter","webservices/input")
+    hostname = format("%s/%s/%s", local.wispsoapconverter_locals.hostname, "wisp-soapconverter","webservices/input")
   })
 }

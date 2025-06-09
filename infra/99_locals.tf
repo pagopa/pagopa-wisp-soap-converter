@@ -17,8 +17,8 @@ locals {
     subscription_required = true
     subscription_limit    = 1000
 
-    rest_path        = "wisp-soap-converter/rest"
-    soap_path        = "wisp-soap-converter/soap"
+    rest_path        = "wisp-soapconverter/rest"
+    soap_path        = "wisp-soapconverter/soap"
     service_url = null
 
     pagopa_tenant_id = data.azurerm_client_config.current.tenant_id
