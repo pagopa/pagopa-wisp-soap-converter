@@ -1,4 +1,4 @@
-microservice-chart: &microservice-chart
+microservice-chart:
   namespace: "nodo"
   nameOverride: ""
   fullnameOverride: "wisp-soap-converter"
@@ -99,6 +99,242 @@ microservice-chart: &microservice-chart
               - type: Percent
                 value: 100
                 periodSeconds: 20
+  configMapFromFile:
+      config-app.conf: |
+        reference {
+          akka {
+            management {
+              http {
+                hostname = 127.0.0.1
+                hostname = ${?MANAGEMENT_HTTP_HOST}
+                port = 8558
+                port = ${?MANAGEMENT_HTTP_PORT}
+                bind-hostname = 0.0.0.0
+                bind-hostname = ${?MANAGEMENT_HTTP_BIND_HOST}
+                bind-port = 8558
+                bind-port = ${?MANAGEMENT_HTTP_BIND_PORT}
+              }
+            }
+            remote {
+              artery {
+                transport = tcp
+                canonical{
+                  hostname = 127.0.0.1
+                  hostname = ${?REMOTING_HOST}
+                  port = 2552
+                  port = ${?REMOTING_PORT}
+                }
+                bind {
+                  hostname = 127.0.0.1
+                  hostname = ${?REMOTING_BIND_HOST}
+                  port = 2552
+                  port = ${?REMOTING_BIND_PORT}
+                }
+                advanced {
+                  maximum-frame-size = 16 MiB
+                }
+              }
+              log-remote-lifecycle-events = off
+            }
+
+            coordinated-shutdown {
+              phases {
+                service-requests-done {
+                  timeout=135s
+                }
+                before-actor-system-terminate {
+                    timeout=30s
+                }
+              }
+            }
+            coordinated-shutdown.exit-jvm = on
+
+            loggers = ["akka.event.slf4j.Slf4jLogger"]
+            loglevel = "DEBUG"
+            logging-filter = "akka.event.slf4j.Slf4jLoggingFilter"
+
+            http {
+              host-connection-pool {
+                max-open-requests = 2048
+                max-retries = 0
+                max-connection-backoff = 1000 ms
+                max-connections = 100
+              }
+              server.parsing.max-content-length = 120m
+              server.parsing.max-chunk-size= 120m
+              client.parsing.max-chunk-size= 120m
+            }
+          }
+          cinnamon {
+            akka {
+              actors {
+                "/user/*" {
+                  report-by = class
+                }
+              }
+            }
+            prometheus {
+              exporters += http-server
+              http-server {
+                host = 127.0.0.1
+                host = ${?PROMETHEUS_HOST}
+                port = 9091
+                port = ${?PROMETHEUS_PORT}
+              }
+            }
+            slf4j.mdc {
+              serialization.limit = 2048 bytes
+            }
+          }
+          cinnamon.akka.http.servers {
+            "*:*" {
+              paths {
+                "*" {
+                  metrics = on
+                }
+              }
+            }
+          }
+          cinnamon.akka.http.clients {
+            "*:*" {
+              paths {
+                "*" {
+                  metrics = on
+                }
+              }
+            }
+          }
+          azurestorage-dispatcher {
+            type = Dispatcher
+            executor = "thread-pool-executor"
+            thread-pool-executor {
+            fixed-pool-size = 16
+            }
+            throughput = 1
+          }
+          config{
+            http {
+              server-request-timeout = 125
+              connect-timeout = 1
+            }
+          }
+        }
+        app {
+            apiConfigCache{
+                url=${API_CONFIG_CACHE_URL}
+                keys=""
+                subscriptionKey=${API_CONFIG_CACHE_SUBSCRIPTION_KEY}
+                timeout=60
+            }
+          adapterEcommerce{
+              url=${ADAPTER_ECOMMERCE_URL}
+          }
+            pdd-host-header-name=X-Original-Forwarded-For
+            configScheduleMinutes=1
+            coordinatedShutdown=true
+            waitAsyncProcesses=true
+            coordinatedShutdownHttpTimeout=130
+            coordinatedShutdownTerminationTimeout=20
+            routing.useMetrics=true
+            bundle.startup.timeout=120
+            bundle.checkUTF8=false
+            bundleTimeoutSeconds=600#10 minuti
+            reXmlLog=${RE_XML_LOG_ACTIVE}
+            reJsonLog=${RE_JSON_LOG_ACTIVE}
+            azure-storage {
+                blob-name = ${AZURE_STORAGE_BLOB_NAME}
+                table-name = ${AZURE_STORAGE_TABLE_NAME}
+                connection-string = ${AZURE_STORAGE_CONNECTION_STRING}
+            }
+          azure-cosmos-data {
+            endpoint = ${AZURE_COSMOS_ENDPOINT}
+            key = ${AZURE_COSMOS_KEY}
+            db-name = ${AZURE_COSMOS_DB_NAME}
+            table-name = ${AZURE_COSMOS_TABLE_NAME_DATA}
+            consistency-level = "BOUNDED_STALENESS"
+          }
+          azure-cosmos-events {
+            endpoint = ${AZURE_COSMOS_ENDPOINT}
+            key = ${AZURE_COSMOS_KEY}
+            db-name = ${AZURE_COSMOS_DB_NAME}
+            table-name = ${AZURE_COSMOS_TABLE_NAME_EVENTS}
+          }
+            azure-cosmos-receipts-rt {
+                endpoint = ${AZURE_COSMOS_ENDPOINT}
+                key = ${AZURE_COSMOS_KEY}
+                db-name = ${AZURE_COSMOS_DB_NAME}
+                table-name = ${AZURE_COSMOS_TABLE_NAME_RECEIPTS_RT}
+            }
+            micrometer {
+                http-server {
+                    host = 127.0.0.1
+                    host = ${?MICROMETER_HOST}
+                    port = 9092
+                    port = ${?MICROMETER_PORT}
+                    hostname = "wispsoapconverter-micrometer"
+                    hostname = ${?MICROMETER_HOSTNAME}
+                }
+            }
+        }      
+      logback.xml:  |
+        <?xml version="1.0" encoding="UTF-8"?>
+        <configuration scan="true" scanPeriod="30 seconds">
+
+            <conversionRule conversionWord="bundleVersion"
+                            converterClass="it.gov.pagopa.common.util.log.BundleVersionConverter" />
+
+            <!--
+            <property name="CONSOLE_COLOR_LOG_PATTERN" value="%cyan(%d) %highlight(%-5level) %green([%X{sessionId}]) %green([%logger]) - %msg %magenta([%X{akkaSource}]%n)"/>
+            -->
+            <property name="CONSOLE_PATTERN" value="%d %-5level [sid:%X{sessionId}] [can:%X{idCanale}] [sta:%X{idStazione}] [%logger] - %msg [%X{akkaSource}]%n"/>
+
+
+            <appender name="CONSOLE_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
+
+                <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                    <providers>
+                        <message/>
+                        <nestedField>
+                            <fieldName>app</fieldName>
+                            <providers>
+                                <timestamp>
+                                    <fieldName>apptimestamp</fieldName>
+                                </timestamp>
+                                <loggerName/>
+                                <threadName/>
+                                <logLevel/>
+                                <logLevelValue/>
+                                <stackTrace/>
+                                <mdc>
+                                    <excludeMdcKeyName>elapsed</excludeMdcKeyName>
+                                </mdc>
+                                <tags/>
+                                <pattern>
+                                    <omitEmptyFields>true</omitEmptyFields>
+                                    <pattern>
+                                        {
+                                        "elapsed": "#asLong{%mdc{elapsed}}"
+                                        }
+                                    </pattern>
+                                </pattern>
+                            </providers>
+                        </nestedField>
+                    </providers>
+                </encoder>
+
+            </appender>
+
+            <appender name="CONSOLE_APPENDER_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+                <appender-ref ref="CONSOLE_APPENDER" />
+            </appender>
+
+            <logger name="it.gov.pagopa" level="INFO" />
+
+            <root level="INFO">
+                <appender-ref ref="CONSOLE_APPENDER_ASYNC" />
+            </root>
+
+        </configuration>                
   envConfig:
     SERVICE_IDENTIFIER: "WSC001"
     AZURE_INSIGHTS_ENABLED: "true"

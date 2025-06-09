@@ -6,5 +6,5 @@ version: 2.95.0
 appVersion: 0.3.3-201-PIDM-492-workload-identity-helm-7
 dependencies:
   - name: microservice-chart
-    version: 7.5.0
+    version: 8.0.1
     repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
