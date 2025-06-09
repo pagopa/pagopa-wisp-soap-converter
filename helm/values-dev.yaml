@@ -1,4 +1,4 @@
-microservice-chart:
+microservice-chart: &microservice-chart
   namespace: "nodo"
   nameOverride: ""
   fullnameOverride: "wisp-soap-converter"
