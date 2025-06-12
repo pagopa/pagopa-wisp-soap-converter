@@ -7,7 +7,7 @@ resource "azurerm_api_management_api_version_set" "api_wispsoapconverter_api_res
 }
 
 module "apim_api_wispsoapconverter_api_v1_rest" {
-  source                = "git::https://github.com/pagopa/terraform-azurerm-v3.git//api_management_api?ref=v5.1.0"
+  source                = "git::https://github.com/pagopa/terraform-azurerm-v3.git//api_management_api?ref=v6.7.0"
   name                  = format("%s-wisp-soap-converter-rest-api", local.project)
   api_management_name   = local.apim.name
   resource_group_name   = local.apim.rg
