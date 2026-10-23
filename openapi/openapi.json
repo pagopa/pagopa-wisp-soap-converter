@@ -4,7 +4,7 @@
     "title": "Wisp soap converter",
     "description": "Wisp soap converter",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.3.9"
+    "version": "0.3.9-217-PIDM-2490-Ridurre-Log-WispSoapConverter"
   },
   "servers": [
     {
