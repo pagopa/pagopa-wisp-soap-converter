@@ -111,6 +111,7 @@ microservice-chart: &microservice-chart
     SERVICE_IDENTIFIER: "WSC001"
     AZURE_INSIGHTS_ENABLED: "true"
     APPLICATIONINSIGHTS_ROLE_NAME: "wispsoapconverter"
+    APPLICATIONINSIGHTS_CONFIGURATION_CONTENT: '{"instrumentation":{"micrometer":{"enabled":false}}}'
     MANAGEMENT_HTTP_PORT: "8558"
     MANAGEMENT_HTTP_BIND_HOST: "0.0.0.0"
     MANAGEMENT_HTTP_BIND_PORT: "8558"
