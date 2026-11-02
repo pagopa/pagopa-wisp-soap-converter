@@ -4,7 +4,7 @@ microservice-chart: &microservice-chart
   fullnameOverride: "wisp-soap-converter"
   image:
     repository: ghcr.io/pagopa/pagopa-wisp-soap-converter
-    tag: 0.3.9
+    tag: 0.3.9-217-PIDM-2490-Ridurre-Log-WispSoapConverter
   terminationGracePeriodSeconds: 140
   livenessProbe:
     handlerType: httpGet
@@ -111,6 +111,7 @@ microservice-chart: &microservice-chart
     SERVICE_IDENTIFIER: "WSC001"
     AZURE_INSIGHTS_ENABLED: "true"
     APPLICATIONINSIGHTS_ROLE_NAME: "wispsoapconverter"
+    APPLICATIONINSIGHTS_CONFIGURATION_CONTENT: '{"instrumentation":{"micrometer":{"enabled":false}}}'
     MANAGEMENT_HTTP_PORT: "8558"
     MANAGEMENT_HTTP_BIND_HOST: "0.0.0.0"
     MANAGEMENT_HTTP_BIND_PORT: "8558"
